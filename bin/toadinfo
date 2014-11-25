@@ -1,0 +1,98 @@
+#!/usr/bin/env python -W ignore
+# -*- coding: utf-8 -*-
+from nibabel.nicom import dicomwrappers
+import ConfigParser
+import argparse
+import os
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright 2014, The Toad Project"
+__credits__ = ["Mathieu Desrosiers"]
+__license__ = "GPL"
+__version__ = "0.0"
+__maintainer__ = "Mathieu Desrosiers"
+__email__ = "mathieu.desrosiers@criugm.qc.ca"
+__status__ = "Development"
+
+
+def parseArguments():
+    """Prepare and parse user friendly command line arguments for sys.argv.
+
+
+    Returns:
+        a args stucture containing command lines arguments
+    """
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description ="""\n
+
+         """)
+    parser.add_argument("dcmFile", help="A SIEMENS DICOM imges")
+
+    parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
+                            help="Write output into a config.cfg file or create a new one if it doesn't exist")
+    args = parser.parse_args()
+    return args
+
+
+def getUnwarpFieldFromDicom(source):
+
+    header=dicomwrappers.wrapper_from_file(source)
+
+    try:
+        phaseEncDir = header.csa_header['tags']['PhaseEncodingDirectionPositive']['items'][0]
+        print "Pase enc dir value ",phaseEncDir
+        epiFactor = max(header['AcquisitionMatrix'])
+        bpppe = header.csa_header['tags']['BandwidthPerPixelPhaseEncode']['items'][0]
+        echoSpacing = 1/(epiFactor*bpppe)*1000
+
+    except AttributeError:
+        print "Cannot read csa header from ", source
+        return (None,None,None)
+
+    except IndexError:
+        print "Some field(s) cannot be found in the header"
+        return (None,None,None)
+
+    return (phaseEncDir, epiFactor, echoSpacing)
+
+
+def writeConfig(source, phaseEncDir, epiFactor, echoSpacing):
+    config = ConfigParser.ConfigParser()
+    if os.path.exists(source):
+        config.read(source)
+
+    if not config.has_section("unwarp"):
+        config.add_section("unwarp")
+
+    if phaseEncDir is not None:
+        config.set("unwarp", "phase_enc_dir", phaseEncDir)
+    if epiFactor is not None:
+        config.set("unwarp", "epi_factor", epiFactor)
+    if echoSpacing is not None:
+        config.set("unwarp", "echo_spacing", echoSpacing)
+
+    config.write(open(source,'w'))
+
+if __name__ == '__main__':
+
+    #parse arguments provide in command line
+    arguments = parseArguments()
+
+    (phaseEncDir, epiFactor, echoSpacing) = getUnwarpFieldFromDicom(arguments.dcmFile)
+
+    if arguments.config:
+        writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing)
+
+    if phaseEncDir is not None:
+        if phaseEncDir==0:
+            print "\tPhase encoding: P>>A"
+        elif phaseEncDir==1:
+            print "\tPhase encoding: A>>P"
+        else:
+            print "Phase encoding:", phaseEncDir
+
+    if epiFactor is not None:
+        print "\tEPIFactor: ", epiFactor
+
+    if echoSpacing is not None:
+        print "\tEchoSpacing: ", echoSpacing, " ms"

@@ -1,0 +1,210 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import argparse
+import logging
+import socket
+import imp
+import sys
+import os
+
+
+#@TODO impelement a list of tasks to specify with --start option
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+from modules import subjectmanager
+
+__author__ = "Mathieu Desrosiers, Arnaud Bore and Christophe Bedetti"
+__copyright__ = "Copyright 2014, The Toad Project"
+__credits__ = ["Mathieu Desrosiers", "Arnaud Bore", "Christophe Bedetti", "Guillaume Vallet"]
+__license__ = "GPL"
+__version__ = "0.6"
+__maintainer__ = "Mathieu Desrosiers"
+__email__ = "mathieu.desrosiers@criugm.qc.ca"
+__status__ = "Development"
+
+
+def __parseArguments():
+    """Prepare and parse user friendly command line arguments for sys.argv.
+
+    Returns:
+        a args stucture containing command lines arguments
+    """
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description ="""\n
+        Pipeline that realize your dream,
+        Please consult the documentation at http://unf-montreal.ca/donotexistsyet
+        for furthers informations""",
+                                epilog= """\n
+
+        studyDir must have the following structure
+        studyDir-\\
+             |-config.cfg
+             |-suj001--\\
+             |         |- t1_001.nii
+             |         |- dwi_001.nii
+             |         |- dwi_001.b ou (dwi_001.bval et dwi_001.bvec)
+             |         |-(optionnal) aparc_aseg.nii
+             |         |-(optionnal) anat_freesurfer.nii
+             |         |-(optionnal) b0ap_001.nii
+             |         |-(optionnal) b0pa_001.nii
+             |         |-(optionnal) config.cfg
+             |
+             |-suj002--\\
+             |         |- t1_002.nii
+             .         |- dwi_002.nii
+             .         |- dwi_002.b ou (dwi_002.bval et dwi_002.bvec)
+             .         |-(optionnal) aparc_aseg.nii
+             |         |-(optionnal) anat_freesurfer.nii
+             |         |-(optionnal) b0ap_001.nii
+             |         |-(optionnal) b0pa_001.nii
+             |         |-(optionnal) config.cfg
+             |
+             |-sujN
+
+
+        Then a structure like this should be created
+
+        sujN--\\
+              |- 00-backup
+              |- 01-preparation
+              |- 02-unwarping
+              |- 03-denoising
+              |- 04-preprocessing
+              |- 05-parcellation
+              |- 06-registration
+              |- 07-masking
+              |- 08-dtifit
+              |- 09-tensors
+              |- 10-tensorsmetric
+              |- 11-tensorstractography
+              |- 12-hardi
+              |- 13-hardimetric
+              |- 14-harditractography
+              |- 15-results
+              |- 16-qa
+
+
+        Please report bugs to mathieu.desrosiers@criugm.qc.ca
+        Check whether it CROAK like a toad and WALK like a toad. It is not uncommon to find a warty skinned frog that isn\'t a toad.
+        """)
+    parser.add_argument("studyDir", help="The directory where we should find the input stucture")
+    parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
+                            help="Specify the location of an alternative the config.cfg file")
+    parser.add_argument("-t", "--tasks", nargs='?', required=False,
+                            help="Begin the pipeline at a specific tasks. This will apply to all subject. not implemented")
+    parser.add_argument("-u", "--subject",action='append', nargs='?',metavar=('directory'), required=False,
+                            help="Explicitly specify the subject directory to submit. This option may be repeat several time")
+    parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
+                            action="store_true")
+    parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
+    parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
+    parser.add_argument("-v","--verbose", help="increase output verbosity (not implemented yet)", action="store_true")
+    args = parser.parse_args()
+    return args
+
+
+
+def __manageEnvironnement():
+    """Set and verify environments variables and modules importations for prior utilisation
+
+    """
+
+    try:
+        version = float(sys.version[0:3])
+        if version < 2.7:
+            logging.warning("This pipeline have never run with a version of python < 2.7")
+    except ValueError:
+        logging.error("Cannot determine your version of python installed")
+
+    packages = ['numpy','nipy']
+    for package in packages:
+        try:
+            imp.find_module(package)
+        except ImportError:
+            logging.error("Cannot find package %s."%package)
+
+    hostname = socket.gethostname()
+    if hostname in ['magma', 'stark']:
+
+        #disable KMP_AFFINITY
+        os.environ["KMP_AFFINITY"] = 'none'
+
+        #setup variables for freesurfer
+        os.environ["FREESURFER_HOME"] = "/usr/local/freesurfer"
+        os.environ["FSFAST_HOME"]     = "/usr/local/freesurfer/fsfast"
+        os.environ["SUBJECTS_DIR"] = "/usr/local/freesurfer/subjects"
+        
+        #setup variables for FSL
+        os.environ["FSLDIR"] = "/usr/local/fsl"
+        os.environ["FSLOUTPUTTYPE"] = "NIFTI_GZ"
+
+        if "PERL5LIB" in os.environ:
+            #setup perl library environnement
+            os.environ["PERL5LIB"] = os.environ["PERL5LIB"] + ":/usr/local/freesurfer/mni/lib/perl5/5.8.5/"
+        else:
+            os.environ["PERL5LIB"] = "/usr/local/freesurfer/mni/lib/perl5/5.8.5/"
+
+        #setup variable PATH
+        os.environ["PATH"] = ("/usr/local/fsl/bin:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:"
+                              "/usr/local/mrtrix3/scripts:/usr/local/ants/bin:/usr/local/freesurfer/fsfast/bin:"
+                              "/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:"
+                              "/usr/local/freesurfer/tktools:/usr/local/c3d/bin:") + os.environ["PATH"]
+
+        if hostname == 'stark':
+            if "LD_LIBRARY_PATH" in os.environ:
+                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib:"+os.environ["LD_LIBRARY_PATH"]
+            else:
+                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib"
+    else:
+
+        try:
+            os.environ["FREESURFER_HOME"]
+        except KeyError:
+            logging.error("Please set the environment variable FREESURFER_HOME and source FreeSurferEnv.sh file")
+            sys.exit()
+
+        try:
+            os.environ["FSLDIR"]
+        except KeyError:
+            logging.error("Please set the environment variable FSLDIR and source fslconf/fsl.sh file")
+            sys.exit()
+
+
+
+
+    """
+    results = util.launchCommand("mrinfo -version")
+    if len(results) == 2 and results[1] == False:
+        logging.error("Cannot locate mrtrix3")
+        sys.exit()
+    try:
+    	if(results[1].split()[2].split(".")[1]) != "3":
+        	logging.error("Mrtrix version 3 is required prior to run this pipeline")
+        	#sys.exit()
+    except IndexError:
+	logging.warning("Could not recognize your mrtrix version")
+    """
+
+
+if __name__ == '__main__':
+
+    #manage the environnement
+    __manageEnvironnement()
+
+    #parse arguments provide in command line
+    arguments = __parseArguments()
+
+    #define toad directory
+    realPath = os.path.realpath(__file__)
+    arguments.toadDir = os.path.dirname(realPath).replace("bin", "")
+
+    #study directory must exist prior to start the pipeline
+    if not os.path.exists(arguments.studyDir):
+        logging.error("Error, directory %s do not exist"%arguments.studyDir)
+        sys.exit()
+
+    #always works in absolute path
+    if not os.path.isabs(arguments.studyDir):
+        arguments.studyDir = os.path.abspath(arguments.studyDir)
+
+    #Launch the manager
+    result = subjectmanager.SubjectManager(arguments).run()
