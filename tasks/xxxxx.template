@@ -8,7 +8,7 @@ class Template(GenericTask):
     def __init__(self, subject):
         """A preset format, used as a starting point for developing a toad task
 
-        Simply copy and rename this file:  cp xx-template.py XX-yourtaskname.py into the tasks folder.
+        Simply copy and rename this file:  cp xxxxx.template yourtaskname.py into the tasks folder.
             XX is simply a 2 digit number that represent the order the tasks will be executed.
             yourtaskname is any name at your convenience. the name must be lowercase
         Change the class name Template for Yourtaskname. Note the first letter of the name should be capitalized
