@@ -51,9 +51,14 @@ class GenericTask(Logger, Load):
                 if i == 0:
                     self.dependDir = dir
 
+    def getOrder(self):
+        return self.__order
 
     def setOrder(self, order):
         self.__order = order
+
+    def __repr__(self):
+        return self.__name
 
 
     def __eq__(self, other):
