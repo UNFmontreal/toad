@@ -169,7 +169,7 @@ class SubjectManager(Logger, Config):
                 finally:
                     subject.removeLock()
             else:
-		#@TODO illegal instrauction
+                #@TODO illegal instrauction
                 self.error(subject.displayLockMessage())
         else:
             self.info("Subject %s already completed, it will not be submitted!"%name)

@@ -20,12 +20,12 @@ class HardiMetric(GenericTask):
     def __fod2metric(self, source, mask=None):
         self.info("Starting fod2metric creation from mrtrix on %s"%source)
 
-	images = {'gfaImage': self.getTarget(source, 'gfa'),
-		'gfaTmp':self.getTarget(self.workingDir, "tmp", 'nii'),
-		'nufoImage':self.getTarget(source, 'nufo'),
-		'nufoTmp':self.getTarget(self.workingDir,"tmp1", 'nii'),
-		'fixelPeakImage':self.getTarget(self.workingDir,"tmp1", 'nii'),
-		'fixelPeakTmp':self.getTarget(self.workingDir,"tmp",'msf','nii')}
+        images = {'gfaImage': self.getTarget(source, 'gfa'),
+        'gfaTmp':self.getTarget(self.workingDir, "tmp", 'nii'),
+        'nufoImage':self.getTarget(source, 'nufo'),
+        'nufoTmp':self.getTarget(self.workingDir,"tmp1", 'nii'),
+        'fixelPeakImage':self.getTarget(self.workingDir,"tmp1", 'nii'),
+        'fixelPeakTmp':self.getTarget(self.workingDir,"tmp",'msf','nii')}
 
         cmd = "fod2metric %s -gfa %s -count %s -fixel_peak %s -nthreads %s -force"%(source, images['gfaTmp'], images['nufoTmp'], images['fixelPeakTmp'], self.getNTreadsMrtrix())
         if mask is not None:
