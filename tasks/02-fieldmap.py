@@ -56,8 +56,7 @@ class Fieldmap(GenericTask):
         
         #flirt -in  anat -ref _mag.nii.gz -out anat_flirt.nii.gz -omat HC_AM32_1_mask_crop_flirt.mat -applyxfm -datatype char -init fieldmap2t1_inv.mat   -interp nearestneighbour
 
-        cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} "
-            .format(source anatomivalMask???, mag, target, outputMatrix, self.get("inverseMatrix"),self.get("interp"), self.get("datatype"))
+        cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} ".format("source anatomivalMask???", mag, target, outputMatrix, self.get("inverseMatrix"),self.get("interp"), self.get("datatype"))
 
         if self.getBoolean("applyxfm"):
             cmd += "-applyxfm "

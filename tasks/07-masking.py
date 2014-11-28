@@ -1,5 +1,7 @@
 from generic.generictask import GenericTask
 from modules import util, mriutil
+import shutil
+import sys
 import os
 
 __author__ = 'desmat'
@@ -56,15 +58,16 @@ class Masking(GenericTask):
         structures = mriutil.extractFreesurferStructure(regions, source, target)
         self.__createMask(structures)
 
+    """
     def __actAnatPrepareFreesurfer(self, source):
-        """Create a five-tissue-type (5TT) segmented image in a format appropriate for ACT
+        Create a five-tissue-type (5TT) segmented image in a format appropriate for ACT
 
         Args:
             source:  A segmented T1 image from FreeSurfer
 
         Returns:
             A five-tissue-type (5TT) segmented image in a format appropriate for AC
-        """
+
 
         tmp = os.path.join(self.workingDir, "tmp.nii")
         target = self.getTarget(source, 'act')
@@ -77,6 +80,54 @@ class Masking(GenericTask):
         os.rename(tmp, target)
 
         return target
+    """
+
+    def __actAnatPrepareFreesurfer(self, source):
+
+        sys.path.append(os.environ["MRTRIX_PYTHON_LIB"])
+        from lib.delTempDir   import delTempDir
+        from lib.errorMessage import errorMessage
+        from lib.loadOptions  import loadOptions
+        from lib.makeTempDir  import makeTempDir
+        from lib.printMessage import printMessage
+
+        target = self.getTarget(source, 'act')
+
+        freesurfer_lut = os.path.join(os.environ['FREESURFER_HOME'], 'FreeSurferColorLUT.txt')
+
+        if not os.path.isfile(freesurfer_lut):
+          errorMessage('Could not find FreeSurfer lookup table file\n(Expected location: ' + freesurfer_lut + ')')
+
+        config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'FreeSurfer2ACT.txt');
+        if not os.path.isfile(config_path):
+          errorMessage('Could not find config file for converting FreeSurfer parcellation output to tissues\n(Expected location: ' + config_path + ')')
+
+        working_dir = os.getcwd()
+        temp_dir = makeTempDir(False)
+
+        # Initial conversion from FreeSurfer parcellation to five principal tissue types
+        self.launchCommand('labelconfig ' + source + ' ' + config_path + ' ' + os.path.join(temp_dir, 'indices.mif') + ' -lut_freesurfer ' + freesurfer_lut)
+
+        os.chdir(temp_dir)
+
+        # Convert into the 5TT format for ACT
+        self.launchCommand('mrcalc indices.mif 1 -eq cgm.mif')
+        self.launchCommand('mrcalc indices.mif 2 -eq sgm.mif')
+        self.launchCommand('mrcalc indices.mif 3 -eq  wm.mif')
+        self.launchCommand('mrcalc indices.mif 4 -eq csf.mif')
+        self.launchCommand('mrcalc indices.mif 5 -eq path.mif')
+        result_path = 'result' + os.path.splitext(target)[1]
+        self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32')
+
+        # Move back to original directory
+        os.chdir(working_dir)
+
+        # Get the final file from the temporary directory & put it in the correct location
+        shutil.move(os.path.join(temp_dir, result_path), target)
+
+        # Don't leave a trace
+        delTempDir(temp_dir)
+
 
 
     def __extractWhiteMatterFromAct(self, source):
@@ -162,5 +213,4 @@ class Masking(GenericTask):
             result = True
 
         return result
-
 
