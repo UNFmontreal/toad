@@ -93,6 +93,7 @@ def __parseArguments():
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
     parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
+    parser.add_argument("-p","--noPrompt", help=("Disable command prompt, always assume yes as answer"), action="store_true")
     parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
     parser.add_argument("-v","--verbose", help="increase output verbosity (not implemented yet)", action="store_true")
     args = parser.parse_args()
@@ -168,12 +169,23 @@ def __manageEnvironnement(logger):
             logger.error("Please set the environment variable FSLDIR and source fslconf/fsl.sh file")
             sys.exit()
 
-        #find mrtrix librairies placeholder
         mrtrix = util.which("tckgen")
         if mrtrix is None:
-            logger.error("Mrtrix version 3 not found, please set the environment variable PATH")
+            logger.error("Mrtrix3 not found. Please install the package or set the environment variable $PATH correctly")
         else:
             os.environ["MRTRIX_PYTHON_LIB"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))),"scripts/lib")
+
+
+        if util.which("ANTS") is None:
+            logger.error("ANTS registration not found. Please install the package or set the environment variable $PATH correctly")
+
+        if util.which("matlab") is None:
+            logger.error("Matlab not found. Please install matlab or set the environment variable $PATH correctly")
+        else:
+            cmd = "matlab -nodisplay -nodesktop -nojvm -nosplash -r \"if exist('spm')~=2,fprintf('SPM_NOT_FOUND');end;quit\""
+            (output,error) = util.launchCommand(cmd)
+            if "SPM_NOT_FOUND" in output:
+                logger.error("Spm package not found, Please install spm or set the pathdef variable correctly")
 
 
 if __name__ == '__main__':
