@@ -14,6 +14,9 @@ class TasksManager(object):
         self.__tasks = self.__initialize()
         self.__runnableTasks = self.__initializeRunnableTasks(self.__tasks)
 
+    def getSubjectName(self):
+        return self.__subject
+
 
     def getTasks(self):
         """get the list of all available task

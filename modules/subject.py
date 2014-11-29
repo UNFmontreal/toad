@@ -24,10 +24,14 @@ class Subject(Lock):
             os.mkdir(self.__logDir)
         Lock.__init__(self, self.__logDir, self.__name)
 
+    def __repr__(self):
+	return self.__name	
 
     def getName(self):
         return self.__name
 
+    def getSubjectDir(self):
+        return self.__subjectDir
 
     def getLogDir(self):
         return self.__logDir

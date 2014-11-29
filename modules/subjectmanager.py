@@ -134,16 +134,13 @@ class SubjectManager(Logger, Config):
 
         else:
             self.warning("Prompt message have been disabled")
-
         for subject in subjects:
-
             tasksmanager = TasksManager(subject)
             for task in tasksmanager.getTasks():
                 task.cleanup()
-
+            
             print "Clean up subject log"
-            #subject.removeLogDir()
-
+            subject.removeLogDir()
 
     def __submitLocal(self, subject):
         """Submit execution of the subject locally in a shell

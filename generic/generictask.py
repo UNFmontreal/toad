@@ -13,7 +13,6 @@ __author__ = 'desmat'
 
 
 class GenericTask(Logger, Load):
-    __metaclass__ = singleton.Singleton
 
     def __init__(self, subject, *args):
         """Set up a TASK child class environment.
@@ -309,7 +308,7 @@ class GenericTask(Logger, Load):
             err = self.getLog()
             self.info("Error will be log in %s \n"%err.name)
 
-        (output, error)= util.launchCommand(cmd, out, err, nice=nice)
+        (output, error)= util.launchCommand(cmd, out, err, nice)
         if stdout is not "None":
             self.info("Output produce by %s: %s \n"%(binary, output))
 
