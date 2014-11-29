@@ -83,7 +83,7 @@ class Validation(object):
             return False
 
 
-        dwiImage = util.getImage(self.config, self.workingDir,'dwi')
+        dwi = util.getImage(self.config, self.workingDir,'dwi')
 
         #@TODO fix data layout incomprehesion
         #make sure that diffusion image Z scale layout is oriented correctly
@@ -91,7 +91,15 @@ class Validation(object):
         #    self.error("Data layout for %s image is unexpected. "
         #                        "Only data layout = [ +0 +1 +2 +3 ] could be process"%dwiImage)
 
-        nbDirections = mriutil.getNbDirectionsFromDWI(dwiImage)
+        nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
+        if nbDirections <= 45:
+            msg = "Found only %s directions into %s image. Hardi model will not be accurate with diffusion weighted image " \
+                  "that contain less than 45 directions\n\n"%(nbDirections, self.dwi)
+            if self.config.getboolean('arguments', 'prompt'):
+                util.displayYesNoMessage(msg)
+            else:
+                self.warning(msg)
+
 
         bEnc = util.getImage(self.config, self.workingDir,'grad', None, 'b')
         bVal = util.getImage(self.config, self.workingDir,'grad', None, 'bval')

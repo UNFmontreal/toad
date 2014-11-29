@@ -1,12 +1,11 @@
+from tasksmanager import TasksManager
 from validation import Validation
 from subject import Subject
 from logger import Logger
 from config import Config
-from tasksmanager import TasksManager
 import util
 import glob
 import copy
-import sys
 import os
 
 __author__ = 'desmat'
@@ -56,7 +55,7 @@ class SubjectManager(Logger, Config):
                 else:
                     self.warning("%s will be discarded"%os.path.basename(dir))
             else:
-                self.warning("User request skipping validation, this option is dangerous")
+                self.warning("Skipping validation have been requested, this option is dangerous")
                 result = True
         else:
             self.warning("%s doesn't look a directory, it will be discarded"%dir)
@@ -112,19 +111,13 @@ class SubjectManager(Logger, Config):
                     tags = {"names": ", ".join(names) ,"locks":"\t,\n".join(arrayOfLocks)}
                     msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/locks.tpl"))
 
-            self.warning(msg)
-
-            while True:
-                choice = raw_input("Continue? (y or n)")
-                if choice == 'y':
-                    print "\nLocked subjects will failed during the execution\n"
-                    break
-                elif choice == 'n':
-                    print "\nPlease correct this issue and submit the pipeline again\n"
-                    sys.exit()
+            if self.config.getboolean('arguments', 'prompt'):
+                util.displayYesNoMessage(msg)
+            else:
+                self.warning(msg)
 
 
-    def __reinitialize(self, subject):
+    def __reinitialize(self, subjects):
         """Reinitialize the study and every subjects into the pipeline
 
         Move every files and images back to the subjects directory and remove
@@ -132,16 +125,24 @@ class SubjectManager(Logger, Config):
         Remove logs directory created into the root directory of the study
 
         Args:
-            subject:  a subject
+            subjects:  a list of subjects
 
         """
+        if not self.config.getboolean('arguments', 'prompt'):
+            msg = "Are you sure you want to reinitialize your data at is initial stage"
+            util.displayYesNoMessage(msg)
 
-        tasksmanager = TasksManager(subject)
-        for task in tasksmanager.getTasks():
-            task.cleanup()
+        else:
+            self.warning("Prompt message have been disabled")
 
-        print "Clean up subject log"
-        subject.removeLogDir()
+        for subject in subjects:
+
+            tasksmanager = TasksManager(subject)
+            for task in tasksmanager.getTasks():
+                task.cleanup()
+
+            print "Clean up subject log"
+            #subject.removeLogDir()
 
 
     def __submitLocal(self, subject):
@@ -169,8 +170,7 @@ class SubjectManager(Logger, Config):
                 finally:
                     subject.removeLock()
             else:
-                #@TODO illegal instrauction
-                self.error(subject.displayLockMessage())
+                self.__processLocksSubjects(subject)
         else:
             self.info("Subject %s already completed, it will not be submitted!"%name)
 
@@ -183,7 +183,7 @@ class SubjectManager(Logger, Config):
 
         """
 
-        cmd = "echo %s/bin/toad -u %s -l %s | qsub -notify -V -N %s -o %s -e %s -q %s"%(self.config.get('arguments', 'toadDir'),
+        cmd = "echo %s/bin/toad -u %s -l %s -p | qsub -notify -V -N %s -o %s -e %s -q %s"%(self.config.get('arguments', 'toadDir'),
               subject.getDir(), self.studyDir, subject.getName(), subject.getLogDir(), subject.getLogDir(), self.config.get('general','sge_queue'))
         self.info("Command launch: %s"%cmd)
         (stdout, stderr) = util.launchCommand(cmd)
@@ -223,14 +223,12 @@ class SubjectManager(Logger, Config):
         subjects = self.__getSubjectsDirectories()
         self.__processLocksSubjects(subjects)
 
-        for subject in subjects:
+        if self.config.getboolean('arguments', 'reinitialize'):
+            self.__reinitialize(subjects)
+        else:
+            for subject in subjects:
 
-            if self.config.getboolean('arguments', 'reinitialize'):
-                self.__reinitialize(subject)
-
-            else:
-
-                if self.config.getboolean('arguments', 'local'):
-                    self.__submitLocal(subject)
-                else:
-                    self.__submitGridEngine(subject)
+                    if self.config.getboolean('arguments', 'local'):
+                        self.__submitLocal(subject)
+                    else:
+                        self.__submitGridEngine(subject)

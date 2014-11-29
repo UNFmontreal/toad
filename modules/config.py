@@ -72,6 +72,11 @@ class Config(object):
         else:
             config.set('arguments', 'validation', 'True')
 
+        if arguments.noPrompt:
+            config.set('arguments', 'prompt', 'False')
+        else:
+            config.set('arguments', 'prompt', 'True')
+
         if arguments.subject and isinstance(arguments.subject, basestring):
             config.set('arguments', 'subjectDir', arguments.subject)
 

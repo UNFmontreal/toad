@@ -1,6 +1,5 @@
 import datetime
 import sys
-import os
 
 __author__ = 'desmat'
 
