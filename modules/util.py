@@ -1,6 +1,7 @@
 from string import Template
 import subprocess
 import glob
+import sys
 import os
 
 __author__ = 'mathieu'
@@ -285,3 +286,14 @@ def parseTemplate(dict, template):
     """
     f = open(template, 'r')
     return Template(f.read()).safe_substitute(dict)
+
+def displayYesNoMessage(msg):
+    print msg
+    while True:
+        choice = raw_input("Continue? (y or n)")
+        if choice == 'y':
+            print "\n Subjects will failed during the execution\n"
+            break
+        elif choice == 'n':
+            print "\nSubmit the pipeline again\n"
+            sys.exit()
