@@ -142,7 +142,7 @@ class SubjectManager(Logger, Config):
                 task.cleanup()
 
             print "Clean up subject log"
-            subject.removeLogDir()
+            #subject.removeLogDir()
 
 
     def __submitLocal(self, subject):
