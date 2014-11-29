@@ -18,7 +18,7 @@ class Lock(object):
         """
         self.__name = name
         self.__logDir = logDir
-        self.__lockFile = "%s/%s.lock"%(logDir, name)
+        self.__lockFile = "{}/{}.lock".format(logDir, name)
 
 
     def isLock(self):

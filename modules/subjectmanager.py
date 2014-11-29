@@ -50,15 +50,15 @@ class SubjectManager(Logger, Config):
         if os.path.isdir(dir):
             if self.config.getboolean('arguments','validation'):
                 if Validation(dir, self.getLogger(), self.__copyConfig(dir)).run():
-                    self.info("%s is a valid subject, adding it to the list."%os.path.basename(dir))
+                    self.info("{} is a valid subject, adding it to the list.".format(os.path.basename(dir)))
                     result = True
                 else:
-                    self.warning("%s will be discarded"%os.path.basename(dir))
+                    self.warning("{} will be discarded".format(os.path.basename(dir)))
             else:
                 self.warning("Skipping validation have been requested, this option is dangerous")
                 result = True
         else:
-            self.warning("%s doesn't look a directory, it will be discarded"%dir)
+            self.warning("{} doesn't look a directory, it will be discarded".format(dir))
         return result
 
 
@@ -80,7 +80,7 @@ class SubjectManager(Logger, Config):
                 if self.__isDirAValidSubject(dir):
                     subjects.append(Subject(self.__copyConfig(dir)))
         else:
-            dirs = glob.glob("%s/*"%self.studyDir)
+            dirs = glob.glob("{}/*".format(self.studyDir))
             for dir in dirs:
                 if self.__isDirAValidSubject(dir):
                     subjects.append(Subject(self.__copyConfig(dir)))
@@ -150,18 +150,18 @@ class SubjectManager(Logger, Config):
 
         """
         name = subject.getName()
-        self.info("Evaluating which task subject %s should process"%(name))
+        self.info("Evaluating which task subject {} should process".format(name))
         tasksmanager = TasksManager(subject)
 
         if tasksmanager.getNumberOfRunnableTasks():
             message = "Tasks : "
             for task in tasksmanager.getRunnableTasks():
-                message += "%s, "%task.getName()
-            self.info("%swill be submitted into the pipeline"%message)
+                message += "{}, ".format(task.getName())
+            self.info("{}will be submitted into the pipeline".format(message))
 
             if not subject.isLock():
                 try:
-                    self.info("Starting subject %s at task %s"%(name, tasksmanager.getFirstRunnableTasks().getName()))
+                    self.info("Starting subject {} at task {}".format(name, tasksmanager.getFirstRunnableTasks().getName()))
                     subject.lock()
                     tasksmanager.run()
                 finally:
@@ -169,7 +169,7 @@ class SubjectManager(Logger, Config):
             else:
                 self.__processLocksSubjects(subject)
         else:
-            self.info("Subject %s already completed, it will not be submitted!"%name)
+            self.info("Subject {} already completed, it will not be submitted!".format(name))
 
 
     def __submitGridEngine(self, subject):
@@ -180,13 +180,13 @@ class SubjectManager(Logger, Config):
 
         """
 
-        cmd = "echo %s/bin/toad -u %s -l %s -p | qsub -notify -V -N %s -o %s -e %s -q %s"%(self.config.get('arguments', 'toadDir'),
-              subject.getDir(), self.studyDir, subject.getName(), subject.getLogDir(), subject.getLogDir(), self.config.get('general','sge_queue'))
-        self.info("Command launch: %s"%cmd)
+        cmd = "echo {0}/bin/toad -u {1} -l {2} -p | qsub -notify -V -N {3} -o {4} -e {4} -q {5}".format(self.config.get('arguments', 'toadDir'),
+              subject.getDir(), self.studyDir, subject.getName(), subject.getLogDir(), self.config.get('general','sge_queue'))
+        self.info("Command launch: {}".format(cmd))
         (stdout, stderr) = util.launchCommand(cmd)
-        self.info("Output produce: %s\n"%stdout)
+        self.info("Output produce: {}\n".format(stdout))
         if stderr is not '':
-            self.info("Error produce: %s\n"%stderr)
+            self.info("Error produce: {}\n".format(stderr))
         self.info("------------------------\n")
 
 
@@ -216,7 +216,7 @@ class SubjectManager(Logger, Config):
                 functionnality should be probably render obsolete during the next versions
 
         """
-        self.info("Directory %s have been specified by the user."%self.studyDir)
+        self.info("Directory {} have been specified by the user.".format(self.studyDir))
         subjects = self.__getSubjectsDirectories()
         self.__processLocksSubjects(subjects)
 

@@ -29,9 +29,9 @@ class Unwarping(GenericTask):
         dwiZDims = int(mriutil.getMriDimensions(dwi)[2])
 
         if dwiZDims%2 == 1:
-            dwi  = self.__extractZVolumes(dwi, "0:%s"%(dwiZDims-2))
-            b0PA = self.__extractZVolumes(b0PA, "0:%s"%(dwiZDims-2))
-            b0AP = self.__extractZVolumes(b0AP, "0:%s"%(dwiZDims-2))
+            dwi  = self.__extractZVolumes(dwi, "0:{}".format(dwiZDims-2))
+            b0PA = self.__extractZVolumes(b0PA, "0:{}".format(dwiZDims-2))
+            b0AP = self.__extractZVolumes(b0AP, "0:{}".format(dwiZDims-2))
 
         #concatenate B0 image together
         b0Image = self.__concatenateB0(b0PA, b0AP,
@@ -58,13 +58,13 @@ class Unwarping(GenericTask):
         outputEddyImage = self.__correction_eddy2(dwi,
                                     outputFieldMaskExtracted, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
 
-        self.info("Uncompressing eddy output image: %s"%outputEddyImage)
+        self.info("Uncompressing eddy output image: {}".format(outputEddyImage))
         util.gunzip(outputEddyImage)
 
         #@TODO remove the glob and use getimage
-        eddyParameterFiles = glob.glob("%s/*.eddy_parameters"%self.workingDir)
+        eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
         if len(eddyParameterFiles)>0:
-            bCorrected = mriutil.applyGradientCorrection(bFile, eddyParameterFiles.pop(0), self.workingDir )
+            bCorrected = mriutil.applyGradientCorrection(bFile, eddyParameterFiles.pop(0), self.workingDir)
             #produce the bVal and bVec file accordingly
             mriutil.bEnc2BVec(bCorrected, self.workingDir)
             mriutil.bEnc2BVal(bCorrected, self.workingDir)
@@ -83,9 +83,9 @@ class Unwarping(GenericTask):
 
         tmp = os.path.join(self.workingDir, "tmp.nii")
         target = self.getTarget(source, "subset")
-        cmd = "mrconvert %s %s -coord +2 %s -nthreads %s -quiet"%(source, tmp, volumes, self.getNTreadsMrtrix())
+        cmd = "mrconvert {} {} -coord +2 {} -nthreads {} -quiet".format(source, tmp, volumes, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
-        self.info("renaming %s to %s"%(tmp, target))
+        self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
         return target
 
@@ -101,7 +101,7 @@ class Unwarping(GenericTask):
         Returns:
              The name of the resulting image
         """
-        cmd = "mrcat %s %s %s -axis 3 -nthreads %s -quiet"%(source1, source2, target, self.getNTreadsMrtrix())
+        cmd = "mrcat {} {} {} -axis 3 -nthreads {} -quiet".format(source1, source2, target, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
         return target
 
@@ -137,15 +137,15 @@ class Unwarping(GenericTask):
 
         if type=='topup':
             parameter='acqp_topup'
-            text = "0 -1 0 %s\n0 1 0 %s\n"%(factor, factor)
+            text = "0 -1 0 {}\n0 1 0 {}\n".format(factor, factor)
         elif type=='eddy':
             parameter='acqp_eddy'
             if phaseEncDir==0:    #P>>A
-                    text = "0 1 0 %s\n"%(factor)
+                    text = "0 1 0 {}\n".format(factor)
             elif phaseEncDir==1:  #A>>P
-                    text = "0 -1 0 %s\n"%(factor)
+                    text = "0 -1 0 {}\n".format(factor)
             else:
-                self.error("Cannot determine the phase encoding direction, got value of: %s"%phaseEncDir)
+                self.error("Cannot determine the phase encoding direction, got value of: {}".format(phaseEncDir))
         else:
             self.error("Type must be of value: topup or eddy")
             return False
@@ -153,7 +153,7 @@ class Unwarping(GenericTask):
         target = os.path.join(self.workingDir, self.get(parameter))
 
         if not util.createScript(target, text):
-            self.error("Unable to create script %s"%target)
+            self.error("Unable to create script {}".format(target))
 
         return target
 
@@ -168,7 +168,7 @@ class Unwarping(GenericTask):
             The resulting file name
         """
         target = os.path.join(self.workingDir, self.get( 'index_filename'))
-        self.info("Creating index file %s"%target)
+        self.info("Creating index file {}".format(target))
         text = ""
         for i in range(0,dimensions):
             text+="1 "
@@ -186,18 +186,18 @@ class Unwarping(GenericTask):
         b0APDim   = mriutil.getMriDimensions(b0AP)
         b0APVoxel = mriutil.getMriVoxelSize(b0AP)
 
-        self.info("Look if %s and %s and %s have the same voxel size"%(dwi, b0PA, b0AP))
+        self.info("Look if {} and {} and {} have the same voxel size".format(dwi, b0PA, b0AP))
         if len(dwiVoxel) == len(b0PAVoxel) == len(b0APVoxel) == 3:
             for i in range(0,len(dwiVoxel)):
                 if not (dwiVoxel[i] == b0PAVoxel[i] == b0APVoxel[i]):
-                    self.error("Voxel size mismatch found at index %s for image %s %s %s"%(i, dwi, b0PA, b0AP))
+                    self.error("Voxel size mismatch found at index {} for image {} {} {}".format(i, dwi, b0PA, b0AP))
         else:
-            self.error("Found Voxel size inconsistency for image %s or  %s or %s"%(dwi, b0PA, b0AP))
+            self.error("Found Voxel size inconsistency for image {} or  {} or {}".format(dwi, b0PA, b0AP))
 
-        self.info("Look if %s and %s and %s have the same dimension for each scale"%(dwi, b0PA, b0AP))
+        self.info("Look if {} and {} and {} have the same dimension for each scale".format(dwi, b0PA, b0AP))
         for i in range(0,3):
                 if not (dwiDim[i]==b0PADim[i]==b0APDim[i]):
-                    self.error("Dimensions mismatch found at index %s for image %s %s %s"%(i, dwi, b0PA, b0AP))
+                    self.error("Dimensions mismatch found at index {} for image {} {} {}".format(i, dwi, b0PA, b0AP))
 
 
     def __topup(self, source, acqp, b02b0File):
@@ -206,8 +206,8 @@ class Unwarping(GenericTask):
         baseName = os.path.join(self.workingDir, self.get( 'topup_results_base_name'))
         output = os.path.join(self.workingDir, self.get( 'topup_results_output'))
 
-        cmd = "topup --imain=%s --datain=%s --config=%s --out=%s  --iout=%s --verbose"\
-              %(source, acqp, b02b0File, baseName, output)
+        cmd = "topup --imain={} --datain={} --config={} --out={}  --iout={} --verbose"\
+              .format(source, acqp, b02b0File, baseName, output)
         self.launchCommand(cmd)
         return [baseName, output]
 
@@ -225,10 +225,10 @@ class Unwarping(GenericTask):
         tmp = self.getTarget(source, "tmp", "nii.gz")
         target = self.getTarget(source, "brain")
 
-        cmd = "bet %s %s -v -m"%(source, tmp)
+        cmd = "bet {} {} -v -m".format(source, tmp)
         self.launchCommand(cmd)
 
-        self.info("renaming %s to %s"%(tmp, target))
+        self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
 
         self.info("Finish brain extraction from fsl")
@@ -242,15 +242,15 @@ class Unwarping(GenericTask):
         self.info("Launch eddy correction from fsl")
         tmp = self.getTarget(source, "tmp")
         target = self.getTarget(source, "unwarp")
-        cmd = "eddy --imain=%s --mask=%s --topup=%s --index=%s --acqp=%s --bvecs=%s --bvals=%s --out=%s --verbose"\
-              %(source, mask, topup, index, acqp, bVecs, bVal, tmp)
+        cmd = "eddy --imain={} --mask={}--topup={} --index={} --acqp={} --bvecs={} --bvals={} --out={} --verbose"\
+              .format(source, mask, topup, index, acqp, bVecs, bVal, tmp)
 
         self.getNTreadsEddy()
         self.launchCommand(cmd)
 
         self.info(util.gunzip(tmp))
 
-        self.info("renaming %s to %s"%(tmp, target))
+        self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
 
         self.info("Finish eddy correction from fsl")

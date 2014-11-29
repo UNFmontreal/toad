@@ -30,8 +30,8 @@ class Denoising(GenericTask):
 
     def __createLpcaScript(self, source, target):
 
-        scriptName = os.path.join(self.workingDir, "%s.m"%self.get("script_name"))
-        self.info("Creating lpca script %s"%scriptName)
+        scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
+        self.info("Creating lpca script {}".format(scriptName))
         #@TODO debug switch self.getNTreads()
         tags={ 'source': source, 'target':target, 'workingDir': self.workingDir, 'nbthreads':"1"}
         template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/denoise.tpl"))
@@ -56,7 +56,7 @@ class Denoising(GenericTask):
             if self.isSomeImagesMissing({'diffusion weighted': dwi}):
                 result = False
             else:
-                self.info("Will take %s image instead"%dwi)
+                self.info("Will take {} image instead".format(dwi))
 
         return result
 

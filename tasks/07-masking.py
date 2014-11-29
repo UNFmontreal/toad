@@ -23,7 +23,8 @@ class Masking(GenericTask):
         self.__createMask(anatBrainWMResample)
 
         extended = self.getTarget('anat', 'extended','nii')
-        self.info("Add %s and %s images together in order to create the ultimate image"%(anatBrainResample, aparcAseg))
+        self.info("Add {} and {} images together in order to create the ultimate image"
+                  .format(anatBrainResample, aparcAseg))
         mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAseg)
         self.__createMask(extended)
 
@@ -48,11 +49,11 @@ class Masking(GenericTask):
 
 
     def __createRegionMaskFromAparcAseg(self, source, operand):
-        option = "%s_seeds"%operand
+        option = "{}_seeds".format(operand)
 
-        self.info("Extract %s regions from %s image"%(operand, source))
+        self.info("Extract {} regions from {} image".format(operand, source))
         regions = util.arrayOfInteger(self.get( option))
-        self.info("Regions to extract: %s"%(regions))
+        self.info("Regions to extract: {}".format(regions))
 
         target = self.getTarget(source, [operand, "extract"])
         structures = mriutil.extractFreesurferStructure(regions, source, target)
@@ -71,12 +72,12 @@ class Masking(GenericTask):
 
         tmp = os.path.join(self.workingDir, "tmp.nii")
         target = self.getTarget(source, 'act')
-        self.info("Starting act_anat_prepare_freesurfer creation from mrtrix on %s"%source)
+        self.info("Starting act_anat_prepare_freesurfer creation from mrtrix on {}"{}ource)
 
-        cmd = "act_anat_prepare_freesurfer %s %s"%(source, tmp)
+        cmd = "act_anat_prepare_freesurfer {} {}".format(source, tmp)
         self.launchCommand(cmd)
 
-        self.info("renaming %s to %s"%(tmp, target))
+        self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
 
         return target
@@ -162,19 +163,19 @@ class Masking(GenericTask):
 
         tmp = os.path.join(self.workingDir, "tmp.nii")
         target = self.getTarget(source, "5tt2gmwmi")
-        self.info("Starting 5tt2gmwmi creation from mrtrix on %s"%source)
+        self.info("Starting 5tt2gmwmi creation from mrtrix on {}".format(source)
 
-        cmd = "5tt2gmwmi %s %s -nthreads %s -quiet"%(source, tmp, self.getNTreadsMrtrix())
+        cmd = "5tt2gmwmi {} {} -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
-        self.info("renaming %s to %s"%(tmp, target))
+        self.info("renaming {} to {}".fomat(tmp, target))
         os.rename(tmp, target)
 
         return target
 
 
     def __createMask(self, source):
-        self.info("Create mask from %s images"%(source))
+        self.info("Create mask from {} images".format(source))
         mriutil.fslmaths(source, self.getTarget(source, 'mask'), 'bin')
 
 

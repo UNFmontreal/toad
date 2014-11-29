@@ -152,13 +152,13 @@ class TasksManager(object):
 
         """
         tasks =[]
-        tasksFiles = glob.glob("%s/tasks/*.py"%(self.__subject.getConfig().get('arguments','toadDir')))
+        tasksFiles = glob.glob("{}/tasks/*.py".format(self.__subject.getConfig().get('arguments','toadDir')))
         for taskFile in tasksFiles:
             task= self.__instanciateFromFile(taskFile)
             if task is not None:
                 tasks.append(task)
             else:
-                print "File %s do not appear as a valid task file"%taskFile
+                print "File {} do not appear as a valid task file".format(taskFile)
         return tasks
 
 
@@ -181,19 +181,19 @@ class TasksManager(object):
         if ext == ".py":
             try:
                 package = taskName
-                module = importlib.import_module("tasks.%s"%package)
+                module = importlib.import_module("tasks.{}".format(package))
                 classes = inspect.getmembers(module, inspect.isclass)
                 for clazz in classes:
-                    if clazz[1].__module__=="tasks.%s"%package:
+                    if clazz[1].__module__=="tasks.{}".format(package):
                         clazz = clazz[1](self.__subject)
                         if not __isDefined(clazz,"isDirty"):
-                            print "Warning: isDirty() method missing in class %s"%clazz
+                            print "Warning: isDirty() method missing in class {}".format(clazz)
                             return None
                         if not __isDefined(clazz,"meetRequirement"):
-                            print "Warning: meetRequirement() method missing in class %s"%clazz
+                            print "Warning: meetRequirement() method missing in class {}".format(clazz)
                             return None
                         if not __isDefined(clazz,"implement"):
-                            print "Warning: implement() method missing in class %s"%clazz
+                            print "Warning: implement() method missing in class {}".format(clazz)
                             return None
                         return clazz
             except ValueError:

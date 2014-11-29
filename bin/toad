@@ -118,7 +118,7 @@ def __manageEnvironnement(logger):
         try:
             imp.find_module(package)
         except ImportError:
-            logger.error("Cannot find package %s."%package)
+            logger.error("Cannot find package {}.".format(package))
 
     hostname = socket.gethostname()
     if hostname in ['magma', 'stark']:
@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
     #study directory must exist prior to start the pipeline
     if not os.path.exists(arguments.studyDir):
-        logger.error("Error, directory %s do not exist"%arguments.studyDir)
+        logger.error("Error, directory {} do not exist".format(arguments.studyDir))
         sys.exit()
 
     #always works in absolute path
