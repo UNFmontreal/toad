@@ -45,7 +45,7 @@ class GenericTask(Logger, Load):
             if len(images) == 1:
                 [name, ext] = os.path.splitext(os.path.basename(images[0]))
                 dir = os.path.join(self.subjectDir, name)
-                setattr(self, "{}Dir",format(arg), dir)
+                setattr(self, "{}Dir".format(arg), dir)
                 self.__dependenciesDirNames["{}Dir".format(arg)] = dir
                 if i == 0:
                     self.dependDir = dir

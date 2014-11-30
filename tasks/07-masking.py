@@ -163,7 +163,7 @@ class Masking(GenericTask):
 
         tmp = os.path.join(self.workingDir, "tmp.nii")
         target = self.getTarget(source, "5tt2gmwmi")
-        self.info("Starting 5tt2gmwmi creation from mrtrix on {}".format(source)
+        self.info("Starting 5tt2gmwmi creation from mrtrix on {}".format(source))
 
         cmd = "5tt2gmwmi {} {} -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
