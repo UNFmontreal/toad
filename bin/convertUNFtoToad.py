@@ -14,7 +14,7 @@ __author__ = 'mathieu'
 
 junks = ["aascout", "localizer", "tensor", "gre_field_map",'mprage_12ch_ipat3']
 anatLabels = ["mprage"]
-dwiLabels = ["dti_", "dwi_"]
+dwiLabels = ["dti_", "dwi_", "ep2d_diff_mddw_64_p2"]
 flairLabels = ["flair"]
 swiLabels = ["swi"]
 
