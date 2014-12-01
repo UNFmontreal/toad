@@ -153,7 +153,7 @@ def __manageEnvironnement(logger):
             else:
                 os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib"
 
-        os.environ["MRTRIX_PYTHON_LIB"] = "/usr/local/mrtrix3/scripts/lib"
+        os.environ["MRTRIX_PYTHON_SCRIPTS"] = "/usr/local/mrtrix3/scripts"
 
     else:
 
@@ -173,7 +173,7 @@ def __manageEnvironnement(logger):
         if mrtrix is None:
             logger.error("Mrtrix3 not found. Please install the package or set the environment variable $PATH correctly")
         else:
-            os.environ["MRTRIX_PYTHON_LIB"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))),"scripts/lib")
+            os.environ["MRTRIX_PYTHON_SCRIPTS"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))),"scripts")
 
 
         if util.which("ANTS") is None:

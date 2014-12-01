@@ -242,7 +242,7 @@ class Unwarping(GenericTask):
         self.info("Launch eddy correction from fsl")
         tmp = self.getTarget(source, "tmp")
         target = self.getTarget(source, "unwarp")
-        cmd = "eddy --imain={} --mask={}--topup={} --index={} --acqp={} --bvecs={} --bvals={} --out={} --verbose"\
+        cmd = "eddy --imain={} --mask={} --topup={} --index={} --acqp={} --bvecs={} --bvals={} --out={} --verbose"\
               .format(source, mask, topup, index, acqp, bVecs, bVal, tmp)
 
         self.getNTreadsEddy()
@@ -274,7 +274,6 @@ class Unwarping(GenericTask):
 
 
     def isDirty(self):
-
         images = {'diffusion weighted unwarped': self.getImage(self.workingDir, 'dwi', 'unwarp'),
                   'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', None, 'bval'),
                   'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),

@@ -30,6 +30,7 @@ class Masking(GenericTask):
 
         self.__createMask(aparcAseg)
 
+
         #produce optionnal mask
         if self.get("start_seeds").strip():
             self.__createRegionMaskFromAparcAseg(aparcAseg, 'start')
@@ -59,49 +60,24 @@ class Masking(GenericTask):
         structures = mriutil.extractFreesurferStructure(regions, source, target)
         self.__createMask(structures)
 
-    """
-    def __actAnatPrepareFreesurfer(self, source):
-        Create a five-tissue-type (5TT) segmented image in a format appropriate for ACT
-
-        Args:
-            source:  A segmented T1 image from FreeSurfer
-
-        Returns:
-            A five-tissue-type (5TT) segmented image in a format appropriate for AC
-
-
-        tmp = os.path.join(self.workingDir, "tmp.nii")
-        target = self.getTarget(source, 'act')
-        self.info("Starting act_anat_prepare_freesurfer creation from mrtrix on {}"{}ource)
-
-        cmd = "act_anat_prepare_freesurfer {} {}".format(source, tmp)
-        self.launchCommand(cmd)
-
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-
-        return target
-    """
 
     def __actAnatPrepareFreesurfer(self, source):
 
-        sys.path.append(os.environ["MRTRIX_PYTHON_LIB"])
+        sys.path.append(os.environ["MRTRIX_PYTHON_SCRIPTS"])
         from lib.delTempDir   import delTempDir
-        from lib.errorMessage import errorMessage
         from lib.loadOptions  import loadOptions
         from lib.makeTempDir  import makeTempDir
-        from lib.printMessage import printMessage
+
 
         target = self.getTarget(source, 'act')
-
         freesurfer_lut = os.path.join(os.environ['FREESURFER_HOME'], 'FreeSurferColorLUT.txt')
 
         if not os.path.isfile(freesurfer_lut):
-          errorMessage('Could not find FreeSurfer lookup table file\n(Expected location: ' + freesurfer_lut + ')')
+          self.error("Could not find FreeSurfer lookup table file: Expected location: {}".format(freesurfer_lut))
 
-        config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'FreeSurfer2ACT.txt');
+        config_path = os.path.join(os.environ["MRTRIX_PYTHON_SCRIPTS"], 'data', 'FreeSurfer2ACT.txt');
         if not os.path.isfile(config_path):
-          errorMessage('Could not find config file for converting FreeSurfer parcellation output to tissues\n(Expected location: ' + config_path + ')')
+          self.error("Could not find config file for converting FreeSurfer parcellation output to tissues: Expected location: {}".format(config_path))
 
         working_dir = os.getcwd()
         temp_dir = makeTempDir(False)
@@ -127,7 +103,9 @@ class Masking(GenericTask):
         shutil.move(os.path.join(temp_dir, result_path), target)
 
         # Don't leave a trace
-        delTempDir(temp_dir)
+        delTempDir(temp_dir, True)
+
+        return target
 
 
 
@@ -141,6 +119,7 @@ class Masking(GenericTask):
             the resulting file filename
 
         """
+
         target = self.getTarget(source, ["wm", "mask"])
         self.info(mriutil.extractSubVolume(source,
                                 target,
@@ -168,7 +147,7 @@ class Masking(GenericTask):
         cmd = "5tt2gmwmi {} {} -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
-        self.info("renaming {} to {}".fomat(tmp, target))
+        self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
 
         return target

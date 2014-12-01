@@ -4,6 +4,8 @@ from string import ascii_uppercase, digits
 from random import choice
 import numpy as np
 import nibabel as nib
+import matplotlib as mpl
+mpl.use('Agg') 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import os

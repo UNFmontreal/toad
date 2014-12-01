@@ -66,8 +66,7 @@ class Parcellation(GenericTask):
         cmd = "recon-all -{} -i {} -subjid {} -sd {} -openmp {}"\
             .format(self.get('directive'), source, self.id, self.workingDir, self.getNTreads())
         self.info("Logging into {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
-        #self.launchCommand(cmd, None, None)
-        util.launchCommand(cmd, None, None)
+        self.launchCommand(cmd, 'log', 'log')
 
     def __createBrodmannArea(self):
         """create a Brodmann Area image
@@ -100,7 +99,7 @@ class Parcellation(GenericTask):
             .format(self.id, annotation, lhAnnotLabels)
         self.launchCommand(cmd, 'log')
 
-        cmd = "mri_aparc2aseg --s {}--annot {} --o {}/{}/mri/{}"\
+        cmd = "mri_aparc2aseg --s {} --annot {} --o {}/{}/mri/{}"\
             .format(self.id, annotation, self.workingDir, self.id, self.get('brodmann_mgz'))
         self.launchCommand(cmd, 'log')
 

@@ -303,7 +303,6 @@ class GenericTask(Logger, Load):
         if stdout=='log':
             out = self.getLog()
             self.info("Output will be log in {} \n".format(out.name))
-
         if stderr=='log':
             err = self.getLog()
             self.info("Error will be log in {} \n".format(err.name))

@@ -14,7 +14,7 @@ class Fieldmap(GenericTask):
 
         """
 
-
+	"""
         ## fieldmap create
 
         mag = self.getImage(self.dependDir, "mag")
@@ -26,8 +26,8 @@ class Fieldmap(GenericTask):
         self.__coregisterFieldmapToAnat(mag, anatFreesurfer)
         self.__invertFieldmapToAnat()
         self.__interpolateAnatMaskToFieldmap(anat, mag)
-
-
+	"""
+	print "NotImplemented"
     def __coregisterFieldmapToAnat(self, source, reference):
         #flirt -in $mag -ref $anat -out  $target -omat fieldmap2t1.mat -cost normmi -searchcost normmi -dof 6 -searchrx -5 5 -searchry -5 5 -searchrz -5 5 -usesqform
         target = self.getTarget(source, "flirt")
