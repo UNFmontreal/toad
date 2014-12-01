@@ -42,15 +42,15 @@ class Validation(object):
         """
 
         if not self.isDirty():
-            self.logger.info("%s directory exists, assuming validation is o.k."%self.backupDir)
+            self.logger.info("{} directory exists, assuming validation is o.k.".format(self.backupDir))
             return True
 
         if not os.path.exists(self.workingDir) or not os.path.isdir(self.workingDir):
-            self.logger.error("Directory %s is not valid"%(self.workingDir))
+            self.logger.error("Directory {} is not valid".format(self.workingDir))
             return False
 
         if not self.__isValidStructure():
-            self.logger.error("Directory %s does not appear to be a valid toad structure"%self.workingDir)
+            self.logger.error("Directory {} does not appear to be a valid toad structure".format(self.workingDir))
             return False
 
         return True
@@ -83,15 +83,23 @@ class Validation(object):
             return False
 
 
-        dwiImage = util.getImage(self.config, self.workingDir,'dwi')
+        dwi = util.getImage(self.config, self.workingDir,'dwi')
 
         #@TODO fix data layout incomprehesion
         #make sure that diffusion image Z scale layout is oriented correctly
         #if not mriutil.isDataLayoutValid(dwiImage):
-        #    self.error("Data layout for %s image is unexpected. "
-        #                        "Only data layout = [ +0 +1 +2 +3 ] could be process"%dwiImage)
+        #    self.error("Data layout for {} image is unexpected. "
+        #                        "Only data layout = [ +0 +1 +2 +3 ] could be process".format(dwiImage))
 
-        nbDirections = mriutil.getNbDirectionsFromDWI(dwiImage)
+        nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
+        if nbDirections <= 45:
+            msg = "Found only {} directions into {} image. Hardi model will not be accurate with diffusion weighted image " \
+                  "that contain less than 45 directions\n\n".format(nbDirections, self.dwi)
+            if self.config.getboolean('arguments', 'prompt'):
+                util.displayYesNoMessage(msg)
+            else:
+                self.warning(msg)
+
 
         bEnc = util.getImage(self.config, self.workingDir,'grad', None, 'b')
         bVal = util.getImage(self.config, self.workingDir,'grad', None, 'bval')
@@ -99,18 +107,18 @@ class Validation(object):
 
         if (not bEnc) and (not bVal or not bVec):
             self.logger.warning("No valid .b encoding or pair of .bval, .bvec"
-                                " file found in directory: %s"%self.workingDir)
+                                " file found in directory: {}".format(self.workingDir))
             return False
 
         if bEnc and not self.__isValidEncoding(nbDirections, '.b'):
-            self.logger.warning("Encoding file %s is invalid"%bEnc)
+            self.logger.warning("Encoding file {} is invalid".format(bEnc))
             return False
 
         if bVal and not self.__isValidEncoding(nbDirections, '.bval'):
-            self.logger.warning("Encoding file %s is invalid"%bEnc)
+            self.logger.warning("Encoding file {} is invalid".format(bEnc))
             return False
         if bVec and not self.__isValidEncoding(nbDirections, '.bvec'):
-            self.logger.warning("Encoding file %s is invalid"%bVec)
+            self.logger.warning("Encoding file {} is invalid".format(bVec))
             return False
         return True
 
@@ -125,21 +133,21 @@ class Validation(object):
             a Boolean that represent if the image filename exist
 
         """        
-        files = glob.glob("%s/%s*.nii*"%(self.workingDir, prefix))
+        files = glob.glob("{}/{}*.nii*".format(self.workingDir, prefix))
         if not files:
-            self.logger.warning("No %s images found with pattern %s* in directory: %s"
-                                %(prefix.replace("_",""),prefix, self.workingDir))
+            self.logger.warning("No {} images found with pattern {}* in directory: {}"
+                                .format(prefix.replace("_",""), prefix, self.workingDir))
             return False
         if len(files) > 1:
-            self.logger.warning("Found many %s images in directory %s, please provide only one"
-                                %(prefix.replace("_",""), self.workingDir))
+            self.logger.warning("Found many {} images in directory {}, please provide only one"
+                                .format(prefix.replace("_",""), self.workingDir))
             return False
         filename = os.path.basename(files.pop())
 
         #make sure that some postfix are not contain in the image file
         for (key, item) in self.config.items("postfix"):
             if item in filename:
-                self.logger.warning("Image name %s contain postfix %s which is prohibited"%(filename,item))
+                self.logger.warning("Image name {} contain postfix {} which is prohibited".format(filename,item))
                 return False
         return True
 
@@ -157,8 +165,8 @@ class Validation(object):
         """
         encoding = util.getImage(self.config, self.workingDir, 'grad', None, type)
         if not encoding:
-            self.logger.warning("No %s encoding file found in directory: %s"
-                                %(type, self.workingDir))
+            self.logger.warning("No {} encoding file found in directory: {}"
+                                .format(type, self.workingDir))
             return False
 
         f = open(encoding,'r')
@@ -169,35 +177,35 @@ class Validation(object):
             for line in lines:
                 nbElements = len(line.split())
                 if nbElements != nbDirection:
-                    self.logger.warning("Expecting %s elements in %s file, counting %s"%(nbDirection,
-                                                                                         encoding, nbElements))
+                    self.logger.warning("Expecting {} elements in {} file, counting {}"
+                                        .format(nbDirection, encoding, nbElements))
                     return False
 
         elif type=='.bvec':
             if len(lines) != 3:
-                self.logger.warning("Expecting 3 vectors in %s file, counting %s"%(encoding, len(lines)))
+                self.logger.warning("Expecting 3 vectors in {} file, counting {}".format(encoding, len(lines)))
                 return False
             for line in lines:
                 if len(line.split()) != nbDirection:
-                    self.logger.warning("Expecting %s values in %s file, counting %s"%(nbDirection,
-                                                                                       encoding, len(line.split())))
+                    self.logger.warning("Expecting {} values in {} file, counting {}"
+                                        .format(nbDirection, encoding, len(line.split())))
                     return False
 
         elif type=='.b':
             if len(lines) != nbDirection:
-                self.logger.warning("Expecting %s lines in %s file, counting %s"%(nbDirection, type, len(lines)))
+                self.logger.warning("Expecting {} lines in {} file, counting {}".format(nbDirection, type, len(lines)))
                 return False
 
             for index, line in enumerate(lines):
                 if index == 0:
                     for token in line.split():
                         if token not in "0" :
-                            self.logger.warning("Expecting only zero values in the first line of file %s, found value %s"
-                                                %(encoding, token))
+                            self.logger.warning("Expecting only zero values in the first line of file {}, found value {}"
+                                                .format(encoding, token))
                             return False
                 if len(line.split()) != 4:
-                    self.logger.warning("Expecting 4 elements at line %s of file %s, counting %s"
-                                        %(index+1, encoding, len(line.split())))
+                    self.logger.warning("Expecting 4 elements at line {} of file {}, counting {}"
+                                        .format(index+1, encoding, len(line.split())))
                     return False
         else:
             self.logger.warning("Unknown encoding file type")

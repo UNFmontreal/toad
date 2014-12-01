@@ -44,9 +44,9 @@ class Registration(GenericTask):
         name = os.path.basename(movingImage).replace(".nii","")
         target = self.getTarget(name, "transformation", ".txt")
 
-        cmd = "ANTS %s --MI-option %s --image-metric %s[%s ,%s ,%s ,%s ] --number-of-affine-iterations %s" \
-              " --output-naming %s --transformation-model %s --use-Histogram-Matching %s"\
-              %(self.get('dimension'),
+        cmd = "ANTS {} --MI-option {} --image-metric {}[{} ,{} ,{} ,{} ] --number-of-affine-iterations {}" \
+              " --output-naming {} --transformation-model {} --use-Histogram-Matching {}"\
+              .format(self.get('dimension'),
                 self.get('mi_option'),
                 self.get('metric'),
                 fixedImage,
@@ -61,14 +61,14 @@ class Registration(GenericTask):
         self.getNTreadsAnts()
         self.launchCommand(cmd)
 
-        self.info('Renaming %sAffine.txt to %s'%(name, target))
-        os.rename('%sAffine.txt'%name, target)
+        self.info('Renaming {}Affine.txt to {}'.format(name, target))
+        os.rename('{}Affine.txt'.format(name), target)
 
         if (self.getBoolean("cleanup")):
-            self.info("Removing extra file %sInverseWarp.nii.gz"%name)
-            os.remove('%sInverseWarp.nii.gz'%name)
-            self.info("Removing extra file %sWarp.nii.gz"%name)
-            os.remove('%sWarp.nii.gz'%name)
+            self.info("Removing extra file {}InverseWarp.nii.gz".format(name))
+            os.remove('{}InverseWarp.nii.gz'.format(name))
+            self.info("Removing extra file {}Warp.nii.gz".format(name))
+            os.remove('{}Warp.nii.gz'.format(name))
 
         self.info("End registration from ants")
         return target
@@ -90,7 +90,8 @@ class Registration(GenericTask):
         self.info("Apply transformation with ants")
         target = self.getTarget(source, "resample")
 
-        cmd = "WarpImageMultiTransform %s %s %s -R %s %s "%(self.get('dimension'), source, target, referenceImage, transformation)
+        cmd = "WarpImageMultiTransform {} {} {} -R {} {} "\
+            .format(self.get('dimension'), source, target, referenceImage, transformation)
         if use_NN:
             cmd += "--use-NN "
 

@@ -47,7 +47,7 @@ class Preprocessing(GenericTask):
             self.warning("Voxel size not specified correctly during upsampling")
 
         target = self.getTarget(source, "upsample")
-        cmd = "mri_convert -voxsize %s --input_volume %s --output_volume %s"%(voxelSize, source, target)
+        cmd = "mri_convert -voxsize {} --input_volume {} --output_volume {}".format(voxelSize, source, target)
         self.launchCommand(cmd)
         return target
 
@@ -70,11 +70,11 @@ class Preprocessing(GenericTask):
 
         self.info("End brain extraction from fsl")
 
-        cmd = "bet %s %s -f %s -g %s -v "%(source, target, fractionalIntensity, verticalGradient)
+        cmd = "bet {} {} -f {} -g {} -v ".format(source, target, fractionalIntensity, verticalGradient)
         if self.getBoolean('reduce_bias'):
             cmd += "-B "
         self.launchCommand(cmd)
-        self.info(util.gunzip("%s.gz"%target))
+        self.info(util.gunzip("{}.gz".format(target)))
         return target
 
 
@@ -93,7 +93,7 @@ class Preprocessing(GenericTask):
         options = util.arrayOfInteger(self.get('segmentation_type'))
 
         if len(options) != 9:
-            self.info("Found %s values into segmentation output_type. Expected 9"%len(options))
+            self.info("Found {} values into segmentation output_type. Expected 9".format(len(options)))
 
         if options[8] != 1:
             self.error("White matter map should be produce as a requirement, the third element must be set to 1")
@@ -106,12 +106,12 @@ class Preprocessing(GenericTask):
                 'mwc1':'mwgw','mwc2':'mwwm','mwc3':'mwcsf'}
 
         for key, value in dict.items():
-            for resultFile in glob.glob("%s/%s%s*.nii"%(self.workingDir,key ,fileBasename)):
-                os.rename(resultFile, "%s/%s_%s.nii"%(self.workingDir ,fileBasename, value))
+            for resultFile in glob.glob("{}/{}{}*.nii".format(self.workingDir,key ,fileBasename)):
+                os.rename(resultFile, "{}/{}_{}.nii".format(self.workingDir ,fileBasename, value))
 
         if (self.getBoolean("cleanup")):
             self.info("Cleaning up extra files")
-            postfixs = ["m%s.nii"%fileBasename, '_seg_sn.mat', '_seg_inv_sn.mat']
+            postfixs = ["m{}.nii".format(fileBasename), '_seg_sn.mat', '_seg_inv_sn.mat']
             for postfix in postfixs:
                 if os.path.exists(os.path.join(self.workingDir, postfix)):
                     os.remove(os.path.join(self.workingDir, postfix))
@@ -139,7 +139,7 @@ class Preprocessing(GenericTask):
         target = os.path.join(self.workingDir, os.path.basename(source).replace(self.config.get("prefix",'dwi'),self.config.get("prefix",'b0')))
         extractAtAxis = self.get('extract_at_axis')
         if extractAtAxis not in ["1", "2", "3"]:
-            self.error('extract_at_axis must be value of 1 or 2 or 3, found %s'%extractAtAxis)
+            self.error('extract_at_axis must be value of 1 or 2 or 3, found {}'.format(extractAtAxis))
 
         #make sure that we do not extract a volumes outside of the dimension
         self.info(mriutil.extractSubVolume(source,
@@ -164,7 +164,7 @@ class Preprocessing(GenericTask):
         """
 
         scriptName = os.path.join(self.workingDir, os.path.basename(source).replace(".nii",".m"))
-        self.info("Creating spm segmentation script %s"%scriptName)
+        self.info("Creating spm segmentation script {}".format(scriptName))
 
         tags={ 'source': source,
                'gm1': options[0], 'gm2': options[1], 'gm3': options[2],
@@ -186,7 +186,7 @@ class Preprocessing(GenericTask):
                 if self.isSomeImagesMissing({'diffusion weighted': dwi}):
                     result=False
                 else:
-                    self.info("Will take %s image instead"%dwi)
+                    self.info("Will take {} image instead".format(dwi))
 
 
         images = {'high resolution': self.getImage(self.preparationDir, 'anat')}

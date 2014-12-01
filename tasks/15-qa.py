@@ -4,6 +4,8 @@ from string import ascii_uppercase, digits
 from random import choice
 import numpy as np
 import nibabel as nib
+import matplotlib as mpl
+mpl.use('Agg') 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import os
@@ -20,7 +22,8 @@ class QA(GenericTask):
         self.debug = False
 
     def implement(self):
-        
+	#@DEBUG remove comments
+        """
         #Usefull images for the QA
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
@@ -155,7 +158,7 @@ class QA(GenericTask):
         tags = {'parseT1Here': parseT1Here, 'parseDWIHere': parseDWIHere, 'parseRegistrationHere': parseRegistrationHere }
         htmlCode = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/qa.main.tpl"))
         util.createScript(self.reportName, htmlCode)
-
+	"""
 
     def __idGenerator(self, size=6, chars=ascii_uppercase + digits):
         """
@@ -373,7 +376,10 @@ class QA(GenericTask):
 
     def meetRequirement(self, result=True):
         """
-        """        
+        """ 
+	#@DEBUG christophe need to fix denoising optionnal issue prior to set meetRequirement()
+	return True
+	"""       
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
         bvec = self.getImage(self.preparationDir, 'grad',  None, 'bvec')
@@ -410,10 +416,11 @@ class QA(GenericTask):
                 result = False
                 
         return result
-
+	"""
 
     def isDirty(self):
         """Validate if this tasks need to be submit for implementation
 
         """
-        return True
+	#@DEBUG christophe have to fix denoising optionnal issue prior to set isDirty() to True
+        return False

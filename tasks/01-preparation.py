@@ -22,11 +22,11 @@ class Preparation(GenericTask):
         b0AP = self.getImage(self.dependDir, 'b0AP')
 
         if b0PA:
-            self.info("Found B0 posterior to anterior image, linking file %s to %s"%(b0AP, self.workingDir))
+            self.info("Found B0 posterior to anterior image, linking file {} to {}".format(b0AP, self.workingDir))
             util.symlink(b0PA, self.workingDir)
 
         if b0AP:
-            self.info("Found B0 anterior to posterior image, linking file %s to %s"%(b0AP, self.workingDir))
+            self.info("Found B0 anterior to posterior image, linking file {} to {}".format(b0AP, self.workingDir))
             util.symlink(b0AP, self.workingDir)
 
         if b0PA and (b0AP is False):
@@ -42,7 +42,7 @@ class Preparation(GenericTask):
 
         for key, value in images.iteritems():
             if value:
-                self.info("Found %s image, linking file %s to %s"%(key, value, self.workingDir))
+                self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
                 util.symlink(value, self.workingDir)
 
 
@@ -76,7 +76,7 @@ class Preparation(GenericTask):
         target = os.path.join(self.workingDir, os.path.basename(source).replace(self.config.get("prefix",'dwi'),self.config.get("prefix",'b0AP')))
         extractAtAxis = self.get('b0AP_extract_at_axis')
         if extractAtAxis not in ["1", "2", "3"]:
-            self.error('extract_at_axis must be value of 1 or 2 or 3, found %s'%extractAtAxis)
+            self.error('extract_at_axis must be value of 1 or 2 or 3, found {}'.format(extractAtAxis))
 
         #make sure that we do not extract a volumes outside of the dimension
         self.info(mriutil.extractSubVolume(source,
@@ -99,7 +99,7 @@ class Preparation(GenericTask):
         if not (self.getImage(self.dependDir, 'grad', None, 'b') or
                 (self.getImage(self.dependDir, 'grad', None, 'bval')
                  and self.getImage(self.dependDir, 'grad', None, 'bvec'))):
-            self.error("No gradient encoding file found in %s"%self.dependDir)
+            self.error("No gradient encoding file found in {}".format(self.dependDir))
             result = False
 
         return result

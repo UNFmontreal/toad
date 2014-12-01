@@ -35,17 +35,17 @@ class Config(object):
 
         """
         config = ConfigParser.ConfigParser()
-        configFiles = ["%s/etc/config.cfg"%arguments.toadDir]
+        configFiles = ["{}/etc/config.cfg".format(arguments.toadDir)]
         config.read(configFiles)
 
         configFiles = ['~/.toad.cfg',
-                       "%s/config.cfg"%arguments.studyDir]
+                       "{}/config.cfg".format(arguments.studyDir)]
 
         if arguments.subject and isinstance(arguments.subject, basestring):
-            subjectFile = "%s/config.cfg"%arguments.subject
+            subjectFile = "{}/config.cfg".format(arguments.subject)
             if os.path.exists(subjectFile):
                 configFiles.append(subjectFile)
-            subjectFile = "%s/config.cfg"%(os.path.join(arguments.subject, "00-backup"))
+            subjectFile = "{}/config.cfg".format(os.path.join(arguments.subject, "00-backup"))
             if os.path.exists(subjectFile):
                 configFiles.append(subjectFile)
 
@@ -71,6 +71,11 @@ class Config(object):
             config.set('arguments', 'validation', 'False')
         else:
             config.set('arguments', 'validation', 'True')
+
+        if arguments.noPrompt:
+            config.set('arguments', 'prompt', 'False')
+        else:
+            config.set('arguments', 'prompt', 'True')
 
         if arguments.subject and isinstance(arguments.subject, basestring):
             config.set('arguments', 'subjectDir', arguments.subject)

@@ -27,16 +27,19 @@ class TensorsMetric(GenericTask):
         value3 = self.getTarget(source, "value3")
         modulate = self.get('modulate')
 
-        cmd1 = "tensor2metric %s -adc %s -fa %s -num 1 -vector %s -value %s -modulate %s -nthreads %s -quiet "%(source, adc, fa, vector, adImage , modulate, self.getNTreadsMrtrix())
-        cmd2 = "tensor2metric %s -num 2 -value %s -modulate %s -nthreads %s -quiet "%(source, value2, modulate, self.getNTreadsMrtrix())
-        cmd3 = "tensor2metric %s -num 3 -value %s -modulate %s -nthreads %s -quiet "%(source, value3, modulate, self.getNTreadsMrtrix())
+        cmd1 = "tensor2metric {} -adc {} -fa {} -num 1 -vector {} -value {} -modulate {} -nthreads {} -quiet "\
+            .format(source, adc, fa, vector, adImage , modulate, self.getNTreadsMrtrix())
+        cmd2 = "tensor2metric {} -num 2 -value {} -modulate {} -nthreads {} -quiet "\
+            .format(source, value2, modulate, self.getNTreadsMrtrix())
+        cmd3 = "tensor2metric {} -num 3 -value {} -modulate {} -nthreads {} -quiet "\
+            .format(source, value3, modulate, self.getNTreadsMrtrix())
 
         for cmd in [cmd1, cmd2, cmd3]:
             if mask is not None:
-                cmd += "-mask %s "%mask
+                cmd += "-mask {} ".format(mask)
             self.launchCommand(cmd)
 
-        cmd = "mrmath %s %s mean %s -nthreads %s -quiet "%(value2, value3, rdImage, self.getNTreadsMrtrix())
+        cmd = "mrmath {} {} mean {} -nthreads {} -quiet ".format(value2, value3, rdImage, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
 

@@ -1,6 +1,5 @@
 import datetime
 import sys
-import os
 
 __author__ = 'desmat'
 
@@ -21,11 +20,11 @@ class Logger(object):
             self.__logIntoFile = False
         else:
             self.__logIntoFile = True
-            self.filename = "%s/%s.log"%(path, self.getName())
+            self.filename = "{}/{}.log".format(path, self.getName())
             self.handle = open(self.filename,'a')
             self.handle.write("#########################################################################\n")
             self.handle.write("\n")
-            self.handle.write(" Start logging task %s at %s"%(self.getName(), self.__timestamp()))
+            self.handle.write(" Start logging task {} at {}".format(self.getName(), self.__timestamp()))
             self.handle.write("\n")
             self.handle.write("\n")
             self.handle.write("#########################################################################\n")
@@ -54,11 +53,11 @@ class Logger(object):
 
         """
         if methodName == "isDirty":
-            self.info("Looking if task %s need to be submit"%self.getName())
+            self.info("Looking if task {} need to be submit".format(self.getName()))
         elif methodName == "meetRequirement":
-            self.info("Looking if all requirement are met prior submitting the task %s."%self.getName())
+            self.info("Looking if all requirement are met prior submitting the task {}.".format(self.getName()))
         elif methodName == "implement":
-            self.info("Starting task %s at %s."%(self.getName(), self.__timestamp()))
+            self.info("Starting task {} at {}.".format(self.getName(), self.__timestamp()))
 
 
     def logFooter(self, methodName, result=False):
@@ -71,19 +70,19 @@ class Logger(object):
 
         """
         if methodName == "isDirty":
-            if result == None:
-                self.info("Ignoring flag activate, task %s will be skipped.\n\n"%self.getName())
-            if result == True:
-                self.info("Missing image(s), task %s will be submit.\n\n"%self.getName())
+            if result is None:
+                self.info("Ignoring flag activate, task {} will be skipped.\n\n".format(self.getName()))
+            if result:
+                self.info("Missing image(s), task {} will be submit.\n\n".format(self.getName()))
             else:
-                self.info("Seem completed, task %s will not be submitted.\n\n"%self.getName())
+                self.info("Seem completed, task {} will not be submitted.\n\n".format(self.getName()))
         elif methodName == "meetRequirement":
-            if result == True:
-                self.info("All requirements met prior to submit task %s\n\n"%self.getName())
+            if result:
+                self.info("All requirements met prior to submit task {}\n\n".format(self.getName()))
             else:
                 self.error("Some mandatory image are missing. Finishing the pipeline now\n\n")
         elif methodName == "implement":
-            self.info("Finish task %s at %s."%(self.getName(), self.__timestamp()))
+            self.info("Finish task {} at {}.".format(self.getName(), self.__timestamp()))
             self.info("-------------------------------------------------------------------------")
 
 
@@ -101,7 +100,7 @@ class Logger(object):
         if level not in ['INFO','WARNING','ERROR']:
             return False
 
-        message = "%s: %s\n"%(level, message)
+        message = "{}: {}\n".format(level, message)
         print message
         if self.__logIntoFile:
             self.handle = open(self.filename,'a')

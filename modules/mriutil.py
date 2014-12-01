@@ -18,13 +18,13 @@ def fslmaths(source1, target, operator="bin", source2=None):
 
     """
     if source2 is None:
-        cmd = "fslmaths %s -%s %s "%(source1, operator, target)
+        cmd = "fslmaths {} -{} {} ".format(source1, operator, target)
     else:
-        cmd = "fslmaths %s -%s %s %s"%(source1, operator, source2, target)
+        cmd = "fslmaths {} -{} {} {}".format(source1, operator, source2, target)
 
     result = util.launchCommand(cmd)
     #Spm do not support .gz format, so uncompress nifty file
-    util.gunzip("%s.gz"%target)
+    util.gunzip("{}.gz".format(target))
     return result
 
 
@@ -40,7 +40,7 @@ def extractSubVolume(source, target, extractAtAxis, extractAtCoordinate, nthread
     Returns:
          A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
     """
-    cmd = "mrconvert -coord %s %s %s %s -nthreads %s -quiet"%(extractAtAxis, extractAtCoordinate, source, target,  nthreads)
+    cmd = "mrconvert -coord {} {} {} {} -nthreads {} -quiet".format(extractAtAxis, extractAtCoordinate, source, target,  nthreads)
     return util.launchCommand(cmd)
 
 
@@ -57,7 +57,7 @@ def mrinfo(source):
         ValueError: if mrinfo binary is not found
     """
 
-    cmd = "mrinfo %s"%(source)
+    cmd = "mrinfo {}".format(source)
     (stdout, stderr) = util.launchCommand(cmd)
     return stdout.splitlines()
 
@@ -155,7 +155,7 @@ def bValBVec2BEnc(bvalFilename, bvecFilename, outputDir):
 
     f = open(bEncodingFilename,'w')
     for index, bval in enumerate(bvals.pop().strip().split()):
-        f.write("%s\t%s\t%s\t%s\n"%(bVecs[0][index], bVecs[1][index], bVecs[2][index],bval, ))
+        f.write("{}\t{}\t{}\t{}\n".format(bVecs[0][index], bVecs[1][index], bVecs[2][index],bval, ))
     f.close()
     return bEncodingFilename
 
@@ -177,7 +177,7 @@ def bEnc2BVec(source, outputDir):
 
     for items in bvecs:
         for item in items:
-            v.write("%s "%item)
+            v.write("{} ".format(item))
         v.write("\n")
     v.close()
 
@@ -199,7 +199,7 @@ def bEnc2BVal(source, outputDir):
     b = open(bvalFilename,"w")
 
     for bval in bvals:
-        b.write("%s "%bval)
+        b.write("{} ".format(bval))
     b.close()
 
     return bvalFilename

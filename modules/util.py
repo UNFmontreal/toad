@@ -1,6 +1,7 @@
 from string import Template
 import subprocess
 import glob
+import sys
 import os
 
 __author__ = 'mathieu'
@@ -20,8 +21,8 @@ def symlink(source, target):
     if not os.path.isabs(source):
         source = os.path.abspath(source)
     [dir, name] = os.path.split(source)
-    output = os.path.join(target, name)
-    src = "../%s/%s"%(os.path.basename(os.path.normpath(dir)), name)
+    #output = os.path.join(target, name)
+    src = "../{}/{}".format(os.path.basename(os.path.normpath(dir)), name)
     os.symlink(src, name)
     return src
 
@@ -36,7 +37,7 @@ def gunzip(source):
         the filename resulting from the compression
 
     """
-    cmd = "gunzip %s"%(source)
+    cmd = "gunzip {}".format(source)
     launchCommand(cmd)
     return source.replace(".gz","")
 
@@ -51,9 +52,9 @@ def gzip(source):
         the filename resulting from the compression
 
     """
-    cmd = "gzip %s"%(source)
+    cmd = "gzip {}".format(source)
     launchCommand(cmd)
-    return "%s.gz"%source
+    return "{}.gz".format(source)
 
 
 def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=2):
@@ -191,7 +192,7 @@ def getImage(config, dir, prefix, postfix=None, ext="nii"):
     if ext.find('.') == 0:
         ext=ext.replace(".","",1)
     if postfix is None:
-        images = glob.glob("%s/%s*.%s"%(dir, config.get('prefix', prefix), ext))
+        images = glob.glob("{}/{}*.{}".format(dir, config.get('prefix', prefix), ext))
     else:
         pfixs = ""
         if isinstance(postfix, str):
@@ -199,7 +200,7 @@ def getImage(config, dir, prefix, postfix=None, ext="nii"):
         else:
             for element in postfix:
                 pfixs = pfixs + config.get('postfix', element)
-        images = glob.glob("%s/%s*%s.%s"%(dir, config.get('prefix',prefix), pfixs, ext))
+        images = glob.glob("{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, ext))
     if len(images) > 0:
         return images.pop()
 
@@ -239,10 +240,10 @@ def getTarget(config, target, source, postfix=None, ext=None, absolute=True):
 
     extension = ""
     for part in parts:
-        extension += ".%s"%part
+        extension += ".{}".format(part)
     if ext is not None:
         if len(ext)>0 and ext[0] != ".":
-            extension = ".%s"%ext
+            extension = ".{}".format(ext)
         else:
             extension = ext    
 
@@ -285,3 +286,14 @@ def parseTemplate(dict, template):
     """
     f = open(template, 'r')
     return Template(f.read()).safe_substitute(dict)
+
+def displayYesNoMessage(msg):
+    print msg
+    while True:
+        choice = raw_input("Continue? (y or n)")
+        if choice == 'y':
+            print "\n Subjects will failed during the execution\n"
+            break
+        elif choice == 'n':
+            print "\nSubmit the pipeline again\n"
+            sys.exit()

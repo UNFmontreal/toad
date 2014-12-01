@@ -52,14 +52,14 @@ class Dtifit(GenericTask):
         self.info("Starting dtifit from fsl")
 
         target = self.getTarget(source, 'fsl', '')
-        cmd ="dtifit -k %s -o %s -r %s -b %s --save_tensor --sse "%(source, target, bVec, bVal)
+        cmd ="dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVec, bVal)
         if mask:
-            cmd += "-m %s"%(mask)
+            cmd += "-m {}".format(mask)
         self.launchCommand(cmd)
 
 
     def __mean(self, source1, source2, target):
-        cmd = "fslmaths %s -add %s -div 2 %s"%(source1, source2, target)
+        cmd = "fslmaths {} -add {} -div 2 {}".format(source1, source2, target)
         self.launchCommand(cmd)
 
 

@@ -27,12 +27,13 @@ class Hardi(GenericTask, Logger):
     def __dwi2response(self, source, mask, bFile):
         tmp = os.path.join(self.workingDir, "tmp.nii")
         output = os.path.join(self.workingDir,os.path.basename(source).replace(".nii",".txt"))
-        self.info("Starting dwi2response creation from mrtrix on %s"%source)
+        self.info("Starting dwi2response creation from mrtrix on {}".format(source))
 
-        cmd = "dwi2response %s %s -mask %s -grad %s -nthreads %s"%(source, tmp, mask, bFile, self.getNTreadsMrtrix())
+        cmd = "dwi2response {} {} -mask {} -grad {} -nthreads {}"\
+            .format(source, tmp, mask, bFile, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
-        self.info("renaming %s to %s"%(tmp, output))
+        self.info("renaming {} to {}".format(tmp, output))
         os.rename(tmp, output)
 
         return output
@@ -40,14 +41,16 @@ class Hardi(GenericTask, Logger):
 
     def __dwi2fod(self, source, dwi2response, mask, bFile):
         tmp = os.path.join(self.workingDir,"tmp.nii")
-        output = os.path.join(self.workingDir, os.path.basename(source).replace(".nii","%s.nii"%self.config.get("postfix","fod")))
+        output = os.path.join(self.workingDir, os.path.basename(source).replace(".nii","{}.nii"
+                                                                            .format(self.config.get("postfix","fod"))))
         target = self.getTarget(source, 'fod')
-        self.info("Starting dwi2fod creation from mrtrix on %s"%source)
+        self.info("Starting dwi2fod creation from mrtrix on {}".format(source))
 
-        cmd = "dwi2fod %s %s %s -mask %s -grad %s -nthreads %s"%(source, dwi2response, tmp, mask, bFile, self.getNTreadsMrtrix())
+        cmd = "dwi2fod {} {} {} -mask {} -grad {} -nthreads {}"\
+            .format(source, dwi2response, tmp, mask, bFile, self.getNTreadsMrtrix())
         self.info(util.launchCommand(cmd))
 
-        self.info("renaming %s to %s"%(tmp, output))
+        self.info("renaming {} to {}".format(tmp, output))
         os.rename(tmp, output)
 
         return output
