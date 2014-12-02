@@ -17,7 +17,7 @@ class Parcellation(GenericTask):
     def implement(self):
 
         images = {'parcellation':self.getImage(self.dependDir,'aparc_aseg'),
-                  'anatomical':self.getImage(self.dependDir,'anat_freesurfer'),
+                  'anat_freesurfer':self.getImage(self.dependDir,'anat_freesurfer'),
                   'brodmann':self.getImage(self.dependDir,'brodmann')}
 
         for key, value in images.iteritems():
@@ -25,7 +25,7 @@ class Parcellation(GenericTask):
                 self.info("Found {} area image, create link from {} to {}".format(key, value, self.workingDir))
                 util.symlink(value, self.workingDir)
 
-        if not (images['parcellation'] and images['anatomical'] and images['brodmann']):
+        if not (images['parcellation'] and images['anat_freesurfer'] and images['brodmann']):
 
             self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
             os.environ["SUBJECTS_DIR"] = self.workingDir
@@ -34,24 +34,15 @@ class Parcellation(GenericTask):
             self.__reconAll(anat)
             self.__createBrodmannArea()
 
-            #@TODO refactor this block of code
-            if not images['anatomical']:
-                anatMgzFreesurfers = glob.glob("{}/{}/mri/T1.mgz".format(self.workingDir, self.id))
-                for anatMgzFreesurfer in anatMgzFreesurfers:
-                    outputFile = os.path.join(self.workingDir,self.get('anat_freesurfer'))
-                    self.__mgz2nii(anatMgzFreesurfer, outputFile)
+            dicts = {'anat_freesurfer': "{}/{}/mri/T1.mgz",
+                    'parcellation': "{}/{}/mri/T1.mgz",
+                    'brodmann': "{}/{}/mri/brodmann.mgz"}
 
-            if not images['parcellation']:
-                aparcMgzAsegs = glob.glob("{}/{}/mri/aparc+aseg.mgz".format(self.workingDir, self.id))
-                for aparcMgzAseg in aparcMgzAsegs:
-                    outputFile = os.path.join(self.workingDir, self.get('aparc_aseg'))
-                    self.__mgz2nii(aparcMgzAseg, outputFile)
-
-            if not images['brodmann']:
-                brodmanns = glob.glob("{}/{}/mri/brodmann.mgz".format(self.workingDir, self.id))
-                for brodmann in brodmanns:
-                    outputFile = os.path.join(self.workingDir, self.get('brodmann'))
-                    self.__mgz2nii(brodmann, outputFile)
+            for key, value in dicts.iteritems():
+                if not dicts[key]:
+                    images = glob.glob(value.format(self.workingDir, self.id))
+                    if len(images) > 0:
+                        self.__mgz2nii(images.pop(), os.path.join(self.workingDir, self.get(key)))
 
 
     def __reconAll(self, source):

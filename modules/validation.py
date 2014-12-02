@@ -109,7 +109,8 @@ class Validation(object):
             self.logger.warning("No valid .b encoding or pair of .bval, .bvec"
                                 " file found in directory: {}".format(self.workingDir))
             return False
-
+        #@TODO uncomment and fix not all zero bvec value in the first line
+        """
         if bEnc and not self.__isValidEncoding(nbDirections, '.b'):
             self.logger.warning("Encoding file {} is invalid".format(bEnc))
             return False
@@ -120,6 +121,7 @@ class Validation(object):
         if bVec and not self.__isValidEncoding(nbDirections, '.bvec'):
             self.logger.warning("Encoding file {} is invalid".format(bVec))
             return False
+        """
         return True
 
 

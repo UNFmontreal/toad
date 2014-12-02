@@ -36,6 +36,8 @@ class Preparation(GenericTask):
 
         images = {'high resolution': self.getImage(self.dependDir, 'anat'),
                   'diffusion weighted': dwi,
+                  'MR magnitude ': self.getImage(self.dependDir, 'mag'),
+                  'MR phase ': self.getImage(self.dependDir, 'phase'),
                   'parcellation': self.getImage(self.dependDir,'aparc_aseg'),
                   'anatomical': self.getImage(self.dependDir, 'anat_freesurfer'),
                   'brodmann': self.getImage(self.dependDir, 'brodmann')}
@@ -108,6 +110,7 @@ class Preparation(GenericTask):
     def isDirty(self):
 
         #@TODO Implement AP PA dirtyness
+        #@TODO Implement mag phase dirtyness
         images = {'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', None, 'bval'),
                   'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b'),
