@@ -19,9 +19,11 @@ class Hardi(GenericTask, Logger):
         if not bFile:
             bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
 
-        mask = self.getImage(self.maskingDir, 'aparc_aseg', ['act','wm','mask'])
-        outputDwi2Response = self.__dwi2response(dwi, mask, bFile)
-        fodImage = self.__dwi2fod(dwi, outputDwi2Response, mask, bFile)
+        maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['act','wm','mask'])
+        outputDwi2Response = self.__dwi2response(dwi, maskDwi2Response, bFile)
+
+        maskDwi2fod =  self.getImage(self.workingDir, 'anat',['extended', 'mask'])
+        fodImage = self.__dwi2fod(dwi, outputDwi2Response, maskDwi2fod, bFile)
 
 
     def __dwi2response(self, source, mask, bFile):
@@ -59,7 +61,8 @@ class Hardi(GenericTask, Logger):
     def meetRequirement(self, result = True):
 
         images = {'diffusion weighted': self.getImage(self.dependDir,'dwi','upsample'),
-                  'white matter segmented mask': self.getImage(self.maskingDir, 'aparc_aseg', ['act','wm','mask'])}
+                  'white matter segmented mask': self.getImage(self.maskingDir, 'aparc_aseg', ['act','wm','mask']),
+                  'ultimate extended mask': self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
 
         if self.isSomeImagesMissing(images):
             result = False

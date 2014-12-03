@@ -20,6 +20,8 @@ class Tensors(GenericTask):
         bValFile = self.getImage(self.unwarpingDir, 'grad', None, 'bval')
         bVecFile = self.getImage(self.unwarpingDir, 'grad', None, 'bvec')
 
+        mask = self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
+
         if (not bFile) or (not bValFile) or (not bVecFile):
             bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
             bValFile = self.getImage(self.preparationDir, 'grad', None, 'bval')
@@ -27,7 +29,7 @@ class Tensors(GenericTask):
 
         anatBrainWMResampleMask = self.getImage(self.maskingDir, 'anat', ['brain', 'wm', 'resample', 'mask'])
 
-        tensorsMrtrix = self.__tensorsMrtrix(dwi, bFile)
+        tensorsMrtrix = self.__tensorsMrtrix(dwi, bFile, mask)
 
         #self.info("Masking mrtrix tensors image with the white matter, brain extracted, resampled, high resolution mask.")
         #self.masking(tensorsMrtrix, anatBrainWMResampleMask)
@@ -37,12 +39,15 @@ class Tensors(GenericTask):
 
 
     # convert diffusion-weighted images to tensor images.
-    def __tensorsMrtrix(self, source, encodingFile):
+    def __tensorsMrtrix(self, source, encodingFile, mask=None):
         self.info("Starting DWI2Tensor from mrtrix")
 
         tmp =  self.getTarget(source, "tmp")
         target = self.getTarget(source, "mrtrix")
-        cmd = "dwi2tensor {} {} -grad {} -nthreads {} -quiet".format(source, tmp, encodingFile, self.getNTreadsMrtrix())
+        cmd = "dwi2tensor {} {} -grad {} -nthreads {} -quiet ".format(source, tmp, encodingFile, self.getNTreadsMrtrix())
+        if mask is not None:
+            cmd += "-mask {}".format(mask)
+
         self.launchCommand(cmd)
 
         self.info("renaming {} to {}".format(tmp, target))
@@ -93,6 +98,10 @@ class Tensors(GenericTask):
 
         if not self.getImage(self.dependDir, 'dwi', 'upsample'):
             self.info("Cannot find any DWI image in {} directory".format(self.dependDir))
+            result = False
+
+        if not self.getImage(self.maskingDir, 'anat', ['extended', 'mask']):
+            self.info("Cannot find any ultimate extended mask {} directory".format(self.maskingDir))
             result = False
 
         return result

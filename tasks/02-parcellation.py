@@ -35,7 +35,7 @@ class Parcellation(GenericTask):
             self.__createBrodmannArea()
 
             dicts = {'anat_freesurfer': "{}/{}/mri/T1.mgz",
-                    'parcellation': "{}/{}/mri/T1.mgz",
+                    'parcellation': "{}/{}/mri/aparc+aseg.mgz",
                     'brodmann': "{}/{}/mri/brodmann.mgz"}
 
             for key, value in dicts.iteritems():
