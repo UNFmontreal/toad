@@ -2,6 +2,7 @@ from generic.generictask import GenericTask
 import scipy.ndimage
 import nibabel
 import numpy
+import math
 import os
 
 __author__ = 'desmat'
@@ -33,10 +34,28 @@ class Fieldmap(GenericTask):
 
         mask = self. __createSegmentationMask(aparcAseg)
         print "mask =",mask
+
+        phaseRescale = self.__rescaleFieldMap(phase)
         self.__coregisterFieldmapToAnat(mag, anatFreesurfer)
         self.__invertFieldmapToAnat()
         self.__interpolateAnatMaskToFieldmap(anat, mag, mask)
-        #self.__computeFieldmap
+        self.__computeFieldmap(phaseRescale, mask)
+
+
+    #@TODO change rebase name
+    def __rescaleFieldMap(self, source):
+
+        target = self.getTarget(source, 'rescale')
+        try:
+            deltaTE = float(self.get("dwell_time"))
+        except ValueError:
+            deltaTE = 0.00246
+
+        factor = (math.pi)/()
+        cmd = "fslmath {} -mul {} -div {} {} -odt float".format(source, math.pi, 4096 *deltaTE, target)
+        self.launchCommand(cmd)
+
+        return target
 
 
     def __createSegmentationMask(self, source):
@@ -89,7 +108,8 @@ class Fieldmap(GenericTask):
         
         #flirt -in  anat -ref _mag.nii.gz -out anat_flirt.nii.gz -omat HC_AM32_1_mask_crop_flirt.mat -applyxfm -datatype char -init fieldmap2t1_inv.mat   -interp nearestneighbour
 
-        cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} ".format(mask, mag, target, outputMatrix, self.get("inverseMatrix"),self.get("interp"), self.get("datatype"))
+        cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} "\
+            .format(mask, mag, target, outputMatrix, self.get("inverseMatrix"),self.get("interp"), self.get("datatype"))
 
         if self.getBoolean("applyxfm"):
             cmd += "-applyxfm "
@@ -97,11 +117,11 @@ class Fieldmap(GenericTask):
         self.launchCommand(cmd)
         return target
 
-    def __computeFiledmap(self, mask):
+    def __computeFiledmap(self, source, mask):
 
         source = self.getImage(self.workingDir, 'anat', 'flirt')
 
-        reg = self.getTarget(source, 'reg')
+        target = self.getTarget(source, 'reg')
 
 
         # compute the fieldmap
@@ -110,10 +130,14 @@ class Fieldmap(GenericTask):
         #fugue --asym=-0.0024600000 --loadfmap=fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field.nii.gz
         #  --savefmap=fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg.nii.gz
         #  --mask=HC_AM32_1_mask_crop_flirt.nii.gz --smooth3=2.00
-        #cmd = "fugue --asym={} --loadfmap={phase???} --savefmap={reg} --mask={} --smooth3={}"
-        #    .format(self.get("dwell_time"), ???, ???_reg,  mask, self.get("smooth3"))
 
-        ## epi correction
+        cmd = "fugue --asym={} --loadfmap={} --savefmap={} --mask={} --smooth3={}"\
+            .format(self.get("dwell_time"), source, target,  mask, self.get("smooth3"))
+
+        self.launchCommand(cmd)
+
+
+
 
         """
 
@@ -157,7 +181,7 @@ class Fieldmap(GenericTask):
         """
 
 
-        print "this is o.k."
+        print "THIS TASK IS IMCOMPLETE"
         import sys
         sys.exit()
 

@@ -43,6 +43,7 @@ class Parcellation(GenericTask):
                 if len(images) > 0:
                     self.__mgz2nii(images.pop(), os.path.join(self.workingDir, self.get(key)))
 
+
     def __reconAll(self, source):
         """Performs all, or any part of, the FreeSurfer cortical reconstruction
 
@@ -56,7 +57,7 @@ class Parcellation(GenericTask):
             .format(self.get('directive'), source, self.id, self.workingDir, self.getNTreads())
         self.info("Logging into {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
         self.launchCommand(cmd, 'log', 'log')
-	
+
 
     def __createBrodmannArea(self):
         """create a Brodmann Area image

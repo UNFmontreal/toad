@@ -252,6 +252,7 @@ class GenericTask(Logger, Load):
                     self.logFooter("implement")
                     break
 
+
     def getName(self):
         """Return the name of this class into lower case
         """
@@ -290,7 +291,7 @@ class GenericTask(Logger, Load):
         return self.config.getboolean(self.getName(), option)
 
 
-    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, nice = 2):
+    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, nice=0):
         """Execute a program in a new process
 
         Args:
