@@ -142,6 +142,7 @@ class SubjectManager(Logger, Config):
             print "Clean up subject log"
             subject.removeLogDir()
 
+
     def __submitLocal(self, subject):
         """Submit execution of the subject locally in a shell
 
@@ -183,11 +184,15 @@ class SubjectManager(Logger, Config):
         cmd = "echo {0}/bin/toad -u {1} -l {2} -p | qsub -notify -V -N {3} -o {4} -e {4} -q {5}".format(self.config.get('arguments', 'toadDir'),
               subject.getDir(), self.studyDir, subject.getName(), subject.getLogDir(), self.config.get('general','sge_queue'))
         self.info("Command launch: {}".format(cmd))
-        (stdout, stderr) = util.launchCommand(cmd)
-        self.info("Output produce: {}\n".format(stdout))
-        if stderr is not '':
-            self.info("Error produce: {}\n".format(stderr))
-        self.info("------------------------\n")
+        #@DEBUG try to workaround deadlock
+        import subprocess
+        process = subprocess.Popen(cmd, stdout=None, stderr=None, shell=True)
+        process.wait()
+        #(stdout, stderr) = util.launchCommand(cmd)
+        #self.info("Output produce: {}\n".format(stdout))
+        #if stderr is not '':
+        #    self.info("Error produce: {}\n".format(stderr))
+        #self.info("------------------------\n")
 
 
     def __copyConfig(self, dir):

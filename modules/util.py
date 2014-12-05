@@ -57,7 +57,7 @@ def gzip(source):
     return "{}.gz".format(source)
 
 
-def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=2):
+def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0):
     """Execute a program in a new process
 
     Args:

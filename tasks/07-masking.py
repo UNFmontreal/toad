@@ -175,7 +175,7 @@ class Masking(GenericTask):
                     'white segmented mask': self.getImage(self.workingDir,"aparc_aseg", ["act", "wm", "mask"]),
                     'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
                     'high resolution, brain extracted, white matter segmented, resampled mask': self.getImage(self.workingDir, 'anat', ['brain', 'wm', 'resample', 'mask']),
-                    'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended','mask'])}
+                    'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask'])}
 
         if self.config.get('masking', "start_seeds").strip() != "":
             images['high resolution, start, brain extracted mask'] = self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask'])

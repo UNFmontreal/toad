@@ -4,19 +4,39 @@ import glob
 import sys
 import os
 
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright 2014, The Toad Project"
+__credits__ = ["Mathieu Desrosiers"]
+__license__ = "GPL"
+__version__ = "0.0"
+__maintainer__ = "Mathieu Desrosiers"
+__email__ = "mathieu.desrosiers@criugm.qc.ca"
+__status__ = "Development"
+
+
+
+#@des gens pourrait avoir plusieurs dti dans leur packqage
+
+-magnituges .. ,
+-Est-ce que l'on peut produire la phase avant la magnitude'?
+-l'autre carte est constitué de la phase est ...'
+
+
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from modules import util
-
-
 
 __author__ = 'mathieu'
 
 
 junks = ["aascout", "localizer", "tensor", "gre_field_map",'mprage_12ch_ipat3']
 anatLabels = ["mprage"]
-dwiLabels = ["dti_", "dwi_"]
+dwiLabels = ["dti_", "dwi_", "ep2d_diff_mddw_64_p2"]
 flairLabels = ["flair"]
 swiLabels = ["swi"]
+
+
 
 if len(sys.argv) < 2:
         rootDir = "."
@@ -37,7 +57,6 @@ def removeKey(d, key):
 #find Magnitude field map image image if exists
 diffOfEchoes = 0
 #sequences =
-
 
 #sort field map
 fieldMaps = {"magnitudes": None , "magnitudesDWI": None , "phases": None , "phasesDWI": None}
@@ -110,7 +129,7 @@ print sequences
 
 
 #filter for anatomical sequence
-anatValue = {"anat": None}
+anatValue = {"anat": []}
 for key, value in sequences.iteritems():
     for anat in anatLabels:
         if anat in key:
@@ -121,6 +140,7 @@ for key, value in sequences.iteritems():
                 anatValue["anat"] = value
 
 print anatValue
+
 
 #filter for flair sequence
 flairValue = {"flair": None}

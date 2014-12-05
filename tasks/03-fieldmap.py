@@ -1,4 +1,9 @@
 from generic.generictask import GenericTask
+import scipy.ndimage
+import nibabel
+import numpy
+import math
+import os
 
 __author__ = 'desmat'
 
@@ -13,25 +18,71 @@ class Fieldmap(GenericTask):
         """Placeholder for the business logic implementation
 
         """
-
-	"""
         ## fieldmap create
 
         mag = self.getImage(self.dependDir, "mag")
+        phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
-        anatFreesurfer = self.getImage(self.parcellationDir,'anat_freesurfer')
+        anatFreesurfer = self.getImage(self.parcellationDir, 'anat_freesurfer')
+        aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
 
-        self.__computeFieldmap
 
+        print "mag",mag
+        print "anat",anat
+        print "anatFreesurfer",anatFreesurfer
+        print "aparcAseg",aparcAseg
+
+        mask = self. __createSegmentationMask(aparcAseg)
+        print "mask =",mask
+
+        phaseRescale = self.__rescaleFieldMap(phase)
         self.__coregisterFieldmapToAnat(mag, anatFreesurfer)
         self.__invertFieldmapToAnat()
-        self.__interpolateAnatMaskToFieldmap(anat, mag)
-	"""
-	print "NotImplemented"
+        self.__interpolateAnatMaskToFieldmap(anat, mag, mask)
+        self.__computeFieldmap(phaseRescale, mask)
+
+
+    #@TODO change rebase name
+    def __rescaleFieldMap(self, source):
+
+        target = self.getTarget(source, 'rescale')
+        try:
+            deltaTE = float(self.get("dwell_time"))
+        except ValueError:
+            deltaTE = 0.00246
+
+        factor = (math.pi)/()
+        cmd = "fslmath {} -mul {} -div {} {} -odt float".format(source, math.pi, 4096 *deltaTE, target)
+        self.launchCommand(cmd)
+
+        return target
+
+
+    def __createSegmentationMask(self, source):
+        """
+        Developped by basile
+
+        Args:
+            source: a freesurfer aparc+aseg files
+        """
+        target = self.getTarget(source, "mask")
+
+        niis = [nibabel.load(f) for f in source]
+        data = [n.get_data() for n in niis]
+        mask = numpy.logical_or(data[0]>.5,data[1]>.5)
+        numpy.logical_or(data[2]>.9,mask,mask)
+        numpy.logical_or(numpy.logical_and(data[0]+data[1]>.2,data[2]>.5),mask,mask)
+        scipy.ndimage.binary_fill_holes(mask,None,mask)
+        nibabel.save(nibabel.Nifti1Image(mask.astype(numpy.uint8),niis[0].get_affine()), target)
+        del niis, data, mask
+        return target
+
+
+
     def __coregisterFieldmapToAnat(self, source, reference):
-        #flirt -in $mag -ref $anat -out  $target -omat fieldmap2t1.mat -cost normmi -searchcost normmi -dof 6 -searchrx -5 5 -searchry -5 5 -searchrz -5 5 -usesqform
+
         target = self.getTarget(source, "flirt")
-        cmd = "flirt -in {} -ref {} -out {} -omat {} -cost{} -searchcost {} -dof {} -searchrx {} -searchry {} -searchrz {} "\
+        cmd = "flirt -in {} -ref {} -out {} -omat {} -cost{} -searchcost {} -dof {}"\
             .format(source, reference , target,
                     self.get("matrix"), self.get("cost"), self.get("searchcost"), self.get("dof"),
                     self.get("searchrx"), self.get("searchry"), self.get("searchrz"))
@@ -49,7 +100,7 @@ class Fieldmap(GenericTask):
         self.launchCommand(cmd)
 
 
-    def __interpolateAnatMaskToFieldmap(self, source, mag ):
+    def __interpolateAnatMaskToFieldmap(self, source, mag, mask):
 
         # interpolate T1 mask in fieldmap space
         target = self.getTarget(source, "flirt")
@@ -57,32 +108,36 @@ class Fieldmap(GenericTask):
         
         #flirt -in  anat -ref _mag.nii.gz -out anat_flirt.nii.gz -omat HC_AM32_1_mask_crop_flirt.mat -applyxfm -datatype char -init fieldmap2t1_inv.mat   -interp nearestneighbour
 
-        cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} ".format("source anatomivalMask???", mag, target, outputMatrix, self.get("inverseMatrix"),self.get("interp"), self.get("datatype"))
+        cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} "\
+            .format(mask, mag, target, outputMatrix, self.get("inverseMatrix"),self.get("interp"), self.get("datatype"))
 
         if self.getBoolean("applyxfm"):
             cmd += "-applyxfm "
 
         self.launchCommand(cmd)
+        return target
 
-    def __computeFiledmap(self):
+    def __computeFiledmap(self, source, mask):
 
         source = self.getImage(self.workingDir, 'anat', 'flirt')
 
-        reg = self.getTarget(source, 'reg')
+        target = self.getTarget(source, 'reg')
+
+
         # compute the fieldmap
         #--asym=-0.0024600000 echo Time 1 - echoTime 2
-        #is sign important and whet it mean
 
         #fugue --asym=-0.0024600000 --loadfmap=fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field.nii.gz
         #  --savefmap=fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg.nii.gz
         #  --mask=HC_AM32_1_mask_crop_flirt.nii.gz --smooth3=2.00
-        cmd = "fugue --asym=-0.0024600000 --loadfmap={phase???} --savefmap={reg} --mask={ anatMask } --smooth3={}"
+
+        cmd = "fugue --asym={} --loadfmap={} --savefmap={} --mask={} --smooth3={}"\
+            .format(self.get("dwell_time"), source, target,  mask, self.get("smooth3"))
+
+        self.launchCommand(cmd)
 
 
 
-
-
-        ## epi correction
 
         """
 
@@ -126,10 +181,13 @@ class Fieldmap(GenericTask):
         """
 
 
-        print "this is o.k."
+        print "THIS TASK IS IMCOMPLETE"
         import sys
         sys.exit()
 
+
+    def isIgnore(self):
+        return self.isSomeImagesMissing({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')})
 
 
     def meetRequirement(self):

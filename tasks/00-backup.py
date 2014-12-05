@@ -18,6 +18,8 @@ class Backup(GenericTask):
 
         images =[self.getImage(self.subjectDir, 'anat'),
                  self.getImage(self.subjectDir, 'dwi'),
+                 self.getImage(self.subjectDir, 'mag',),
+                 self.getImage(self.subjectDir, 'phase'),
                  self.getImage(self.subjectDir, 'aparc_aseg'),
                  self.getImage(self.subjectDir, 'anat_freesurfer'),
                  self.getImage(self.subjectDir, 'brodmann'),

@@ -50,11 +50,14 @@ class GenericTask(Logger, Load):
                 if i == 0:
                     self.dependDir = dir
 
+
     def getOrder(self):
         return self.__order
 
+
     def setOrder(self, order):
         self.__order = order
+
 
     def __repr__(self):
         return self.__name
@@ -86,8 +89,6 @@ class GenericTask(Logger, Load):
         -A task should create and move into is own working space
 
         """
-        self.logHeader("implement")
-        start = datetime.now()
         if not os.path.exists(self.workingDir):
             self.info("Creating {} directory".format(self.workingDir))
             os.mkdir(self.workingDir)
@@ -96,9 +97,7 @@ class GenericTask(Logger, Load):
         util.symlink(self.getLogFileName(), self.workingDir)
         self.implement()
         os.chdir(currentDir)
-        finish = datetime.now()
-        self.info("Time to run the task = {} seconds".format(str(timedelta(seconds=(finish - start).seconds))))
-        self.logFooter("implement")
+
 
 
     #this is where all the science occurs
@@ -228,10 +227,30 @@ class GenericTask(Logger, Load):
         """Method that have the responsability to lauch the implementation
 
         """
+        #@TODO relocate logHeader 'implements'
+        attempt = 0
+        self.logHeader("implement")
+        start = datetime.now()
         if self.__meetRequirement():
-            if self.__cleanupBeforeImplement:
-                self.__cleanup()
-            self.__implement()
+            try:
+                nbSubmission = int(self.config.get('general','nbsubmissions'))
+            except ValueError:
+                nbSubmission = 3
+
+            while(attempt < nbSubmission):
+                if self.__cleanupBeforeImplement:
+                    self.__cleanup()
+                self.__implement()
+                if attempt == nbSubmission:
+                    self.error("Cannot execute this task successfully, exiting the pipeline")
+                elif self.isDirty():
+                    self.info("A problems occur during the task execution, resubmitting this task again")
+                    attempt += 1
+                else:
+                    finish = datetime.now()
+                    self.info("Time to finish the task = {} seconds".format(str(timedelta(seconds=(finish - start).seconds))))
+                    self.logFooter("implement")
+                    break
 
 
     def getName(self):
@@ -272,7 +291,7 @@ class GenericTask(Logger, Load):
         return self.config.getboolean(self.getName(), option)
 
 
-    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, nice = 2):
+    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, nice=0):
         """Execute a program in a new process
 
         Args:
