@@ -16,7 +16,7 @@ class Parcellation(GenericTask):
 
     def implement(self):
 
-        images = {'parcellation':self.getImage(self.dependDir,'aparc_aseg'),
+        images = {'aparc_aseg':self.getImage(self.dependDir,'aparc_aseg'),
                   'anat_freesurfer':self.getImage(self.dependDir,'anat_freesurfer'),
                   'brodmann':self.getImage(self.dependDir,'brodmann')}
 
@@ -25,7 +25,7 @@ class Parcellation(GenericTask):
                 self.info("Found {} area image, create link from {} to {}".format(key, value, self.workingDir))
                 util.symlink(value, self.workingDir)
 
-        if not (images['parcellation'] and images['anat_freesurfer'] and images['brodmann']):
+        if not (images['aparc_aseg'] and images['anat_freesurfer'] and images['brodmann']):
 
             self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
             os.environ["SUBJECTS_DIR"] = self.workingDir
@@ -35,15 +35,14 @@ class Parcellation(GenericTask):
             self.__createBrodmannArea()
 
             dicts = {'anat_freesurfer': "{}/{}/mri/T1.mgz",
-                    'parcellation': "{}/{}/mri/aparc+aseg.mgz",
+                    'aparc_aseg': "{}/{}/mri/aparc+aseg.mgz",
                     'brodmann': "{}/{}/mri/brodmann.mgz"}
 
             for key, value in dicts.iteritems():
-                if not dicts[key]:
-                    images = glob.glob(value.format(self.workingDir, self.id))
-                    if len(images) > 0:
-                        self.__mgz2nii(images.pop(), os.path.join(self.workingDir, self.get(key)))
-
+                images = glob.glob(value.format(self.workingDir, self.id))
+		print images
+                if len(images) > 0:
+                	self.__mgz2nii(images.pop(), os.path.join(self.workingDir, self.get(key)))
 
     def __reconAll(self, source):
         """Performs all, or any part of, the FreeSurfer cortical reconstruction
@@ -58,6 +57,7 @@ class Parcellation(GenericTask):
             .format(self.get('directive'), source, self.id, self.workingDir, self.getNTreads())
         self.info("Logging into {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
         self.launchCommand(cmd, 'log', 'log')
+	
 
     def __createBrodmannArea(self):
         """create a Brodmann Area image
@@ -79,20 +79,20 @@ class Parcellation(GenericTask):
             cmd = "mri_label2label --srcsubject fsaverage --srclabel {} " \
                 "--trgsubject {} --trglabel {} --hemi {} --regmethod surface"\
                 .format(labelDir, self.id, label, hemisphere)
-            self.launchCommand(cmd, 'log')
+            self.launchCommand(cmd, 'log', 'log')
 
         annotation = self.get('annotation')
         cmd = "mris_label2annot --s {} --h rh --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --a {} {}"\
             .format(self.id, annotation, rhAnnotLabels)
-        self.launchCommand(cmd, 'log')
+        self.launchCommand(cmd, 'log', 'log')
 
         cmd = "mris_label2annot --s {} --h lh --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --a {} {}"\
             .format(self.id, annotation, lhAnnotLabels)
-        self.launchCommand(cmd, 'log')
+        self.launchCommand(cmd, 'log', 'log')
 
         cmd = "mri_aparc2aseg --s {} --annot {} --o {}/{}/mri/{}"\
             .format(self.id, annotation, self.workingDir, self.id, self.get('brodmann_mgz'))
-        self.launchCommand(cmd, 'log')
+        self.launchCommand(cmd, 'log', 'log')
 
 
     def __mgz2nii(self, source, target, inType='mgz', outType='nii'):
@@ -107,7 +107,7 @@ class Parcellation(GenericTask):
         """
         self.info("convert {} image to {} ".format(source, target))
         cmd = "mri_convert -it {} -ot {} {} {}".format(inType, outType, source, target)
-        util.launchCommand(cmd)
+        self.launchCommand(cmd, 'log', 'log')
 
 
     def __cleanupReconAll(self):

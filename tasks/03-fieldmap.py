@@ -20,9 +20,11 @@ class Fieldmap(GenericTask):
         ## fieldmap create
 
         mag = self.getImage(self.dependDir, "mag")
+        phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
         anatFreesurfer = self.getImage(self.parcellationDir, 'anat_freesurfer')
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
+
 
         print "mag",mag
         print "anat",anat
@@ -159,6 +161,9 @@ class Fieldmap(GenericTask):
         import sys
         sys.exit()
 
+
+    def isIgnore(self):
+        return self.isSomeImagesMissing({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')})
 
 
     def meetRequirement(self):

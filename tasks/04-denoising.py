@@ -14,7 +14,7 @@ class Denoising(GenericTask):
 
     def implement(self):
 
-        if self.getBoolean("skip_denoising"):
+        if self.get("algorithm") is "None":
             self.info("Skipping denoising process")
         else:
             dwi = self.getImage(self.dependDir, "dwi", 'unwarp')
@@ -25,6 +25,7 @@ class Denoising(GenericTask):
             tmp = self.getTarget(dwi, "tmp")
             scriptName = self.__createLpcaScript(dwi, tmp)
             self.__launchMatlabExecution(scriptName)
+            self.info("rename {} to {}".format(tmp, target))
             os.rename(tmp, target)
 
 
@@ -46,7 +47,7 @@ class Denoising(GenericTask):
 
 
     def isIgnore(self):
-        return self.getBoolean("skip_denoising")
+        return self.get("algorithm") is "None"
 
 
     def meetRequirement(self, result = True):
