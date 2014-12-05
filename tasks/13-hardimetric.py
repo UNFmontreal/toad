@@ -27,7 +27,7 @@ class HardiMetric(GenericTask):
         'fixelPeakImage':self.getTarget(self.workingDir,"tmp1", 'nii'),
         'fixelPeakTmp':self.getTarget(self.workingDir,"tmp",'msf','nii')}
 
-        cmd = "fod2metric {} -gfa {} -count {} -fixel_peak {} -nthreads {} -force"\
+        cmd = "fod2metric {} -gfa {} -count {} -fixel_peak {} -nthreads {} -force -quiet"\
             .format(source, images['gfaTmp'], images['nufoTmp'], images['fixelPeakTmp'], self.getNTreadsMrtrix())
         if mask is not None:
             cmd += " -mask {} ".format(mask)

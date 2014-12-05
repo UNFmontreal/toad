@@ -22,40 +22,40 @@ class Hardi(GenericTask, Logger):
         maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['act','wm','mask'])
         outputDwi2Response = self.__dwi2response(dwi, maskDwi2Response, bFile)
 
-        maskDwi2fod =  self.getImage(self.workingDir, 'anat',['extended', 'mask'])
+        maskDwi2fod =  self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
         fodImage = self.__dwi2fod(dwi, outputDwi2Response, maskDwi2fod, bFile)
 
 
     def __dwi2response(self, source, mask, bFile):
-        tmp = os.path.join(self.workingDir, "tmp.nii")
-        output = os.path.join(self.workingDir,os.path.basename(source).replace(".nii",".txt"))
-        self.info("Starting dwi2response creation from mrtrix on {}".format(source))
 
-        cmd = "dwi2response {} {} -mask {} -grad {} -nthreads {}"\
+        target = self.getTarget(source, None,'txt')
+        tmp = self.getTarget(source, "tmp",'txt')
+
+        self.info("Starting dwi2response creation from mrtrix on {}".format(source))
+        cmd = "dwi2response {} {} -mask {} -grad {} -nthreads {} -quiet"\
             .format(source, tmp, mask, bFile, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
+        self.info("renaming {} to {}".format(tmp, target))
+        os.rename(tmp, target)
 
-        self.info("renaming {} to {}".format(tmp, output))
-        os.rename(tmp, output)
-
-        return output
+        return target
 
 
     def __dwi2fod(self, source, dwi2response, mask, bFile):
-        tmp = os.path.join(self.workingDir,"tmp.nii")
-        output = os.path.join(self.workingDir, os.path.basename(source).replace(".nii","{}.nii"
-                                                                            .format(self.config.get("postfix","fod"))))
-        target = self.getTarget(source, 'fod')
+
+        tmp = self.getTarget(source, "tmp")
+        target = self.getTarget(source, "fod")
+
         self.info("Starting dwi2fod creation from mrtrix on {}".format(source))
 
-        cmd = "dwi2fod {} {} {} -mask {} -grad {} -nthreads {}"\
+        cmd = "dwi2fod {} {} {} -mask {} -grad {} -nthreads {} -quiet"\
             .format(source, dwi2response, tmp, mask, bFile, self.getNTreadsMrtrix())
-        self.info(util.launchCommand(cmd))
+	self.launchCommand(cmd)
 
-        self.info("renaming {} to {}".format(tmp, output))
-        os.rename(tmp, output)
+        self.info("renaming {} to {}".format(tmp, target))
+        os.rename(tmp, target)
 
-        return output
+        return target
 
 
     def meetRequirement(self, result = True):
