@@ -13,7 +13,6 @@ __author__ = 'desmat'
 
 
 class GenericTask(Logger, Load):
-    __metaclass__ = singleton.Singleton
 
     def __init__(self, subject, *args):
         """Set up a TASK child class environment.
@@ -42,20 +41,23 @@ class GenericTask(Logger, Load):
         for arg in args:
             self.dependencies.append(arg)
         for i, arg in enumerate(args):
-            images = glob.glob("%s/tasks/??-%s.py"%(self.toadDir, arg))
+            images = glob.glob("{}/tasks/??-{}.py".format(self.toadDir, arg))
             if len(images) == 1:
                 [name, ext] = os.path.splitext(os.path.basename(images[0]))
                 dir = os.path.join(self.subjectDir, name)
-                setattr(self, "%sDir"%(arg), dir)
-                self.__dependenciesDirNames["%sDir"%(arg)] = dir
+                setattr(self, "{}Dir".format(arg), dir)
+                self.__dependenciesDirNames["{}Dir".format(arg)] = dir
                 if i == 0:
                     self.dependDir = dir
+
 
     def getOrder(self):
         return self.__order
 
+
     def setOrder(self, order):
         self.__order = order
+
 
     def __repr__(self):
         return self.__name
@@ -87,19 +89,15 @@ class GenericTask(Logger, Load):
         -A task should create and move into is own working space
 
         """
-        self.logHeader("implement")
-        start = datetime.now()
         if not os.path.exists(self.workingDir):
-            self.info("Creating %s directory"%self.workingDir)
+            self.info("Creating {} directory".format(self.workingDir))
             os.mkdir(self.workingDir)
         currentDir = os.getcwd()
         os.chdir(self.workingDir)
         util.symlink(self.getLogFileName(), self.workingDir)
         self.implement()
         os.chdir(currentDir)
-        finish = datetime.now()
-        self.info("Time to run the task = %s seconds"%str(timedelta(seconds=(finish - start).seconds)))
-        self.logFooter("implement")
+
 
 
     #this is where all the science occurs
@@ -129,7 +127,7 @@ class GenericTask(Logger, Load):
 
         #    #make sure that this directory is not optionnal
         #    if not os.path.exists(value):
-        #        self.error("Mandatory directory %s not found"%value)
+        #        self.error("Mandatory directory {} not found".format(value))
         result = self.meetRequirement()
         self.logFooter("meetRequirement", result)
         return result
@@ -174,7 +172,7 @@ class GenericTask(Logger, Load):
             return False
 
         if not os.path.exists(self.workingDir):
-            self.info("Directory %s not found"%self.workingDir)
+            self.info("Directory {} not found".format(self.workingDir))
             self.logFooter("isDirty", True)
             return True
 
@@ -221,7 +219,7 @@ class GenericTask(Logger, Load):
 
         """
         if os.path.exists(self.workingDir) and os.path.isdir(self.workingDir):
-            self.info("Cleaning up \"deleting\" %s directory"%(self.workingDir))
+            self.info("Cleaning up \"deleting\" {} directory".format(self.workingDir))
             shutil.rmtree(self.workingDir)
 
 
@@ -229,10 +227,30 @@ class GenericTask(Logger, Load):
         """Method that have the responsability to lauch the implementation
 
         """
+        #@TODO relocate logHeader 'implements'
+        attempt = 0
+        self.logHeader("implement")
+        start = datetime.now()
         if self.__meetRequirement():
-            if self.__cleanupBeforeImplement:
-                self.__cleanup()
-            self.__implement()
+            try:
+                nbSubmission = int(self.config.get('general','nbsubmissions'))
+            except ValueError:
+                nbSubmission = 3
+
+            while(attempt < nbSubmission):
+                if self.__cleanupBeforeImplement:
+                    self.__cleanup()
+                self.__implement()
+                if attempt == nbSubmission:
+                    self.error("Cannot execute this task successfully, exiting the pipeline")
+                elif self.isDirty():
+                    self.info("A problems occur during the task execution, resubmitting this task again")
+                    attempt += 1
+                else:
+                    finish = datetime.now()
+                    self.info("Time to finish the task = {} seconds".format(str(timedelta(seconds=(finish - start).seconds))))
+                    self.logFooter("implement")
+                    break
 
 
     def getName(self):
@@ -273,7 +291,7 @@ class GenericTask(Logger, Load):
         return self.config.getboolean(self.getName(), option)
 
 
-    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, nice = 2):
+    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, nice=0):
         """Execute a program in a new process
 
         Args:
@@ -293,28 +311,27 @@ class GenericTask(Logger, Load):
 
         binary = cmd.split(" ").pop(0)
         if util.which(binary) is None:
-            self.error("Command %s not found"%binary)
+            self.error("Command {} not found".format(binary))
 
-        self.info("Launch %s command line...\n"%binary)
-        self.info("Command line submit: %s\n"%cmd)
+        self.info("Launch {} command line...\n".format(binary))
+        self.info("Command line submit: {}\n".format(cmd))
 
         out = None
         err = None
 
         if stdout=='log':
             out = self.getLog()
-            self.info("Output will be log in %s \n"%out.name)
-
+            self.info("Output will be log in {} \n".format(out.name))
         if stderr=='log':
             err = self.getLog()
-            self.info("Error will be log in %s \n"%err.name)
+            self.info("Error will be log in {} \n".format(err.name))
 
-        (output, error)= util.launchCommand(cmd, out, err, nice=nice)
+        (output, error)= util.launchCommand(cmd, out, err, nice)
         if stdout is not "None":
-            self.info("Output produce by %s: %s \n"%(binary, output))
+            self.info("Output produce by {}: {} \n".format(binary, output))
 
         if error != '' or error != "None":
-            self.info("Error produce by %s: %s\n"%(binary, error))
+            self.info("Error produce by {}: {}\n".format(binary, error))
         self.info("------------------------\n")
 
 
@@ -339,7 +356,7 @@ class GenericTask(Logger, Load):
         [scriptName, ext] = os.path.splitext(os.path.basename(source))
         tags={ 'script': scriptName, 'workingDir': self.workingDir, 'singleCompThread': singleCompThread}
         cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/matlab.tpl"))
-        self.info("Launching matlab command: %s"%cmd)
+        self.info("Launching matlab command: {}".format(cmd))
         self.launchCommand(cmd, 'log')
 
 
@@ -394,7 +411,7 @@ class GenericTask(Logger, Load):
         result = False
         for key, value in dict.iteritems():
             if not value:
-                self.info("No %s image found"%(key))
+                self.info("No {} image found".format(key))
                 result = True
         return result
 

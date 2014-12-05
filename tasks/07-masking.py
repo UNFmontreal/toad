@@ -1,5 +1,7 @@
 from generic.generictask import GenericTask
 from modules import util, mriutil
+import shutil
+import sys
 import os
 
 __author__ = 'desmat'
@@ -21,11 +23,13 @@ class Masking(GenericTask):
         self.__createMask(anatBrainWMResample)
 
         extended = self.getTarget('anat', 'extended','nii')
-        self.info("Add %s and %s images together in order to create the ultimate image"%(anatBrainResample, aparcAseg))
+        self.info("Add {} and {} images together in order to create the ultimate image"
+                  .format(anatBrainResample, aparcAseg))
         mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAseg)
         self.__createMask(extended)
 
         self.__createMask(aparcAseg)
+
 
         #produce optionnal mask
         if self.get("start_seeds").strip():
@@ -46,37 +50,63 @@ class Masking(GenericTask):
 
 
     def __createRegionMaskFromAparcAseg(self, source, operand):
-        option = "%s_seeds"%operand
+        option = "{}_seeds".format(operand)
 
-        self.info("Extract %s regions from %s image"%(operand, source))
+        self.info("Extract {} regions from {} image".format(operand, source))
         regions = util.arrayOfInteger(self.get( option))
-        self.info("Regions to extract: %s"%(regions))
+        self.info("Regions to extract: {}".format(regions))
 
         target = self.getTarget(source, [operand, "extract"])
         structures = mriutil.extractFreesurferStructure(regions, source, target)
         self.__createMask(structures)
 
+
     def __actAnatPrepareFreesurfer(self, source):
-        """Create a five-tissue-type (5TT) segmented image in a format appropriate for ACT
 
-        Args:
-            source:  A segmented T1 image from FreeSurfer
+        sys.path.append(os.environ["MRTRIX_PYTHON_SCRIPTS"])
+        from lib.delTempDir   import delTempDir
+        from lib.loadOptions  import loadOptions
+        from lib.makeTempDir  import makeTempDir
 
-        Returns:
-            A five-tissue-type (5TT) segmented image in a format appropriate for AC
-        """
 
-        tmp = os.path.join(self.workingDir, "tmp.nii")
         target = self.getTarget(source, 'act')
-        self.info("Starting act_anat_prepare_freesurfer creation from mrtrix on %s"%source)
+        freesurfer_lut = os.path.join(os.environ['FREESURFER_HOME'], 'FreeSurferColorLUT.txt')
 
-        cmd = "act_anat_prepare_freesurfer %s %s"%(source, tmp)
-        self.launchCommand(cmd)
+        if not os.path.isfile(freesurfer_lut):
+          self.error("Could not find FreeSurfer lookup table file: Expected location: {}".format(freesurfer_lut))
 
-        self.info("renaming %s to %s"%(tmp, target))
-        os.rename(tmp, target)
+        config_path = os.path.join(os.environ["MRTRIX_PYTHON_SCRIPTS"], 'data', 'FreeSurfer2ACT.txt');
+        if not os.path.isfile(config_path):
+          self.error("Could not find config file for converting FreeSurfer parcellation output to tissues: Expected location: {}".format(config_path))
+
+        working_dir = os.getcwd()
+        temp_dir = makeTempDir(False)
+
+        # Initial conversion from FreeSurfer parcellation to five principal tissue types
+        self.launchCommand('labelconfig ' + source + ' ' + config_path + ' ' + os.path.join(temp_dir, 'indices.mif') + ' -lut_freesurfer ' + freesurfer_lut)
+
+        os.chdir(temp_dir)
+
+        # Convert into the 5TT format for ACT
+        self.launchCommand('mrcalc indices.mif 1 -eq cgm.mif')
+        self.launchCommand('mrcalc indices.mif 2 -eq sgm.mif')
+        self.launchCommand('mrcalc indices.mif 3 -eq  wm.mif')
+        self.launchCommand('mrcalc indices.mif 4 -eq csf.mif')
+        self.launchCommand('mrcalc indices.mif 5 -eq path.mif')
+        result_path = 'result' + os.path.splitext(target)[1]
+        self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32')
+
+        # Move back to original directory
+        os.chdir(working_dir)
+
+        # Get the final file from the temporary directory & put it in the correct location
+        shutil.move(os.path.join(temp_dir, result_path), target)
+
+        # Don't leave a trace
+        delTempDir(temp_dir, True)
 
         return target
+
 
 
     def __extractWhiteMatterFromAct(self, source):
@@ -89,6 +119,7 @@ class Masking(GenericTask):
             the resulting file filename
 
         """
+
         target = self.getTarget(source, ["wm", "mask"])
         self.info(mriutil.extractSubVolume(source,
                                 target,
@@ -111,19 +142,19 @@ class Masking(GenericTask):
 
         tmp = os.path.join(self.workingDir, "tmp.nii")
         target = self.getTarget(source, "5tt2gmwmi")
-        self.info("Starting 5tt2gmwmi creation from mrtrix on %s"%source)
+        self.info("Starting 5tt2gmwmi creation from mrtrix on {}".format(source))
 
-        cmd = "5tt2gmwmi %s %s -nthreads %s -quiet"%(source, tmp, self.getNTreadsMrtrix())
+        cmd = "5tt2gmwmi {} {} -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
-        self.info("renaming %s to %s"%(tmp, target))
+        self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
 
         return target
 
 
     def __createMask(self, source):
-        self.info("Create mask from %s images"%(source))
+        self.info("Create mask from {} images".format(source))
         mriutil.fslmaths(source, self.getTarget(source, 'mask'), 'bin')
 
 
@@ -144,7 +175,7 @@ class Masking(GenericTask):
                     'white segmented mask': self.getImage(self.workingDir,"aparc_aseg", ["act", "wm", "mask"]),
                     'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
                     'high resolution, brain extracted, white matter segmented, resampled mask': self.getImage(self.workingDir, 'anat', ['brain', 'wm', 'resample', 'mask']),
-                    'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended','mask'])}
+                    'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask'])}
 
         if self.config.get('masking', "start_seeds").strip() != "":
             images['high resolution, start, brain extracted mask'] = self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask'])
@@ -162,5 +193,4 @@ class Masking(GenericTask):
             result = True
 
         return result
-
 

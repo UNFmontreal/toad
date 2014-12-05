@@ -14,7 +14,7 @@ class Denoising(GenericTask):
 
     def implement(self):
 
-        if self.getBoolean("skip_denoising"):
+        if self.get("algorithm") is "None":
             self.info("Skipping denoising process")
         else:
             dwi = self.getImage(self.dependDir, "dwi", 'unwarp')
@@ -25,13 +25,14 @@ class Denoising(GenericTask):
             tmp = self.getTarget(dwi, "tmp")
             scriptName = self.__createLpcaScript(dwi, tmp)
             self.__launchMatlabExecution(scriptName)
+            self.info("rename {} to {}".format(tmp, target))
             os.rename(tmp, target)
 
 
     def __createLpcaScript(self, source, target):
 
-        scriptName = os.path.join(self.workingDir, "%s.m"%self.get("script_name"))
-        self.info("Creating lpca script %s"%scriptName)
+        scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
+        self.info("Creating lpca script {}".format(scriptName))
         #@TODO debug switch self.getNTreads()
         tags={ 'source': source, 'target':target, 'workingDir': self.workingDir, 'nbthreads':"1"}
         template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/denoise.tpl"))
@@ -46,7 +47,7 @@ class Denoising(GenericTask):
 
 
     def isIgnore(self):
-        return self.getBoolean("skip_denoising")
+        return self.get("algorithm") is "None"
 
 
     def meetRequirement(self, result = True):
@@ -56,7 +57,7 @@ class Denoising(GenericTask):
             if self.isSomeImagesMissing({'diffusion weighted': dwi}):
                 result = False
             else:
-                self.info("Will take %s image instead"%dwi)
+                self.info("Will take {} image instead".format(dwi))
 
         return result
 

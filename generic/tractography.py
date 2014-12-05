@@ -27,16 +27,17 @@ class Tractography(object):
             The resulting streamlines tractography filename generated
 
         """
-        self.info("Starting tckgen creation from mrtrix on %s"%source)
-        tmp = os.path.join(self.workingDir, "tmp_%s.tck"%algorithm)
+        self.info("Starting tckgen creation from mrtrix on {}".format(source))
+        tmp = os.path.join(self.workingDir, "tmp_{}.tck".format(algorithm))
 
-        cmd = "tckgen %s %s  -mask %s -act %s -seed_gmwmi %s -number %s -algorithm %s -nthreads %s -quiet"%\
-              (source, tmp, mask,  act, seed_gmwmi, self.get( 'number_tracks'), algorithm, self.getNTreadsMrtrix())
+        cmd = "tckgen {} {}  -mask {} -act {} -seed_gmwmi {} -number {} -algorithm {} -nthreads {} -quiet"\
+            .format(source, tmp, mask,  act, seed_gmwmi, self.get( 'number_tracks'), algorithm, self.getNTreadsMrtrix())
+
         if bFile is not None:
-            cmd += " -grad %s"%bFile
+            cmd += " -grad {}".format(bFile)
 
         self.launchCommand(cmd)
-        self.info("renaming %s to %s"%(tmp, target))
+        self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
 
         return target
@@ -54,12 +55,12 @@ class Tractography(object):
             The resulting .cvs file name
 
         """
-        self.info("Starting tck2connectome from mrtrix on %s"%source)
+        self.info("Starting tck2connectome from mrtrix on {}".format(source))
         tmp = os.path.join(self.workingDir, "tmp.csv")
-        cmd = "tck2connectome %s %s %s -quiet -nthreads %s"%(source, nodes, tmp, self.getNTreadsMrtrix() )
+        cmd = "tck2connectome {} {} {} -quiet -nthreads {}".format(source, nodes, tmp, self.getNTreadsMrtrix() )
 
         self.launchCommand(cmd)
-        self.info("renaming %s to %s"%(tmp, target))
+        self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
 
         return target
@@ -78,12 +79,12 @@ class Tractography(object):
         """
         tmp = os.path.join(self.workingDir,"tmp_tcksift.tck")
         target = self.getTarget(source, 'tcksift','.tck')
-        self.info("Starting tcksift creation from mrtrix on %s"%source)
+        self.info("Starting tcksift creation from mrtrix on {}".format(source))
 
-        cmd = "tcksift %s %s %s -nthreads %s -quiet"%(source, dwi2fod, tmp, self.getNTreadsMrtrix())
+        cmd = "tcksift {} {} {} -nthreads {} -quiet".format(source, dwi2fod, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
-        self.info("renaming %s to %s"%(tmp, target))
+        self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
         return target
 

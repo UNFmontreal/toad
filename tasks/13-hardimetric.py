@@ -18,7 +18,7 @@ class HardiMetric(GenericTask):
 
 
     def __fod2metric(self, source, mask=None):
-        self.info("Starting fod2metric creation from mrtrix on %s"%source)
+        self.info("Starting fod2metric creation from mrtrix on {}".format(source))
 
         images = {'gfaImage': self.getTarget(source, 'gfa'),
         'gfaTmp':self.getTarget(self.workingDir, "tmp", 'nii'),
@@ -27,22 +27,15 @@ class HardiMetric(GenericTask):
         'fixelPeakImage':self.getTarget(self.workingDir,"tmp1", 'nii'),
         'fixelPeakTmp':self.getTarget(self.workingDir,"tmp",'msf','nii')}
 
-        cmd = "fod2metric %s -gfa %s -count %s -fixel_peak %s -nthreads %s -force"%(source, images['gfaTmp'], images['nufoTmp'], images['fixelPeakTmp'], self.getNTreadsMrtrix())
+        cmd = "fod2metric {} -gfa {} -count {} -fixel_peak {} -nthreads {} -force -quiet"\
+            .format(source, images['gfaTmp'], images['nufoTmp'], images['fixelPeakTmp'], self.getNTreadsMrtrix())
         if mask is not None:
-            cmd += " -mask %s "%mask
+            cmd += " -mask {} ".format(mask)
 
         self.launchCommand(cmd)
         for prefix in ["gfa", "nufo", "fixelPeak" ]:
-            self.info("renaming %s to %s"%(images["%sTmp"%(prefix)], images["%sImage"%(prefix)]))
-            os.rename(images["%sTmp"%(prefix)], images["%sImage"%(prefix)])
-
-        #@TODO remove comment
-        #self.info("renaming %s to %s"%(gfaTmp, gfaImage))
-        #os.rename(gfaTmp, gfaImage)
-        #self.info("renaming %s to %s"%(nufoTmp, nufoImage))
-        #os.rename(nufoTmp, nufoImage)
-        #self.info("renaming %s to %s"%(fixelPeakTmp, fixelPeakImage))
-        #os.rename(fixelPeakTmp, fixelPeakImage)
+            self.info("renaming {} to {}".format(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)]))
+            os.rename(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)])
 
 
     def meetRequirement(self):

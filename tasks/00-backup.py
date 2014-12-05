@@ -14,10 +14,12 @@ class Backup(GenericTask):
         self.setCleanupBeforeImplement(False)
 
     def implement(self):
-        self.info("Build directories structure for subject: %s"%(os.path.basename(self.workingDir)))
+        self.info("Build directories structure for subject: {}".format(os.path.basename(self.workingDir)))
 
         images =[self.getImage(self.subjectDir, 'anat'),
                  self.getImage(self.subjectDir, 'dwi'),
+                 self.getImage(self.subjectDir, 'mag',),
+                 self.getImage(self.subjectDir, 'phase'),
                  self.getImage(self.subjectDir, 'aparc_aseg'),
                  self.getImage(self.subjectDir, 'anat_freesurfer'),
                  self.getImage(self.subjectDir, 'brodmann'),
@@ -30,7 +32,7 @@ class Backup(GenericTask):
 
         for image in images:
             if image:
-                self.info("Moving file %s to %s directory"%(image, self.workingDir))
+                self.info("Moving file {} to {} directory".format(image, self.workingDir))
                 shutil.move(image, self.workingDir)
 
 
@@ -52,7 +54,7 @@ class Backup(GenericTask):
 
     def cleanup(self):
         if os.path.exists(self.workingDir):
-            sources = glob.glob("%s/*"%self.workingDir)
+            sources = glob.glob("{}/*".format(self.workingDir))
             for source in sources:
                 if os.path.islink(source):
                     os.unlink(source)
