@@ -75,6 +75,7 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing):
 
 if __name__ == '__main__':
 
+
     #parse arguments provide in command line
     arguments = parseArguments()
 

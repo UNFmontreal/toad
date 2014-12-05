@@ -40,9 +40,8 @@ class Parcellation(GenericTask):
 
             for key, value in dicts.iteritems():
                 images = glob.glob(value.format(self.workingDir, self.id))
-		print images
                 if len(images) > 0:
-                	self.__mgz2nii(images.pop(), os.path.join(self.workingDir, self.get(key)))
+                    self.__mgz2nii(images.pop(), os.path.join(self.workingDir, self.get(key)))
 
     def __reconAll(self, source):
         """Performs all, or any part of, the FreeSurfer cortical reconstruction
