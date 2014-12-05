@@ -100,7 +100,6 @@ def __parseArguments():
     return args
 
 
-
 def __manageEnvironnement(logger):
     """Set and verify environments variables and modules importations for prior utilisation
 
