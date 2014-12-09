@@ -19,7 +19,7 @@ class Fieldmap(GenericTask):
 
         """
         ## fieldmap create
-
+	"""
         mag = self.getImage(self.dependDir, "mag")
         phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
@@ -168,7 +168,7 @@ class Fieldmap(GenericTask):
 
 	self.launchCommand(cmd)
 
-        """
+
 
 =======
         target = self.getTarget(source, 'warped')
@@ -189,7 +189,7 @@ class Fieldmap(GenericTask):
 
 
 
-        """
+
         # coregister the epi with lossy distorted fieldmap magnitude
         flirt -in /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/dwi_convert/20120913_131105DTIb0Saads007a1001.nii -ref /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/fm_voxelshiftmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy_warped.nii.gz -out 20120913_131105DTIb0Saads007a1001_flirt.nii.gz -omat epi_to_b0fm -cost normmi -searchcost normmi -dof 6 -interp trilinear -refweight /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/signal_loss/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss.nii.gz -searchrx -5 5 -searchry -5 5 -searchrz -5 5
 
