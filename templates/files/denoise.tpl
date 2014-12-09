@@ -1,11 +1,12 @@
 clc;
 clear all;
 warning off;
-rician=1;  % 1 for bias correction and 0 to disable it.
+beta =$beta;
+rician=$rician;  % 1 for rician noise model and 0 for gaussian noise model.
 nbthreads=$nbthreads; % number of threads submit
 V=spm_vol('$source');
 ima=spm_read_vols(V);
-[fima] = DWIDenoisingLPCA(ima, rician, nbthreads);
+[fima] = DWIDenoisingLPCA(ima, beta, rician, nbthreads);
 % save result
 ss=size(V);
 for ii=1:ss(1)
