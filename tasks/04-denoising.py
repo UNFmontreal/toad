@@ -33,8 +33,12 @@ class Denoising(GenericTask):
 
         scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
         self.info("Creating lpca script {}".format(scriptName))
-        #@TODO debug switch self.getNTreads()
-        tags={ 'source': source, 'target':target, 'workingDir': self.workingDir, 'nbthreads':"1"}
+        tags={ 'source': source, 'target':target,
+               'workingDir': self.workingDir,
+               'beta': self.get('beta'),
+               'rician': self.get('rician'),
+               'nbthreads': self.getNTreads()}
+
         template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/denoise.tpl"))
         util.createScript(scriptName, template)
         return scriptName
