@@ -413,6 +413,10 @@ class GenericTask(Logger, Load):
             if not value:
                 self.info("No {} image found".format(key))
                 result = True
+            else:
+                if not os.path.exists(value):
+                    self.info("No {} image found".format(key))
+                    result = True
         return result
 
 
