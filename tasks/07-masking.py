@@ -51,7 +51,7 @@ class Masking(GenericTask):
 
         colorLut = "{}/templates/lookup_tables/FreeSurferColorLUT_ItkSnap.txt".format(self.toadDir)
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
-        shutil.copyfile(colorLut, self.workingDir)
+        shutil.copy(colorLut, self.workingDir)
 
 
     def __createRegionMaskFromAparcAseg(self, source, operand):
@@ -167,7 +167,6 @@ class Masking(GenericTask):
 
 
     def isDirty(self, result = False):
-
         images ={'aparc anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["resample","mask"]),
                     'aparc_aseg mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
                     'anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["act"]),
