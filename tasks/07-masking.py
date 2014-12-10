@@ -1,5 +1,5 @@
-from generic.generictask import GenericTask
-from modules import util, mriutil
+from lib.generictask import GenericTask
+from lib import util, mriutil
 import tempfile
 import shutil
 import sys
@@ -23,7 +23,7 @@ class Masking(GenericTask):
         anatBrainWMResample = self.getImage(self.dependDir, 'anat', ['brain','wm','resample'])
         self.__createMask(anatBrainWMResample)
 
-        extended = self.getTarget('anat', 'extended','nii')
+        extended = self.buildName('anat', 'extended','nii')
         self.info("Add {} and {} images together in order to create the ultimate image"
                   .format(anatBrainResample, aparcAseg))
         mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAseg)
@@ -61,7 +61,7 @@ class Masking(GenericTask):
         regions = util.arrayOfInteger(self.get( option))
         self.info("Regions to extract: {}".format(regions))
 
-        target = self.getTarget(source, [operand, "extract"])
+        target = self.buildName(source, [operand, "extract"])
         structures = mriutil.extractFreesurferStructure(regions, source, target)
         self.__createMask(structures)
 
@@ -70,7 +70,7 @@ class Masking(GenericTask):
 
         sys.path.append(os.environ["MRTRIX_PYTHON_SCRIPTS"])
 
-        target = self.getTarget(source, 'act')
+        target = self.buildName(source, 'act')
         freesurfer_lut = os.path.join(os.environ['FREESURFER_HOME'], 'FreeSurferColorLUT.txt')
 
         if not os.path.isfile(freesurfer_lut):
@@ -119,7 +119,7 @@ class Masking(GenericTask):
 
         """
 
-        target = self.getTarget(source, ["wm", "mask"])
+        target = self.buildName(source, ["wm", "mask"])
         self.info(mriutil.extractSubVolume(source,
                                 target,
                                 self.get('act_extract_at_axis'),
@@ -140,7 +140,7 @@ class Masking(GenericTask):
         """
 
         tmp = os.path.join(self.workingDir, "tmp.nii")
-        target = self.getTarget(source, "5tt2gmwmi")
+        target = self.buildName(source, "5tt2gmwmi")
         self.info("Starting 5tt2gmwmi creation from mrtrix on {}".format(source))
 
         cmd = "5tt2gmwmi {} {} -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
@@ -154,7 +154,7 @@ class Masking(GenericTask):
 
     def __createMask(self, source):
         self.info("Create mask from {} images".format(source))
-        mriutil.fslmaths(source, self.getTarget(source, 'mask'), 'bin')
+        mriutil.fslmaths(source, self.buildName(source, 'mask'), 'bin')
 
 
     def meetRequirement(self):

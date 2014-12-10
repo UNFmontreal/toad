@@ -1,9 +1,8 @@
-from modules.logger import Logger
+from lib.logger import Logger
 from datetime import timedelta
 from datetime import datetime
-from modules import util
-from modules.load import Load
-from generic import singleton
+from lib import util
+from lib.load import Load
 import subprocess
 import shutil
 import glob
@@ -378,7 +377,7 @@ class GenericTask(Logger, Load):
         return util.getImage(self.config, dir, prefix, postfix, ext)
 
 
-    def getTarget(self, source, postfix, ext=None, absolute = True):
+    def buildName(self, source, postfix, ext=None, absolute = True):
         """A simple utility function that return a file name that contain the postfix and the current working directory
 
         The path of the filename contain the current working  directory
@@ -392,7 +391,7 @@ class GenericTask(Logger, Load):
         Returns:
             a file name that contain the postfix and the current working directory
         """
-        return util.getTarget(self.config, self.workingDir, source, postfix, ext, absolute)
+        return util.buildName(self.config, self.workingDir, source, postfix, ext, absolute)
 
 
     def isSomeImagesMissing(self, dict):

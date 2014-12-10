@@ -78,7 +78,7 @@ class Tractography(object):
 
         """
         tmp = os.path.join(self.workingDir,"tmp_tcksift.tck")
-        target = self.getTarget(source, 'tcksift','.tck')
+        target = self.buildName(source, 'tcksift','.tck')
         self.info("Starting tcksift creation from mrtrix on {}".format(source))
 
         cmd = "tcksift {} {} {} -nthreads {} -quiet".format(source, dwi2fod, tmp, self.getNTreadsMrtrix())

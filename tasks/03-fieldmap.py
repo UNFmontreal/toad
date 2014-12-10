@@ -1,5 +1,5 @@
-from generic.generictask import GenericTask
-from modules import util
+from lib.generictask import GenericTask
+from lib import util
 import scipy.ndimage
 import nibabel
 import numpy
@@ -45,7 +45,7 @@ class Fieldmap(GenericTask):
     #@TODO change rebase name
     def __rescaleFieldMap(self, source):
 
-        target = self.getTarget(source, 'rescale')
+        target = self.buildName(source, 'rescale')
         try:
             deltaTE = float(self.get("dwell_time"))
         except ValueError:
@@ -58,7 +58,7 @@ class Fieldmap(GenericTask):
 
 
     def __createSegmentationMask(self, source):
-	target = self.getTarget(source, 'mask')
+	target = self.buildName(source, 'mask')
 
 	nii = nibabel.load(source)
 	op = ((numpy.mgrid[:5,:5,:5]-2.0)**2).sum(0)<=4
@@ -72,7 +72,7 @@ class Fieldmap(GenericTask):
 
     def __coregisterFieldmapToAnat(self, source, reference):
 
-        target = self.getTarget(source, "flirt")
+        target = self.buildName(source, "flirt")
 
         cmd = "flirt -in {} -ref {} -out {} -omat {} -cost {} -searchcost {} -dof {} "\
             .format(source, reference , target,
@@ -89,7 +89,7 @@ class Fieldmap(GenericTask):
 
     def __invertFieldmapToAnat(self, source):
 
-        target = self.getTarget(source, 'inv', 'mat')
+        target = self.buildName(source, 'inv', 'mat')
         cmd = "convert_xfm -omat {} -inverse {}".format(target , source)
         self.launchCommand(cmd)
         return target
@@ -98,8 +98,8 @@ class Fieldmap(GenericTask):
     def __interpolateAnatMaskToFieldmap(self, source, mag, inverseMatrix,  mask):
 
         # interpolate T1 mask in fieldmap space
-        target = self.getTarget(source, "flirt")
-        outputMatrix =self.getTarget(source, "flirt", "mat")
+        target = self.buildName(source, "flirt")
+        outputMatrix =self.buildName(source, "flirt", "mat")
         
         #flirt -in  anat -ref _mag.nii.gz -out anat_flirt.nii.gz -omat HC_AM32_1_mask_crop_flirt.mat -applyxfm -datatype char -init fieldmap2t1_inv.mat   -interp nearestneighbour
 
@@ -115,7 +115,7 @@ class Fieldmap(GenericTask):
 
     def __computeFiledmap(self, source, mask):
 
-        target = self.getTarget(source, 'reg')
+        target = self.buildName(source, 'reg')
 
         # compute the fieldmap
         #--asym=-0.0024600000 echo Time 1 - echoTime 2
@@ -136,7 +136,7 @@ class Fieldmap(GenericTask):
         # compute signal loss in fieldmap space
         #sigloss --te=0.094000 -i /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/make_fieldmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg.nii.gz -m /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/warp_t1_mask/HC_AM32_1_mask_crop_flirt.nii.gz -s /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/signal_loss/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss.nii.gz
 
-        target = self.getTarget(source, 'sigloss')
+        target = self.buildName(source, 'sigloss')
         cmd = "sigloss --te={} -i {} -m {} -s".format(self.get('echo_time'), source, mask, target)
 
         self.launchCommand(cmd)
@@ -149,7 +149,7 @@ class Fieldmap(GenericTask):
         # compute the fieldmap magnitude file with signal loss
         #fslmaths /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/mask_mag/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain.nii -mul /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/signal_loss/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss.nii.gz /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/fieldmap_mag_lossy/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy.nii
 
-	target = self.getTarget(source, prefix)
+	target = self.buildName(source, prefix)
 
 	cmd = "fslmaths {} -mul {} ".format(source, mask, target)
 	self.launchCommand(cmd)
@@ -162,7 +162,7 @@ class Fieldmap(GenericTask):
         #fugue --dwell=0.0006900000 --loadfmap=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/make_fieldmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg.nii.gz --in=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/fieldmap_mag_lossy/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy.nii --mask=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/warp_t1_mask/HC_AM32_1_mask_crop_flirt.nii.gz --nokspace --unwarpdir=y --warp=fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy_warped.nii.gz
 
 
-	target = self.getTarget(source, 'warped')
+	target = self.buildName(source, 'warped')
 	
 	cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.get('dwell_time'), source, lossyImage, self.get('unwarpdir'), target )
 
@@ -171,7 +171,7 @@ class Fieldmap(GenericTask):
 
 
 =======
-        target = self.getTarget(source, 'warped')
+        target = self.buildName(source, 'warped')
 
         cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.get('dwell_time'), source, lossyImage, self.get('unwarpdir'), target )
 
@@ -184,7 +184,7 @@ class Fieldmap(GenericTask):
     def __coregisterEpiLossyMap(self, source, reference, lossyMap, weighted ):
 >>>>>>> 4ff7ec8a3b69d45b5b2b4571fd78d49ea22c991a
 
-        matrixName = self.getTarget("epi_to_b0fm")
+        matrixName = self.buildName("epi_to_b0fm")
         "flirt -in {} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference,matrixName, self.get("dof"), weighted)
 
 

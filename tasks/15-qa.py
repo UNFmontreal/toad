@@ -1,5 +1,5 @@
-from generic.generictask import GenericTask
-from modules import util, mriutil
+from lib.generictask import GenericTask
+from lib import util, mriutil
 from string import ascii_uppercase, digits
 from random import choice
 import numpy as np
@@ -45,24 +45,24 @@ class QA(GenericTask):
         brodmann_rs = self.getImage(self.registrationDir, 'brodmann', 'resample')
         
         #png and gif targets
-        anat_tg = self.getTarget(anat, None, 'png', False)
-        brain_tg = self.getTarget(brain, None, 'png', False)
-        wm_tg = self.getTarget(wm, None, 'png', False)
-        anatfs_tg = self.getTarget(anatfs, None, 'png', False)
-        aparcaseg_tg = self.getTarget(aparcaseg, None, 'png', False)
-        brodmann_tg = self.getTarget(brodmann, None, 'png', False)
-        dwi_tg = self.getTarget(dwi, None, 'gif', False)
-        unwarp_tg = self.getTarget(unwarp, None, 'gif', False)
+        anat_tg = self.buildName(anat, None, 'png', False)
+        brain_tg = self.buildName(brain, None, 'png', False)
+        wm_tg = self.buildName(wm, None, 'png', False)
+        anatfs_tg = self.buildName(anatfs, None, 'png', False)
+        aparcaseg_tg = self.buildName(aparcaseg, None, 'png', False)
+        brodmann_tg = self.buildName(brodmann, None, 'png', False)
+        dwi_tg = self.buildName(dwi, None, 'gif', False)
+        unwarp_tg = self.buildName(unwarp, None, 'gif', False)
         translation_tg = 'translation.png'
         rotation_tg = 'rotation.png'
         vector_tg = 'vector.gif'
         snr_tg = 'snr.png'
         snr_denoised_tg = 'snr_denoised.png'
-        denoise_tg = self.getTarget(denoise, None, 'gif', False)
-        brain_rs_tg = self.getTarget(brain_rs, None, 'png', False)
-        wm_rs_tg = self.getTarget(wm_rs, None, 'png', False)
-        aparcaseg_rs_tg = self.getTarget(aparcaseg_rs, None, 'png', False)
-        brodmann_rs_tg = self.getTarget(brodmann_rs, None, 'png', False)
+        denoise_tg = self.buildName(denoise, None, 'gif', False)
+        brain_rs_tg = self.buildName(brain_rs, None, 'png', False)
+        wm_rs_tg = self.buildName(wm_rs, None, 'png', False)
+        aparcaseg_rs_tg = self.buildName(aparcaseg_rs, None, 'png', False)
+        brodmann_rs_tg = self.buildName(brodmann_rs, None, 'png', False)
         
         
         # slicer images production
@@ -311,7 +311,7 @@ class QA(GenericTask):
         """
         
         """
-        #target = self.getTarget(input, 'snr')
+        #target = self.buildName(input, 'snr')
         ccIdList = util.arrayOfInteger(self.config.get('masking','corpus_collosum'))
         ccMask = mriutil.extractFreesurferStructure(ccIdList, seg, 'cc_mask.nii')
         

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from generic.generictask import GenericTask
+from lib.generictask import GenericTask
 import os
 
 __author__ = 'desmat'
@@ -42,8 +42,8 @@ class Tensors(GenericTask):
     def __tensorsMrtrix(self, source, encodingFile, mask=None):
         self.info("Starting DWI2Tensor from mrtrix")
 
-        tmp =  self.getTarget(source, "tmp")
-        target = self.getTarget(source, "mrtrix")
+        tmp =  self.buildName(source, "tmp")
+        target = self.buildName(source, "mrtrix")
         cmd = "dwi2tensor {} {} -grad {} -nthreads {} -quiet ".format(source, tmp, encodingFile, self.getNTreadsMrtrix())
         if mask is not None:
             cmd += "-mask {}".format(mask)

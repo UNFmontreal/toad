@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from modules import mriutil, util
+from lib import mriutil, util
 import glob
 import os
 
