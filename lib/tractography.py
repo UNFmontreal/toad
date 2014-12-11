@@ -87,7 +87,3 @@ class Tractography(object):
         self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)
         return target
-
-
-
-

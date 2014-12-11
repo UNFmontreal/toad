@@ -21,6 +21,7 @@ class QA(GenericTask):
         self.imgWidth = 650
         self.debug = False
 
+
     def implement(self):
 	#@DEBUG remove comments
         """

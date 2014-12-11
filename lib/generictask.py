@@ -198,10 +198,12 @@ class GenericTask(Logger, Load):
         """
         raise NotImplementedError
 
+
     def setCleanupBeforeImplement(self, cleanup=True):
         """Determine if the working directory need to be cleanup before launching task implementation
         """
         self.__cleanupBeforeImplement = cleanup
+
 
     def __cleanup(self):
         """Base class that remove every files that may have been produce during the execution of the parent task.
