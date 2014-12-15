@@ -1,5 +1,6 @@
 from generic.generictask import GenericTask
 from modules import util, mriutil
+import tempfile
 import shutil
 import sys
 import os
@@ -48,6 +49,10 @@ class Masking(GenericTask):
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
         seed_gmwmi = self.__launch5tt2gmwmi(act)
 
+        colorLut = "{}/templates/lookup_tables/FreeSurferColorLUT_ItkSnap.txt".format(self.toadDir)
+        self.info("Copying {} file into {}".format(colorLut, self.workingDir))
+        shutil.copy(colorLut, self.workingDir)
+
 
     def __createRegionMaskFromAparcAseg(self, source, operand):
         option = "{}_seeds".format(operand)
@@ -64,10 +69,6 @@ class Masking(GenericTask):
     def __actAnatPrepareFreesurfer(self, source):
 
         sys.path.append(os.environ["MRTRIX_PYTHON_SCRIPTS"])
-        from lib.delTempDir   import delTempDir
-        from lib.loadOptions  import loadOptions
-        from lib.makeTempDir  import makeTempDir
-
 
         target = self.getTarget(source, 'act')
         freesurfer_lut = os.path.join(os.environ['FREESURFER_HOME'], 'FreeSurferColorLUT.txt')
@@ -79,13 +80,11 @@ class Masking(GenericTask):
         if not os.path.isfile(config_path):
           self.error("Could not find config file for converting FreeSurfer parcellation output to tissues: Expected location: {}".format(config_path))
 
-        working_dir = os.getcwd()
-        temp_dir = makeTempDir(False)
+        temp_dir = tempfile.mkdtemp()
+        os.chdir(temp_dir)
 
         # Initial conversion from FreeSurfer parcellation to five principal tissue types
         self.launchCommand('labelconfig ' + source + ' ' + config_path + ' ' + os.path.join(temp_dir, 'indices.mif') + ' -lut_freesurfer ' + freesurfer_lut)
-
-        os.chdir(temp_dir)
 
         # Convert into the 5TT format for ACT
         self.launchCommand('mrcalc indices.mif 1 -eq cgm.mif')
@@ -96,17 +95,17 @@ class Masking(GenericTask):
         result_path = 'result' + os.path.splitext(target)[1]
         self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32')
 
+
         # Move back to original directory
-        os.chdir(working_dir)
+        os.chdir(self.workingDir)
 
         # Get the final file from the temporary directory & put it in the correct location
         shutil.move(os.path.join(temp_dir, result_path), target)
 
         # Don't leave a trace
-        delTempDir(temp_dir, True)
+        shutil.rmtree(temp_dir)
 
         return target
-
 
 
     def __extractWhiteMatterFromAct(self, source):
@@ -168,14 +167,15 @@ class Masking(GenericTask):
 
 
     def isDirty(self, result = False):
-
         images ={'aparc anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["resample","mask"]),
                     'aparc_aseg mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
                     'anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["act"]),
                     'white segmented mask': self.getImage(self.workingDir,"aparc_aseg", ["act", "wm", "mask"]),
                     'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
                     'high resolution, brain extracted, white matter segmented, resampled mask': self.getImage(self.workingDir, 'anat', ['brain', 'wm', 'resample', 'mask']),
-                    'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask'])}
+                    'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask']),
+                    'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt' )
+        }
 
         if self.config.get('masking', "start_seeds").strip() != "":
             images['high resolution, start, brain extracted mask'] = self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask'])
