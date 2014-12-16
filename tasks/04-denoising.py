@@ -1,5 +1,5 @@
-from generic.generictask import GenericTask
-from modules import util
+from lib.generictask import GenericTask
+from lib import util
 import os
 
 
@@ -21,8 +21,8 @@ class Denoising(GenericTask):
             if not dwi:
                 dwi = self.getImage(self.preparationDir, "dwi")
 
-            target = self.getTarget(dwi, "denoise")
-            tmp = self.getTarget(dwi, "tmp")
+            target = self.buildName(dwi, "denoise")
+            tmp = self.buildName(dwi, "tmp")
             scriptName = self.__createLpcaScript(dwi, tmp)
             self.__launchMatlabExecution(scriptName)
             self.info("rename {} to {}".format(tmp, target))

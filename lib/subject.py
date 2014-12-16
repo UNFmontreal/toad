@@ -25,7 +25,7 @@ class Subject(Lock):
         Lock.__init__(self, self.__logDir, self.__name)
 
     def __repr__(self):
-	return self.__name	
+        return self.__name
 
     def getName(self):
         return self.__name

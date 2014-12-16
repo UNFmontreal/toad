@@ -90,4 +90,4 @@ class Config(object):
              a config ConfigParser object
 
         """
-        return self.config    
+        return self.config

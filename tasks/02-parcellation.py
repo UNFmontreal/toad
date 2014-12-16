@@ -1,5 +1,5 @@
-from generic.generictask import GenericTask
-from modules import util
+from lib.generictask import GenericTask
+from lib import util
 import glob
 import os
 

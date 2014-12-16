@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from generic.tractography import Tractography
-from generic.generictask import GenericTask
+from lib.tractography import Tractography
+from lib.generictask import GenericTask
 
 __author__ = 'desmat'
 
@@ -18,8 +18,8 @@ class HardiTractography(GenericTask, Tractography):
 
         dwi2fod =  self.getImage(self.dependDir,'dwi','fod')
         mask = self.getImage(self.maskingDir, 'anat',['extended','mask'])
-        tckgen = self.tckgen(dwi2fod, self.getTarget(dwi2fod, 'tckgen','.tck'), mask, act, seed_gmwmi)
-        self.tck2connectome(tckgen, brodmann, self.getTarget(dwi2fod, 'tckgen_det', 'csv'))
+        tckgen = self.tckgen(dwi2fod, self.buildName(dwi2fod, 'tckgen','.tck'), mask, act, seed_gmwmi)
+        self.tck2connectome(tckgen, brodmann, self.buildName(dwi2fod, 'tckgen_det', 'csv'))
         self.tcksift(tckgen, dwi2fod)
 
 

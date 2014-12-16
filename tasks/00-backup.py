@@ -1,4 +1,4 @@
-from generic.generictask import GenericTask
+from lib.generictask import GenericTask
 import shutil
 import glob
 import os

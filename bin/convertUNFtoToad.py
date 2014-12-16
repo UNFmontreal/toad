@@ -25,7 +25,7 @@ __status__ = "Development"
 
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from modules import util
+from lib import util
 
 __author__ = 'mathieu'
 

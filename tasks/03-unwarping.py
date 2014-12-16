@@ -1,5 +1,5 @@
-from generic.generictask import GenericTask
-from modules import util, mriutil
+from lib.generictask import GenericTask
+from lib import util, mriutil
 import glob
 import os
 
@@ -82,7 +82,7 @@ class Unwarping(GenericTask):
         """
 
         tmp = os.path.join(self.workingDir, "tmp.nii")
-        target = self.getTarget(source, "subset")
+        target = self.buildName(source, "subset")
         cmd = "mrconvert {} {} -coord +2 {} -nthreads {} -quiet".format(source, tmp, volumes, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
         self.info("renaming {} to {}".format(tmp, target))
@@ -222,8 +222,8 @@ class Unwarping(GenericTask):
     def __bet(self, source):
 
         self.info("Launch brain extraction from fsl")
-        tmp = self.getTarget(source, "tmp", "nii.gz")
-        target = self.getTarget(source, "brain")
+        tmp = self.buildName(source, "tmp", "nii.gz")
+        target = self.buildName(source, "brain")
 
         cmd = "bet {} {} -v -m".format(source, tmp)
         self.launchCommand(cmd)
@@ -240,8 +240,8 @@ class Unwarping(GenericTask):
 
         """
         self.info("Launch eddy correction from fsl")
-        tmp = self.getTarget(source, "tmp")
-        target = self.getTarget(source, "unwarp")
+        tmp = self.buildName(source, "tmp")
+        target = self.buildName(source, "unwarp")
         cmd = "eddy --imain={} --mask={} --topup={} --index={} --acqp={} --bvecs={} --bvals={} --out={} --verbose"\
               .format(source, mask, topup, index, acqp, bVecs, bVal, tmp)
 

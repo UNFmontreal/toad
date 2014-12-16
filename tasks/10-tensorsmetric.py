@@ -1,4 +1,4 @@
-from generic.generictask import GenericTask
+from lib.generictask import GenericTask
 
 __author__ = 'desmat'
 
@@ -18,13 +18,13 @@ class TensorsMetric(GenericTask):
     def __metricMrtrix(self, source, mask = None):
 
         self.info("Launch tensor2metric from mrtrix.\n")
-        adc = self.getTarget(source, "adc")
-        fa = self.getTarget(source, "fa")
-        vector = self.getTarget(source, "vector")
-        adImage = self.getTarget(source, "value_ad")
-        rdImage = self.getTarget(source, "value_rd")
-        value2 = self.getTarget(source, "value2")
-        value3 = self.getTarget(source, "value3")
+        adc = self.buildName(source, "adc")
+        fa = self.buildName(source, "fa")
+        vector = self.buildName(source, "vector")
+        adImage = self.buildName(source, "value_ad")
+        rdImage = self.buildName(source, "value_rd")
+        value2 = self.buildName(source, "value2")
+        value3 = self.buildName(source, "value3")
         modulate = self.get('modulate')
 
         cmd1 = "tensor2metric {} -adc {} -fa {} -num 1 -vector {} -value {} -modulate {} -nthreads {} -quiet "\

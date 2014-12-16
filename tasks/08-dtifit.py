@@ -1,4 +1,4 @@
-from generic.generictask import GenericTask
+from lib.generictask import GenericTask
 import os
 
 __author__ = 'desmat'
@@ -32,8 +32,8 @@ class Dtifit(GenericTask):
         l2 = self.getImage(self.workingDir, 'dwi', 'fsl_value2', 'nii.gz')
         l3 = self.getImage(self.workingDir, 'dwi', 'fsl_value3', 'nii.gz')
 
-        ad = self.getTarget(dwi, 'fsl_ad', 'nii.gz')
-        rd = self.getTarget(dwi, 'fsl_rd', 'nii.gz')
+        ad = self.buildName(dwi, 'fsl_ad', 'nii.gz')
+        rd = self.buildName(dwi, 'fsl_rd', 'nii.gz')
 
         os.rename(l1, ad)
         self.__mean(l2, l3, rd)
@@ -51,7 +51,7 @@ class Dtifit(GenericTask):
         """
         self.info("Starting dtifit from fsl")
 
-        target = self.getTarget(source, 'fsl', '')
+        target = self.buildName(source, 'fsl', '')
         cmd ="dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVec, bVal)
         if mask:
             cmd += "-m {}".format(mask)
