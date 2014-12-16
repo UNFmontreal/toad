@@ -68,4 +68,3 @@ class Lock(object):
         if self.isLock():
             return self.__lockFile
         return False
-

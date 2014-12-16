@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from generic.tractography import Tractography
-from generic.generictask import GenericTask
+from lib.tractography import Tractography
+from lib.generictask import GenericTask
 
 __author__ = 'desmat'
 
@@ -23,11 +23,11 @@ class TensorsTractography(GenericTask, Tractography):
 
         mask = self.getImage(self.maskingDir, 'anat', ['extended','mask'])
 
-        tckDet = self.tckgen(dwi, self.getTarget(dwi, 'tckgen_det', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Det')
-        tckProb = self.tckgen(dwi, self.getTarget(dwi, 'tckgen_prob', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Prob')
+        tckDet = self.tckgen(dwi, self.buildName(dwi, 'tckgen_det', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Det')
+        tckProb = self.tckgen(dwi, self.buildName(dwi, 'tckgen_prob', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Prob')
 
-        self.tck2connectome(tckDet, brodmann, self.getTarget(dwi, 'tckgen_det', 'csv'))
-        self.tck2connectome(tckProb, brodmann, self.getTarget(dwi, 'tckgen_prob', 'csv'))
+        self.tck2connectome(tckDet, brodmann, self.buildName(dwi, 'tckgen_det', 'csv'))
+        self.tck2connectome(tckProb, brodmann, self.buildName(dwi, 'tckgen_prob', 'csv'))
 
 
     def meetRequirement(self, result = True):

@@ -1,5 +1,5 @@
-from generic.generictask import GenericTask
-from modules import util, mriutil
+from lib.generictask import GenericTask
+from lib import util, mriutil
 import glob
 import os
 
@@ -46,7 +46,7 @@ class Preprocessing(GenericTask):
         if len(voxelSize.strip().split(" "))!=3:
             self.warning("Voxel size not specified correctly during upsampling")
 
-        target = self.getTarget(source, "upsample")
+        target = self.buildName(source, "upsample")
         cmd = "mri_convert -voxsize {} --input_volume {} --output_volume {}".format(voxelSize, source, target)
         self.launchCommand(cmd)
         return target
@@ -64,7 +64,7 @@ class Preprocessing(GenericTask):
             The resulting output file name
         """
         self.info("Launch brain extraction from fsl")
-        target = self.getTarget(source, "brain")
+        target = self.buildName(source, "brain")
         fractionalIntensity =  self.get('fractional_intensity')
         verticalGradient =  self.get('vertical_gradient')
 
@@ -100,7 +100,7 @@ class Preprocessing(GenericTask):
 
         scriptName = self.__createSegmentationScript(source, options)
         self.launchMatlabCommand(scriptName,  self.isSingleThread())
-        fileBasename = self.getTarget(source, None, "", False)
+        fileBasename = self.buildName(source, None, "", False)
         dict = {'c1':'gw','c2':'wm','c3':'csf',
                 'wc1':'wgw','wc2':'wwm','wc3':'wcsf',
                 'mwc1':'mwgw','mwc2':'mwwm','mwc3':'mwcsf'}
@@ -116,7 +116,7 @@ class Preprocessing(GenericTask):
                 if os.path.exists(os.path.join(self.workingDir, postfix)):
                     os.remove(os.path.join(self.workingDir, postfix))
         
-        target = self.getTarget(source, "wm")
+        target = self.buildName(source, "wm")
         if not os.path.exists(target):
             self.error("No white matter image found to return")
 

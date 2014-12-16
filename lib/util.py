@@ -207,7 +207,7 @@ def getImage(config, dir, prefix, postfix=None, ext="nii"):
     return False
 
 
-def getTarget(config, target, source, postfix=None, ext=None, absolute=True):
+def buildName(config, target, source, postfix=None, ext=None, absolute=True):
     """A simple utility function that return a file name that contain the postfix and the current working directory
 
     The path of the filename contain the current directory

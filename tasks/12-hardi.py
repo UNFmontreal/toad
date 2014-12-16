@@ -1,6 +1,6 @@
-from generic.generictask import GenericTask
-from modules.logger import Logger
-from modules import util
+from lib.generictask import GenericTask
+from lib.logger import Logger
+from lib import util
 import os
 
 __author__ = 'desmat'
@@ -28,8 +28,8 @@ class Hardi(GenericTask, Logger):
 
     def __dwi2response(self, source, mask, bFile):
 
-        target = self.getTarget(source, None,'txt')
-        tmp = self.getTarget(source, "tmp",'txt')
+        target = self.buildName(source, None,'txt')
+        tmp = self.buildName(source, "tmp",'txt')
 
         self.info("Starting dwi2response creation from mrtrix on {}".format(source))
         cmd = "dwi2response {} {} -mask {} -grad {} -nthreads {} -quiet"\
@@ -43,14 +43,14 @@ class Hardi(GenericTask, Logger):
 
     def __dwi2fod(self, source, dwi2response, mask, bFile):
 
-        tmp = self.getTarget(source, "tmp")
-        target = self.getTarget(source, "fod")
+        tmp = self.buildName(source, "tmp")
+        target = self.buildName(source, "fod")
 
         self.info("Starting dwi2fod creation from mrtrix on {}".format(source))
 
         cmd = "dwi2fod {} {} {} -mask {} -grad {} -nthreads {} -quiet"\
             .format(source, dwi2response, tmp, mask, bFile, self.getNTreadsMrtrix())
-	self.launchCommand(cmd)
+        self.launchCommand(cmd)
 
         self.info("renaming {} to {}".format(tmp, target))
         os.rename(tmp, target)

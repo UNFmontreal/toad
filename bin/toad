@@ -7,7 +7,7 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from modules import subjectmanager, logger, util
+from lib import subjectmanager, logger, util
 
 __author__ = "Mathieu Desrosiers, Arnaud Bore and Christophe Bedetti"
 __copyright__ = "Copyright 2014, The Toad Project"
@@ -101,7 +101,7 @@ def __parseArguments():
 
 
 def __manageEnvironnement(logger):
-    """Set and verify environments variables and modules importations for prior utilisation
+    """Set and verify environments variables and lib importations for prior utilisation
 
     """
 

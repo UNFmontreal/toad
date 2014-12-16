@@ -1,4 +1,4 @@
-from generic.generictask import GenericTask
+from lib.generictask import GenericTask
 import os
 
 
@@ -20,12 +20,12 @@ class HardiMetric(GenericTask):
     def __fod2metric(self, source, mask=None):
         self.info("Starting fod2metric creation from mrtrix on {}".format(source))
 
-        images = {'gfaImage': self.getTarget(source, 'gfa'),
-        'gfaTmp':self.getTarget(self.workingDir, "tmp", 'nii'),
-        'nufoImage':self.getTarget(source, 'nufo'),
-        'nufoTmp':self.getTarget(self.workingDir,"tmp1", 'nii'),
-        'fixelPeakImage':self.getTarget(self.workingDir,"tmp1", 'nii'),
-        'fixelPeakTmp':self.getTarget(self.workingDir,"tmp",'msf','nii')}
+        images = {'gfaImage': self.buildName(source, 'gfa'),
+        'gfaTmp':self.buildName(self.workingDir, "tmp", 'nii'),
+        'nufoImage':self.buildName(source, 'nufo'),
+        'nufoTmp':self.buildName(self.workingDir,"tmp1", 'nii'),
+        'fixelPeakImage':self.buildName(self.workingDir,"tmp1", 'nii'),
+        'fixelPeakTmp':self.buildName(self.workingDir,"tmp",'msf','nii')}
 
         cmd = "fod2metric {} -gfa {} -count {} -fixel_peak {} -nthreads {} -force -quiet"\
             .format(source, images['gfaTmp'], images['nufoTmp'], images['fixelPeakTmp'], self.getNTreadsMrtrix())

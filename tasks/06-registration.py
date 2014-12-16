@@ -1,4 +1,4 @@
-from generic.generictask import GenericTask
+from lib.generictask import GenericTask
 import os
 
 __author__ = 'desmat'
@@ -42,7 +42,7 @@ class Registration(GenericTask):
         """
         self.info("Starting registration from ants")
         name = os.path.basename(movingImage).replace(".nii","")
-        target = self.getTarget(name, "transformation", ".txt")
+        target = self.buildName(name, "transformation", ".txt")
 
         cmd = "ANTS {} --MI-option {} --image-metric {}[{} ,{} ,{} ,{} ] --number-of-affine-iterations {}" \
               " --output-naming {} --transformation-model {} --use-Histogram-Matching {}"\
@@ -88,7 +88,7 @@ class Registration(GenericTask):
 
         """
         self.info("Apply transformation with ants")
-        target = self.getTarget(source, "resample")
+        target = self.buildName(source, "resample")
 
         cmd = "WarpImageMultiTransform {} {} {} -R {} {} "\
             .format(self.get('dimension'), source, target, referenceImage, transformation)
