@@ -19,24 +19,20 @@ class QA(GenericTask):
         GenericTask.__init__(self, subject, 'preparation', 'unwarping', 'denoising', 'preprocessing', 'parcellation',  'registration')
         self.reportName = self.config.get('qa','report_name')
         self.imgWidth = 650
+        self.dirty = True #change to False after one execution of implement
         self.debug = False
 
 
     def implement(self):
-	#@DEBUG remove comments
-        """
+
         #Usefull images for the QA
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
         bvec = self.getImage(self.preparationDir, 'grad',  None, 'bvec')
-        unwarp = self.getImage(self.unwarpingDir,'dwi','unwarp')
-        eddy_parameters = os.path.join(self.subjectDir, self.unwarpingDir, "tmp.nii.eddy_parameters")
-        bvec_eddy = self.getImage(self.unwarpingDir, 'grad', 'eddy', 'bvec')
-        denoise = self.getImage(self.denoisingDir,'dwi',['unwarp','denoise'])
         brain = self.getImage(self.preprocessingDir,'anat','brain')
         wm = self.getImage(self.preprocessingDir,'anat','wm')
-        dwi_rs = self.getImage(self.preprocessingDir, 'dwi' ,['unwarp', 'denoise', 'upsample'])
-        b0_rs = self.getImage(self.preprocessingDir, 'b0' ,['unwarp', 'denoise', 'upsample'])
+        dwi_up = self.getImage(self.preprocessingDir, 'dwi' ,'upsample')
+        b0_up = self.getImage(self.preprocessingDir, 'b0' ,'upsample')
         anatfs = self.getImage(self.parcellationDir, 'anat_freesurfer')
         aparcaseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         brodmann = self.getImage(self.parcellationDir, 'brodmann')
@@ -44,7 +40,7 @@ class QA(GenericTask):
         wm_rs = self.getImage(self.registrationDir,'anat',['brain','wm','resample'])
         aparcaseg_rs = self.getImage(self.registrationDir, 'aparc_aseg', 'resample')
         brodmann_rs = self.getImage(self.registrationDir, 'brodmann', 'resample')
-        
+
         #png and gif targets
         anat_tg = self.buildName(anat, None, 'png', False)
         brain_tg = self.buildName(brain, None, 'png', False)
@@ -53,27 +49,44 @@ class QA(GenericTask):
         aparcaseg_tg = self.buildName(aparcaseg, None, 'png', False)
         brodmann_tg = self.buildName(brodmann, None, 'png', False)
         dwi_tg = self.buildName(dwi, None, 'gif', False)
-        unwarp_tg = self.buildName(unwarp, None, 'gif', False)
-        translation_tg = 'translation.png'
-        rotation_tg = 'rotation.png'
         vector_tg = 'vector.gif'
         snr_tg = 'snr.png'
         snr_denoised_tg = 'snr_denoised.png'
-        denoise_tg = self.buildName(denoise, None, 'gif', False)
         brain_rs_tg = self.buildName(brain_rs, None, 'png', False)
         wm_rs_tg = self.buildName(wm_rs, None, 'png', False)
         aparcaseg_rs_tg = self.buildName(aparcaseg_rs, None, 'png', False)
         brodmann_rs_tg = self.buildName(brodmann_rs, None, 'png', False)
         
+        #Special case for unwarping and denoising
         
+        unwarp = self.getImage(self.unwarpingDir,'dwi','unwarp')
+        if unwarp:
+            bvec_eddy = self.getImage(self.unwarpingDir, 'grad', 'eddy', 'bvec')
+            eddy_parameters = os.path.join(self.subjectDir, self.unwarpingDir, "tmp.nii.eddy_parameters")
+            unwarp_tg = self.buildName(unwarp, None, 'gif', False)
+            translation_tg = 'translation.png'
+            rotation_tg = 'rotation.png'
+        else:
+            bvec_eddy = False
+            eddy_parameters = False
+            unwarp_tg = None
+            translation_tg = None
+            rotation_tg = None
+
+        denoise = self.getImage(self.denoisingDir,'dwi','denoise')
+        if denoise:
+            denoise_tg = self.buildName(denoise, None, 'gif', False)        
+        else:
+            denoise_tg = None
+
         # slicer images production
         slicerImages = [
             (anat, None, anat_tg),
             (anat, brain, brain_tg),
             (anat, wm, wm_tg),
             (anatfs, None, anatfs_tg),
-            (b0_rs, brain_rs, brain_rs_tg),
-            (b0_rs, wm_rs, wm_rs_tg),
+            (b0_up, brain_rs, brain_rs_tg),
+            (b0_up, wm_rs, wm_rs_tg),
             ]
         for background, overlay, target in slicerImages:
             if not self.debug:
@@ -83,8 +96,8 @@ class QA(GenericTask):
         c3dImages = [
             (anatfs, aparcaseg, aparcaseg_tg, '2', '0.5'),
             (anatfs, brodmann, brodmann_tg, '2', '0.5'),
-            (b0_rs, aparcaseg_rs, aparcaseg_rs_tg, '1', '0.95'),
-            (b0_rs, brodmann_rs, brodmann_rs_tg, '1', '0.95'),
+            (b0_up, aparcaseg_rs, aparcaseg_rs_tg, '1', '0.95'),
+            (b0_up, brodmann_rs, brodmann_rs_tg, '1', '0.95'),
             ]
         for background, segmentation, target, scale, opacity in c3dImages:
             if not self.debug:
@@ -105,14 +118,18 @@ class QA(GenericTask):
                     
         #eddy movement images production
         if not self.debug:
-            self.__plotMvt(eddy_parameters, translation_tg, rotation_tg)
+            if eddy_parameters:
+                self.__plotMvt(eddy_parameters, translation_tg, rotation_tg)
+            else:
+                translation_tg = None
+                rotation_tg = None
         
         #Gradient vector image production
         if not self.debug:
             self.__plotVectors(bvec, bvec_eddy, vector_tg)
         
         #SNR calculation
-        #self.__snrCalc(dwi_rs, aparcaseg_rs)
+        #self.__snrCalc(dwi_up, aparcaseg_rs)
         
         
         #### Anat QA ####
@@ -130,12 +147,16 @@ class QA(GenericTask):
         
         
         #### DWI QA ####
+        gradVectorLegend = 'Red : raw bvec | Blue : opposite bvec'
+        if unwarp:
+            gradVectorLegend += ' | Black + : movement corrected bvec'
+
         dwiQaTags = [
             ('Raw', dwi_tg, str(mriutil.getMriDimensions(dwi))),
             ('DWI Unwarp', unwarp_tg, None),
             ('Translation correction by eddy', translation_tg, None),
             ('Rotation correction by eddy', rotation_tg, None),
-            ('Gradients vectors on the unitary sphere', vector_tg, 'Red : raw bvec | Blue : opposite bvec | Black + : movement corrected bvec'),
+            ('Gradients vectors on the unitary sphere', vector_tg, gradVectorLegend),
             ('DWI Denoising', denoise_tg, None),
             ]
         parseDWIHere = ''
@@ -159,7 +180,8 @@ class QA(GenericTask):
         tags = {'parseT1Here': parseT1Here, 'parseDWIHere': parseDWIHere, 'parseRegistrationHere': parseRegistrationHere }
         htmlCode = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/qa.main.tpl"))
         util.createScript(self.reportName, htmlCode)
-	"""
+
+        self.dirty = False
 
     def __idGenerator(self, size=6, chars=ascii_uppercase + digits):
         """
@@ -281,9 +303,14 @@ class QA(GenericTask):
         
         bvec1 = np.loadtxt(rawBvec)
         bvec0= -bvec1
-        bvec2 = np.loadtxt(eddyBvec)
         
-        for s, c, m, bv in [(80, 'b', 'o', bvec0), (80, 'r', 'o', bvec1), (20, 'k', '+', bvec2)]:
+        graphParam = [(80, 'b', 'o', bvec0), (80, 'r', 'o', bvec1)]
+        
+        if eddyBvec:
+            bvec2 = np.loadtxt(eddyBvec)
+            graphParam.append((20, 'k', '+', bvec2))
+        
+        for s, c, m, bv in graphParam:
             x = bv[0,1:]
             y = bv[1,1:]
             z = bv[2,1:]
@@ -378,15 +405,13 @@ class QA(GenericTask):
     def meetRequirement(self, result=True):
         """
         """ 
-	#@DEBUG christophe need to fix denoising optionnal issue prior to set meetRequirement()
-	return True
-	"""       
+	
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
         bvec = self.getImage(self.preparationDir, 'grad',  None, 'bvec')
         brain = self.getImage(self.preprocessingDir,'anat','brain')
         wm = self.getImage(self.preprocessingDir,'anat','wm')
-        b0_rs = self.getImage(self.preprocessingDir, 'b0' ,['unwarp', 'denoise', 'upsample'])
+        b0_up = self.getImage(self.preprocessingDir, 'b0' ,'upsample')
         anatfs = self.getImage(self.parcellationDir, 'anat_freesurfer')
         aparcaseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         brodmann = self.getImage(self.parcellationDir, 'brodmann')
@@ -398,10 +423,10 @@ class QA(GenericTask):
         infoMessages = {
             anat:'No anatomical image found in directory %s.'%self.preparationDir,
             dwi:'No DWI image found in directory %s.'%self.preparationDir,
-            bvec:'No bvec file found in directory %s.'%self.preparationDir,
+            bvec:'No gradient file found in directory %s.'%self.preparationDir,
             brain:'No brain image found in directory %s.'%self.preprocessingDir,
             wm:'No white matter image found in directory %s.'%self.preprocessingDir,
-            b0_rs:'No B0 resample image found in directory %s.'%self.preprocessingDir,
+            b0_up:'No B0 upsample image found in directory %s.'%self.preprocessingDir,
             anatfs:'No Freesurfer anatomical image found in directory %s.'%self.parcellationDir,
             aparcaseg:'No aparc_aseg image found in directory %s.'%self.parcellationDir,
             brodmann:'No Brodmann segmentation image found in directory %s.'%self.parcellationDir,
@@ -417,11 +442,9 @@ class QA(GenericTask):
                 result = False
                 
         return result
-	"""
 
     def isDirty(self):
         """Validate if this tasks need to be submit for implementation
 
         """
-	#@DEBUG christophe have to fix denoising optionnal issue prior to set isDirty() to True
-        return False
+	return self.dirty
