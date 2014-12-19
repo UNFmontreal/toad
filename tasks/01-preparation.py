@@ -22,7 +22,7 @@ class Preparation(GenericTask):
         b0PA = self.getImage(self.dependDir, 'b0PA')
         b0AP = self.getImage(self.dependDir, 'b0AP')
 
-        self.__produceEncodingFiles()
+        self.__produceEncodingFiles(bEnc, bVal, bVec)
 
 
         if b0PA:
