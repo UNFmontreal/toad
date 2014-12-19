@@ -18,8 +18,8 @@ class Eddy(GenericTask):
         dwi   = self.getImage(self.dependDir, 'dwi')
 
         b0 = self.getImage(self.dependDir, 'b0')
-        b0PA  = self.getImage(self.dependDir, 'b0PA')
         b0AP  = self.getImage(self.dependDir, 'b0AP')
+        b0PA  = self.getImage(self.dependDir, 'b0PA')
 
         bFile =  self.getImage(self.dependDir, 'grad',  None, 'b')
         bVals =  self.getImage(self.dependDir, 'grad',  None, 'bval')
@@ -152,6 +152,7 @@ class Eddy(GenericTask):
         if type=='topup':
             parameter='acqp_topup'
             text = "0 -1 0 {}\n0 1 0 {}\n".format(factor, factor)
+            
         elif type=='eddy':
             parameter='acqp_eddy'
             if phaseEncDir==0:    #P>>A

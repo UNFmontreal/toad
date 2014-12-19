@@ -13,13 +13,17 @@ class Preparation(GenericTask):
 
 
     def implement(self):
-        self.info("Produce .b .bval and .bvec gradient file if not existing")
-        self.__produceEncodingFiles()
 
         dwi = self.getImage(self.dependDir, 'dwi')
+        bEnc = self.getImage(self.dependDir, 'grad', None, 'b')
+        bVal = self.getImage(self.dependDir, 'grad', None, 'bval')
+        bVec = self.getImage(self.dependDir, 'grad', None, 'bvec')
 
         b0PA = self.getImage(self.dependDir, 'b0PA')
         b0AP = self.getImage(self.dependDir, 'b0AP')
+
+        self.__produceEncodingFiles()
+
 
         if b0PA:
             self.info("Found B0 posterior to anterior image, linking file {} to {}".format(b0AP, self.workingDir))
@@ -29,7 +33,7 @@ class Preparation(GenericTask):
             self.info("Found B0 anterior to posterior image, linking file {} to {}".format(b0AP, self.workingDir))
             util.symlink(b0AP, self.workingDir)
 
-        self.__extractB0APSubVolumeFromDWI(dwi)
+        self.__extractFirstB0FromDWI(dwi, bVal)
 
         images = {'high resolution': self.getImage(self.dependDir, 'anat'),
                   'diffusion weighted': dwi,
@@ -45,13 +49,11 @@ class Preparation(GenericTask):
                 util.symlink(value, self.workingDir)
 
 
-    def __produceEncodingFiles(self):
+    def __produceEncodingFiles(self, bEnc, bVal, bVec):
 
         #produire les fichiers gradient encoding pour dipy ainsi que mrtrix
-        bEnc = self.getImage(self.dependDir, 'grad', None, 'b')
-        bVal = self.getImage(self.dependDir, 'grad', None, 'bval')
-        bVec = self.getImage(self.dependDir, 'grad', None, 'bvec')
 
+        self.info("Produce .b .bval and .bvec gradient file if not existing")
         if not bEnc:
             mriutil.bValBVec2BEnc(bVal, bVec, self.workingDir)
         else:
@@ -68,7 +70,7 @@ class Preparation(GenericTask):
             util.symlink(bVec, self.workingDir)
 
 
-    def __extractB0APSubVolumeFromDWI(self, source):
+    def __extractFirstB0FromDWI(self, source, bval):
         self.info("Launch sub volume extraction from mrtrix")
 
         #rename the file B0
@@ -77,11 +79,17 @@ class Preparation(GenericTask):
         if extractAtAxis not in ["1", "2", "3"]:
             self.error('extract_at_axis must be value of 1 or 2 or 3, found {}'.format(extractAtAxis))
 
+        #extract coordinnate of the first b0 file
+        index = 0
+        for line in open(bval,'r').readlines():
+                b0s = line.strip().split()
+                index = b0s.index('0')
+
         #make sure that we do not extract a volumes outside of the dimension
         self.info(mriutil.extractSubVolume(source,
                                 target,
                                 extractAtAxis,
-                                self.get("b0_extract_at_coordinate"),
+                                index,
                                 self.getNTreadsMrtrix()))
 
         self.info("End extraction from mrtrix")
