@@ -9,14 +9,14 @@ class Preprocessing(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'unwarping')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'eddy')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
         if not dwi:
-            dwi = self.getImage(self.unwarpingDir, 'dwi', 'unwarp')
+            dwi = self.getImage(self.eddyDir, 'dwi', 'eddy')
             if not dwi:
                 dwi = self.getImage(self.dependDir, 'dwi')
 
@@ -180,8 +180,8 @@ class Preprocessing(GenericTask):
     def meetRequirement(self, result=True):
 
         if self.isSomeImagesMissing({'denoised': self.getImage(self.dependDir, "dwi", 'denoise')}):
-            dwi = self.getImage(self.unwarpingDir, "dwi", 'unwarp')
-            if self.isSomeImagesMissing({'unwarped': dwi}):
+            dwi = self.getImage(self.eddyDir, "dwi", 'eddy')
+            if self.isSomeImagesMissing({'eddy corrected': dwi}):
                 dwi = self.getImage(self.preparationDir, "dwi")
                 if self.isSomeImagesMissing({'diffusion weighted': dwi}):
                     result=False

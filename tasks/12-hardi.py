@@ -9,13 +9,13 @@ class Hardi(GenericTask, Logger):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'unwarping', 'masking')
+        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddyDir', 'masking')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir,'dwi', 'upsample')
-        bFile = self.getImage(self.unwarpingDir, 'grad', None, 'b')
+        bFile = self.getImage(self.eddyDir, 'grad', None, 'b')
         if not bFile:
             bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
 
@@ -67,7 +67,7 @@ class Hardi(GenericTask, Logger):
         if self.isSomeImagesMissing(images):
             result = False
 
-        if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.unwarpingDir, 'grad', None, 'b')}):
+        if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'b')}):
             if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.preparationDir, 'grad', None, 'b')}):
                 result = False
 

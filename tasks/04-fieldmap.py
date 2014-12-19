@@ -12,22 +12,21 @@ class Fieldmap(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, "preparation", "parcellation")
+        GenericTask.__init__(self, subject, "preparation", "parcellation", "eddy")
 
     def implement(self):
-        """Placeholder for the business logic implementation
+        pass
 
-        """
+    """
+
         ## fieldmap create
-	"""
+
         mag = self.getImage(self.dependDir, "mag")
         phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
         anatFreesurfer = self.getImage(self.parcellationDir, 'anat_freesurfer')
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         mask = self. __createSegmentationMask(aparcAseg)
-
-
 
 
         phaseRescale = self.__rescaleFieldMap(phase)
@@ -41,6 +40,8 @@ class Fieldmap(GenericTask):
         lossyMagnitude = self.__computeMap(self, magnitudeMask, lossy, 'lossy')
 
         warped = self.__computeForwardDistorsion(self, fieldmap, lossyMagnitude, magnitudeMask)
+
+
 
     #@TODO change rebase name
     def __rescaleFieldMap(self, source):
@@ -58,15 +59,15 @@ class Fieldmap(GenericTask):
 
 
     def __createSegmentationMask(self, source):
-	target = self.buildName(source, 'mask')
+        target = self.buildName(source, 'mask')
 
-	nii = nibabel.load(source)
-	op = ((numpy.mgrid[:5,:5,:5]-2.0)**2).sum(0)<=4
-	mask = scipy.ndimage.binary_closing(nii.get_data()>0, op, iterations=2)
-	scipy.ndimage.binary_fill_holes(mask, output=mask)
-	nibabel.save(nibabel.Nifti1Image(mask.astype(numpy.uint8), nii.get_affine()), target)
-	del nii, mask, op
-	return target
+        nii = nibabel.load(source)
+        op = ((numpy.mgrid[:5,:5,:5]-2.0)**2).sum(0)<=4
+        mask = scipy.ndimage.binary_closing(nii.get_data()>0, op, iterations=2)
+        scipy.ndimage.binary_fill_holes(mask, output=mask)
+        nibabel.save(nibabel.Nifti1Image(mask.astype(numpy.uint8), nii.get_affine()), target)
+        del nii, mask, op
+        return target
 
 
 
@@ -81,9 +82,10 @@ class Fieldmap(GenericTask):
         if self.getBoolean("usesqform"):
             cmd += "-usesqform "
 
-	#uncompress resulting file
-	util.gunzip("{}.gz".format(target))
+        #uncompress resulting file
+        util.gunzip("{}.gz".format(target))
         self.launchCommand(cmd)
+
         return fielmapToAnat
 
 
@@ -130,6 +132,7 @@ class Fieldmap(GenericTask):
         self.launchCommand(cmd)
         return target
 
+
     def __simulateLossyMap(self, source, mask):
 
         ## the following step simulate a lossy distorted image from fieldmap magnitude file to improve registration with EPI
@@ -149,10 +152,10 @@ class Fieldmap(GenericTask):
         # compute the fieldmap magnitude file with signal loss
         #fslmaths /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/mask_mag/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain.nii -mul /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/signal_loss/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss.nii.gz /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/fieldmap_mag_lossy/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy.nii
 
-	target = self.buildName(source, prefix)
+        target = self.buildName(source, prefix)
 
-	cmd = "fslmaths {} -mul {} ".format(source, mask, target)
-	self.launchCommand(cmd)
+        cmd = "fslmaths {} -mul {} ".format(source, mask, target)
+        self.launchCommand(cmd)
 
 	
     def __computeForwardDistorsion(self, source, lossyImage, mask):
@@ -162,30 +165,20 @@ class Fieldmap(GenericTask):
         #fugue --dwell=0.0006900000 --loadfmap=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/make_fieldmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg.nii.gz --in=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/fieldmap_mag_lossy/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy.nii --mask=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/warp_t1_mask/HC_AM32_1_mask_crop_flirt.nii.gz --nokspace --unwarpdir=y --warp=fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy_warped.nii.gz
 
 
-	target = self.buildName(source, 'warped')
-	
-	cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.get('dwell_time'), source, lossyImage, self.get('unwarpdir'), target )
-
-	self.launchCommand(cmd)
-
-
-
-=======
         target = self.buildName(source, 'warped')
-
         cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.get('dwell_time'), source, lossyImage, self.get('unwarpdir'), target )
-
         self.launchCommand(cmd)
         return target
+
+
 
     source = epi
     reference = warped
 
     def __coregisterEpiLossyMap(self, source, reference, lossyMap, weighted ):
->>>>>>> 4ff7ec8a3b69d45b5b2b4571fd78d49ea22c991a
 
         matrixName = self.buildName("epi_to_b0fm")
-        "flirt -in {} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference,matrixName, self.get("dof"), weighted)
+        "flirt -in {extraction de la b0 de ls dwi} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference, matrixName, self.get("dof"), weighted)
 
 
 
@@ -210,14 +203,14 @@ class Fieldmap(GenericTask):
 
 
         # apply distortion correction to the whole DWI data
-        fugue --in=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/eddy/eddy_corrected.nii.gz --mask=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/mask2epi/HC_AM32_1_mask_crop_flirt.nii.gz --loadshift=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/epi_voxelshiftmap/vsm_epi.nii.gz --unwarp=eddy_corrected_unwarped.nii.gz
-        """
+        fugue --in=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/eddy/eddy_corrected.nii.gz     {extraction de la b0 de ls dwi}   --mask=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/mask2epi/HC_AM32_1_mask_crop_flirt.nii.gz --loadshift=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/epi_voxelshiftmap/vsm_epi.nii.gz --unwarp=eddy_corrected_unwarped.nii.gz
+
 
 
         print "THIS TASK IS IMCOMPLETE"
         import sys
         sys.exit()
-
+    """
 
     def isIgnore(self):
         return self.isSomeImagesMissing({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')})

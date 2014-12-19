@@ -16,7 +16,7 @@ __author__ = 'cbedetti'
 class QA(GenericTask):
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preparation', 'unwarping', 'denoising', 'preprocessing', 'parcellation',  'registration')
+        GenericTask.__init__(self, subject, 'preparation', 'eddyDir', 'denoising', 'preprocessing', 'parcellation',  'registration')
         self.reportName = self.config.get('qa','report_name')
         self.imgWidth = 650
         self.dirty = True #change to False after one execution of implement
@@ -57,19 +57,19 @@ class QA(GenericTask):
         aparcaseg_rs_tg = self.buildName(aparcaseg_rs, None, 'png', False)
         brodmann_rs_tg = self.buildName(brodmann_rs, None, 'png', False)
         
-        #Special case for unwarping and denoising
+        #Special case for eddy_correction and denoising
         
-        unwarp = self.getImage(self.unwarpingDir,'dwi','unwarp')
-        if unwarp:
-            bvec_eddy = self.getImage(self.unwarpingDir, 'grad', 'eddy', 'bvec')
-            eddy_parameters = os.path.join(self.subjectDir, self.unwarpingDir, "tmp.nii.eddy_parameters")
-            unwarp_tg = self.buildName(unwarp, None, 'gif', False)
+        eddy = self.getImage(self.eddyDir,'dwi','eddy')
+        if eddy:
+            bvec_eddy = self.getImage(self.eddyDir, 'grad', 'eddy', 'bvec')
+            eddy_parameters = os.path.join(self.subjectDir, self.eddyDir, "tmp.nii.eddy_parameters")
+            eddy_tg = self.buildName(eddy, None, 'gif', False)
             translation_tg = 'translation.png'
             rotation_tg = 'rotation.png'
         else:
             bvec_eddy = False
             eddy_parameters = False
-            unwarp_tg = None
+            eddy_tg = None
             translation_tg = None
             rotation_tg = None
 
@@ -106,7 +106,7 @@ class QA(GenericTask):
         #nii4dtoGif images production
         nii4dtoGifImages = [
             (dwi, dwi_tg),
-            (unwarp, unwarp_tg),
+            (eddy, eddy_tg),
             (denoise, denoise_tg),
             ]
         for image, target in nii4dtoGifImages:
@@ -148,12 +148,12 @@ class QA(GenericTask):
         
         #### DWI QA ####
         gradVectorLegend = 'Red : raw bvec | Blue : opposite bvec'
-        if unwarp:
+        if eddy:
             gradVectorLegend += ' | Black + : movement corrected bvec'
 
         dwiQaTags = [
             ('Raw', dwi_tg, str(mriutil.getMriDimensions(dwi))),
-            ('DWI Unwarp', unwarp_tg, None),
+            ('DWI eddy', eddy_tg, None),
             ('Translation correction by eddy', translation_tg, None),
             ('Rotation correction by eddy', rotation_tg, None),
             ('Gradients vectors on the unitary sphere', vector_tg, gradVectorLegend),

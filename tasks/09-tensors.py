@@ -9,16 +9,16 @@ class Tensors(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'unwarping', 'masking')
+        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir,'dwi','upsample')
 
-        bFile = self.getImage(self.unwarpingDir, 'grad',  None, 'b')
-        bValFile = self.getImage(self.unwarpingDir, 'grad', None, 'bval')
-        bVecFile = self.getImage(self.unwarpingDir, 'grad', None, 'bvec')
+        bFile = self.getImage(self.eddyDir, 'grad',  None, 'b')
+        bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
+        bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
 
         mask = self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
 
@@ -78,9 +78,9 @@ class Tensors(GenericTask):
     def meetRequirement(self, result = True):
 
         #Look first if there is eddy b encoding files produces
-        bFile = self.getImage(self.unwarpingDir, 'grad', None, 'b')
-        bValFile = self.getImage(self.unwarpingDir, 'grad', None, 'bval')
-        bVecFile = self.getImage(self.unwarpingDir, 'grad', None, 'bvec')
+        bFile = self.getImage(self.eddyDir, 'grad', None, 'b')
+        bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
+        bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
 
         if (not bFile) or (not bValFile) or (not bVecFile):
 

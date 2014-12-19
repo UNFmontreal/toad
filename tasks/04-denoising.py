@@ -9,7 +9,7 @@ class Denoising(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'unwarping', 'preparation' )
+        GenericTask.__init__(self, subject, 'eddy', 'preparation' )
 
 
     def implement(self):
@@ -17,7 +17,7 @@ class Denoising(GenericTask):
         if self.get("algorithm") is "None":
             self.info("Skipping denoising process")
         else:
-            dwi = self.getImage(self.dependDir, "dwi", 'unwarp')
+            dwi = self.getImage(self.dependDir, "dwi", 'eddy')
             if not dwi:
                 dwi = self.getImage(self.preparationDir, "dwi")
 
@@ -60,7 +60,7 @@ class Denoising(GenericTask):
 
     def meetRequirement(self, result = True):
 
-        if self.isSomeImagesMissing({'unwarped': self.getImage(self.dependDir, "dwi", 'unwarp')}):
+        if self.isSomeImagesMissing({'eddy corrected': self.getImage(self.dependDir, "dwi", 'eddy')}):
             dwi = self.getImage(self.preparationDir, "dwi")
             if self.isSomeImagesMissing({'diffusion weighted': dwi}):
                 result = False

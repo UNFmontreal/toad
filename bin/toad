@@ -63,7 +63,7 @@ def __parseArguments():
         sujN--\\
               |- 00-backup
               |- 01-preparation
-              |- 02-unwarping
+              |- 02-eddy
               |- 03-denoising
               |- 04-preprocessing
               |- 05-parcellation

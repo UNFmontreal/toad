@@ -11,7 +11,7 @@ class Dtifit(GenericTask):
         """Fits a diffusion tensor model at each voxel
 
         """
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'unwarping', 'masking')
+        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
 
 
     def implement(self):
@@ -20,8 +20,8 @@ class Dtifit(GenericTask):
         """
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
         mask = self.getImage(self.maskingDir, "aparc_aseg", ["resample","mask"] )
-        bVal = self.getImage(self.unwarpingDir, 'grad', None, 'bval')
-        bVec = self.getImage(self.unwarpingDir, 'grad', None, 'bvec')
+        bVal = self.getImage(self.eddyDir, 'grad', None, 'bval')
+        bVec = self.getImage(self.eddyDir, 'grad', None, 'bvec')
         if (not bVal) or (not bVec):
             bVal = self.getImage(self.preparationDir,'grad', None, 'bval')
             bVec = self.getImage(self.preparationDir,'grad', None, 'bvec')
@@ -68,8 +68,8 @@ class Dtifit(GenericTask):
 
         """
 
-        images = {'.bval gradient encoding file': self.getImage(self.unwarpingDir, 'grad', None, 'bval'),
-                '.bvec gradient encoding file': self.getImage(self.unwarpingDir, 'grad', None, 'bvec')}
+        images = {'.bval gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'bval'),
+                '.bvec gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'bvec')}
 
         if self.isSomeImagesMissing(images):
             images = {'.bval gradient encoding file': self.getImage(self.preparationDir, 'grad', None, 'bval'),

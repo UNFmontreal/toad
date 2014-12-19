@@ -6,7 +6,7 @@ import os
 __author__ = 'desmat'
 
 
-class Unwarping(GenericTask):
+class Eddy(GenericTask):
 
 
     def __init__(self, subject):
@@ -16,8 +16,11 @@ class Unwarping(GenericTask):
     def implement(self):
 
         dwi   = self.getImage(self.dependDir, 'dwi')
+
+        b0 = self.getImage(self.dependDir, 'b0')
         b0PA  = self.getImage(self.dependDir, 'b0PA')
         b0AP  = self.getImage(self.dependDir, 'b0AP')
+
         bFile =  self.getImage(self.dependDir, 'grad',  None, 'b')
         bVals =  self.getImage(self.dependDir, 'grad',  None, 'bval')
         bVecs =  self.getImage(self.dependDir, 'grad',  None, 'bvec')
@@ -25,38 +28,49 @@ class Unwarping(GenericTask):
         #make sure the 3 images have the same voxel size and dimension scale
         self.__validateSizeAndDimension(dwi, b0PA, b0AP)
 
+
         #make sure that the z dimension contain an odd number of slices
         dwiZDims = int(mriutil.getMriDimensions(dwi)[2])
-
         if dwiZDims%2 == 1:
             dwi  = self.__extractZVolumes(dwi, "0:{}".format(dwiZDims-2))
-            b0PA = self.__extractZVolumes(b0PA, "0:{}".format(dwiZDims-2))
-            b0AP = self.__extractZVolumes(b0AP, "0:{}".format(dwiZDims-2))
+            if b0PA:
+                b0PA = self.__extractZVolumes(b0PA, "0:{}".format(dwiZDims-2))
+            if b0AP:
+                b0AP = self.__extractZVolumes(b0AP, "0:{}".format(dwiZDims-2))
 
-        #concatenate B0 image together
-        b0Image = self.__concatenateB0(b0PA, b0AP,
+
+        if b0AP and b0PA is False:
+            b0PA = b0
+
+        if b0PA and b0AP is False:
+            b0AP = b0
+
+        if b0AP is False or b0PA is False:
+            topupBaseName = None
+            mask = self.__bet(b0)
+
+        else:
+
+            #concatenate B0 image together
+            b0Image = self.__concatenateB0(b0PA, b0AP,
                             os.path.join(self.workingDir, self.get('b0s_filename')))
 
-        #create an empty b02b0.cnf file
-        #b02b0File = os.path.join(self.workingDir, self.get('b02b0_filename'))
-        #open(b02b0File, 'a').close()
+            #create the acquisition parameter file
+            acqpTopup = self.__createAcquisitionParameterFile('topup')
+            #Lauch topup on concatenate B0 image
+            [topupBaseName, topupImage] = self.__topup(b0Image, acqpTopup, self.get('b02b0_filename'))
+            meanTopup = self.__fslmaths_tmean(os.path.join(self.workingDir, topupImage))
+            mask = self.__bet(meanTopup)
 
-        #create the acquisition parameter file
-        acqpTopup = self.__createAcquisitionParameterFile('topup')
+
+        #create the acquisition parameter file for eddy
         acqpEddy = self.__createAcquisitionParameterFile('eddy')
 
         #create an index file
         indexFile = self.__createIndexFile(mriutil.getNbDirectionsFromDWI(dwi))
 
-        #Lauch topup on concatenate B0 image
-        [topupBaseName, topupImage] = self.__topup(b0Image, acqpTopup, self.get('b02b0_filename'))
-
-        outputFieldMask = self.__fslmaths_tmean(os.path.join(self.workingDir, topupImage))
-
-        outputFieldMaskExtracted = self.__bet(outputFieldMask)
-
         outputEddyImage = self.__correction_eddy2(dwi,
-                                    outputFieldMaskExtracted, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
+                                    mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
 
         self.info("Uncompressing eddy output image: {}".format(outputEddyImage))
         util.gunzip(outputEddyImage)
@@ -241,9 +255,12 @@ class Unwarping(GenericTask):
         """
         self.info("Launch eddy correction from fsl")
         tmp = self.buildName(source, "tmp")
-        target = self.buildName(source, "unwarp")
-        cmd = "eddy --imain={} --mask={} --topup={} --index={} --acqp={} --bvecs={} --bvals={} --out={} --verbose"\
-              .format(source, mask, topup, index, acqp, bVecs, bVal, tmp)
+        target = self.buildName(source, "eddy")
+        cmd = "eddy --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} "\
+              .format(source, mask, index, acqp, bVecs, bVal, tmp)
+
+        if topup is not None:
+            cmd += " --topup={}".format(topup)
 
         self.getNTreadsEddy()
         self.launchCommand(cmd)
@@ -258,23 +275,20 @@ class Unwarping(GenericTask):
 
 
     def isIgnore(self):
-        return self.isSomeImagesMissing({'posterior to anterior':self.getImage(self.dependDir, 'b0PA'), 'anterior to posterior':self.getImage(self.dependDir, 'b0AP')})
+        return self.get("ignore") is "True"
 
 
     def meetRequirement(self):
 
         images = {'diffusion weighted':self.getImage(self.dependDir, 'dwi'),
-                  'posterior to anterior':self.getImage(self.dependDir, 'b0PA'),
-                  'anterior to posterior':self.getImage(self.dependDir, 'b0PA'),
                   'gradient .bval encoding file': self.getImage(self.dependDir, 'grad', None, 'bval'),
                   'gradient .bvec encoding file': self.getImage(self.dependDir, 'grad', None, 'bvec'),
                   'gradient .b encoding file': self.getImage(self.dependDir, 'grad', None, 'b')}
-
         return self.isAllImagesExists(images)
 
 
     def isDirty(self):
-        images = {'diffusion weighted unwarped': self.getImage(self.workingDir, 'dwi', 'unwarp'),
+        images = {'diffusion weighted eddy corrected': self.getImage(self.workingDir, 'dwi', 'eddy'),
                   'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', None, 'bval'),
                   'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b')}
