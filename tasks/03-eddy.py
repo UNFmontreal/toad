@@ -15,15 +15,15 @@ class Eddy(GenericTask):
 
     def implement(self):
 
-        dwi   = self.getImage(self.dependDir, 'dwi')
+        dwi = self.getImage(self.dependDir, 'dwi')
 
-        b0 = self.getImage(self.dependDir, 'b0')
-        b0AP  = self.getImage(self.dependDir, 'b0AP')
-        b0PA  = self.getImage(self.dependDir, 'b0PA')
+        b0= self.getImage(self.dependDir, 'b0')
+        b0AP= self.getImage(self.dependDir, 'b0AP')
+        b0PA= self.getImage(self.dependDir, 'b0PA')
 
-        bFile =  self.getImage(self.dependDir, 'grad',  None, 'b')
-        bVals =  self.getImage(self.dependDir, 'grad',  None, 'bval')
-        bVecs =  self.getImage(self.dependDir, 'grad',  None, 'bvec')
+        bFile=  self.getImage(self.dependDir, 'grad',  None, 'b')
+        bVals=  self.getImage(self.dependDir, 'grad',  None, 'bval')
+        bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvec')
 
         #make sure the 3 images have the same voxel size and dimension scale
         self.__validateSizeAndDimension(dwi, b0PA, b0AP)
@@ -33,6 +33,7 @@ class Eddy(GenericTask):
         dwiZDims = int(mriutil.getMriDimensions(dwi)[2])
         if dwiZDims%2 == 1:
             dwi  = self.__extractZVolumes(dwi, "0:{}".format(dwiZDims-2))
+            b0  = self.__extractZVolumes(b0, "0:{}".format(dwiZDims-2))
             if b0PA:
                 b0PA = self.__extractZVolumes(b0PA, "0:{}".format(dwiZDims-2))
             if b0AP:
@@ -59,7 +60,7 @@ class Eddy(GenericTask):
             acqpTopup = self.__createAcquisitionParameterFile('topup')
             #Lauch topup on concatenate B0 image
             [topupBaseName, topupImage] = self.__topup(b0Image, acqpTopup, self.get('b02b0_filename'))
-            meanTopup = self.__fslmaths_tmean(os.path.join(self.workingDir, topupImage))
+            meanTopup = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
             mask = self.__bet(meanTopup)
 
 
@@ -69,7 +70,7 @@ class Eddy(GenericTask):
         #create an index file
         indexFile = self.__createIndexFile(mriutil.getNbDirectionsFromDWI(dwi))
 
-        outputEddyImage = self.__correction_eddy2(dwi,
+        outputEddyImage = self.__correctionEddy2(dwi,
                                     mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
 
         self.info("Uncompressing eddy output image: {}".format(outputEddyImage))
@@ -152,7 +153,7 @@ class Eddy(GenericTask):
         if type=='topup':
             parameter='acqp_topup'
             text = "0 -1 0 {}\n0 1 0 {}\n".format(factor, factor)
-            
+
         elif type=='eddy':
             parameter='acqp_eddy'
             if phaseEncDir==0:    #P>>A
@@ -227,7 +228,7 @@ class Eddy(GenericTask):
         return [baseName, output]
 
 
-    def __fslmaths_tmean(self, source):
+    def __fslmathsTmean(self, source):
 
         target = source.replace(".nii", "_tmean.nii")
         mriutil.fslmaths(source, target , 'Tmean')
@@ -250,8 +251,20 @@ class Eddy(GenericTask):
         return target
 
 
-    def __correction_eddy2(self, source, mask, topup, index, acqp, bVecs, bVal):
-        """
+    def __correctionEddy2(self, source, mask, topup, index, acqp, bVecs, bVal):
+        """Performs eddy correction on a dwi file.
+
+        Args:
+            source:	File containing all the images to estimate distortions for
+            mask:	Mask to indicate brain
+            topup:  Base name for output files from topup
+            index:	File containing indices for all volumes in --imain into --acqp and --topup
+            acqp:	File containing acquisition parameters
+            bvecs:	File containing the b-vectors for all volumes in --imain
+            bvals:	File containing the b-values for all volumes in --imain
+
+        Returns:
+            The resulting file name
 
         """
         self.info("Launch eddy correction from fsl")

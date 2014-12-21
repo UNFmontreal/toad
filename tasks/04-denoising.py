@@ -2,7 +2,6 @@ from lib.generictask import GenericTask
 from lib import util
 import os
 
-
 __author__ = 'desmat'
 
 class Denoising(GenericTask):
