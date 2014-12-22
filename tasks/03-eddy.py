@@ -206,20 +206,20 @@ class Eddy(GenericTask):
 
     def __validateSizeAndDimension(self, sources):
 
-	names = []		
+        names = []
         dims = []
         sizes = []
-	
+
         for source in sources:
             if source:
-		names.append(source)
-		dimensions = mriutil.getMriDimensions(source)
-		if len(dimensions) == 4:
-                	dims.append([dimensions[0], dimensions[1], dimensions[2]])
-		else:
-			dims.append(dimensions)
-                sizes.append(mriutil.getMriVoxelSize(source))
-		
+                names.append(source)
+                dimensions = mriutil.getMriDimensions(source)
+                if len(dimensions) == 4:
+                    dims.append([dimensions[0], dimensions[1], dimensions[2]])
+                else:
+                    dims.append(dimensions)
+                    sizes.append(mriutil.getMriVoxelSize(source))
+
         if not dims[1:] == dims[:-1]:
             self.error("Dimension for each scale mismatch found between images: {}".format(", ".join(names)))
 
@@ -256,7 +256,7 @@ class Eddy(GenericTask):
         self.launchCommand(cmd)
 
         self.info("uncompressing {}".format(tmp))
-	unzip = util.gunzip(tmp) 
+        unzip = util.gunzip(tmp)
 
         self.info("renaming {} to {}".format(unzip, target))
         os.rename(unzip, target)

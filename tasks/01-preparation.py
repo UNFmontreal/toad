@@ -24,7 +24,6 @@ class Preparation(GenericTask):
 
         self.__produceEncodingFiles(bEnc, bVal, bVec)
 
-
         if b0PA:
             self.info("Found B0 posterior to anterior image, linking file {} to {}".format(b0AP, self.workingDir))
             util.symlink(b0PA, self.workingDir)
@@ -33,7 +32,8 @@ class Preparation(GenericTask):
             self.info("Found B0 anterior to posterior image, linking file {} to {}".format(b0AP, self.workingDir))
             util.symlink(b0AP, self.workingDir)
 
-        self.__extractFirstB0FromDWI(dwi, bVal)
+        b0Index = self.mriutil.getFirstB0IndexFromDwi(bVal)
+        self.__extractFirstB0FromDwi(dwi, b0Index)
 
         images = {'high resolution': self.getImage(self.dependDir, 'anat'),
                   'diffusion weighted': dwi,
@@ -70,7 +70,14 @@ class Preparation(GenericTask):
             util.symlink(bVec, self.workingDir)
 
 
-    def __extractFirstB0FromDWI(self, source, bval):
+    def __extractFirstB0FromDwi(self, source, index):
+        """ Extract the first B0 images found in a dwi images
+            Args:
+                source: the dwi image
+                bval: the .b encoding files associate to that image
+            Returns:
+                target filename
+        """
         self.info("Launch sub volume extraction from mrtrix")
 
         #rename the file B0
@@ -78,12 +85,6 @@ class Preparation(GenericTask):
         extractAtAxis = self.get('b0_extract_at_axis')
         if extractAtAxis not in ["1", "2", "3"]:
             self.error('extract_at_axis must be value of 1 or 2 or 3, found {}'.format(extractAtAxis))
-
-        #extract coordinnate of the first b0 file
-        index = 0
-        for line in open(bval,'r').readlines():
-                b0s = line.strip().split()
-                index = b0s.index('0')
 
         #make sure that we do not extract a volumes outside of the dimension
         self.info(mriutil.extractSubVolume(source,

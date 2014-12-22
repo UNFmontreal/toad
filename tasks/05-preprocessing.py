@@ -21,25 +21,48 @@ class Preprocessing(GenericTask):
                 dwi = self.getImage(self.dependDir, 'dwi')
 
 
-        b0 = self.getImage(self.dependDir, 'b0', 'denoise')
-        if not b0:
-            b0 = self.getImage(self.eddyDir, 'b0', 'eddy')
-            if not b0:
-                b0 = self.getImage(self.dependDir, 'b0')
-
-
         bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
         if not bVal:
             bVal= self.getImage(self.preparationDir, 'grad', None, 'b')
 
 
+        b0Index = self.mriutil.getFirstB0IndexFromDwi(bVal)
+
         dwiUpsample=  self.__upsampling(dwi)
-        boUpsample=  self.__upsampling(b0)
+        boUpsample= self.__extractFirstB0FromDwi(dwiUpsample, b0Index)
         whiteMatterDWI = self.__segmentation(boUpsample)
 
         anat = self.getImage(self.preparationDir, 'anat')
         brainAnat      = self.__bet(anat)
         whiteMatterAnat= self.__segmentation(brainAnat)
+
+
+    #@ TODO this finction is repeat into the preparation task, refactor
+    def __extractFirstB0FromDwi(self, source, index):
+        """ Extract the first B0 images found in a dwi images
+            Args:
+                source: the dwi image
+                bval: the .b encoding files associate to that image
+            Returns:
+                target filename
+        """
+        self.info("Launch sub volume extraction from mrtrix")
+
+        #rename the file B0
+        target = os.path.join(self.workingDir, os.path.basename(source).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        extractAtAxis = self.get('b0_extract_at_axis')
+        if extractAtAxis not in ["1", "2", "3"]:
+            self.error('extract_at_axis must be value of 1 or 2 or 3, found {}'.format(extractAtAxis))
+
+        #make sure that we do not extract a volumes outside of the dimension
+        self.info(mriutil.extractSubVolume(source,
+                                target,
+                                extractAtAxis,
+                                index,
+                                self.getNTreadsMrtrix()))
+
+        self.info("End extraction from mrtrix")
+        return target
 
 
     def __upsampling(self, source):
