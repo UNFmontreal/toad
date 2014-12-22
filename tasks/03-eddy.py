@@ -16,35 +16,26 @@ class Eddy(GenericTask):
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi')
-
         b0= self.getImage(self.dependDir, 'b0')
         b0AP= self.getImage(self.dependDir, 'b0AP')
         b0PA= self.getImage(self.dependDir, 'b0PA')
-
         bFile=  self.getImage(self.dependDir, 'grad',  None, 'b')
         bVals=  self.getImage(self.dependDir, 'grad',  None, 'bval')
         bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvec')
 
-        #make sure the 3 images have the same voxel size and dimension scale
-        self.__validateSizeAndDimension(dwi, b0PA, b0AP)
 
+        #make sure all the images have the same voxel size and dimension scale between them
+        self.__validateSizeAndDimension([dwi, b0, b0AP, b0PA])
 
-        #make sure that the z dimension contain an odd number of slices
-        dwiZDims = int(mriutil.getMriDimensions(dwi)[2])
-        if dwiZDims%2 == 1:
-            dwi  = self.__extractZVolumes(dwi, "0:{}".format(dwiZDims-2))
-            b0  = self.__extractZVolumes(b0, "0:{}".format(dwiZDims-2))
-            if b0PA:
-                b0PA = self.__extractZVolumes(b0PA, "0:{}".format(dwiZDims-2))
-            if b0AP:
-                b0AP = self.__extractZVolumes(b0AP, "0:{}".format(dwiZDims-2))
+        #Generate a missing b0 image if we could. --> 0 = P>>A, 1 = A>>P
+        if dwi == "0" and b0PA and b0AP is False:
+            b0AP = b0
 
-
-        if b0AP and b0PA is False:
+        if dwi == "1" and b0AP and b0PA is False :
             b0PA = b0
 
-        if b0PA and b0AP is False:
-            b0AP = b0
+
+        [dwi, b0, b0AP, b0PA] = self.__oddImagesWithEvenNumberOfSlices([dwi, b0, b0AP, b0PA])
 
         if b0AP is False or b0PA is False:
             topupBaseName = None
@@ -62,7 +53,6 @@ class Eddy(GenericTask):
             [topupBaseName, topupImage] = self.__topup(b0Image, acqpTopup, self.get('b02b0_filename'))
             meanTopup = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
             mask = self.__bet(meanTopup)
-
 
         #create the acquisition parameter file for eddy
         acqpEddy = self.__createAcquisitionParameterFile('eddy')
@@ -83,6 +73,26 @@ class Eddy(GenericTask):
             #produce the bVal and bVec file accordingly
             mriutil.bEnc2BVec(bCorrected, self.workingDir)
             mriutil.bEnc2BVal(bCorrected, self.workingDir)
+
+
+    def  __oddImagesWithEvenNumberOfSlices(self, sources):
+        """return a list of images that will count a odd number of slices in z direction
+
+            If an even number of slices is found, the upper volume will be remove
+
+        Args:
+            sources: a list of images
+
+        Returns:
+             the same list but with images modified
+
+        """
+        for i, source in enumerate(sources):
+            if source:
+                zDims = int(mriutil.getMriDimensions(source)[2])
+                if zDims%2 == 1:
+                    sources[i]= self.__extractZVolumes(source, "0:{}".format(zDims-2))
+        return sources
 
 
     def __extractZVolumes(self, source, volumes):
@@ -193,27 +203,25 @@ class Eddy(GenericTask):
         return target
 
 
-    def __validateSizeAndDimension(self, dwi, b0PA, b0AP):
+    def __validateSizeAndDimension(self, sources):
 
-        dwiDim   = mriutil.getMriDimensions(dwi)
-        dwiVoxel = mriutil.getMriVoxelSize(dwi)
-        b0PADim   = mriutil.getMriDimensions(b0PA)
-        b0PAVoxel = mriutil.getMriVoxelSize(b0PA)
-        b0APDim   = mriutil.getMriDimensions(b0AP)
-        b0APVoxel = mriutil.getMriVoxelSize(b0AP)
+        dims = []
+        sizes = []
+        for source in sources:
+            if source:
+                dims.append(mriutil.getMriDimensions(source))
+                sizes.append(mriutil.getMriVoxelSize(source))
+                mriutil.getMriVoxelSize(source)
 
-        self.info("Look if {} and {} and {} have the same voxel size".format(dwi, b0PA, b0AP))
-        if len(dwiVoxel) == len(b0PAVoxel) == len(b0APVoxel) == 3:
-            for i in range(0,len(dwiVoxel)):
-                if not (dwiVoxel[i] == b0PAVoxel[i] == b0APVoxel[i]):
-                    self.error("Voxel size mismatch found at index {} for image {} {} {}".format(i, dwi, b0PA, b0AP))
-        else:
-            self.error("Found Voxel size inconsistency for image {} or  {} or {}".format(dwi, b0PA, b0AP))
+        #@DEBUG
+        print "sizes =", sizes
 
-        self.info("Look if {} and {} and {} have the same dimension for each scale".format(dwi, b0PA, b0AP))
-        for i in range(0,3):
-                if not (dwiDim[i]==b0PADim[i]==b0APDim[i]):
-                    self.error("Dimensions mismatch found at index {} for image {} {} {}".format(i, dwi, b0PA, b0AP))
+        if not dims[1:] == dims[:-1]:
+            self.error("Dimension for each scale mismatch found between images: {}".format(" ".join(sources)))
+
+        if not dims[1:] == dims[:-1]:
+            self.error("Voxel size mismatch found between images: {}".format(" ".join(sources)))
+
 
 
     def __topup(self, source, acqp, b02b0File):
