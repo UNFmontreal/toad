@@ -113,11 +113,8 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
 
     h = open(output, 'w')
 
-    index = 0
-    for line in eddys:
-
+    for index, line in enumerate(eddys):
         row_four_to_six_eddy = line.split('  ')[3:6]
-
         x = numpy.matrix([[ 1, 0, 0],
                      [0,numpy.cos(float(row_four_to_six_eddy[0])) , numpy.sin(float(row_four_to_six_eddy[0]))] ,
                      [0,-numpy.sin(float(row_four_to_six_eddy[0])),numpy.cos(float(row_four_to_six_eddy[0]))]])
@@ -132,8 +129,9 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
         matrix = (z*y*x).I
         gradient = numpy.matrix([[float(b_line[index].split('\t')[0]), float(b_line[index].split('\t')[1]),float(b_line[index].split('\t')[2])]])
         new_gradient = matrix*gradient.T
-        h.write(str(float(new_gradient[0]))+'\t'+str(float(new_gradient[1]))+'\t'+str(float(new_gradient[2]))+'\t'+b_line[index].split('\t')[3]+'\n')
-        index= index +1
+	
+	values = str(float(new_gradient[0]))+'\t'+str(float(new_gradient[1]))+'\t'+str(float(new_gradient[2]))+'\t'+b_line[index].split('\t')[3].strip()+'\n'
+        h.write(values)
 
     h.close()
     return output

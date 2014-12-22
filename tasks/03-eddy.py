@@ -28,12 +28,11 @@ class Eddy(GenericTask):
         self.__validateSizeAndDimension([dwi, b0, b0AP, b0PA])
 
         #Generate a missing b0 image if we could. --> 0 = P>>A, 1 = A>>P
-        if dwi == "0" and b0PA and b0AP is False:
+        if self.get("phase_enc_dir") == "0" and b0PA and b0AP is False:
             b0AP = b0
 
-        if dwi == "1" and b0AP and b0PA is False :
+        if self.get("phase_enc_dir") == "1" and b0AP and b0PA is False :
             b0PA = b0
-
 
         [dwi, b0, b0AP, b0PA] = self.__oddImagesWithEvenNumberOfSlices([dwi, b0, b0AP, b0PA])
 
@@ -49,10 +48,12 @@ class Eddy(GenericTask):
 
             #create the acquisition parameter file
             acqpTopup = self.__createAcquisitionParameterFile('topup')
+
             #Lauch topup on concatenate B0 image
             [topupBaseName, topupImage] = self.__topup(b0Image, acqpTopup, self.get('b02b0_filename'))
             meanTopup = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
             mask = self.__bet(meanTopup)
+
 
         #create the acquisition parameter file for eddy
         acqpEddy = self.__createAcquisitionParameterFile('eddy')
@@ -134,7 +135,7 @@ class Eddy(GenericTask):
     def __createAcquisitionParameterFile(self, type):
         """Create the acquire parameter (--acqp) file for topup or eddy
 
-        For topup, the image is always concatenate b0AP first then b0PA
+        For topup, the image will concatenate b0AP first then b0PA
             #A>>P, 0 -1 0
             #P>>A, 0 1 0
             #R>>L, 1 0 0
@@ -205,23 +206,25 @@ class Eddy(GenericTask):
 
     def __validateSizeAndDimension(self, sources):
 
+	names = []		
         dims = []
         sizes = []
+	
         for source in sources:
             if source:
-                dims.append(mriutil.getMriDimensions(source))
+		names.append(source)
+		dimensions = mriutil.getMriDimensions(source)
+		if len(dimensions) == 4:
+                	dims.append([dimensions[0], dimensions[1], dimensions[2]])
+		else:
+			dims.append(dimensions)
                 sizes.append(mriutil.getMriVoxelSize(source))
-                mriutil.getMriVoxelSize(source)
-
-        #@DEBUG
-        print "sizes =", sizes
-
+		
         if not dims[1:] == dims[:-1]:
-            self.error("Dimension for each scale mismatch found between images: {}".format(" ".join(sources)))
+            self.error("Dimension for each scale mismatch found between images: {}".format(", ".join(names)))
 
-        if not dims[1:] == dims[:-1]:
-            self.error("Voxel size mismatch found between images: {}".format(" ".join(sources)))
-
+        if not sizes[1:] == sizes[:-1]:
+            self.error("Voxel size mismatch found between images: {}".format(", ".join(names)))
 
 
     def __topup(self, source, acqp, b02b0File):
@@ -252,8 +255,11 @@ class Eddy(GenericTask):
         cmd = "bet {} {} -v -m".format(source, tmp)
         self.launchCommand(cmd)
 
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
+        self.info("uncompressing {}".format(tmp))
+	unzip = util.gunzip(tmp) 
+
+        self.info("renaming {} to {}".format(unzip, target))
+        os.rename(unzip, target)
 
         self.info("Finish brain extraction from fsl")
         return target
