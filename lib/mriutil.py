@@ -28,6 +28,20 @@ def fslmaths(source1, target, operator="bin", source2=None):
     return result
 
 
+def extractFirstB0FromDwi(source, target, bval, nthreads = "1"):
+    """Perform an extraction of the first b0 image found into a DWI image
+
+    Args:
+        source: The input image
+        target: The resulting output name
+        bval:   A gradient encoding B0 values file name
+
+    Returns:
+         A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
+    """
+    return extractSubVolume(source, target, "3", getFirstB0IndexFromDwi(bval), nthreads)
+
+
 def extractSubVolume(source, target, extractAtAxis, extractAtCoordinate, nthreads = "1"):
     """Perform an extraction of a subset of the source image
 
@@ -40,7 +54,7 @@ def extractSubVolume(source, target, extractAtAxis, extractAtCoordinate, nthread
     Returns:
          A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
     """
-    cmd = "mrconvert -coord {} {} {} {} -nthreads {} -quiet".format(extractAtAxis, extractAtCoordinate, source, target,  nthreads)
+    cmd = "mrconvert -coord {} {} {} {} -nthreads {} -quiet".format(extractAtAxis, extractAtCoordinate, source, target, nthreads)
     return util.launchCommand(cmd)
 
 

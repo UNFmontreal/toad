@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from lib.generictask import GenericTask
+import numpy, nibabel, dipy
 import os
 
 __author__ = 'desmat'
@@ -30,11 +31,10 @@ class Tensors(GenericTask):
         anatBrainWMResampleMask = self.getImage(self.maskingDir, 'anat', ['brain', 'wm', 'resample', 'mask'])
 
         tensorsMrtrix = self.__tensorsMrtrix(dwi, bFile, mask)
+        tensorsDipy = self.__tensorsDipy(dwi, bFile, bVecFile)
 
         #self.info("Masking mrtrix tensors image with the white matter, brain extracted, resampled, high resolution mask.")
         #self.masking(tensorsMrtrix, anatBrainWMResampleMask)
-
-        #@TODO activate tensors dipy
         #@TODO clarify masking situation
 
 
@@ -55,12 +55,12 @@ class Tensors(GenericTask):
 
         return target
 
-    """
-    def __tensorsDipy(self, image, bValFile, bVecFile):
-        self.info("Starting tensors creation from dipy on {}".formatimage)
-        outputFile = os.path.join(self.workingDir, os.path.basename(image.replace(".nii","{}.nii"{}elf.config.get('postfix','dipy'))))
 
-        dwiImage = nibabel.load(image)
+    def __tensorsDipy(self, source, bValFile, bVecFile):
+        self.info("Starting tensors creation from dipy on {}".formatimage)
+        target = self.buildName(source, "dipy")
+
+        dwiImage = nibabel.load(source)
         dwiData  = dwiImage.get_data()
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValFile), numpy.loadtxt(bVecFile))
 
@@ -70,10 +70,10 @@ class Tensors(GenericTask):
         correctOrder = [0,1,3,2,4,5]
         tensorsValuesReordered = tensorsValues[:,:,:,correctOrder]
         tensorsImage = nibabel.Nifti1Image(tensorsValuesReordered.astype(numpy.float32), dwiImage.get_affine())
-        nibabel.save(tensorsImage, outputFile)
-        self.info("End tensor creation from dipy, resulting file is {} ".format(outputFile))
-        return outputFile
-    """
+        nibabel.save(tensorsImage, target)
+        self.info("End tensor creation from dipy, resulting file is {} ".format(target))
+        return target
+
 
     def meetRequirement(self, result = True):
 
@@ -109,19 +109,9 @@ class Tensors(GenericTask):
 
     def isDirty(self):
 
-        images ={"mrtrix tensor": self.getImage(self.workingDir, "dwi", "mrtrix")}
+        images ={"mrtrix tensor": self.getImage(self.workingDir, "dwi", "mrtrix"),
+                 "dipy tensor": self.getImage(self.workingDir, "dwi", "dipy")}
         return self.isSomeImagesMissing(images)
-
-
-
-        #@TODO see with Arnaud for that feature
-        #if not self.getImage(self.workingDir, 'dwi', ['mrtrix', 'mask']):
-        #    self.info("No mrtrix tensor mask found in directory {}"{}elf.workingDir)
-        #    result = True
-
-        #if not self.getImage(self.workingDir, 'dwi', 'dipy'):
-        #    self.info("No dipy tensor image found in directory {}"{}elf.workingDir)
-        #    result = True
 
         #@TODO see with Arnaud for that feature
         #if not self.getImage(self.workingDir, 'dwi', ['dipy', 'mask']):

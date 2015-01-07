@@ -32,9 +32,6 @@ class Preparation(GenericTask):
             self.info("Found B0 anterior to posterior image, linking file {} to {}".format(b0AP, self.workingDir))
             util.symlink(b0AP, self.workingDir)
 
-        b0Index = self.mriutil.getFirstB0IndexFromDwi(bVal)
-        self.__extractFirstB0FromDwi(dwi, b0Index)
-
         images = {'high resolution': self.getImage(self.dependDir, 'anat'),
                   'diffusion weighted': dwi,
                   'MR magnitude ': self.getImage(self.dependDir, 'mag'),
@@ -69,34 +66,6 @@ class Preparation(GenericTask):
         else:
             util.symlink(bVec, self.workingDir)
 
-
-    def __extractFirstB0FromDwi(self, source, index):
-        """ Extract the first B0 images found in a dwi images
-            Args:
-                source: the dwi image
-                bval: the .b encoding files associate to that image
-            Returns:
-                target filename
-        """
-        self.info("Launch sub volume extraction from mrtrix")
-
-        #rename the file B0
-        target = os.path.join(self.workingDir, os.path.basename(source).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
-        extractAtAxis = self.get('b0_extract_at_axis')
-        if extractAtAxis not in ["1", "2", "3"]:
-            self.error('extract_at_axis must be value of 1 or 2 or 3, found {}'.format(extractAtAxis))
-
-        #make sure that we do not extract a volumes outside of the dimension
-        self.info(mriutil.extractSubVolume(source,
-                                target,
-                                extractAtAxis,
-                                index,
-                                self.getNTreadsMrtrix()))
-
-        self.info("End extraction from mrtrix")
-        return target
-
-
     def meetRequirement(self, result=True):
 
         images = {'high resolution':self.getImage(self.dependDir, 'anat'),
@@ -121,7 +90,6 @@ class Preparation(GenericTask):
                   'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b'),
                   'high resolution': self.getImage(self.workingDir, 'anat'),
-                  'diffusion weighted': self.getImage(self.workingDir, 'dwi'),
-                  'b0':self.getImage(self.workingDir, 'b0')}
+                  'diffusion weighted': self.getImage(self.workingDir, 'dwi')}
 
         return self.isSomeImagesMissing(images)

@@ -28,9 +28,7 @@ class Masking(GenericTask):
                   .format(anatBrainResample, aparcAseg))
         mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAseg)
         self.__createMask(extended)
-
         self.__createMask(aparcAseg)
-
 
         #produce optionnal mask
         if self.get("start_seeds").strip():

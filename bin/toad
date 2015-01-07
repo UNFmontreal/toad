@@ -23,7 +23,7 @@ def __parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.
 
     Returns:
-        a args stucture containing command lines arguments
+        a args structure containing command lines arguments
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description ="""\n
@@ -108,10 +108,11 @@ def __manageEnvironnement(logger):
     try:
         version = float(sys.version[0:3])
         if version < 2.7:
-            logger.warning("This pipeline have never run with a version of python < 2.7")
+            logger.warning("Note that toad had never run with a version of python < 2.7")
     except ValueError:
         logger.error("Cannot determine your version of python installed")
 
+    #@TODO add nibabel and dipy dependencies
     packages = ['numpy','nipy']
     for package in packages:
         try:
@@ -173,7 +174,6 @@ def __manageEnvironnement(logger):
             logger.error("Mrtrix3 not found. Please install the package or set the environment variable $PATH correctly")
         else:
             os.environ["MRTRIX_PYTHON_SCRIPTS"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))),"scripts")
-
 
         if util.which("ANTS") is None:
             logger.error("ANTS registration not found. Please install the package or set the environment variable $PATH correctly")
