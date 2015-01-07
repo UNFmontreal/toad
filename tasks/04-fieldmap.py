@@ -1,5 +1,5 @@
 from lib.generictask import GenericTask
-from lib import util
+from lib import util, mriutil
 import scipy.ndimage
 import nibabel
 import numpy
@@ -15,11 +15,13 @@ class Fieldmap(GenericTask):
         GenericTask.__init__(self, subject, "preparation", "parcellation", "eddy")
 
     def implement(self):
-        pass
-
-    """
 
         ## fieldmap create
+        dwi =  self.getImage(self.eddyDir, "eddy")
+        bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVal))
 
         mag = self.getImage(self.dependDir, "mag")
         phase = self.getImage(self.dependDir, "phase")
@@ -27,7 +29,6 @@ class Fieldmap(GenericTask):
         anatFreesurfer = self.getImage(self.parcellationDir, 'anat_freesurfer')
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         mask = self. __createSegmentationMask(aparcAseg)
-
 
         phaseRescale = self.__rescaleFieldMap(phase)
         fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, anatFreesurfer)
@@ -41,6 +42,13 @@ class Fieldmap(GenericTask):
 
         warped = self.__computeForwardDistorsion(self, fieldmap, lossyMagnitude, magnitudeMask)
 
+        matrixName = self.buildName("epi_to_b0fm")
+        self.__coregisterEpiLossyMap(b0, warped, matrixName, lossy)
+        invertMatrixName = self.__invertComputeMatrix(matrixName)
+        self.__interpolateFieldmapInEpiSpace(lossy, b0, invertMatrixName)
+        interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
+        saveshift = self.__performDistortionCorrection(b0, interpolateFieldmap, interpolateMask )
+        self.__performDistortionCorrectionToDWI(dwi, interpolateMask, saveshift)
 
 
     #@TODO change rebase name
@@ -82,11 +90,8 @@ class Fieldmap(GenericTask):
         if self.getBoolean("usesqform"):
             cmd += "-usesqform "
 
-        #uncompress resulting file
-        util.gunzip("{}.gz".format(target))
         self.launchCommand(cmd)
-
-        return fielmapToAnat
+        return target
 
 
     def __invertFieldmapToAnat(self, source):
@@ -171,46 +176,45 @@ class Fieldmap(GenericTask):
         return target
 
 
-
-    source = epi
-    reference = warped
-
-    def __coregisterEpiLossyMap(self, source, reference, lossyMap, weighted ):
-
-        matrixName = self.buildName("epi_to_b0fm")
-        "flirt -in {extraction de la b0 de ls dwi} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference, matrixName, self.get("dof"), weighted)
+    def __coregisterEpiLossyMap(self, source, reference, matrix, weighted ):
+        "flirt -in {} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference, matrix, self.get("dof"), weighted)
 
 
+    def __invertComputeMatrix(self, source):
+
+        target = self.buildName(source, 'inv', 'mat')
+        cmd = "convert_xfm -omat {} -inverse {}".format(target , source)
+        self.launchCommand(cmd)
+        return target
 
 
-        # coregister the epi with lossy distorted fieldmap magnitude
-        flirt -in /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/dwi_convert/20120913_131105DTIb0Saads007a1001.nii -ref /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/fm_voxelshiftmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy_warped.nii.gz -out 20120913_131105DTIb0Saads007a1001_flirt.nii.gz -omat epi_to_b0fm -cost normmi -searchcost normmi -dof 6 -interp trilinear -refweight /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/signal_loss/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss.nii.gz -searchrx -5 5 -searchry -5 5 -searchrz -5 5
+    def __interpolateFieldmapInEpiSpace(self, source, reference, initMatrix):
+        target = self.buildName(source, 'sigloss')
+        outputMatrixName = self.buildName(source, 'flirt', 'mat')
 
-        # invert the previously computed matrix
-        convert_xfm -omat /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/invert_warp/epi_to_b0fm_inv.mat -inverse /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/estimate_warp/epi_to_b0fm
-
-        ## get the fielmap in EPI space
-        # interpolate fieldmap lossy distorted fieldmap magnitude in EPI space (just to check registration)
-        flirt -in /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/signal_loss/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss.nii.gz -ref /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/dwi_convert/20120913_131105DTIb0Saads007a1001.nii -out fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss_flirt.nii.gz -omat fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss_flirt.mat -applyxfm -init /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/invert_warp/epi_to_b0fm_inv.mat
-
-        # interpolate the fieldmap in EPI space
-        flirt -in /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/make_fieldmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg.nii.gz -ref /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/dwi_convert/20120913_131105DTIb0Saads007a1001.nii -out fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_flirt.nii.gz -omat fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_flirt.mat -applyxfm -init /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/invert_warp/epi_to_b0fm_inv.mat
-
-
-        ## perform distortion correction
-        # compute voxel shift map in EPI space and apply correction to B0 image
-        fugue --dwell=0.0006900000 --loadfmap=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/warp_fieldmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_flirt.nii.gz --in=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/dwi_convert/20120913_131105DTIb0Saads007a1001.nii --mask=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/mask2epi/HC_AM32_1_mask_crop_flirt.nii.gz --saveshift=vsm_epi.nii.gz --unwarpdir=y --unwarp=20120913_131105DTIb0Saads007a1001_unwarped.nii.gz
-
-
-        # apply distortion correction to the whole DWI data
-        fugue --in=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/eddy/eddy_corrected.nii.gz     {extraction de la b0 de ls dwi}   --mask=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/_subject_HC_AM32_1/mask2epi/HC_AM32_1_mask_crop_flirt.nii.gz --loadshift=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/epi_voxelshiftmap/vsm_epi.nii.gz --unwarp=eddy_corrected_unwarped.nii.gz
+        cmd = "flirt -in {} -ref {} -out {} -omat {} -applyxfm -init {}".format(source, reference, outputMatrixName, initMatrix)
+        self.launchCommand(cmd)
+        return target
 
 
 
-        print "THIS TASK IS IMCOMPLETE"
-        import sys
-        sys.exit()
-    """
+    def __performDistortionCorrection(self, source, fieldmap, mask):
+
+        unwarp = self.buildName(source, 'unwarped')
+        target = self.buildName(source, 'vsm')
+        cmd = "fugue --dwell={} --in={}  --loadfmap={}--mask={} --saveshift={} --unwarpdir={} --unwarp={}".format(source, self.get('dwell_time'), fieldmap, mask, target, self.get('unwarpdir'), unwarp)
+        self.launchCommand(cmd)
+        return target
+
+
+    def __performDistortionCorrectionToDWI(self, source, mask, shift):
+
+        target = self.buildName(source, 'unwarped')
+        cmd= "fugue --in={} --mask={} --loadshift={} --unwarp={}".format(source, mask, shift, target)
+        self.launchCommand(cmd)
+        return target
+
+
 
     def isIgnore(self):
         return self.isSomeImagesMissing({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')})

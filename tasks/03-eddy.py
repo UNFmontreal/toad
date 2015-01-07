@@ -16,13 +16,16 @@ class Eddy(GenericTask):
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi')
-        b0= self.getImage(self.dependDir, 'b0')
+        #b0 = self.getImage(self.dependDir, 'b0')
         b0AP= self.getImage(self.dependDir, 'b0AP')
         b0PA= self.getImage(self.dependDir, 'b0PA')
         bFile=  self.getImage(self.dependDir, 'grad',  None, 'b')
         bVals=  self.getImage(self.dependDir, 'grad',  None, 'bval')
         bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvec')
 
+        #extract b0 image from the dwi
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
         #make sure all the images have the same voxel size and dimension scale between them
         self.__validateSizeAndDimension([dwi, b0, b0AP, b0PA])
