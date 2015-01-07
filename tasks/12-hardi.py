@@ -9,7 +9,7 @@ class Hardi(GenericTask, Logger):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddyDir', 'masking')
+        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
 
 
     def implement(self):

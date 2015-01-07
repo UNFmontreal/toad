@@ -16,7 +16,7 @@ __author__ = 'cbedetti'
 class QA(GenericTask):
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preparation', 'eddyDir', 'denoising', 'preprocessing', 'parcellation',  'registration')
+        GenericTask.__init__(self, subject, 'preparation', 'eddy', 'denoising', 'preprocessing', 'parcellation',  'registration')
         self.reportName = self.config.get('qa','report_name')
         self.imgWidth = 650
         self.dirty = True #change to False after one execution of implement
@@ -62,7 +62,13 @@ class QA(GenericTask):
         eddy = self.getImage(self.eddyDir,'dwi','eddy')
         if eddy:
             bvec_eddy = self.getImage(self.eddyDir, 'grad', 'eddy', 'bvec')
-            eddy_parameters = os.path.join(self.subjectDir, self.eddyDir, "tmp.nii.eddy_parameters")
+            #@TODO this line of code is not working
+            #eddy_parameters = os.path.join(self.subjectDir, self.eddyDir, "tmp.nii.eddy_parameters")
+            import glob
+            fixs = glob.glob("{}/*_temporary.nii.eddy_parameters".format(self.eddyDir))
+            for fix in fixs:
+                eddy_parameters = fix
+
             eddy_tg = self.buildName(eddy, None, 'gif', False)
             translation_tg = 'translation.png'
             rotation_tg = 'rotation.png'

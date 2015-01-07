@@ -26,7 +26,7 @@ class Preprocessing(GenericTask):
             bVal= self.getImage(self.preparationDir, 'grad', None, 'b')
 
 
-        b0Index = self.mriutil.getFirstB0IndexFromDwi(bVal)
+        b0Index = mriutil.getFirstB0IndexFromDwi(bVal)
 
         dwiUpsample=  self.__upsampling(dwi)
         boUpsample= self.__extractFirstB0FromDwi(dwiUpsample, b0Index)
