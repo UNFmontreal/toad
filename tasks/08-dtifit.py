@@ -1,4 +1,5 @@
 from lib.generictask import GenericTask
+from lib import mriutil
 import os
 
 __author__ = 'desmat'
@@ -11,7 +12,7 @@ class Dtifit(GenericTask):
         """Fits a diffusion tensor model at each voxel
 
         """
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'eddy', 'masking')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'eddy')
 
 
     def implement(self):
@@ -19,13 +20,18 @@ class Dtifit(GenericTask):
 
         """
         dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
-        mask = self.getImage(self.maskingDir, "aparc_aseg", ["resample","mask"] )
+
         bVal = self.getImage(self.eddyDir, 'grad', None, 'bval')
         bVec = self.getImage(self.eddyDir, 'grad', None, 'bvec')
         if (not bVal) or (not bVec):
             bVal = self.getImage(self.preparationDir,'grad', None, 'bval')
             bVec = self.getImage(self.preparationDir,'grad', None, 'bvec')
 
+        #dtifit required a mask
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVal))
+        mask = self.__createMask(b0)
+        print "DEBUG mask name =", mask
         self.__tensorsFsl(dwi, bVec, bVal, mask)
 
         l1 = self.getImage(self.workingDir, 'dwi', 'fsl_value1', 'nii.gz')
@@ -62,6 +68,26 @@ class Dtifit(GenericTask):
         cmd = "fslmaths {} -add {} -div 2 {}".format(source1, source2, target)
         self.launchCommand(cmd)
 
+
+    def __createMask(self, source):
+        """deletes non-brain tissue from an image of the whole head
+
+        bias field & neck cleanup will always be perform by this method
+
+        Args:
+            source: The input file name
+
+        Return:
+            The resulting output file name
+        """
+        self.info("Launch brain extraction from fsl")
+        target = self.buildName(source, "brain")
+        fractionalIntensity = 0.4
+        verticalGradient = 0
+        self.info("End brain extraction from fsl")
+        cmd = "bet {} {} -f {} -g {} -v -m".format(source, target, fractionalIntensity, verticalGradient)
+        self.launchCommand(cmd)
+        return self.buildName(source, "mask")
 
     def meetRequirement(self, result=True):
         """Validate if all requirements have been met prior to launch the task
