@@ -11,14 +11,14 @@ class Dtifit(GenericTask):
         """Fits a diffusion tensor model at each voxel
 
         """
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'eddy', 'masking')
 
 
     def implement(self):
         """Placeholder for the business logic implementation
 
         """
-        dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
+        dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
         mask = self.getImage(self.maskingDir, "aparc_aseg", ["resample","mask"] )
         bVal = self.getImage(self.eddyDir, 'grad', None, 'bval')
         bVec = self.getImage(self.eddyDir, 'grad', None, 'bvec')
@@ -77,7 +77,7 @@ class Dtifit(GenericTask):
             if self.isSomeImagesMissing(images):
                 result=False
 
-        if self.isSomeImagesMissing({'diffusion weighted':  self.getImage(self.dependDir, 'dwi', 'upsample')}):
+        if self.isSomeImagesMissing({'diffusion weighted':  self.getImage(self.dependDir, 'dwi', 'denoise')}):
             result=False
 
         return result
