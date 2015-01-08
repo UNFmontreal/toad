@@ -20,14 +20,12 @@ class Preprocessing(GenericTask):
             if not dwi:
                 dwi = self.getImage(self.dependDir, 'dwi')
 
-
         bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
         if not bVal:
             bVal= self.getImage(self.preparationDir, 'grad', None, 'b')
 
 
         dwiUpsample=  self.__upsampling(dwi)
-
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVal))
         whiteMatterDWI = self.__segmentation(b0Upsample)
@@ -115,7 +113,7 @@ class Preprocessing(GenericTask):
 
         for key, value in dict.items():
             for resultFile in glob.glob("{}/{}{}*.nii".format(self.workingDir,key ,fileBasename)):
-                os.rename(resultFile, "{}/{}_{}.nii".format(self.workingDir ,fileBasename, value))
+                self.rename(resultFile, "{}/{}_{}.nii".format(self.workingDir ,fileBasename, value))
 
         if (self.getBoolean("cleanup")):
             self.info("Cleaning up extra files")

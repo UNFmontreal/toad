@@ -16,7 +16,6 @@ class Eddy(GenericTask):
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi')
-        #b0 = self.getImage(self.dependDir, 'b0')
         b0AP= self.getImage(self.dependDir, 'b0AP')
         b0PA= self.getImage(self.dependDir, 'b0PA')
         bFile=  self.getImage(self.dependDir, 'grad',  None, 'b')
@@ -114,9 +113,8 @@ class Eddy(GenericTask):
         target = self.buildName(source, "subset")
         cmd = "mrconvert {} {} -coord +2 {} -nthreads {} -quiet".format(source, tmp, volumes, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-        return target
+
+        return self.rename(tmp, target)
 
 
     def __concatenateB0(self, source1, source2, target):
@@ -174,6 +172,10 @@ class Eddy(GenericTask):
                     text = "0 1 0 {}\n".format(factor)
             elif phaseEncDir==1:  #A>>P
                     text = "0 -1 0 {}\n".format(factor)
+            elif phaseEncDir==2:  #R>>L
+                    text = "1 0 0 {}\n".format(factor)
+            elif phaseEncDir==3:  #L>>R
+                    text = "-1 0 0 {}\n".format(factor)
             else:
                 self.error("Cannot determine the phase encoding direction, got value of: {}".format(phaseEncDir))
         else:
@@ -260,9 +262,7 @@ class Eddy(GenericTask):
 
         self.info("uncompressing {}".format(tmp))
         unzip = util.gunzip(tmp)
-
-        self.info("renaming {} to {}".format(unzip, target))
-        os.rename(unzip, target)
+        self.rename(unzip, target)
 
         self.info("Finish brain extraction from fsl")
         return target
@@ -297,12 +297,9 @@ class Eddy(GenericTask):
         self.launchCommand(cmd)
 
         self.info(util.gunzip(tmp))
-
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-
         self.info("Finish eddy correction from fsl")
-        return target
+        return self.rename(tmp, target)
+
 
 
     def isIgnore(self):

@@ -49,11 +49,7 @@ class Tensors(GenericTask):
             cmd += "-mask {}".format(mask)
 
         self.launchCommand(cmd)
-
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-
-        return target
+        return self.rename(tmp, target)
 
 
     def __tensorsDipy(self, source, bValFile, bVecFile):

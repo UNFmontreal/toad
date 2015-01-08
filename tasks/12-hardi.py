@@ -35,10 +35,7 @@ class Hardi(GenericTask, Logger):
         cmd = "dwi2response {} {} -mask {} -grad {} -nthreads {} -quiet"\
             .format(source, tmp, mask, bFile, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-
-        return target
+        return self.rename(tmp, target)
 
 
     def __dwi2fod(self, source, dwi2response, mask, bFile):

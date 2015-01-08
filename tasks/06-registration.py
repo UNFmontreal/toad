@@ -62,7 +62,7 @@ class Registration(GenericTask):
         self.launchCommand(cmd)
 
         self.info('Renaming {}Affine.txt to {}'.format(name, target))
-        os.rename('{}Affine.txt'.format(name), target)
+        self.rename('{}Affine.txt'.format(name), target)
 
         if (self.getBoolean("cleanup")):
             self.info("Removing extra file {}InverseWarp.nii.gz".format(name))

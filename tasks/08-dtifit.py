@@ -7,7 +7,6 @@ __author__ = 'desmat'
 class Dtifit(GenericTask):
 
 
-    #@TODO add appropriate mask to __tensorsFsl the command line
     def __init__(self, subject):
         """Fits a diffusion tensor model at each voxel
 
@@ -41,7 +40,7 @@ class Dtifit(GenericTask):
         ad = self.buildName(dwi, 'fsl_ad', 'nii.gz')
         rd = self.buildName(dwi, 'fsl_rd', 'nii.gz')
 
-        os.rename(l1, ad)
+        self.rename(l1, ad)
         self.__mean(l2, l3, rd)
 
 
