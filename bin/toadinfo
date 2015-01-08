@@ -122,13 +122,13 @@ if __name__ == '__main__':
 
     if phaseEncDir is not None:
         if phaseEncDir==0:
-            print "\tPhase encoding: P>>A"
+            print "\tPhase encoding: {}, P>>A".format(phaseEncDir)
         elif phaseEncDir==1:
-            print "\tPhase encoding: A>>P"
+            print "\tPhase encoding: {}, A>>P".format(phaseEncDir)
         elif phaseEncDir==2:
-            print "\tPhase encoding: R>>L"
+            print "\tPhase encoding: {}, R>>L".format(phaseEncDir)
         elif phaseEncDir==3:
-            print "\tPhase encoding: L>>R"
+            print "\tPhase encoding: {}, L>>R".format(phaseEncDir)
         else:
             print "Phase encoding:", phaseEncDir
 

@@ -24,11 +24,11 @@ class Denoising(GenericTask):
             tmp = self.buildName(dwi, "tmp")
             scriptName = self.__createLpcaScript(dwi, tmp)
             self.__launchMatlabExecution(scriptName)
-            self.info("rename {} to {}".format(tmp, target))
-            os.rename(tmp, target)
+            self.rename(tmp, target)
 
 
     def __createLpcaScript(self, source, target):
+
 
         scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
         self.info("Creating denoising script {}".format(scriptName))
@@ -36,7 +36,7 @@ class Denoising(GenericTask):
                'workingDir': self.workingDir,
                'beta': self.get('beta'),
                'rician': self.get('rician'),
-               'nbthreads': self.getNTreads()}
+               'nbthreads': self.getNTreadsDenoise()}
 
         if self.get("algorithm") == "aonlm":
             template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/denoise_aonlm.tpl"))

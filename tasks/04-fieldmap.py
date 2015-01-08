@@ -16,7 +16,7 @@ class Fieldmap(GenericTask):
 
     def implement(self):
 
-        ## fieldmap create
+        #@TODO validate all information
         dwi =  self.getImage(self.eddyDir, "eddy")
         bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
 
@@ -67,8 +67,8 @@ class Fieldmap(GenericTask):
 
 
     def __createSegmentationMask(self, source):
-        target = self.buildName(source, 'mask')
 
+        target = self.buildName(source, 'mask')
         nii = nibabel.load(source)
         op = ((numpy.mgrid[:5,:5,:5]-2.0)**2).sum(0)<=4
         mask = scipy.ndimage.binary_closing(nii.get_data()>0, op, iterations=2)
@@ -82,7 +82,6 @@ class Fieldmap(GenericTask):
     def __coregisterFieldmapToAnat(self, source, reference):
 
         target = self.buildName(source, "flirt")
-
         cmd = "flirt -in {} -ref {} -out {} -omat {} -cost {} -searchcost {} -dof {} "\
             .format(source, reference , target,
                     self.get("matrix"), self.get("cost"), self.get("searchcost"), self.get("dof"))

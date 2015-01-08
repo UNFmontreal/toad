@@ -64,6 +64,24 @@ class Load(object):
         os.environ["OMP_NUM_THREADS"] = self.__getNTreads()
 
 
+    def getNTreadsDenoise(self):
+        """Define the number of thread that should be deploy without stressing the server too much
+
+        limit the number of threads to 5 because higher values may lead to matlab crash
+
+        Returns:
+            the suggested number of threads that should be deploy
+        """
+        try:
+            nTreads = int(self.__getNTreads())
+            if nTreads > 5:
+                nTreads = 5
+
+        except ValueError:
+            nTreads = 1
+        return str(nTreads)
+
+
     def getNTreadsMrtrix(self):
         """Define the number of thread that should be deploy without stressing the server too much
 
