@@ -148,10 +148,11 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
                      [-numpy.sin(float(row_four_to_six_eddy[1])),numpy.cos(float(row_four_to_six_eddy[1])),0]    ,
                      [ 0, 0, 1]])
         matrix = (z*y*x).I
-        gradient = numpy.matrix([[float(b_line[index].split('\t')[0]), float(b_line[index].split('\t')[1]),float(b_line[index].split('\t')[2])]])
+        b_values = b_line[index].replace('\t',' ').split()
+        gradient = numpy.matrix([[float(b_values[0]), float(b_values[1]),float(b_values[2])]])
         new_gradient = matrix*gradient.T
 
-        values = str(float(new_gradient[0]))+'\t'+str(float(new_gradient[1]))+'\t'+str(float(new_gradient[2]))+'\t'+b_line[index].split('\t')[3].strip()+'\n'
+        values = str(float(new_gradient[0]))+'\t'+str(float(new_gradient[1]))+'\t'+str(float(new_gradient[2]))+'\t'+b_values[3].strip()+'\n'
         h.write(values)
 
     h.close()
