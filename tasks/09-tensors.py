@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from lib.generictask import GenericTask
-import numpy, nibabel, dipy
+import dipy.core.gradients, dipy.reconst.dti
+import numpy, nibabel
 
 __author__ = 'desmat'
 
@@ -29,7 +30,7 @@ class Tensors(GenericTask):
 
         anatBrainWMResampleMask = self.getImage(self.maskingDir, 'anat', ['brain', 'wm', 'resample', 'mask'])
 
-        tensorsMrtrix = self.__tensorsMrtrix(dwi, bFile, mask)
+        #tensorsMrtrix = self.__tensorsMrtrix(dwi, bFile, mask)
         tensorsDipy = self.__tensorsDipy(dwi, bFile, bVecFile)
 
         #self.info("Masking mrtrix tensors image with the white matter, brain extracted, resampled, high resolution mask.")
