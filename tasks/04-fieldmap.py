@@ -1,5 +1,5 @@
 from lib.generictask import GenericTask
-from lib import util, mriutil
+from lib import mriutil
 import scipy.ndimage
 import nibabel
 import numpy
@@ -37,7 +37,7 @@ class Fieldmap(GenericTask):
         fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
 
         lossy = self.__simulateLossyMap(fieldmap, interpolateMask)
-	
+
         magnitudeMask = self.__computeMap(mag, interpolateMask, 'brain')
         lossyMagnitude = self.__computeMap(magnitudeMask, lossy, 'lossy')
 
@@ -54,14 +54,14 @@ class Fieldmap(GenericTask):
 
     def __getDwellTime(self):
         try:
-	    echo1 = float(self.get("echo_time1"))/1000.0
-	    echo2 = float(self.get("echo_time2"))/1000.0
+            echo1 = float(self.get("echo_time1"))/1000.0
+            echo2 = float(self.get("echo_time2"))/1000.0
             return str(echo2-echo1)
 
         except ValueError:
-	    self.error("cannot determine dwell time")
+            self.error("cannot determine dwell time")
 
-	
+
     #@TODO change rebase name
     def __rescaleFieldMap(self, source):
 
@@ -169,8 +169,9 @@ class Fieldmap(GenericTask):
 
         cmd = "fslmaths {} -mul {} {}".format(source, mask, target)
         self.launchCommand(cmd)
-	return target
-	
+        return target
+
+
     def __computeForwardDistorsion(self, source, lossyImage, mask):
         #--dwell=Effective echo spacing
         #--unwarpdir=y < piege a la con
