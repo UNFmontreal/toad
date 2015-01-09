@@ -71,7 +71,7 @@ def __returnPhaseEncodingDirection(line):
 
 def __getUnwarpFieldFromDicom(source):
 
-    header=dicomwrappers.wrapper_from_file(source)
+    header=dicomwrappers.wrapper_from_file(source, force=True)
 
     try:
         epiFactor = max(header['AcquisitionMatrix'])
@@ -114,7 +114,8 @@ if __name__ == '__main__':
 
     #found information into the ASCCONV tags
     phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
-
+    epiFactor = None
+    echoSpacing=None
     (epiFactor, echoSpacing) = __getUnwarpFieldFromDicom(arguments.dcmFile)
 
     if arguments.config:
