@@ -30,8 +30,8 @@ class Tensors(GenericTask):
 
         anatBrainWMResampleMask = self.getImage(self.maskingDir, 'anat', ['brain', 'wm', 'resample', 'mask'])
 
-        #tensorsMrtrix = self.__tensorsMrtrix(dwi, bFile, mask)
-        tensorsDipy = self.__tensorsDipy(dwi, bFile, bVecFile)
+        tensorsMrtrix = self.__tensorsMrtrix(dwi, bFile, mask)
+        tensorsDipy = self.__tensorsDipy(dwi, bValFile, bVecFile)
 
         #self.info("Masking mrtrix tensors image with the white matter, brain extracted, resampled, high resolution mask.")
         #self.masking(tensorsMrtrix, anatBrainWMResampleMask)
