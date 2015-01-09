@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from lib.generictask import GenericTask
 import numpy, nibabel, dipy
-import os
 
 __author__ = 'desmat'
 
@@ -53,7 +52,7 @@ class Tensors(GenericTask):
 
 
     def __tensorsDipy(self, source, bValFile, bVecFile):
-        self.info("Starting tensors creation from dipy on {}".formatimage)
+        self.info("Starting tensors creation from dipy on {}".format(source))
         target = self.buildName(source, "dipy")
 
         dwiImage = nibabel.load(source)

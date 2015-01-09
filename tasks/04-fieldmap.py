@@ -78,30 +78,24 @@ class Fieldmap(GenericTask):
         return target
 
 
-
     def __coregisterFieldmapToAnat(self, source, reference):
 
-        flirtOutput = self.buildName(source, "flirt")
-
-
-        target = "fieldmap2t1.mat"
-
-
+        target = self.buildName(source, "flirt")
         cmd = "flirt -in {} -ref {} -out {} -omat {} -cost {} -searchcost {} -dof {} "\
             .format(source, reference , target,
-                    target, self.get("cost"), self.get("searchcost"), self.get("dof"))
+                self.get("fieldmapToAnat"), self.get("cost"), self.get("searchcost"), self.get("dof"))
 
         if self.getBoolean("usesqform"):
             cmd += "-usesqform "
 
         self.launchCommand(cmd)
-        return target
+        return self.get("fieldmapToAnat")
 
 
     def __invertFieldmapToAnat(self, source):
 
         target = self.buildName(source, 'inv', 'mat')
-        cmd = "convert_xfm -omat {} -inverse {}".format(target , source)
+        cmd = "convert_xfm -omat {} -inverse {}".format(target, source)
         self.launchCommand(cmd)
         return target
 
