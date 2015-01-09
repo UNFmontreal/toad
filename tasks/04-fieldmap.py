@@ -37,12 +37,13 @@ class Fieldmap(GenericTask):
         fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
 
         lossy = self.__simulateLossyMap(fieldmap, interpolateMask)
-        magnitudeMask = self.__computeMap(self, mag, interpolateMask, 'brain')
-        lossyMagnitude = self.__computeMap(self, magnitudeMask, lossy, 'lossy')
+	
+        magnitudeMask = self.__computeMap(mag, interpolateMask, 'brain')
+        lossyMagnitude = self.__computeMap(magnitudeMask, lossy, 'lossy')
 
-        warped = self.__computeForwardDistorsion(self, fieldmap, lossyMagnitude, magnitudeMask)
+        warped = self.__computeForwardDistorsion(fieldmap, lossyMagnitude, magnitudeMask)
 
-        matrixName = self.buildName("epi_to_b0fm")
+        matrixName = self.get("epiTo_b0fm")
         self.__coregisterEpiLossyMap(b0, warped, matrixName, lossy)
         invertMatrixName = self.__invertComputeMatrix(matrixName)
         self.__interpolateFieldmapInEpiSpace(lossy, b0, invertMatrixName)
@@ -51,12 +52,22 @@ class Fieldmap(GenericTask):
         self.__performDistortionCorrectionToDWI(dwi, interpolateMask, saveshift)
 
 
+    def __getDwellTime(self):
+        try:
+	    echo1 = float(self.get("echo_time1"))/1000.0
+	    echo2 = float(self.get("echo_time2"))/1000.0
+            return str(echo2-echo1)
+
+        except ValueError:
+	    self.error("cannot determine dwell time")
+
+	
     #@TODO change rebase name
     def __rescaleFieldMap(self, source):
 
         target = self.buildName(source, 'rescale')
         try:
-            deltaTE = float(self.get("dwell_time"))
+            deltaTE = float(self.__getDwellTime())
         except ValueError:
             deltaTE = 0.00246
 
@@ -94,7 +105,7 @@ class Fieldmap(GenericTask):
 
     def __invertFieldmapToAnat(self, source):
 
-        target = self.buildName(source, 'inv', 'mat')
+        target = self.buildName(source, 'inverse', 'mat')
         cmd = "convert_xfm -omat {} -inverse {}".format(target, source)
         self.launchCommand(cmd)
         return target
@@ -118,7 +129,7 @@ class Fieldmap(GenericTask):
         return target
 
 
-    def __computeFiledmap(self, source, mask):
+    def __computeFieldmap(self, source, mask):
 
         target = self.buildName(source, 'reg')
 
@@ -130,7 +141,7 @@ class Fieldmap(GenericTask):
         #  --mask=HC_AM32_1_mask_crop_flirt.nii.gz --smooth3=2.00
 
         cmd = "fugue --asym={} --loadfmap={} --savefmap={} --mask={} --smooth3={}"\
-            .format(self.get("dwell_time"), source, target,  mask, self.get("smooth3"))
+            .format(self.__getDwellTime(), source, target,  mask, self.get("smooth3"))
 
         self.launchCommand(cmd)
         return target
@@ -143,7 +154,7 @@ class Fieldmap(GenericTask):
         #sigloss --te=0.094000 -i /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/make_fieldmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg.nii.gz -m /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/warp_t1_mask/HC_AM32_1_mask_crop_flirt.nii.gz -s /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/signal_loss/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss.nii.gz
 
         target = self.buildName(source, 'sigloss')
-        cmd = "sigloss --te={} -i {} -m {} -s".format(self.get('echo_time'), source, mask, target)
+        cmd = "sigloss --te={} -i {} -m {} -s {}".format(self.get('echo_time2'), source, mask, target)
 
         self.launchCommand(cmd)
         return target
@@ -154,12 +165,11 @@ class Fieldmap(GenericTask):
 
         # compute the fieldmap magnitude file with signal loss
         #fslmaths /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/mask_mag/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain.nii -mul /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/signal_loss/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss.nii.gz /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/fieldmap_mag_lossy/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy.nii
-
         target = self.buildName(source, prefix)
 
-        cmd = "fslmaths {} -mul {} ".format(source, mask, target)
+        cmd = "fslmaths {} -mul {} {}".format(source, mask, target)
         self.launchCommand(cmd)
-
+	return target
 	
     def __computeForwardDistorsion(self, source, lossyImage, mask):
         #--dwell=Effective echo spacing
@@ -169,7 +179,7 @@ class Fieldmap(GenericTask):
 
 
         target = self.buildName(source, 'warped')
-        cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.get('dwell_time'), source, lossyImage, self.get('unwarpdir'), target )
+        cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(), source, lossyImage, mask, self.get('unwarpdir'), target )
         self.launchCommand(cmd)
         return target
 
@@ -180,7 +190,7 @@ class Fieldmap(GenericTask):
 
     def __invertComputeMatrix(self, source):
 
-        target = self.buildName(source, 'inv', 'mat')
+        target = self.buildName(source, 'inverse', 'mat')
         cmd = "convert_xfm -omat {} -inverse {}".format(target , source)
         self.launchCommand(cmd)
         return target
@@ -190,7 +200,7 @@ class Fieldmap(GenericTask):
         target = self.buildName(source, 'sigloss')
         outputMatrixName = self.buildName(source, 'flirt', 'mat')
 
-        cmd = "flirt -in {} -ref {} -out {} -omat {} -applyxfm -init {}".format(source, reference, outputMatrixName, initMatrix)
+        cmd = "flirt -in {} -ref {} -out {} -omat {} -applyxfm -init {}".format(source, reference, target, outputMatrixName, initMatrix)
         self.launchCommand(cmd)
         return target
 
@@ -200,7 +210,7 @@ class Fieldmap(GenericTask):
 
         unwarp = self.buildName(source, 'unwarped')
         target = self.buildName(source, 'vsm')
-        cmd = "fugue --dwell={} --in={}  --loadfmap={}--mask={} --saveshift={} --unwarpdir={} --unwarp={}".format(source, self.get('dwell_time'), fieldmap, mask, target, self.get('unwarpdir'), unwarp)
+        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target, self.get('unwarpdir'), unwarp, self.__getDwellTime())
         self.launchCommand(cmd)
         return target
 
