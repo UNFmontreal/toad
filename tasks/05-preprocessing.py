@@ -167,16 +167,6 @@ class Preprocessing(GenericTask):
                     self.info("Will take {} image instead".format(dwi))
 
 
-        if self.isSomeImagesMissing({'b0 denoised': self.getImage(self.dependDir, "b0", 'denoise')}):
-            b0 = self.getImage(self.eddyDir, "dwi", 'eddy')
-            if self.isSomeImagesMissing({'b0 eddy corrected': b0}):
-                b0 = self.getImage(self.preparationDir, "dwi")
-                if self.isSomeImagesMissing({'b0 diffusion weighted': b0}):
-                    result=False
-                else:
-                    self.info("Will take {} image instead".format(b0))
-
-
         images = {'high resolution': self.getImage(self.preparationDir, 'anat')}
         result = self.isAllImagesExists(images)
         return result

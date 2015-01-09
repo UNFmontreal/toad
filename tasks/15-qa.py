@@ -24,7 +24,8 @@ class QA(GenericTask):
 
 
     def implement(self):
-
+        pass
+        """
         #Usefull images for the QA
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
@@ -188,7 +189,7 @@ class QA(GenericTask):
         util.createScript(self.reportName, htmlCode)
 
         self.dirty = False
-
+        """
     def __idGenerator(self, size=6, chars=ascii_uppercase + digits):
         """
         Generate random strings
@@ -410,7 +411,7 @@ class QA(GenericTask):
 
     def meetRequirement(self, result=True):
         """
-        """ 
+        
 	
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
@@ -448,6 +449,9 @@ class QA(GenericTask):
                 result = False
                 
         return result
+        """
+        return True
+
 
     def isDirty(self):
         """Validate if this tasks need to be submit for implementation

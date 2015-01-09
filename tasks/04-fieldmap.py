@@ -17,7 +17,7 @@ class Fieldmap(GenericTask):
     def implement(self):
 
         #@TODO validate all information
-        dwi =  self.getImage(self.eddyDir, "eddy")
+        dwi =  self.getImage(self.eddyDir,"dwi", "eddy")
         bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
 
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
@@ -81,10 +81,15 @@ class Fieldmap(GenericTask):
 
     def __coregisterFieldmapToAnat(self, source, reference):
 
-        target = self.buildName(source, "flirt")
+        flirtOutput = self.buildName(source, "flirt")
+
+
+        target = "fieldmap2t1.mat"
+
+
         cmd = "flirt -in {} -ref {} -out {} -omat {} -cost {} -searchcost {} -dof {} "\
             .format(source, reference , target,
-                    self.get("matrix"), self.get("cost"), self.get("searchcost"), self.get("dof"))
+                    target, self.get("cost"), self.get("searchcost"), self.get("dof"))
 
         if self.getBoolean("usesqform"):
             cmd += "-usesqform "
