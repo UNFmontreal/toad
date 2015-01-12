@@ -9,13 +9,13 @@ class Hardi(GenericTask, Logger):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'unwarping', 'masking')
+        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir,'dwi', 'upsample')
-        bFile = self.getImage(self.unwarpingDir, 'grad', None, 'b')
+        bFile = self.getImage(self.eddyDir, 'grad', None, 'b')
         if not bFile:
             bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
 
@@ -35,10 +35,7 @@ class Hardi(GenericTask, Logger):
         cmd = "dwi2response {} {} -mask {} -grad {} -nthreads {} -quiet"\
             .format(source, tmp, mask, bFile, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-
-        return target
+        return self.rename(tmp, target)
 
 
     def __dwi2fod(self, source, dwi2response, mask, bFile):
@@ -67,7 +64,7 @@ class Hardi(GenericTask, Logger):
         if self.isSomeImagesMissing(images):
             result = False
 
-        if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.unwarpingDir, 'grad', None, 'b')}):
+        if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'b')}):
             if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.preparationDir, 'grad', None, 'b')}):
                 result = False
 

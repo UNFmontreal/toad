@@ -8,7 +8,7 @@ class TensorsTractography(GenericTask, Tractography):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'tensors', 'masking', 'unwarping', 'preprocessing', 'preparation', 'registration')
+        GenericTask.__init__(self, subject, 'tensors', 'masking', 'eddy', 'preprocessing', 'preparation', 'registration')
 
 
     def implement(self):
@@ -17,7 +17,7 @@ class TensorsTractography(GenericTask, Tractography):
         brodmann = self.getImage(self.registrationDir, "brodmann", "resample")
 
         dwi = self.getImage(self.preprocessingDir, 'dwi', 'upsample')
-        bFile = self.getImage(self.unwarpingDir, 'grad', None, 'b')
+        bFile = self.getImage(self.eddyDir, 'grad', None, 'b')
         if not bFile:
             bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
 
@@ -33,7 +33,7 @@ class TensorsTractography(GenericTask, Tractography):
     def meetRequirement(self, result = True):
 
 
-        if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.unwarpingDir, 'grad', None, 'b')}):
+        if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'b')}):
             if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.preparationDir, 'grad', None, 'b')}):
                 result = False
 

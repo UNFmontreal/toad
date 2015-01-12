@@ -2,14 +2,13 @@ from lib.generictask import GenericTask
 from lib import util
 import os
 
-
 __author__ = 'desmat'
 
 class Denoising(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'unwarping', 'preparation' )
+        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'fieldmap')
 
 
     def implement(self):
@@ -17,7 +16,7 @@ class Denoising(GenericTask):
         if self.get("algorithm") is "None":
             self.info("Skipping denoising process")
         else:
-            dwi = self.getImage(self.dependDir, "dwi", 'unwarp')
+            dwi = self.getImage(self.dependDir, "dwi", 'eddy')
             if not dwi:
                 dwi = self.getImage(self.preparationDir, "dwi")
 
@@ -25,11 +24,11 @@ class Denoising(GenericTask):
             tmp = self.buildName(dwi, "tmp")
             scriptName = self.__createLpcaScript(dwi, tmp)
             self.__launchMatlabExecution(scriptName)
-            self.info("rename {} to {}".format(tmp, target))
-            os.rename(tmp, target)
+            self.rename(tmp, target)
 
 
     def __createLpcaScript(self, source, target):
+
 
         scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
         self.info("Creating denoising script {}".format(scriptName))
@@ -37,7 +36,7 @@ class Denoising(GenericTask):
                'workingDir': self.workingDir,
                'beta': self.get('beta'),
                'rician': self.get('rician'),
-               'nbthreads': self.getNTreads()}
+               'nbthreads': self.getNTreadsDenoise()}
 
         if self.get("algorithm") == "aonlm":
             template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/denoise_aonlm.tpl"))
@@ -60,7 +59,7 @@ class Denoising(GenericTask):
 
     def meetRequirement(self, result = True):
 
-        if self.isSomeImagesMissing({'unwarped': self.getImage(self.dependDir, "dwi", 'unwarp')}):
+        if self.isSomeImagesMissing({'eddy corrected': self.getImage(self.dependDir, "dwi", 'eddy')}):
             dwi = self.getImage(self.preparationDir, "dwi")
             if self.isSomeImagesMissing({'diffusion weighted': dwi}):
                 result = False

@@ -9,20 +9,26 @@ class Preprocessing(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'unwarping')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'eddy')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
         if not dwi:
-            dwi = self.getImage(self.unwarpingDir, 'dwi', 'unwarp')
+            dwi = self.getImage(self.eddyDir, 'dwi', 'eddy')
             if not dwi:
                 dwi = self.getImage(self.dependDir, 'dwi')
 
-        upsampledDWI =   self.__upsampling(dwi)
-        extractDWI =     self.__extractB0SubVolumeFromDWI(upsampledDWI)
-        whiteMatterDWI = self.__segmentation(extractDWI)
+        bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
+        if not bVal:
+            bVal= self.getImage(self.preparationDir, 'grad', None, 'b')
+
+
+        dwiUpsample=  self.__upsampling(dwi)
+        b0Upsample = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVal))
+        whiteMatterDWI = self.__segmentation(b0Upsample)
 
         anat = self.getImage(self.preparationDir, 'anat')
         brainAnat      = self.__bet(anat)
@@ -107,7 +113,7 @@ class Preprocessing(GenericTask):
 
         for key, value in dict.items():
             for resultFile in glob.glob("{}/{}{}*.nii".format(self.workingDir,key ,fileBasename)):
-                os.rename(resultFile, "{}/{}_{}.nii".format(self.workingDir ,fileBasename, value))
+                self.rename(resultFile, "{}/{}_{}.nii".format(self.workingDir ,fileBasename, value))
 
         if (self.getBoolean("cleanup")):
             self.info("Cleaning up extra files")
@@ -121,34 +127,6 @@ class Preprocessing(GenericTask):
             self.error("No white matter image found to return")
 
         self.info("End Segmentation from spm")
-        return target
-
-
-    def __extractB0SubVolumeFromDWI(self, source):
-        """Perform an extraction of a subset of the source image
-
-        Args:
-            source: The input DWI image
-
-        Returns:
-             The resulting file name
-
-        """
-        self.info("Launch sub volume extraction from mrtrix")
-
-        target = os.path.join(self.workingDir, os.path.basename(source).replace(self.config.get("prefix",'dwi'),self.config.get("prefix",'b0')))
-        extractAtAxis = self.get('extract_at_axis')
-        if extractAtAxis not in ["1", "2", "3"]:
-            self.error('extract_at_axis must be value of 1 or 2 or 3, found {}'.format(extractAtAxis))
-
-        #make sure that we do not extract a volumes outside of the dimension
-        self.info(mriutil.extractSubVolume(source,
-                                target,
-                                extractAtAxis,
-                                self.get("extract_at_coordinate"),
-                                self.getNTreadsMrtrix()))
-
-        self.info("End extraction from mrtrix")
         return target
 
 
@@ -180,8 +158,8 @@ class Preprocessing(GenericTask):
     def meetRequirement(self, result=True):
 
         if self.isSomeImagesMissing({'denoised': self.getImage(self.dependDir, "dwi", 'denoise')}):
-            dwi = self.getImage(self.unwarpingDir, "dwi", 'unwarp')
-            if self.isSomeImagesMissing({'unwarped': dwi}):
+            dwi = self.getImage(self.eddyDir, "dwi", 'eddy')
+            if self.isSomeImagesMissing({'eddy corrected': dwi}):
                 dwi = self.getImage(self.preparationDir, "dwi")
                 if self.isSomeImagesMissing({'diffusion weighted': dwi}):
                     result=False

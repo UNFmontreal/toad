@@ -28,6 +28,20 @@ def fslmaths(source1, target, operator="bin", source2=None):
     return result
 
 
+def extractFirstB0FromDwi(source, target, bval, nthreads = "1"):
+    """Perform an extraction of the first b0 image found into a DWI image
+
+    Args:
+        source: The input image
+        target: The resulting output name
+        bval:   A gradient encoding B0 values file name
+
+    Returns:
+         A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
+    """
+    return extractSubVolume(source, target, "3", getFirstB0IndexFromDwi(bval), nthreads)
+
+
 def extractSubVolume(source, target, extractAtAxis, extractAtCoordinate, nthreads = "1"):
     """Perform an extraction of a subset of the source image
 
@@ -40,7 +54,7 @@ def extractSubVolume(source, target, extractAtAxis, extractAtCoordinate, nthread
     Returns:
          A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
     """
-    cmd = "mrconvert -coord {} {} {} {} -nthreads {} -quiet".format(extractAtAxis, extractAtCoordinate, source, target,  nthreads)
+    cmd = "mrconvert -coord {} {} {} {} -nthreads {} -quiet".format(extractAtAxis, extractAtCoordinate, source, target, nthreads)
     return util.launchCommand(cmd)
 
 
@@ -100,6 +114,13 @@ def isDataLayoutValid(source):
     return dataLayout == "[ 1 2 3 4 ]"
 
 
+def getFirstB0IndexFromDwi(bval):
+    for line in open(bval,'r').readlines():
+            b0s = line.strip().split()
+            return b0s.index('0')
+    return False
+
+
 def applyGradientCorrection(bFilename, eddyFilename, target):
 
     output = os.path.join(target, os.path.basename(bFilename).replace(".b","_eddy.b"))
@@ -113,27 +134,26 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
 
     h = open(output, 'w')
 
-    index = 0
-    for line in eddys:
-
+    for index, line in enumerate(eddys):
         row_four_to_six_eddy = line.split('  ')[3:6]
+        x= numpy.matrix([[ 1, 0, 0],
+                         [0,numpy.cos(float(row_four_to_six_eddy[0])) , numpy.sin(float(row_four_to_six_eddy[0]))] ,
+                         [0,-numpy.sin(float(row_four_to_six_eddy[0])),numpy.cos(float(row_four_to_six_eddy[0]))]])
 
-        x = numpy.matrix([[ 1, 0, 0],
-                     [0,numpy.cos(float(row_four_to_six_eddy[0])) , numpy.sin(float(row_four_to_six_eddy[0]))] ,
-                     [0,-numpy.sin(float(row_four_to_six_eddy[0])),numpy.cos(float(row_four_to_six_eddy[0]))]])
-
-        y = numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])) , 0, numpy.sin(float(row_four_to_six_eddy[1])) ] ,
+        y= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])) , 0, numpy.sin(float(row_four_to_six_eddy[1])) ] ,
                      [ 0, 1, 0],
                      [-numpy.sin(float(row_four_to_six_eddy[1])) , 0 , numpy.cos(float(row_four_to_six_eddy[1]))]])
 
-        z = numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])) , numpy.sin(float(row_four_to_six_eddy[1])) , 0] ,
+        z= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])) , numpy.sin(float(row_four_to_six_eddy[1])) , 0] ,
                      [-numpy.sin(float(row_four_to_six_eddy[1])),numpy.cos(float(row_four_to_six_eddy[1])),0]    ,
                      [ 0, 0, 1]])
         matrix = (z*y*x).I
-        gradient = numpy.matrix([[float(b_line[index].split('\t')[0]), float(b_line[index].split('\t')[1]),float(b_line[index].split('\t')[2])]])
+        b_values = b_line[index].replace('\t',' ').split()
+        gradient = numpy.matrix([[float(b_values[0]), float(b_values[1]),float(b_values[2])]])
         new_gradient = matrix*gradient.T
-        h.write(str(float(new_gradient[0]))+'\t'+str(float(new_gradient[1]))+'\t'+str(float(new_gradient[2]))+'\t'+b_line[index].split('\t')[3]+'\n')
-        index= index +1
+
+        values = str(float(new_gradient[0]))+'\t'+str(float(new_gradient[1]))+'\t'+str(float(new_gradient[2]))+'\t'+b_values[3].strip()+'\n'
+        h.write(values)
 
     h.close()
     return output
