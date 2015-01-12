@@ -291,7 +291,7 @@ class GenericTask(Logger, Load):
         return self.config.getboolean(self.getName(), option)
 
 
-    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, nice=0):
+    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-1, nice=0):
         """Execute a program in a new process
 
         Args:
@@ -326,11 +326,11 @@ class GenericTask(Logger, Load):
             err = self.getLog()
             self.info("Error will be log in {} \n".format(err.name))
 
-        (output, error)= util.launchCommand(cmd, out, err, nice)
-        if stdout is not "None":
+        (output, error)= util.launchCommand(cmd, out, err, timeout, nice)
+        if not (stdout is "None" or stdout is None):
             self.info("Output produce by {}: {} \n".format(binary, output))
 
-        if error != '' or error != "None":
+        if not (error is '' or error is "None" or error is None):
             self.info("Error produce by {}: {}\n".format(binary, error))
         self.info("------------------------\n")
 

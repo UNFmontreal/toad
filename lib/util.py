@@ -1,5 +1,8 @@
 from string import Template
 import subprocess
+import datetime
+import signal
+import time
 import glob
 import sys
 import os
@@ -57,7 +60,7 @@ def gzip(source):
     return "{}.gz".format(source)
 
 
-def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0):
+def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0, timeout=-1):
     """Execute a program in a new process
 
     Args:
@@ -65,6 +68,7 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0):
        stdout: this attribute is a file object that provides output from the child process
        stderr: this attribute is a file object that provides error from the child process
        nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
+       timeout: Number of seconds before a process timeout, usefull for deadlock
 
     Returns
         return a 3 elements tuples representing the command execute, the standards output and the standard error message
@@ -74,9 +78,45 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0):
         ValueError :  the command line is called with invalid arguments
 
     """
+
+    start = datetime.datetime.now()
     process = subprocess.Popen(cmd, preexec_fn=lambda: os.nice(nice), stdout=stdout, stderr=stderr, shell=True)
-    process.wait()
+
+    if timeout == -1:
+        process.wait()
+    else:
+        while process.poll() is None:
+            time.sleep(0.1)
+            now = datetime.datetime.now()
+            if (now - start).seconds > timeout:
+                os.kill(process.pid, signal.SIGKILL)
+                os.waitpid(-1, os.WNOHANG)
+                return None, "Error, a timeout for this process occured"
+
     return process.communicate()
+
+
+def timeout_command(command, timeout):
+    """call shell-command and either return its output or kill it
+    if it doesn't normally exit within timeout seconds and return None"""
+    import subprocess, datetime, os, time, signal
+
+    cmd = command.split(" ")
+    start = datetime.datetime.now()
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    while process.poll() is None:
+        time.sleep(0.1)
+        now = datetime.datetime.now()
+        if (now - start).seconds > timeout:
+            os.kill(process.pid, signal.SIGKILL)
+            os.waitpid(-1, os.WNOHANG)
+            return None
+
+    return process.stdout.read()
+
+
+
 
 
 def createScript(source, text):
