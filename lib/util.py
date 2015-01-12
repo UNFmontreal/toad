@@ -60,7 +60,7 @@ def gzip(source):
     return "{}.gz".format(source)
 
 
-def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0, timeout=-1):
+def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-1, nice=0):
     """Execute a program in a new process
 
     Args:
@@ -86,7 +86,7 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0, 
         process.wait()
     else:
         while process.poll() is None:
-            time.sleep(0.1)
+            time.sleep(0.2)
             now = datetime.datetime.now()
             if (now - start).seconds > timeout:
                 os.kill(process.pid, signal.SIGKILL)

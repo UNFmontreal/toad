@@ -327,7 +327,7 @@ class GenericTask(Logger, Load):
             self.info("Error will be log in {} \n".format(err.name))
 
         (output, error)= util.launchCommand(cmd, out, err, timeout, nice)
-        if not (stdout is "None" or stdout is None):
+        if not (output is "" or output is "None" or output is None):
             self.info("Output produce by {}: {} \n".format(binary, output))
 
         if not (error is '' or error is "None" or error is None):
