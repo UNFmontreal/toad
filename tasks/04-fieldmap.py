@@ -52,14 +52,49 @@ class Fieldmap(GenericTask):
         self.__performDistortionCorrectionToDWI(dwi, interpolateMask, saveshift)
 
 
-    def __getDwellTime(self):
+    def __getMagnitudeEchoTimeDifferences(self):
         try:
-            echo1 = float(self.get("echo_time1"))/1000.0
-            echo2 = float(self.get("echo_time2"))/1000.0
+            echo1 = float(self.get("echo_time_mag1"))/1000.0
+            echo2 = float(self.get("echo_time_mag2"))/1000.0
             return str(echo2-echo1)
 
         except ValueError:
-            self.error("cannot determine dwell time")
+            self.error("cannot determine difference echo time between the two magnitude image")
+
+
+    def __getDwiEchoTime(self):
+        try:
+            echo = float(self.get("echo_time_dwi"))/1000.0
+            return str(echo)
+
+        except ValueError:
+            self.error("cannot determine the echo time of the dwi image")
+
+
+    def __getDwellTime(self):
+        try:
+            spacing = float(self.config.get("eddy","echo_spacing"))/1000.0
+            return str(spacing)
+
+        except ValueError:
+            self.error("cannot determine the effective echo spacing of the dwi image")
+
+
+    def __getUnwarpDirection(self):
+        try:
+            direction = int(self.config.get("eddy","echo_spacing"))
+            value="y"
+            if direction == 0:
+                value = "y"
+            elif direction == 1:
+                value = "-y"
+            elif direction == 2:
+                value = "-x"
+            elif direction == 3:
+                value = "x"
+
+        except ValueError:
+            self.error("cannot determine unwarping direction of the the dwi image")
 
 
     #@TODO change rebase name
@@ -67,7 +102,7 @@ class Fieldmap(GenericTask):
 
         target = self.buildName(source, 'rescale')
         try:
-            deltaTE = float(self.__getDwellTime())
+            deltaTE = float(self.__getMagnitudeEchoTimeDifferences())
         except ValueError:
             deltaTE = 0.00246
 
@@ -141,7 +176,7 @@ class Fieldmap(GenericTask):
         #  --mask=HC_AM32_1_mask_crop_flirt.nii.gz --smooth3=2.00
 
         cmd = "fugue --asym={} --loadfmap={} --savefmap={} --mask={} --smooth3={}"\
-            .format(self.__getDwellTime(), source, target,  mask, self.get("smooth3"))
+            .format(self.__getMagnitudeEchoTimeDifferences(), source, target,  mask, self.get("smooth3"))
 
         self.launchCommand(cmd)
         return target
@@ -154,7 +189,7 @@ class Fieldmap(GenericTask):
         #sigloss --te=0.094000 -i /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/make_fieldmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg.nii.gz -m /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/warp_t1_mask/HC_AM32_1_mask_crop_flirt.nii.gz -s /media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/signal_loss/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg_sigloss.nii.gz
 
         target = self.buildName(source, 'sigloss')
-        cmd = "sigloss --te={} -i {} -m {} -s {}".format(self.get('echo_time2'), source, mask, target)
+        cmd = "sigloss --te={} -i {} -m {} -s {}".format(self.__getDwiEchoTime(), source, mask, target)
 
         self.launchCommand(cmd)
         return target
@@ -180,7 +215,7 @@ class Fieldmap(GenericTask):
 
 
         target = self.buildName(source, 'warped')
-        cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(), source, lossyImage, mask, self.get('unwarpdir'), target )
+        cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(), source, lossyImage, mask, self.__getUnwarpDirection(), target )
         self.launchCommand(cmd)
         return target
 
@@ -211,7 +246,7 @@ class Fieldmap(GenericTask):
 
         unwarp = self.buildName(source, 'unwarped')
         target = self.buildName(source, 'vsm')
-        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target, self.get('unwarpdir'), unwarp, self.__getDwellTime())
+        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target, self.__getUnwarpDirection(), unwarp, self.__getDwellTime())
         self.launchCommand(cmd)
         return target
 
