@@ -28,9 +28,7 @@ class Masking(GenericTask):
                   .format(anatBrainResample, aparcAseg))
         mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAseg)
         self.__createMask(extended)
-
         self.__createMask(aparcAseg)
-
 
         #produce optionnal mask
         if self.get("start_seeds").strip():
@@ -146,10 +144,7 @@ class Masking(GenericTask):
         cmd = "5tt2gmwmi {} {} -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-
-        return target
+        return self.rename(tmp, target)
 
 
     def __createMask(self, source):

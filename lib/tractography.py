@@ -37,10 +37,9 @@ class Tractography(object):
             cmd += " -grad {}".format(bFile)
 
         self.launchCommand(cmd)
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
 
-        return target
+
+        return self.rename(tmp, target)
 
 
     def tck2connectome(self, source, nodes, target):
@@ -60,10 +59,7 @@ class Tractography(object):
         cmd = "tck2connectome {} {} {} -quiet -nthreads {}".format(source, nodes, tmp, self.getNTreadsMrtrix() )
 
         self.launchCommand(cmd)
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-
-        return target
+        return self.rename(tmp, target)
 
 
     def tcksift(self, source, dwi2fod):
@@ -84,6 +80,4 @@ class Tractography(object):
         cmd = "tcksift {} {} {} -nthreads {} -quiet".format(source, dwi2fod, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
-        self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-        return target
+        return self.rename(tmp, target)

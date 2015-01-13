@@ -1,4 +1,5 @@
 from lib.generictask import GenericTask
+from lib import mriutil
 import os
 
 __author__ = 'desmat'
@@ -6,26 +7,30 @@ __author__ = 'desmat'
 class Dtifit(GenericTask):
 
 
-    #@TODO add appropriate mask to __tensorsFsl the command line
     def __init__(self, subject):
         """Fits a diffusion tensor model at each voxel
 
         """
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'unwarping', 'masking')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'eddy')
 
 
     def implement(self):
         """Placeholder for the business logic implementation
 
         """
-        dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
-        mask = self.getImage(self.maskingDir, "aparc_aseg", ["resample","mask"] )
-        bVal = self.getImage(self.unwarpingDir, 'grad', None, 'bval')
-        bVec = self.getImage(self.unwarpingDir, 'grad', None, 'bvec')
+        dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
+
+        bVal = self.getImage(self.eddyDir, 'grad', None, 'bval')
+        bVec = self.getImage(self.eddyDir, 'grad', None, 'bvec')
         if (not bVal) or (not bVec):
             bVal = self.getImage(self.preparationDir,'grad', None, 'bval')
             bVec = self.getImage(self.preparationDir,'grad', None, 'bvec')
 
+        #dtifit required a mask
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVal))
+        mask = self.__createMask(b0)
+        print "DEBUG mask name =", mask
         self.__tensorsFsl(dwi, bVec, bVal, mask)
 
         l1 = self.getImage(self.workingDir, 'dwi', 'fsl_value1', 'nii.gz')
@@ -35,7 +40,7 @@ class Dtifit(GenericTask):
         ad = self.buildName(dwi, 'fsl_ad', 'nii.gz')
         rd = self.buildName(dwi, 'fsl_rd', 'nii.gz')
 
-        os.rename(l1, ad)
+        self.rename(l1, ad)
         self.__mean(l2, l3, rd)
 
 
@@ -63,13 +68,34 @@ class Dtifit(GenericTask):
         self.launchCommand(cmd)
 
 
+    def __createMask(self, source):
+        """deletes non-brain tissue from an image of the whole head
+
+        bias field & neck cleanup will always be perform by this method
+
+        Args:
+            source: The input file name
+
+        Return:
+            The resulting output file name
+        """
+        self.info("Launch brain extraction from fsl")
+        target = self.buildName(source, "brain")
+        fractionalIntensity = 0.4
+        verticalGradient = 0
+        self.info("End brain extraction from fsl")
+        cmd = "bet {} {} -f {} -g {} -v -m".format(source, target, fractionalIntensity, verticalGradient)
+        self.launchCommand(cmd)
+	
+        return self.getImage(self.workingDir, 'b0', ['brain','mask'], 'nii.gz')
+
     def meetRequirement(self, result=True):
         """Validate if all requirements have been met prior to launch the task
 
         """
 
-        images = {'.bval gradient encoding file': self.getImage(self.unwarpingDir, 'grad', None, 'bval'),
-                '.bvec gradient encoding file': self.getImage(self.unwarpingDir, 'grad', None, 'bvec')}
+        images = {'.bval gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'bval'),
+                '.bvec gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'bvec')}
 
         if self.isSomeImagesMissing(images):
             images = {'.bval gradient encoding file': self.getImage(self.preparationDir, 'grad', None, 'bval'),
@@ -77,7 +103,7 @@ class Dtifit(GenericTask):
             if self.isSomeImagesMissing(images):
                 result=False
 
-        if self.isSomeImagesMissing({'diffusion weighted':  self.getImage(self.dependDir, 'dwi', 'upsample')}):
+        if self.isSomeImagesMissing({'diffusion weighted':  self.getImage(self.dependDir, 'dwi', 'denoise')}):
             result=False
 
         return result

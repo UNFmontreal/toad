@@ -3,6 +3,7 @@
 from nibabel.nicom import dicomwrappers
 import ConfigParser
 import argparse
+import math
 import os
 
 __author__ = "Mathieu Desrosiers"
@@ -34,26 +35,58 @@ def parseArguments():
     return args
 
 
-def getUnwarpFieldFromDicom(source):
+def __getPhaseEncodingDirection(source):
+    f = open(source, 'r')
+    lines = f.readlines()
+    f.close()
+    for line in lines:
+        if "sSliceArray.asSlice" in line and ".dInPlaneRot" in line:
+            return __returnPhaseEncodingDirection(line)
+        return 1
 
-    header=dicomwrappers.wrapper_from_file(source)
+
+def __returnPhaseEncodingDirection(line):
+
+    tolerance = 0.2
 
     try:
-        phaseEncDir = header.csa_header['tags']['PhaseEncodingDirectionPositive']['items'][0]
-        print "Pase enc dir value ",phaseEncDir
+        value = float(line.split("=")[-1].strip())
+    except ValueError:
+        return 1
+
+    if value < tolerance and value > -tolerance:
+       return 1  #A>>P
+
+    if (value > math.pi - tolerance) or (value < tolerance - math.pi):
+        return 0  #P>>A
+
+    if (value > (math.pi/2) - tolerance) and (value < (math.pi/2)+tolerance):
+        return 2  #R>>L
+
+    if (value < math.copysign((math.pi/2)-tolerance,-0.0)) and (value > math.copysign((math.pi/2)+tolerance, -0.0)):
+         return 3  #L>>R
+
+    return 1
+
+
+def __getUnwarpFieldFromDicom(source):
+
+    header=dicomwrappers.wrapper_from_file(source, force=True)
+
+    try:
         epiFactor = max(header['AcquisitionMatrix'])
         bpppe = header.csa_header['tags']['BandwidthPerPixelPhaseEncode']['items'][0]
         echoSpacing = 1/(epiFactor*bpppe)*1000
 
     except AttributeError:
         print "Cannot read csa header from ", source
-        return (None,None,None)
+        return (None,None)
 
     except IndexError:
         print "Some field(s) cannot be found in the header"
-        return (None,None,None)
+        return (None,None)
 
-    return (phaseEncDir, epiFactor, echoSpacing)
+    return (epiFactor, echoSpacing)
 
 
 def writeConfig(source, phaseEncDir, epiFactor, echoSpacing):
@@ -61,15 +94,15 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing):
     if os.path.exists(source):
         config.read(source)
 
-    if not config.has_section("unwarp"):
-        config.add_section("unwarp")
+    if not config.has_section("eddy"):
+        config.add_section("eddy")
 
     if phaseEncDir is not None:
-        config.set("unwarp", "phase_enc_dir", phaseEncDir)
+        config.set("eddy", "phase_enc_dir", phaseEncDir)
     if epiFactor is not None:
-        config.set("unwarp", "epi_factor", epiFactor)
+        config.set("eddy", "epi_factor", epiFactor)
     if echoSpacing is not None:
-        config.set("unwarp", "echo_spacing", echoSpacing)
+        config.set("eddy", "echo_spacing", echoSpacing)
 
     config.write(open(source,'w'))
 
@@ -79,16 +112,24 @@ if __name__ == '__main__':
     #parse arguments provide in command line
     arguments = parseArguments()
 
-    (phaseEncDir, epiFactor, echoSpacing) = getUnwarpFieldFromDicom(arguments.dcmFile)
+    #found information into the ASCCONV tags
+    phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
+    epiFactor = None
+    echoSpacing=None
+    (epiFactor, echoSpacing) = __getUnwarpFieldFromDicom(arguments.dcmFile)
 
     if arguments.config:
         writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing)
 
     if phaseEncDir is not None:
         if phaseEncDir==0:
-            print "\tPhase encoding: P>>A"
+            print "\tPhase encoding: {}, P>>A".format(phaseEncDir)
         elif phaseEncDir==1:
-            print "\tPhase encoding: A>>P"
+            print "\tPhase encoding: {}, A>>P".format(phaseEncDir)
+        elif phaseEncDir==2:
+            print "\tPhase encoding: {}, R>>L".format(phaseEncDir)
+        elif phaseEncDir==3:
+            print "\tPhase encoding: {}, L>>R".format(phaseEncDir)
         else:
             print "Phase encoding:", phaseEncDir
 

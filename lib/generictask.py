@@ -253,7 +253,6 @@ class GenericTask(Logger, Load):
                     self.logFooter("implement")
                     break
 
-
     def getName(self):
         """Return the name of this class into lower case
         """
@@ -394,6 +393,27 @@ class GenericTask(Logger, Load):
             a file name that contain the postfix and the current working directory
         """
         return util.buildName(self.config, self.workingDir, source, postfix, ext, absolute)
+
+
+    def rename(self, source, target):
+        """rename an image name specify as source
+
+        Args:
+            source:  name of the source file
+            target:  name of the output file
+
+        Returns
+            name of the output file
+
+        """
+        self.info("renaming {} to {}".format(source, target))
+
+        if os.path.exists(source):
+            os.rename(source, target)
+            return target
+        else:
+            self.warning("unable to find {} image".format(source))
+            return False
 
 
     def isSomeImagesMissing(self, dict):

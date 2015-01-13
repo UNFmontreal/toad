@@ -35,8 +35,7 @@ class HardiMetric(GenericTask):
         self.launchCommand(cmd)
         for prefix in ["gfa", "nufo", "fixelPeak" ]:
             self.info("renaming {} to {}".format(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)]))
-            os.rename(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)])
-
+            self.rename(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)])
 
     def meetRequirement(self):
 
