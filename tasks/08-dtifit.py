@@ -86,8 +86,9 @@ class Dtifit(GenericTask):
         self.info("End brain extraction from fsl")
         cmd = "bet {} {} -f {} -g {} -v -m".format(source, target, fractionalIntensity, verticalGradient)
         self.launchCommand(cmd)
-	
+
         return self.getImage(self.workingDir, 'b0', ['brain','mask'], 'nii.gz')
+
 
     def meetRequirement(self, result=True):
         """Validate if all requirements have been met prior to launch the task

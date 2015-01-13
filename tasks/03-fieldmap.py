@@ -14,9 +14,9 @@ class Fieldmap(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, "preparation", "parcellation", "eddy")
 
+
     def implement(self):
 
-        #@TODO validate all information
         dwi =  self.getImage(self.eddyDir,"dwi", "eddy")
         bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
 
@@ -46,13 +46,11 @@ class Fieldmap(GenericTask):
         self.__coregisterEpiLossyMap(b0, warped, matrixName, lossy)
         invertMatrixName = self.__invertComputeMatrix(matrixName)
         magnitudeIntoDwiSpace = self.__interpolateFieldmapInEpiSpace(warped, b0, invertMatrixName)
-	magnitudeIntoDwiSpaceMask = self.__mask(magnitudeIntoDwiSpace)
+        magnitudeIntoDwiSpaceMask = self.__mask(magnitudeIntoDwiSpace)
         interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
         saveshift = self.__performDistortionCorrection(b0, interpolateFieldmap, magnitudeIntoDwiSpaceMask )
         self.__performDistortionCorrectionToDWI(dwi, magnitudeIntoDwiSpaceMask, saveshift)
-	#@DEBUG	
-	import sys
-	sys.exit()
+
 
     def __getMagnitudeEchoTimeDifferences(self):
         try:
@@ -99,7 +97,7 @@ class Fieldmap(GenericTask):
         except ValueError:
             self.error("cannot determine unwarping direction of the the dwi image")
 
-    #@TODO change rebase name
+
     def __rescaleFieldMap(self, source):
 
         target = self.buildName(source, 'rescale')
@@ -197,7 +195,6 @@ class Fieldmap(GenericTask):
         return target
 
 
-    #@TODO find another prefix instead of mask and suffix brain
     def __computeMap(self, source, mask, prefix):
 
         # compute the fieldmap magnitude file with signal loss
@@ -215,19 +212,18 @@ class Fieldmap(GenericTask):
         # compute forward distortion on lossy fielmap magnitude file
         #fugue --dwell=0.0006900000 --loadfmap=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/make_fieldmap/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_field_reg.nii.gz --in=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/epi_correction/_subject_HC_AM32_1/fieldmap_mag_lossy/fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy.nii --mask=/media/77f462a2-7290-437d-8209-c1e673ed635a/analysis/cardio_pd/dwi_fieldmap/_subject_HC_AM32_1/warp_t1_mask/HC_AM32_1_mask_crop_flirt.nii.gz --nokspace --unwarpdir=y --warp=fieldmap_dwi_CARDIO_HC_C_AM32_1_20120913_mag_brain_lossy_warped.nii.gz
 
-
         target = self.buildName(source, 'warped')
-        #cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(),source, lossyImage,  mask, self.__getUnwarpDirection(), target )
-        cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(),source, lossyImage,  mask, "y", target )
+        cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(),source, lossyImage,  mask, self.__getUnwarpDirection(), target )
         self.launchCommand(cmd)
         return target
 
 
     def __coregisterEpiLossyMap(self, source, reference, matrix, weighted ):
-	target = self.buildName(source, 'flirt')
+        target = self.buildName(source, 'flirt')
         cmd = "flirt -in {} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference, matrix, self.get("dof"), weighted)
         self.launchCommand(cmd)
         return target
+
 
     def __invertComputeMatrix(self, source):
 
@@ -244,19 +240,20 @@ class Fieldmap(GenericTask):
         cmd = "flirt -in {} -ref {} -out {} -omat {} -applyxfm -init {}".format(source, reference, target, outputMatrixName, initMatrix)
         self.launchCommand(cmd)
         return target
-	
+
+
     def __mask(self, source):
         target = self.buildName(source, 'mask')
         cmd = "fslmaths {} -bin {}".format(source, target)
         self.launchCommand(cmd)
         return target	
 
+
     def __performDistortionCorrection(self, source, fieldmap, mask):
 
         unwarp = self.buildName(source, 'unwarped')
         target = self.buildName(source, 'vsm')
-        #cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target, self.__getUnwarpDirection(), unwarp, self.__getDwellTime())
-        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target,"y", unwarp, self.__getDwellTime())
+        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target, self.__getUnwarpDirection(), unwarp, self.__getDwellTime())
         self.launchCommand(cmd)
         return target
 
@@ -269,7 +266,6 @@ class Fieldmap(GenericTask):
         return target
 
 
-
     def isIgnore(self):
         return self.isSomeImagesMissing({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')})
 
@@ -280,7 +276,14 @@ class Fieldmap(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
-        return True
+        if self.isSomeImagesMissing({'eddy corrected': self.getImage(self.dependDir, "dwi", 'eddy')}):
+            dwi = self.getImage(self.preparationDir, "dwi")
+            if self.isSomeImagesMissing({'diffusion weighted': dwi}):
+                result = False
+            else:
+                self.info("Will take {} image instead".format(dwi))
+
+        return result
 
 
     def isDirty(self):
@@ -289,4 +292,5 @@ class Fieldmap(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        return True
+        dict = {'unwarped': self.getImage(self.workingDir, "dwi", 'unwarped')}
+        return self.isSomeImagesMissing(dict)

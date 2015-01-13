@@ -301,7 +301,6 @@ class Eddy(GenericTask):
         return self.rename(tmp, target)
 
 
-
     def isIgnore(self):
         return self.get("ignore") is "True"
 
