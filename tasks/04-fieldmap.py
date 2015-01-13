@@ -29,7 +29,6 @@ class Fieldmap(GenericTask):
         anatFreesurfer = self.getImage(self.parcellationDir, 'anat_freesurfer')
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         mask = self. __createSegmentationMask(aparcAseg)
-
         phaseRescale = self.__rescaleFieldMap(phase)
         fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, anatFreesurfer)
         invertFielmapToAnat = self.__invertFieldmapToAnat(fieldmapToAnat)
@@ -41,16 +40,19 @@ class Fieldmap(GenericTask):
         magnitudeMask = self.__computeMap(mag, interpolateMask, 'brain')
         lossyMagnitude = self.__computeMap(magnitudeMask, lossy, 'lossy')
 
-        warped = self.__computeForwardDistorsion(fieldmap, lossyMagnitude, magnitudeMask)
+        warped = self.__computeForwardDistorsion(fieldmap, lossyMagnitude, interpolateMask)
 
         matrixName = self.get("epiTo_b0fm")
         self.__coregisterEpiLossyMap(b0, warped, matrixName, lossy)
         invertMatrixName = self.__invertComputeMatrix(matrixName)
-        self.__interpolateFieldmapInEpiSpace(lossy, b0, invertMatrixName)
+        magnitudeIntoDwiSpace = self.__interpolateFieldmapInEpiSpace(warped, b0, invertMatrixName)
+	magnitudeIntoDwiSpaceMask = self.__mask(magnitudeIntoDwiSpace)
         interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
-        saveshift = self.__performDistortionCorrection(b0, interpolateFieldmap, interpolateMask )
-        self.__performDistortionCorrectionToDWI(dwi, interpolateMask, saveshift)
-
+        saveshift = self.__performDistortionCorrection(b0, interpolateFieldmap, magnitudeIntoDwiSpaceMask )
+        self.__performDistortionCorrectionToDWI(dwi, magnitudeIntoDwiSpaceMask, saveshift)
+	#@DEBUG	
+	import sys
+	sys.exit()
 
     def __getMagnitudeEchoTimeDifferences(self):
         try:
@@ -82,20 +84,20 @@ class Fieldmap(GenericTask):
 
     def __getUnwarpDirection(self):
         try:
-            direction = int(self.config.get("eddy","echo_spacing"))
+            direction = int(self.config.get("eddy","phase_enc_dir"))
             value="y"
             if direction == 0:
                 value = "y"
             elif direction == 1:
-                value = "-y"
+                value = "y-"
             elif direction == 2:
-                value = "-x"
+                value = "x-"
             elif direction == 3:
                 value = "x"
+            return value
 
         except ValueError:
             self.error("cannot determine unwarping direction of the the dwi image")
-
 
     #@TODO change rebase name
     def __rescaleFieldMap(self, source):
@@ -149,8 +151,8 @@ class Fieldmap(GenericTask):
     def __interpolateAnatMaskToFieldmap(self, source, mag, inverseMatrix,  mask):
 
         # interpolate T1 mask in fieldmap space
-        target = self.buildName(source, "flirt")
-        outputMatrix =self.buildName(source, "flirt", "mat")
+        target = self.buildName(source, "mask")
+        outputMatrix =self.buildName(source, "mask", "mat")
         
         #flirt -in  anat -ref _mag.nii.gz -out anat_flirt.nii.gz -omat HC_AM32_1_mask_crop_flirt.mat -applyxfm -datatype char -init fieldmap2t1_inv.mat   -interp nearestneighbour
 
@@ -166,7 +168,7 @@ class Fieldmap(GenericTask):
 
     def __computeFieldmap(self, source, mask):
 
-        target = self.buildName(source, 'reg')
+        target = self.buildName(source, 'fieldmap')
 
         # compute the fieldmap
         #--asym=-0.0024600000 echo Time 1 - echoTime 2
@@ -215,14 +217,17 @@ class Fieldmap(GenericTask):
 
 
         target = self.buildName(source, 'warped')
-        cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(), source, lossyImage, mask, self.__getUnwarpDirection(), target )
+        #cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(),source, lossyImage,  mask, self.__getUnwarpDirection(), target )
+        cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(),source, lossyImage,  mask, "y", target )
         self.launchCommand(cmd)
         return target
 
 
     def __coregisterEpiLossyMap(self, source, reference, matrix, weighted ):
-        "flirt -in {} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference, matrix, self.get("dof"), weighted)
-
+	target = self.buildName(source, 'flirt')
+        cmd = "flirt -in {} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference, matrix, self.get("dof"), weighted)
+        self.launchCommand(cmd)
+        return target
 
     def __invertComputeMatrix(self, source):
 
@@ -233,20 +238,25 @@ class Fieldmap(GenericTask):
 
 
     def __interpolateFieldmapInEpiSpace(self, source, reference, initMatrix):
-        target = self.buildName(source, 'sigloss')
+        target = self.buildName(source, 'flirt')
         outputMatrixName = self.buildName(source, 'flirt', 'mat')
 
         cmd = "flirt -in {} -ref {} -out {} -omat {} -applyxfm -init {}".format(source, reference, target, outputMatrixName, initMatrix)
         self.launchCommand(cmd)
         return target
-
-
+	
+    def __mask(self, source):
+        target = self.buildName(source, 'mask')
+        cmd = "fslmaths {} -bin {}".format(source, target)
+        self.launchCommand(cmd)
+        return target	
 
     def __performDistortionCorrection(self, source, fieldmap, mask):
 
         unwarp = self.buildName(source, 'unwarped')
         target = self.buildName(source, 'vsm')
-        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target, self.__getUnwarpDirection(), unwarp, self.__getDwellTime())
+        #cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target, self.__getUnwarpDirection(), unwarp, self.__getDwellTime())
+        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target,"y", unwarp, self.__getDwellTime())
         self.launchCommand(cmd)
         return target
 

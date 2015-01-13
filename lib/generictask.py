@@ -313,8 +313,8 @@ class GenericTask(Logger, Load):
         if util.which(binary) is None:
             self.error("Command {} not found".format(binary))
 
-        self.info("\nLaunch {} command line...".format(binary))
-        self.info("Command line submit: {}\n".format(cmd))
+        self.info("Launch {} command line...".format(binary))
+        self.info("Command line submit: {}".format(cmd))
 
         out = None
         err = None
