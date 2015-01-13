@@ -24,16 +24,17 @@ class QA(GenericTask):
 
 
     def implement(self):
-        pass
-        """
+        
         #Usefull images for the QA
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
         bvec = self.getImage(self.preparationDir, 'grad',  None, 'bvec')
+        bval = self.getImage(self.preparationDir, 'grad', None, 'bval')
         brain = self.getImage(self.preprocessingDir,'anat','brain')
         wm = self.getImage(self.preprocessingDir,'anat','wm')
         dwi_up = self.getImage(self.preprocessingDir, 'dwi' ,'upsample')
-        b0_up = self.getImage(self.preprocessingDir, 'b0' ,'upsample')
+        b0_up = os.path.join(self.workingDir, os.path.basename(dwi_up).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        self.info(mriutil.extractFirstB0FromDwi(dwi_up, b0_up, bval))
         anatfs = self.getImage(self.parcellationDir, 'anat_freesurfer')
         aparcaseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         brodmann = self.getImage(self.parcellationDir, 'brodmann')
@@ -189,7 +190,7 @@ class QA(GenericTask):
         util.createScript(self.reportName, htmlCode)
 
         self.dirty = False
-        """
+        
     def __idGenerator(self, size=6, chars=ascii_uppercase + digits):
         """
         Generate random strings
@@ -410,15 +411,13 @@ class QA(GenericTask):
 
 
     def meetRequirement(self, result=True):
-        """
         
-	
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
         bvec = self.getImage(self.preparationDir, 'grad',  None, 'bvec')
         brain = self.getImage(self.preprocessingDir,'anat','brain')
         wm = self.getImage(self.preprocessingDir,'anat','wm')
-        b0_up = self.getImage(self.preprocessingDir, 'b0' ,'upsample')
+        #b0_up = self.getImage(self.preprocessingDir, 'b0' ,'upsample')
         anatfs = self.getImage(self.parcellationDir, 'anat_freesurfer')
         aparcaseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         brodmann = self.getImage(self.parcellationDir, 'brodmann')
@@ -433,7 +432,7 @@ class QA(GenericTask):
             bvec:'No gradient file found in directory %s.'%self.preparationDir,
             brain:'No brain image found in directory %s.'%self.preprocessingDir,
             wm:'No white matter image found in directory %s.'%self.preprocessingDir,
-            b0_up:'No B0 upsample image found in directory %s.'%self.preprocessingDir,
+            #b0_up:'No B0 upsample image found in directory %s.'%self.preprocessingDir,
             anatfs:'No Freesurfer anatomical image found in directory %s.'%self.parcellationDir,
             aparcaseg:'No aparc_aseg image found in directory %s.'%self.parcellationDir,
             brodmann:'No Brodmann segmentation image found in directory %s.'%self.parcellationDir,
@@ -449,8 +448,6 @@ class QA(GenericTask):
                 result = False
                 
         return result
-        """
-        return True
 
 
     def isDirty(self):
