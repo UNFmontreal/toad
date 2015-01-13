@@ -23,13 +23,6 @@ class Preparation(GenericTask):
 
         self.__produceEncodingFiles(bEnc, bVal, bVec)
 
-        #@DEBUG test timeout capability
-        import subprocess
-        self.launchCommand("sleep 5;echo \'BLBLB\';", stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0, timeout=9)
-        self.launchCommand("sleep 15;echo \'Timeout me\';", stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0, timeout=9)
-        import sys
-        sys.exit()
-
         if b0PA:
             self.info("Found B0 posterior to anterior image, linking file {} to {}".format(b0AP, self.workingDir))
             util.symlink(b0PA, self.workingDir)
