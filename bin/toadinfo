@@ -1,5 +1,9 @@
-#!/usr/bin/env python -W ignore
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+import warnings
+warnings.simplefilter('ignore')
+
 from nibabel.nicom import dicomwrappers
 import ConfigParser
 import argparse

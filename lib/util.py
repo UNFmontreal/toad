@@ -1,5 +1,8 @@
 from string import Template
 import subprocess
+import datetime
+import signal
+import time
 import glob
 import sys
 import os
@@ -57,7 +60,7 @@ def gzip(source):
     return "{}.gz".format(source)
 
 
-def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0):
+def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-1, nice=0):
     """Execute a program in a new process
 
     Args:
@@ -65,17 +68,31 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,  nice=0):
        stdout: this attribute is a file object that provides output from the child process
        stderr: this attribute is a file object that provides error from the child process
        nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
+       timeout: Number of seconds before a process is consider void, usefull against deadlock
 
     Returns
-        return a 3 elements tuples representing the command execute, the standards output and the standard error message
+        return a 2 elements tuples representing the standards output and the standard error message
 
     Raises
         OSError:      the function trying to execute a non-existent file.
         ValueError :  the command line is called with invalid arguments
 
     """
+
+    start = datetime.datetime.now()
     process = subprocess.Popen(cmd, preexec_fn=lambda: os.nice(nice), stdout=stdout, stderr=stderr, shell=True)
-    process.wait()
+
+    if timeout == -1:
+        process.wait()
+    else:
+        while process.poll() is None:
+            time.sleep(0.2)
+            now = datetime.datetime.now()
+            if (now - start).seconds > timeout:
+                os.kill(process.pid, signal.SIGKILL)
+                os.waitpid(-1, os.WNOHANG)
+                return None, "Error, a timeout for this process occurred"
+
     return process.communicate()
 
 

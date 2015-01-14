@@ -243,15 +243,16 @@ class GenericTask(Logger, Load):
                     self.__cleanup()
                 self.__implement()
                 if attempt == nbSubmission:
-                    self.error("Cannot execute this task successfully, exiting the pipeline")
+                    self.error("I already execute this task {} time and failed, exiting the pipeline")
                 elif self.isDirty():
-                    self.info("A problems occur during the task execution, resubmitting this task again")
+                    self.info("A problems occur during the execution of this task, resubmitting this task again")
                     attempt += 1
                 else:
                     finish = datetime.now()
                     self.info("Time to finish the task = {} seconds".format(str(timedelta(seconds=(finish - start).seconds))))
                     self.logFooter("implement")
                     break
+
 
     def getName(self):
         """Return the name of this class into lower case
@@ -291,7 +292,7 @@ class GenericTask(Logger, Load):
         return self.config.getboolean(self.getName(), option)
 
 
-    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, nice=0):
+    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-1, nice=0):
         """Execute a program in a new process
 
         Args:
@@ -308,13 +309,12 @@ class GenericTask(Logger, Load):
             ValueError :  the command line is called with invalid arguments
 
         """
-
         binary = cmd.split(" ").pop(0)
         if util.which(binary) is None:
             self.error("Command {} not found".format(binary))
 
-        self.info("Launch {} command line...\n".format(binary))
-        self.info("Command line submit: {}\n".format(cmd))
+        self.info("Launch {} command line...".format(binary))
+        self.info("Command line submit: {}".format(cmd))
 
         out = None
         err = None
@@ -326,11 +326,11 @@ class GenericTask(Logger, Load):
             err = self.getLog()
             self.info("Error will be log in {} \n".format(err.name))
 
-        (output, error)= util.launchCommand(cmd, out, err, nice)
-        if stdout is not "None":
+        (output, error)= util.launchCommand(cmd, out, err, timeout, nice)
+        if not (output is "" or output is "None" or output is None):
             self.info("Output produce by {}: {} \n".format(binary, output))
 
-        if error != '' or error != "None":
+        if not (error is '' or error is "None" or error is None):
             self.info("Error produce by {}: {}\n".format(binary, error))
         self.info("------------------------\n")
 

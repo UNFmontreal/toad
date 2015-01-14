@@ -13,12 +13,16 @@ class Denoising(GenericTask):
 
     def implement(self):
 
+
         if self.get("algorithm") is "None":
             self.info("Skipping denoising process")
         else:
-            dwi = self.getImage(self.dependDir, "dwi", 'eddy')
+            dwi = self.getImage(self.fieldmapDir, "dwi", 'unwarp')
             if not dwi:
-                dwi = self.getImage(self.preparationDir, "dwi")
+                dwi = self.getImage(self.dependDir, "dwi", 'eddy')
+                if not dwi:
+                    dwi = self.getImage(self.preparationDir, "dwi")
+
 
             target = self.buildName(dwi, "denoise")
             tmp = self.buildName(dwi, "tmp")
@@ -58,14 +62,11 @@ class Denoising(GenericTask):
 
 
     def meetRequirement(self, result = True):
-
-        if self.isSomeImagesMissing({'eddy corrected': self.getImage(self.dependDir, "dwi", 'eddy')}):
-            dwi = self.getImage(self.preparationDir, "dwi")
-            if self.isSomeImagesMissing({'diffusion weighted': dwi}):
-                result = False
-            else:
-                self.info("Will take {} image instead".format(dwi))
-
+        if self.isSomeImagesMissing({'fieldmap': self.getImage(self.fieldmapDir, "dwi", 'unwarp')}) and \
+                self.isSomeImagesMissing({'eddy corrected': self.getImage(self.dependDir, "dwi", 'eddy')}) and \
+                self.isSomeImagesMissing({'diffusion weighted': self.getImage(self.preparationDir, "dwi")}):
+            result = False
+            self.warning("No suitable dwi image found for denoising task")
         return result
 
 

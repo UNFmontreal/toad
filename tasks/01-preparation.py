@@ -1,6 +1,5 @@
 from lib.generictask import GenericTask
 from lib import util, mriutil
-import os
 
 __author__ = 'desmat'
 
