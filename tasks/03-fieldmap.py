@@ -191,7 +191,7 @@ class Fieldmap(GenericTask):
 
     def __computeForwardDistorsion(self, source, lossyImage, mask):
 
-        target = self.buildName(source, 'warped')
+        target = self.buildName(source, 'warp')
         cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(),source, lossyImage,  mask, self.__getUnwarpDirection(), target )
         self.launchCommand(cmd)
         return target
@@ -229,7 +229,7 @@ class Fieldmap(GenericTask):
 
 
     def __performDistortionCorrection(self, source, fieldmap, mask):
-        unwarp = self.buildName(source, 'unwarped')
+        unwarp = self.buildName(source, 'unwarp')
         target = self.buildName(source, 'vsm')
         cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target, self.__getUnwarpDirection(), unwarp, self.__getDwellTime())
         self.launchCommand(cmd)
@@ -238,7 +238,7 @@ class Fieldmap(GenericTask):
 
     def __performDistortionCorrectionToDWI(self, source, mask, shift):
 
-        target = self.buildName(source, 'unwarped')
+        target = self.buildName(source, 'unwarp')
         cmd= "fugue --in={} --mask={} --loadshift={} --unwarp={}".format(source, mask, shift, target)
         self.launchCommand(cmd)
         return target
@@ -270,5 +270,5 @@ class Fieldmap(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        dict = {'unwarped': self.getImage(self.workingDir, "dwi", 'unwarped')}
+        dict = {'unwarped': self.getImage(self.workingDir, "dwi", 'unwarp')}
         return self.isSomeImagesMissing(dict)
