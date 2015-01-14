@@ -24,17 +24,17 @@ class Logger(object):
             self.handle = open(self.filename,'a')
             self.handle.write("#########################################################################\n")
             self.handle.write("\n")
-            self.handle.write(" Start logging task {} at {}".format(self.getName(), self.__timestamp()))
+            self.handle.write(" Start logging task {} at {}".format(self.getName(), self.getTimestamp()))
             self.handle.write("\n")
             self.handle.write("\n")
             self.handle.write("#########################################################################\n")
             self.handle.close()
 
 
-    def __timestamp(self):
+    def getTimestamp(self):
         """Return the current time and date formated as %Y%m%d %Hh%M
 
-        example if the current time is  9:41 the  14 october 2014, the timestamp will
+        example if the current time is  9:41 the 14 october 2014, the timestamp will
         return the string: 20141014 09h41
 
         Returns:
@@ -57,7 +57,7 @@ class Logger(object):
         elif methodName == "meetRequirement":
             self.info("Looking if all requirement are met prior submitting the task {}.".format(self.getName()))
         elif methodName == "implement":
-            self.info("Starting task {} at {}.".format(self.getName(), self.__timestamp()))
+            self.info("Starting task {} at {}.".format(self.getName(), self.getTimestamp()))
 
 
     def logFooter(self, methodName, result=False):
@@ -82,7 +82,7 @@ class Logger(object):
             else:
                 self.error("Some mandatory image are missing. Finishing the pipeline now\n\n")
         elif methodName == "implement":
-            self.info("Finish task {} at {}.".format(self.getName(), self.__timestamp()))
+            self.info("Finish task {} at {}.".format(self.getName(), self.getTimestamp()))
             self.info("-------------------------------------------------------------------------")
 
 

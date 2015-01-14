@@ -167,6 +167,7 @@ class SubjectManager(Logger, Config):
                     tasksmanager.run()
                 finally:
                     subject.removeLock()
+                    self.info("Pipeline finish at {} have a nice day!".format(self.getTimestamp()))
             else:
                 self.__processLocksSubjects(subject)
         else:
