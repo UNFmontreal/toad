@@ -243,15 +243,16 @@ class GenericTask(Logger, Load):
                     self.__cleanup()
                 self.__implement()
                 if attempt == nbSubmission:
-                    self.error("Cannot execute this task successfully, exiting the pipeline")
+                    self.error("I already execute this task {} time and failed, exiting the pipeline")
                 elif self.isDirty():
-                    self.info("A problems occur during the task execution, resubmitting this task again")
+                    self.info("A problems occur during the execution of this task, resubmitting this task again")
                     attempt += 1
                 else:
                     finish = datetime.now()
                     self.info("Time to finish the task = {} seconds".format(str(timedelta(seconds=(finish - start).seconds))))
                     self.logFooter("implement")
                     break
+
 
     def getName(self):
         """Return the name of this class into lower case
@@ -308,7 +309,6 @@ class GenericTask(Logger, Load):
             ValueError :  the command line is called with invalid arguments
 
         """
-
         binary = cmd.split(" ").pop(0)
         if util.which(binary) is None:
             self.error("Command {} not found".format(binary))

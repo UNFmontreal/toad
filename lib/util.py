@@ -68,10 +68,10 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-
        stdout: this attribute is a file object that provides output from the child process
        stderr: this attribute is a file object that provides error from the child process
        nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
-       timeout: Number of seconds before a process timeout, usefull for deadlock
+       timeout: Number of seconds before a process is consider void, usefull against deadlock
 
     Returns
-        return a 3 elements tuples representing the command execute, the standards output and the standard error message
+        return a 2 elements tuples representing the standards output and the standard error message
 
     Raises
         OSError:      the function trying to execute a non-existent file.
@@ -91,32 +91,9 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-
             if (now - start).seconds > timeout:
                 os.kill(process.pid, signal.SIGKILL)
                 os.waitpid(-1, os.WNOHANG)
-                return None, "Error, a timeout for this process occured"
+                return None, "Error, a timeout for this process occurred"
 
     return process.communicate()
-
-
-def timeout_command(command, timeout):
-    """call shell-command and either return its output or kill it
-    if it doesn't normally exit within timeout seconds and return None"""
-    import subprocess, datetime, os, time, signal
-
-    cmd = command.split(" ")
-    start = datetime.datetime.now()
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    while process.poll() is None:
-        time.sleep(0.1)
-        now = datetime.datetime.now()
-        if (now - start).seconds > timeout:
-            os.kill(process.pid, signal.SIGKILL)
-            os.waitpid(-1, os.WNOHANG)
-            return None
-
-    return process.stdout.read()
-
-
-
 
 
 def createScript(source, text):

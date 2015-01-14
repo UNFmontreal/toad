@@ -7,7 +7,7 @@ __author__ = 'desmat'
 class HardiTractography(GenericTask, Tractography):
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'hardi', 'registration' ,'masking')
+        GenericTask.__init__(self, subject, 'hardi', 'registration', 'masking')
 
 
     def implement(self):
