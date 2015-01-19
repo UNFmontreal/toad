@@ -7,16 +7,22 @@ __author__ = 'mathieu'
 class Load(object):
 
 
-    def __init__(self, nThreads="algorithm"):
+    def __init__(self, nbSubjects, nbThreads="algorithm"):
         """Determine the number of threads a package should consume without stressing the server.
 
         The package should implement some multithreading capabilty prior to use that package
 
         Args:
-            nTreads: if not set to "algorithm", Force to override the return value to a specific number.
+
+            nbSubjects: The number of subjects that have been submit
+            nbThreads: if not set to "algorithm" or "unlimited", Force to override the return value to a specific number.
 
         """
-        self.nThreads = nThreads
+        self.nbThreads = nbThreads
+        try:
+            self.nbSubjects = int(nbSubjects)
+        except ValueError:
+            self.nbSubjects = 1000
 
 
     def __getLoad(self):
@@ -26,24 +32,6 @@ class Load(object):
             a float value representing the load
         """
         return os.getloadavg()[0]
-
-
-    def __get5MinuteLoad(self):
-        """utility that displays the load average of the system over the last 5 minutes
-
-        Returns:
-            a float value representing the load
-        """
-        return os.getloadavg()[1]
-
-
-    def isSingleThread(self):
-        """Define if a command line should be run as a single thread.
-
-        Returns:
-            True if the load on the system is consider low, False Otherwise
-        """
-        return self.__getLoad() < 15
 
 
     def getNTreadsAnts(self):
@@ -94,58 +82,74 @@ class Load(object):
     def __getNTreads(self):
         """Define the number of thread that should be deploy without stressing the server too much
 
+            -First compute the number of threads base on the server capacity
+            -Second look if nbThreads have not been overwrite into the config file
+            -Third make sure the system is not overworking
+            -Last, if emergency have been call, pray to avoid a crash
+
         Returns:
             the suggested number of threads that should be deploy
+
         """
-        if self.nThreads == "algorithm":
-            if 'magma' in socket.gethostname():
-                if self.__getLoad() > 100:
-                    return "1"
 
-                elif self.__getLoad() > 40 and (self.__getLoad() < self.__get5MinuteLoad()):
-                    return "5"
+        serverName = socket.gethostname()
 
-                elif self.__getLoad() > 40:
-                    return "3"
-
-                elif self.__getLoad() > 20:
-                    return "5"
-
-                elif self.__getLoad() > 10:
-                    return "7"
-
-                elif self.__getLoad() > 1:
-                    return "10"
-
-                else:
-                    return "23"
-
-            elif 'stark' in socket.gethostname():
-                if self.__getLoad() > 100:
-                    return "4"
-
-                elif self.__getLoad() > 50 and (self.__getLoad() < self.__get5MinuteLoad()):
-                    return "9"
-
-                elif self.__getLoad() > 50:
-                    return "7"
-
-                elif self.__getLoad() > 20:
-                    return "15"
-
-                elif self.__getLoad() > 5:
-                    return "20"
-
-                elif self.__getLoad() > 1:
-                    return "30"
-
-                else:
-                    return "63"
-
+        #First compute the number of threads base on the server capacity
+        if 'magma' in serverName:
+            if self.nbSubjects <= 5:
+                value = 3
+            elif self.nbSubjects <= 10:
+                value = 3
             else:
-                return "3"
+                value = 1
+
+        elif 'stark' in serverName:
+            if self.nbSubjects <= 5:
+                value = 4
+            elif self.nbSubjects <= 10:
+                value = 3
+            elif self.nbSubjects <= 15:
+                value = 2
+            else:
+                value = 1
         else:
-            return self.nThreads
+            value = 1
+
+        #Second look if nbThreads have not been overwrite into the config file
+        if self.nbThreads is not "algorithm" or self.nbThreads is not "unlimited":
+            try:
+                nbThreads = int(self.nbThreads)
+                if nbThreads <= value:
+                    value = nbThreads
+            except ValueError:
+                pass
+
+
+        #Third make sure the system is not overworking
+        if self.isSystemOverloaded(serverName):
+            value = 1
+
+        #Last, if emergency have been call, pray to avoid a crash
+        if self.nbThreads is "unlimited" and self.nbSubjects == 1:
+            value = 100
+
+        return value
+
+
+    def isSystemOverloaded(self, serverName):
+        """ Define a treshold for the load of the server
+
+        Args:
+            serverName: the name of the server
+
+        Returns:
+            A boolean if the system is consider overload or not
+        """
+        if serverName == "magma" and self.__getLoad() > 70:
+                return True
+        elif serverName == "stark" and self.__getLoad() > 100:
+                return True
+        return False
 
 
     def getNTreads(self):

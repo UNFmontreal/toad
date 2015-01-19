@@ -105,7 +105,7 @@ class Preprocessing(GenericTask):
             self.error("White matter map should be produce as a requirement, the third element must be set to 1")
 
         scriptName = self.__createSegmentationScript(source, options)
-        self.launchMatlabCommand(scriptName,  self.isSingleThread())
+        self.launchMatlabCommand(scriptName)
         fileBasename = self.buildName(source, None, "", False)
         dict = {'c1':'gw','c2':'wm','c3':'csf',
                 'wc1':'wgw','wc2':'wwm','wc3':'wcsf',

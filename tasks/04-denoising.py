@@ -54,7 +54,7 @@ class Denoising(GenericTask):
     def __launchMatlabExecution(self, pyscript):
 
         self.info("Launch DWIDenoisingLPCA from matlab.")
-        self.launchMatlabCommand(pyscript, self.isSingleThread())
+        self.launchMatlabCommand(pyscript)
 
 
     def isIgnore(self):

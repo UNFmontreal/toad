@@ -85,7 +85,7 @@ class Validation(object):
 
         dwi = util.getImage(self.config, self.workingDir,'dwi')
 
-        #@TODO fix data layout incomprehesion
+        #@TODO send data layout warning if strides are not 1,2,3
         #make sure that diffusion image Z scale layout is oriented correctly
         #if not mriutil.isDataLayoutValid(dwiImage):
         #    self.error("Data layout for {} image is unexpected. "

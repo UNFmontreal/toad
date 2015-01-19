@@ -304,13 +304,41 @@ def parseTemplate(dict, template):
     f = open(template, 'r')
     return Template(f.read()).safe_substitute(dict)
 
+
 def displayYesNoMessage(msg):
+    """Utility that ask a question
+
+
+    Args:
+       msg: A message to display before prompt
+       template: object passed to the constructors template argument.
+
+    Returns:
+        the string substitute
+
+    """
     print msg
     while True:
         choice = raw_input("Continue? (y or n)")
         if choice == 'y':
-            print "\n Subjects will failed during the execution\n"
+            print "\nPipeline may failed during execution\n"
             break
         elif choice == 'n':
-            print "\nSubmit the pipeline again\n"
+            print "\nPlease submit the pipeline again\n"
             sys.exit()
+
+def displayContinueQuitRemoveMessage(msg, files=[]):
+    print msg
+    while True:
+        choice = raw_input("Continue? (y, n or r)")
+        if choice.lower() == 'y':
+            print "\nPipeline may failed during execution\n"
+            break
+        elif choice.lower() == 'n':
+            print "\nPlease submit the pipeline again\n"
+            sys.exit()
+        elif choice.lower() == 'r':
+            for file in files:
+                if os.path.isfile(file):
+                    os.remove(file)
+            break
