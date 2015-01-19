@@ -11,4 +11,9 @@ If a previously jobs crashed or have been interupted by a user. Please verify
         # ps -ef |grep $name |grep toad
 
 
-Otherwise, you may delete $lock file.
+If you are 100% sure that no toad process is currently running. I may remove $lock file and continue the pipeline.
+Otherwise, delete that file manually and restart the pipeline again (recommended).
+
+If you continue, $name will be exclude from the submission?
+If you are 100% sure that those subject are not running. You may type 'r' to remove the locks and continue the pipeline.
+You may also interrupt the pipeline and delete those locks files manually (recommended).

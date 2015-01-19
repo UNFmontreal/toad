@@ -31,10 +31,10 @@ class GenericTask(Logger, Load):
         self.__cleanupBeforeImplement = True
         self.config = subject.getConfig()
         self.subjectDir = subject.getDir()
-        self.toadDir = self.config.get('arguments', 'toadDir')
+        self.toadDir = self.config.get('arguments', 'toad_dir')
         self.workingDir = os.path.join(self.subjectDir,  self.__class__.__module__.split(".")[-1])
         Logger.__init__(self, subject.getLogDir())
-        Load.__init__(self, self.config.get('general', 'nthreads'))
+        Load.__init__(self, self.config.get('general', 'nb_subjects'), self.config.get('general', 'nb_threads'))
         self.dependencies = []
         self.__dependenciesDirNames = {}
         for arg in args:
@@ -234,7 +234,7 @@ class GenericTask(Logger, Load):
         start = datetime.now()
         if self.__meetRequirement():
             try:
-                nbSubmission = int(self.config.get('general','nbsubmissions'))
+                nbSubmission = int(self.config.get('general','nb_submissions'))
             except ValueError:
                 nbSubmission = 3
 
@@ -335,26 +335,21 @@ class GenericTask(Logger, Load):
         self.info("------------------------\n")
 
 
-    def launchMatlabCommand(self, source, singleThread = True):
+    def launchMatlabCommand(self, source):
         """Execute a Matlab script in a new process
 
         The script must contains all paths and program that are necessary to run the script
 
         Args:
             source: A matlab script to execute in the current working directory
-            singleThread: If matlab should run in multithread mode
+
         Returns
             return a 3 elements tuples representing the command execute, the standards output and the standard error message
 
         """
 
-        if singleThread:
-            singleCompThread = "-singleCompThread"
-        else:
-            singleCompThread=""
-
         [scriptName, ext] = os.path.splitext(os.path.basename(source))
-        tags={ 'script': scriptName, 'workingDir': self.workingDir, 'singleCompThread': singleCompThread}
+        tags={ 'script': scriptName, 'workingDir': self.workingDir}
         cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/matlab.tpl"))
         self.info("Launching matlab command: {}".format(cmd))
         self.launchCommand(cmd, 'log')

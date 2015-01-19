@@ -103,16 +103,16 @@ class SubjectManager(Logger, Config):
                 msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/lock.tpl"))
 
             else:
-                names = []
-                arrayOfLocks = []
+                subjectsNames = []
+                locksFileNames = []
                 for subject in locks:
-                    names.append(subject.getName())
-                    arrayOfLocks.append(subject.getLock())
-                    tags = {"names": ", ".join(names) ,"locks":"\t,\n".join(arrayOfLocks)}
+                    subjectsNames.append(subject.getName())
+                    locksFileNames.append(subject.getLock())
+                    tags = {"names": ", ".join(subjectsNames) ,"locks":"\t,\n".join(locksFileNames)}
                     msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/locks.tpl"))
 
             if self.config.getboolean('arguments', 'prompt'):
-                util.displayYesNoMessage(msg)
+                util.displayContinueQuitRemoveMessage(msg, locks)
             else:
                 self.warning(msg)
 
@@ -224,13 +224,16 @@ class SubjectManager(Logger, Config):
         """
         self.info("Directory {} have been specified by the user.".format(self.studyDir))
         subjects = self.__getSubjectsDirectories()
-        self.__processLocksSubjects(subjects)
+
+        #need to remove locks subject in a case we submit the pipeline
+        subjects = self.__processLocksSubjects(subjects)
+
+        self.config.set('general', 'nb_subjects', len(subjects))
 
         if self.config.getboolean('arguments', 'reinitialize'):
             self.__reinitialize(subjects)
         else:
             for subject in subjects:
-
                     if self.config.getboolean('arguments', 'local'):
                         self.__submitLocal(subject)
                     else:
