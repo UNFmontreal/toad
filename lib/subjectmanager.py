@@ -35,7 +35,7 @@ class SubjectManager(Logger, Config):
         return self.__class__.__name__.lower()
 
 
-    def __isDirAValidSubject(self, source):
+    def __isDirectoryAValidSubject(self, source):
         """Verify if the directory source may be consider a valid subject
 
         Args:
@@ -62,7 +62,7 @@ class SubjectManager(Logger, Config):
         return result
 
 
-    def __getSubjectsDirectories(self):
+    def __instantiateSubjectsFromDirectories(self):
         """Return directories who qualified for the pipeline
 
         Look into each subdirectory if it meet all the requirements. If yes, the subdirectory is consider
@@ -72,18 +72,26 @@ class SubjectManager(Logger, Config):
             subjects: a list of directory containing qualified subjects
 
         """
-        self.info("Looking for valid subjects.")
         subjects = []
+
+        self.info("Directory {} have been specified by the user.".format(self.studyDir))
+        self.info("Looking for valid subjects.")
 
         if self.arguments.subject:
             for dir in self.arguments.subject:
-                if self.__isDirAValidSubject(dir):
+                if self.__isDirectoryAValidSubject(dir):
                     subjects.append(Subject(self.__copyConfig(dir)))
         else:
             dirs = glob.glob("{}/*".format(self.studyDir))
             for dir in dirs:
-                if self.__isDirAValidSubject(dir):
+                if self.__isDirectoryAValidSubject(dir):
                     subjects.append(Subject(self.__copyConfig(dir)))
+
+        subjects = self.__processLocksSubjects(subjects)
+
+        #Subject Load() class need to know how much valid subject are submit.
+        for subject in subjects:
+            subject.setConfigItem("general", "nb_subjects", len(subjects))
 
         return subjects
 
@@ -113,15 +121,15 @@ class SubjectManager(Logger, Config):
 
             if self.config.getboolean('arguments', 'prompt'):
                 answer = util.displayContinueQuitRemoveMessage(msg)
-		if answer == "y":
-	            self.info("Locks subjects will be ignored during execution\n")
-                    print locks
-                    subjects = [subject for subject in subjects if subject not in locks]
-                elif answer == "r":
-                    self.info("Removing locks and continue the pipeline\n")
-                    for lock in locks:
-                        if os.path.isfile(lock.getLock()):
-                            os.remove(lock.getLock())                    
+            if answer == "y":
+                self.info("Locks subjects will be ignored during execution\n")
+                print locks
+                subjects = [subject for subject in subjects if subject not in locks]
+            elif answer == "r":
+                self.info("Removing locks and continue the pipeline\n")
+                for lock in locks:
+                    if os.path.isfile(lock.getLock()):
+                        os.remove(lock.getLock())
                 else:
                     self.error("Please submit the pipeline again\n")
             else:
@@ -234,13 +242,7 @@ class SubjectManager(Logger, Config):
                 functionnality should be probably render obsolete during the next versions
 
         """
-        self.info("Directory {} have been specified by the user.".format(self.studyDir))
-        subjects = self.__getSubjectsDirectories()
-
-        #need to remove locks subject in a case we submit the pipeline
-        subjects = self.__processLocksSubjects(subjects)
-
-        self.config.set('general', 'nb_subjects', len(subjects))
+        subjects = self.__instantiateSubjectsFromDirectories()
 
         if self.config.getboolean('arguments', 'reinitialize'):
             self.__reinitialize(subjects)
