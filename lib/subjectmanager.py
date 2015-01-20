@@ -98,7 +98,7 @@ class SubjectManager(Logger, Config):
                 locks.append(subject)
         if locks:
             if len(locks) == 1:
-                subject = locks.pop()
+                subject = locks[0]
                 tags = {"name": subject.getName(), "lock":subject.getLock()}
                 msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/lock.tpl"))
 
@@ -112,9 +112,21 @@ class SubjectManager(Logger, Config):
                     msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/locks.tpl"))
 
             if self.config.getboolean('arguments', 'prompt'):
-                util.displayContinueQuitRemoveMessage(msg, locks)
+                answer = util.displayContinueQuitRemoveMessage(msg)
+		if answer == "y":
+	            self.info("Locks subjects will be ignored during execution\n")
+                    print locks
+                    subjects = [subject for subject in subjects if subject not in locks]
+                elif answer == "r":
+                    self.info("Removing locks and continue the pipeline\n")
+                    for lock in locks:
+                        if os.path.isfile(lock.getLock()):
+                            os.remove(lock.getLock())                    
+                else:
+                    self.error("Please submit the pipeline again\n")
             else:
                 self.warning(msg)
+        return subjects
 
 
     def __reinitialize(self, subjects):

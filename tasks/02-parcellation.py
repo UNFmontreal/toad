@@ -11,8 +11,8 @@ class Parcellation(GenericTask):
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preparation')
-        self.id = subject.getConfig().get('parcellation', 'id')
-
+        #self.id = subject.getConfig().get('parcellation', 'id')
+        self.id = self.get('id')
 
     def implement(self):
 
@@ -63,7 +63,7 @@ class Parcellation(GenericTask):
         """create a Brodmann Area image
 
         """
-        toadLabelsDir = os.path.join(self.toadDir, self.config.get("parcellation", "labels_dir"))
+        toadLabelsDir = os.path.join(self.toadDir, self.get("labels_dir"))
         labels = glob.glob("{}/*.label".format(toadLabelsDir))
 
         rhAnnotLabels =""

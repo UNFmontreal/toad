@@ -327,18 +327,13 @@ def displayYesNoMessage(msg):
             print "\nPlease submit the pipeline again\n"
             sys.exit()
 
-def displayContinueQuitRemoveMessage(msg, files=[]):
+def displayContinueQuitRemoveMessage(msg):
     print msg
     while True:
         choice = raw_input("Continue? (y, n or r)")
         if choice.lower() == 'y':
-            print "\nPipeline may failed during execution\n"
-            break
+            return "y"
         elif choice.lower() == 'n':
-            print "\nPlease submit the pipeline again\n"
-            sys.exit()
+            return "n"
         elif choice.lower() == 'r':
-            for file in files:
-                if os.path.isfile(file):
-                    os.remove(file)
-            break
+            return "r"
