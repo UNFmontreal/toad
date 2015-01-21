@@ -28,7 +28,9 @@ class Preprocessing(GenericTask):
         dwiUpsample=  self.__upsampling(dwi)
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVal))
-        whiteMatterDWI = self.__segmentation(b0Upsample)
+
+        #B0 WM segementation is void
+        #whiteMatterDWI = self.__segmentation(b0Upsample)
 
         anat = self.getImage(self.preparationDir, 'anat')
         brainAnat      = self.__bet(anat)
@@ -166,7 +168,6 @@ class Preprocessing(GenericTask):
                 else:
                     self.info("Will take {} image instead".format(dwi))
 
-
         images = {'high resolution': self.getImage(self.preparationDir, 'anat')}
         result = self.isAllImagesExists(images)
         return result
@@ -174,8 +175,8 @@ class Preprocessing(GenericTask):
 
     def isDirty(self, result = False):
 
-        images = {'high resolution brain extracted': self.getImage(self.workingDir ,'anat', "brain"),
-                  'high resolution white matter': self.getImage(self.workingDir ,'anat', "wm"),
-                  'b0 white matter': self.getImage(self.workingDir ,'b0', "wm")}
-
+        images = {'upsampled diffusion weighted': self.getImage(self.workingDir ,'dwi', "upsample"),
+                    'high resolution brain extracted': self.getImage(self.workingDir ,'anat', "brain"),
+                    'high resolution white matter': self.getImage(self.workingDir ,'anat', "wm"),
+                    'b0 white matter': self.getImage(self.workingDir ,'b0', "wm")}
         return self.isSomeImagesMissing(images)

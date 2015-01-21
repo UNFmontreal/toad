@@ -220,7 +220,6 @@ def getImage(config, dir, prefix, postfix=None, ext="nii"):
         images = glob.glob("{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, ext))
     if len(images) > 0:
         return images.pop()
-
     return False
 
 
@@ -236,7 +235,7 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
         source: The input file name, a config prefix or simply a string
         postfix: An option item specified in config at the postfix section
         ext: the Extension of the new target
-        absolute: a bolean if the full path must be absolute
+        absolute: a boolean if the full path must be absolute
 
     Returns:
         a file name that contain the postfix and the current working directory
@@ -270,6 +269,13 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
         targetName = os.path.join(target, targetName)
     
     return targetName
+
+
+def getFileWithParents(source, levels=1):
+    common = source
+    for i in range(levels + 1):
+        common = os.path.dirname(common)
+    return os.path.relpath(source, common)
 
 
 def which(source):

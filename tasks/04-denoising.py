@@ -13,7 +13,6 @@ class Denoising(GenericTask):
 
     def implement(self):
 
-
         if self.get("algorithm") is "None":
             self.info("Skipping denoising process")
         else:
@@ -32,7 +31,6 @@ class Denoising(GenericTask):
 
 
     def __createLpcaScript(self, source, target):
-
 
         scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
         self.info("Creating denoising script {}".format(scriptName))

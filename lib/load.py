@@ -34,15 +34,6 @@ class Load(object):
         return os.getloadavg()[0]
 
 
-    def getNTreadsAnts(self):
-        """Define the number of thread that should be deploy without stressing the server too much
-
-        Returns:
-            the suggested number of threads that should be deploy
-        """
-        os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"] = self.__getNTreads()
-
-
     def getNTreadsEddy(self):
         """Define the number of thread that should be deploy without stressing the server too much
 

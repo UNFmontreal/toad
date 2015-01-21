@@ -33,7 +33,8 @@ class Fieldmap(GenericTask):
 
         phaseRescale = self.__rescaleFieldMap(phase)
         fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, anatFreesurfer)
-        invertFielmapToAnat = self.__invertFieldmapToAnat(fieldmapToAnat)
+
+        invertFielmapToAnat = mriutil.invertMatrix(fieldmapToAnat, self.buildName(fieldmapToAnat, 'inverse', 'mat'))
         interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, mag, invertFielmapToAnat, mask)
         fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
 
@@ -46,7 +47,8 @@ class Fieldmap(GenericTask):
 
         matrixName = self.get("epiTo_b0fm")
         self.__coregisterEpiLossyMap(b0, warped, matrixName, lossy)
-        invertMatrixName = self.__invertComputeMatrix(matrixName)
+
+        invertMatrixName = mriutil.invertMatrix(matrixName, self.buildName(matrixName, 'inverse', 'mat'))
         magnitudeIntoDwiSpace = self.__interpolateFieldmapInEpiSpace(warped, b0, invertMatrixName)
         magnitudeIntoDwiSpaceMask = self.__mask(magnitudeIntoDwiSpace)
         interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
@@ -141,14 +143,6 @@ class Fieldmap(GenericTask):
         return self.get("fieldmapToAnat")
 
 
-    def __invertFieldmapToAnat(self, source):
-
-        target = self.buildName(source, 'inverse', 'mat')
-        cmd = "convert_xfm  -inverse {} -omat {}".format(source, target)
-        self.launchCommand(cmd)
-        return target
-
-
     def __interpolateAnatMaskToFieldmap(self, source, mag, inverseMatrix,  mask):
 
         target = self.buildName(source, "mask")
@@ -201,14 +195,6 @@ class Fieldmap(GenericTask):
 
         target = self.buildName(source, 'flirt')
         cmd = "flirt -in {} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference, matrix, self.get("dof"), weighted)
-        self.launchCommand(cmd)
-        return target
-
-
-    def __invertComputeMatrix(self, source):
-
-        target = self.buildName(source, 'inverse', 'mat')
-        cmd = "convert_xfm -omat {} -inverse {}".format(target , source)
         self.launchCommand(cmd)
         return target
 

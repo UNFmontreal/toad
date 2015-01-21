@@ -11,37 +11,74 @@ class Parcellation(GenericTask):
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preparation')
-        #self.id = subject.getConfig().get('parcellation', 'id')
         self.id = self.get('id')
+
 
     def implement(self):
 
         images = {'aparc_aseg':self.getImage(self.dependDir,'aparc_aseg'),
-                  'anat_freesurfer':self.getImage(self.dependDir,'anat_freesurfer'),
-                  'brodmann':self.getImage(self.dependDir,'brodmann')}
+                    'anat_freesurfer':self.getImage(self.dependDir,'anat_freesurfer'),
+                    'rh_ribbon':self.getImage(self.dependDir,'rh_ribbon'),
+                    'lh_ribbon':self.getImage(self.dependDir,'lh_ribbon'),
+                    'brodmann':self.getImage(self.dependDir,'brodmann')}
 
         for key, value in images.iteritems():
             if value:
                 self.info("Found {} area image, create link from {} to {}".format(key, value, self.workingDir))
                 util.symlink(value, self.workingDir)
 
-        if not (images['aparc_aseg'] and images['anat_freesurfer'] and images['brodmann']):
 
-            self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
-            os.environ["SUBJECTS_DIR"] = self.workingDir
+        if not (images['aparc_aseg']
+                and images['anat_freesurfer']
+                and images['rh_ribbon']
+                and images['lh_ribbon']
+                and images['brodmann']):
 
-            anat = self.getImage(self.dependDir, 'anat')
-            self.__reconAll(anat)
-            self.__createBrodmannArea()
-
-            dicts = {'anat_freesurfer': "{}/{}/mri/T1.mgz",
-                    'aparc_aseg': "{}/{}/mri/aparc+aseg.mgz",
-                    'brodmann': "{}/{}/mri/brodmann.mgz"}
+            #Skip recon-all if most files could be found Look if freesurfer treee exist and may be exploited
+            missing = False
+            dicts = {'anat_freesurfer': "{}/*/mri/T1.mgz",
+                    'aparc_aseg': "{}/*/mri/aparc+aseg.mgz",
+                    'rh_ribbon': "{}/*/mri/rh.ribbon.mgz",
+                    'lh_ribbon': "{}/*/mri/lh.ribbon.mgz"}
 
             for key, value in dicts.iteritems():
-                images = glob.glob(value.format(self.workingDir, self.id))
+                images = glob.glob(value.format(self.workingDir))
+                if len(images) == 0:
+                   missing = True
+
+            if missing:
+
+                self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
+                os.environ["SUBJECTS_DIR"] = self.workingDir
+
+                anat = self.getImage(self.dependDir, 'anat')
+                self.__reconAll(anat)
+
+            #convert images of interest into nifti
+            for key, value in dicts.iteritems():
+                images = glob.glob(value.format(self.workingDir))
                 if len(images) > 0:
                     self.__mgz2nii(images.pop(), os.path.join(self.workingDir, self.get(key)))
+
+
+            #create the brodmann image
+            self.__createBrodmannAreaFromMricronTemplate()
+
+
+    def __createBrodmannAreaFromMricronTemplate(self):
+        brodmannTemplate = os.path.join(self.toadDir, self.get("templates_brodmann"))
+        target = self.get("brodmann")
+
+
+        #@TODO remove all trace of mgz file
+        cmd = "mri_vol2vol --mov {} --targ $SUBJECTS_DIR/fsaverage/mri/T1.mgz" \
+              " --o brodmann_fsaverage.nii --regheader --interp nearest".format(brodmannTemplate)
+        self.launchCommand(cmd)
+
+        cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/freesurfer/mri/norm.mgz --s freesurfer --targ brodmann_fsaverage.nii" \
+               " --m3z talairach.m3z --o {} --interp nearest --inv-morph".format(target)
+        self.launchCommand(cmd)
+        return target
 
 
     def __reconAll(self, source):
@@ -55,58 +92,20 @@ class Parcellation(GenericTask):
 
         cmd = "recon-all -{} -i {} -subjid {} -sd {} -openmp {}"\
             .format(self.get('directive'), source, self.id, self.workingDir, self.getNTreads())
-        self.info("Logging into {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
-        self.launchCommand(cmd, 'log', 'log', 777600)
+        self.info("Log could be found at {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
+        self.launchCommand(cmd, None, None, 777600)
 
 
-    def __createBrodmannArea(self):
-        """create a Brodmann Area image
-
-        """
-        toadLabelsDir = os.path.join(self.toadDir, self.get("labels_dir"))
-        labels = glob.glob("{}/*.label".format(toadLabelsDir))
-
-        rhAnnotLabels =""
-        lhAnnotLabels =""
-        for labelDir in labels:
-            label = os.path.basename(labelDir)
-            hemisphere = label.split(".")[0]
-            if hemisphere == "rh":
-                rhAnnotLabels += "--l {}/{}/label/{} ".format(self.workingDir, self.id,label)
-            if hemisphere == "lh":
-                lhAnnotLabels += "--l {}/{}/label/{} ".format(self.workingDir, self.id,label)
-
-            cmd = "mri_label2label --srcsubject fsaverage --srclabel {} " \
-                "--trgsubject {} --trglabel {} --hemi {} --regmethod surface"\
-                .format(labelDir, self.id, label, hemisphere)
-            self.launchCommand(cmd, 'log', 'log')
-
-        annotation = self.get('annotation')
-        cmd = "mris_label2annot --s {} --h rh --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --a {} {}"\
-            .format(self.id, annotation, rhAnnotLabels)
-        self.launchCommand(cmd, 'log', 'log')
-
-        cmd = "mris_label2annot --s {} --h lh --ctab $FREESURFER_HOME/FreeSurferColorLUT.txt --a {} {}"\
-            .format(self.id, annotation, lhAnnotLabels)
-        self.launchCommand(cmd, 'log', 'log')
-
-        cmd = "mri_aparc2aseg --s {} --annot {} --o {}/{}/mri/{}"\
-            .format(self.id, annotation, self.workingDir, self.id, self.get('brodmann_mgz'))
-        self.launchCommand(cmd, 'log', 'log')
-
-
-    def __mgz2nii(self, source, target, inType='mgz', outType='nii'):
+    def __mgz2nii(self, source, target):
         """Utility for converting between different file formats
 
         Args:
             source: The input source file
             target: The name of the resulting output file name
-            inType: The image format of the original file. Default: mgz
-            outType: The format of the resulting output image. Default: nii
 
         """
         self.info("convert {} image to {} ".format(source, target))
-        cmd = "mri_convert -it {} -ot {} {} {}".format(inType, outType, source, target)
+        cmd = "mrconvert {} {} -stride {}".format(source, target, self.get('stride_orientation'))
         self.launchCommand(cmd, 'log', 'log')
 
 
@@ -129,9 +128,9 @@ class Parcellation(GenericTask):
     def isDirty(self):
 
         images = {'parcellation': self.getImage(self.workingDir,'aparc_aseg'),
-                  'anatomical': self.getImage(self.workingDir,'anat_freesurfer'),
-                  'brodmann': self.getImage(self.workingDir,'brodmann')}
-
+                    'anatomical': self.getImage(self.workingDir,'anat_freesurfer'),
+                    'rh_ribbon':self.getImage(self.workingDir,'rh_ribbon'),
+                    'lh_ribbon':self.getImage(self.workingDir,'lh_ribbon'),
+                    'brodmann':self.getImage(self.workingDir,'brodmann')
+                    }
         return self.isSomeImagesMissing(images)
-
-

@@ -1,58 +1,60 @@
-# -*- coding: utf-8 -*-
 from lib.generictask import GenericTask
 import dipy.core.gradients, dipy.reconst.dti
 import numpy, nibabel
 
 __author__ = 'desmat'
 
-#@TODO apply masking on proper images
-class Tensors(GenericTask):
+class TensorDipy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
+        """A preset format, used as a starting point for developing a toad task
 
+        Simply copy and rename this file:  cp xxxxx.template yourtaskname.py into the tasks folder.
+            XX is simply a 2 digit number that represent the order the tasks will be executed.
+            yourtaskname is any name at your convenience. the name must be lowercase
+        Change the class name Template for Yourtaskname. Note the first letter of the name should be capitalized
+
+        A directory called XX-yourtaskname will be create into the subject dir. A local variable self.workingDir will
+        be initialize to that directory
+
+        Args:
+            subject: a Subject instance inherit by the subjectmanager.
+
+        """
+
+        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
+        """Inherit from a generic Task.
+
+        Args:
+            subject: Subject instance inherit by the subjectmanager.
+
+            Note that you may supply additional arguments to generic tasks.
+            Exemple: if you provide Task.__init__(self, subject, foo, bar ...)
+            toad will create an variable fooDir and barDir and then create an alias 'dependDir'
+            that will point to the first additionnal argurments fooDir.
+
+        """
 
     def implement(self):
 
-        dwi = self.getImage(self.dependDir,'dwi','upsample')
+        dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
 
-        bFile = self.getImage(self.eddyDir, 'grad',  None, 'b')
+        #Look first if there is eddy b encoding files produces
         bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
         bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
 
-        mask = self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
+        if not bValFile:
+            bValFile = self.getImage(self.preparationDir,'grad', None, 'bval')
 
-        if (not bFile) or (not bValFile) or (not bVecFile):
-            bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
-            bValFile = self.getImage(self.preparationDir, 'grad', None, 'bval')
-            bVecFile = self.getImage(self.preparationDir, 'grad', None, 'bvec')
+        if not bVecFile:
+            bVecFile = self.getImage(self.preparationDir,'grad', None, 'bvec')
 
-        anatBrainWMResampleMask = self.getImage(self.maskingDir, 'anat', ['brain', 'wm', 'resample', 'mask'])
-
-        tensorsMrtrix = self.__tensorsMrtrix(dwi, bFile, mask)
-        tensorsDipy = self.__tensorsDipy(dwi, bValFile, bVecFile)
-
-        #self.info("Masking mrtrix tensors image with the white matter, brain extracted, resampled, high resolution mask.")
-        #self.masking(tensorsMrtrix, anatBrainWMResampleMask)
-        #@TODO clarify masking situation
+        #@TODO define proper mask
+        self.__produceTensors(dwi, bValFile, bVecFile)
 
 
-    # convert diffusion-weighted images to tensor images.
-    def __tensorsMrtrix(self, source, encodingFile, mask=None):
-        self.info("Starting DWI2Tensor from mrtrix")
-
-        tmp =  self.buildName(source, "tmp")
-        target = self.buildName(source, "mrtrix")
-        cmd = "dwi2tensor {} {} -grad {} -nthreads {} -quiet ".format(source, tmp, encodingFile, self.getNTreadsMrtrix())
-        if mask is not None:
-            cmd += "-mask {}".format(mask)
-
-        self.launchCommand(cmd)
-        return self.rename(tmp, target)
-
-
-    def __tensorsDipy(self, source, bValFile, bVecFile):
+    def __produceTensors(self, source, bValFile, bVecFile):
         self.info("Starting tensors creation from dipy on {}".format(source))
         target = self.buildName(source, "dipy")
 
@@ -74,15 +76,10 @@ class Tensors(GenericTask):
     def meetRequirement(self, result = True):
 
         #Look first if there is eddy b encoding files produces
-        bFile = self.getImage(self.eddyDir, 'grad', None, 'b')
         bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
         bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
 
-        if (not bFile) or (not bValFile) or (not bVecFile):
-
-            if not self.getImage(self.preparationDir, 'grad', None, 'b'):
-                self.info("Mrtrix gradient encoding file is missing in directory {}".format(self.preparationDir))
-                result = False
+        if (not bValFile) or (not bVecFile):
 
             if not self.getImage(self.preparationDir,'grad', None, 'bval'):
                 self.info("Dipy .bval gradient encoding file is missing in directory {}".format(self.preparationDir))
@@ -105,8 +102,7 @@ class Tensors(GenericTask):
 
     def isDirty(self):
 
-        images ={"mrtrix tensor": self.getImage(self.workingDir, "dwi", "mrtrix"),
-                 "dipy tensor": self.getImage(self.workingDir, "dwi", "dipy")}
+        images ={"dipy tensor": self.getImage(self.workingDir, "dwi", "dipy")}
         return self.isSomeImagesMissing(images)
 
         #@TODO see with Arnaud for that feature

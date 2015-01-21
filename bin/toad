@@ -87,12 +87,14 @@ def __parseArguments():
     parser.add_argument("studyDir", help="The directory where we should find the input stucture")
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Specify the location of an alternative the config.cfg file")
-    parser.add_argument("-t", "--tasks", nargs='?', required=False,
-                            help="Begin the pipeline at a specific tasks. This will apply to all subject. not implemented")
     parser.add_argument("-u", "--subject",action='append', nargs='?',metavar=('directory'), required=False,
                             help="Explicitly specify the subject directory to submit. This option may be repeat several time")
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
+    parser.add_argument("-t", "--stopBeforeTask", nargs='?',metavar=('task name'), required=False,
+                            help="Stop the pipeline at a specific task. TOAD will create the working directory."
+                                 "Usefull if you want to introduce your own freesurfer tree into the pipeline. "
+                                 "This command will apply to all subject.")
     parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
     parser.add_argument("-p","--noPrompt", help=("Disable command prompt, always assume yes as answer"), action="store_true")
     parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
@@ -148,7 +150,7 @@ def __manageEnvironnement(logger):
 
         #setup variable PATH
         os.environ["PATH"] = ("/usr/local/fsl/bin:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:"
-                              "/usr/local/mrtrix3/scripts:/usr/local/ants/bin:/usr/local/freesurfer/fsfast/bin:"
+                              "/usr/local/mrtrix3/scripts:/usr/local/freesurfer/fsfast/bin:"
                               "/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:"
                               "/usr/local/freesurfer/tktools:/usr/local/c3d/bin:") + os.environ["PATH"]
 
@@ -179,9 +181,6 @@ def __manageEnvironnement(logger):
             logger.error("Mrtrix3 not found. Please install the package or set the environment variable $PATH correctly")
         else:
             os.environ["MRTRIX_PYTHON_SCRIPTS"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))),"scripts")
-
-        if util.which("ANTS") is None:
-            logger.error("ANTS registration not found. Please install the package or set the environment variable $PATH correctly")
 
         if util.which("matlab") is None:
             logger.error("Matlab not found. Please install matlab or set the environment variable $PATH correctly")

@@ -4,7 +4,7 @@ import os
 
 __author__ = 'desmat'
 
-class Dtifit(GenericTask):
+class TensorFsl(GenericTask):
 
 
     def __init__(self, subject):
@@ -55,7 +55,6 @@ class Dtifit(GenericTask):
 
         """
         self.info("Starting dtifit from fsl")
-
         target = self.buildName(source, 'fsl', '')
         cmd ="dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVec, bVal)
         if mask:

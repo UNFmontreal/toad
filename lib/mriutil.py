@@ -76,6 +76,12 @@ def mrinfo(source):
     return stdout.splitlines()
 
 
+def invertMatrix(source, target):
+    cmd = "convert_xfm -inverse {} -omat {}".format(source, target)
+    (stdout, stderr) = util.launchCommand(cmd)
+    return target
+
+
 def getMrinfoFieldValues(text, field, delimiter=""):
     output = []
     for line in text:
@@ -136,17 +142,17 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
 
     for index, line in enumerate(eddys):
         row_four_to_six_eddy = line.split('  ')[3:6]
-        x= numpy.matrix([[ 1, 0, 0],
-                         [0,numpy.cos(float(row_four_to_six_eddy[0])) , numpy.sin(float(row_four_to_six_eddy[0]))] ,
-                         [0,-numpy.sin(float(row_four_to_six_eddy[0])),numpy.cos(float(row_four_to_six_eddy[0]))]])
+        x= numpy.matrix([[1, 0, 0],
+                         [0,numpy.cos(float(row_four_to_six_eddy[0])), numpy.sin(float(row_four_to_six_eddy[0]))],
+                         [0,-numpy.sin(float(row_four_to_six_eddy[0])), numpy.cos(float(row_four_to_six_eddy[0]))]])
 
-        y= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])) , 0, numpy.sin(float(row_four_to_six_eddy[1])) ] ,
-                     [ 0, 1, 0],
-                     [-numpy.sin(float(row_four_to_six_eddy[1])) , 0 , numpy.cos(float(row_four_to_six_eddy[1]))]])
+        y= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])), 0, numpy.sin(float(row_four_to_six_eddy[1]))],
+                     [0, 1, 0],
+                     [-numpy.sin(float(row_four_to_six_eddy[1])), 0, numpy.cos(float(row_four_to_six_eddy[1]))]])
 
-        z= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])) , numpy.sin(float(row_four_to_six_eddy[1])) , 0] ,
-                     [-numpy.sin(float(row_four_to_six_eddy[1])),numpy.cos(float(row_four_to_six_eddy[1])),0]    ,
-                     [ 0, 0, 1]])
+        z= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])), numpy.sin(float(row_four_to_six_eddy[1])), 0],
+                     [-numpy.sin(float(row_four_to_six_eddy[1])), numpy.cos(float(row_four_to_six_eddy[1])), 0],
+                     [0, 0, 1]])
         matrix = (z*y*x).I
         b_values = b_line[index].replace('\t',' ').split()
         gradient = numpy.matrix([[float(b_values[0]), float(b_values[1]),float(b_values[2])]])

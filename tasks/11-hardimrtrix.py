@@ -5,7 +5,7 @@ import os
 
 __author__ = 'desmat'
 
-class Hardi(GenericTask, Logger):
+class HardiMrtrix(GenericTask, Logger):
 
 
     def __init__(self, subject):
@@ -24,6 +24,10 @@ class Hardi(GenericTask, Logger):
 
         maskDwi2fod =  self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
         fodImage = self.__dwi2fod(dwi, outputDwi2Response, maskDwi2fod, bFile)
+
+        #@TODO see with arnaud the proper mask to apply
+        #mask = self.getImage(self.maskingDir, 'anat',['extended','mask'])
+        self.__fod2metric(fodImage, mask)
 
 
     def __dwi2response(self, source, mask, bFile):
@@ -54,6 +58,26 @@ class Hardi(GenericTask, Logger):
 
         return target
 
+    def __fod2metric(self, source, mask=None):
+        self.info("Starting fod2metric creation from mrtrix on {}".format(source))
+
+        images = {'gfaImage': self.buildName(source, 'gfa'),
+        'gfaTmp':self.buildName(self.workingDir, "tmp", 'nii'),
+        'nufoImage':self.buildName(source, 'nufo'),
+        'nufoTmp':self.buildName(self.workingDir,"tmp1", 'nii'),
+        'fixelPeakImage':self.buildName(self.workingDir,"tmp1", 'nii'),
+        'fixelPeakTmp':self.buildName(self.workingDir,"tmp",'msf','nii')}
+
+        cmd = "fod2metric {} -gfa {} -count {} -fixel_peak {} -nthreads {} -force -quiet"\
+            .format(source, images['gfaTmp'], images['nufoTmp'], images['fixelPeakTmp'], self.getNTreadsMrtrix())
+        if mask is not None:
+            cmd += " -mask {} ".format(mask)
+
+        self.launchCommand(cmd)
+        for prefix in ["gfa", "nufo", "fixelPeak" ]:
+            self.info("renaming {} to {}".format(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)]))
+            self.rename(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)])
+
 
     def meetRequirement(self, result = True):
 
@@ -74,7 +98,8 @@ class Hardi(GenericTask, Logger):
     def isDirty(self, result = False):
 
         images = {"response function estimation text file": self.getImage(self.workingDir, 'dwi', None, 'txt'),
-                  "fibre orientation distribution estimation": self.getImage(self.workingDir, 'dwi', 'fod')}
+                  "fibre orientation distribution estimation": self.getImage(self.workingDir, 'dwi', 'fod'),
+                  "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
+                  'nufo': self.getImage(self.workingDir,'dwi','nufo')}
 
         return self.isSomeImagesMissing(images)
-
