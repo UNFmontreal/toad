@@ -23,7 +23,7 @@ class Masking(GenericTask):
         #anatBrainWMResample = self.getImage(self.dependDir, 'anat', ['brain','wm','resample'])
         #self.__createMask(anatBrainWMResample)
 
-        extended = self.buildName('anat', 'extended','nii')
+        extended = self.buildName('anat', 'extended')
         self.info("Add {} and {} images together in order to create the ultimate image"
                   .format(anatBrainResample, aparcAsegResample))
         mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAsegResample)

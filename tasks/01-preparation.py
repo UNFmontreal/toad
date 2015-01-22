@@ -48,7 +48,6 @@ class Preparation(GenericTask):
     def __produceEncodingFiles(self, bEnc, bVal, bVec):
 
         #produire les fichiers gradient encoding pour dipy ainsi que mrtrix
-
         self.info("Produce .b .bval and .bvec gradient file if not existing")
         if not bEnc:
             mriutil.bValBVec2BEnc(bVal, bVec, self.workingDir)

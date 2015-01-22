@@ -23,11 +23,19 @@ class Denoising(GenericTask):
                     dwi = self.getImage(self.preparationDir, "dwi")
 
 
-            target = self.buildName(dwi, "denoise")
-            tmp = self.buildName(dwi, "tmp")
-            scriptName = self.__createLpcaScript(dwi, tmp)
+            dwiUncompress = self.__uncompressAnImageForSpm(dwi)
+            tmp = self.buildName(dwiUncompress, "tmp", 'nii')
+            scriptName = self.__createLpcaScript(dwiUncompress, tmp)
             self.__launchMatlabExecution(scriptName)
-            self.rename(tmp, target)
+
+            #compress the output if needed
+            tmpCompress = util.gzip(tmp)
+            target = self.buildName(dwiUncompress, "denoise")
+            self.rename(tmpCompress, target)
+
+    def __uncompressAnImageForSpm(self, source):
+        target = util.gunzip(source)
+        return target
 
 
     def __createLpcaScript(self, source, target):

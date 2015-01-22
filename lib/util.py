@@ -192,7 +192,7 @@ def arrayOfString(source):
     return __arrayOf(source, 'String')
 
 
-def getImage(config, dir, prefix, postfix=None, ext="nii"):
+def getImage(config, dir, prefix, postfix=None, ext="nii.gz"):
     """A simple utility function that return an mri image given certain criteria
 
     Args:
@@ -200,7 +200,7 @@ def getImage(config, dir, prefix, postfix=None, ext="nii"):
         dir:     the directory where looking for the image
         prefix:  an expression that the filename should start with
         postfix: an expression that the filename should end with (excluding the extension)
-        ext:     name of the extension of the filename
+        ext:     name of the extension of the filename. defaults: nii.gz
 
     Returns:
         the absolute filename if found, False otherwise

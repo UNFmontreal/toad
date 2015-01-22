@@ -364,7 +364,7 @@ class GenericTask(Logger, Load):
         self.launchCommand(cmd, 'log')
 
 
-    def getImage(self, dir, prefix, postfix=None, ext="nii"):
+    def getImage(self, dir, prefix, postfix=None, ext="nii.gz"):
         """A simple utility function that return an mri image given certain criteria
 
         this is a wrapper over mriutil getImage function
@@ -373,7 +373,7 @@ class GenericTask(Logger, Load):
             dir:     the directory where looking for the image
             prefix:  an expression that the filename should start with
             postfix: an expression that the filename should end with (excluding the extension)
-            ext:     name of the extension of the filename
+            ext:     name of the extension of the filename. defaults: nii.gz
 
         Returns:
             the relative filename if found, False otherwise

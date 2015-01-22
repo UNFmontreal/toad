@@ -42,7 +42,7 @@ class Validation(object):
         """
 
         if not self.isDirty():
-            self.logger.info("{} directory exists, assuming validation is o.k.".format(self.backupDir))
+            self.logger.info("{} directory exists, assuming validation have already done before".format(self.backupDir))
             return True
 
         if not os.path.exists(self.workingDir) or not os.path.isdir(self.workingDir):
@@ -86,6 +86,7 @@ class Validation(object):
         dwi = util.getImage(self.config, self.workingDir,'dwi')
 
         #@TODO send data layout warning if strides are not 1,2,3
+
         #make sure that diffusion image Z scale layout is oriented correctly
         #if not mriutil.isDataLayoutValid(dwiImage):
         #    self.error("Data layout for {} image is unexpected. "
@@ -134,14 +135,15 @@ class Validation(object):
         Returns:
             a Boolean that represent if the image filename exist
 
-        """        
+        """
+        #@TODO Uncompress uimages should warn right here
         files = glob.glob("{}/{}*.nii*".format(self.workingDir, prefix))
         if not files:
             self.logger.warning("No {} images found with pattern {}* in directory: {}"
                                 .format(prefix.replace("_",""), prefix, self.workingDir))
             return False
         if len(files) > 1:
-            self.logger.warning("Found many {} images in directory {}, please provide only one"
+            self.logger.warning("Found many {} images in directory {}, only one should be provided"
                                 .format(prefix.replace("_",""), self.workingDir))
             return False
         filename = os.path.basename(files.pop())

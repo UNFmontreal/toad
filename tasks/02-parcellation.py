@@ -16,11 +16,11 @@ class Parcellation(GenericTask):
 
     def implement(self):
 
-        images = {'aparc_aseg':self.getImage(self.dependDir,'aparc_aseg'),
-                    'anat_freesurfer':self.getImage(self.dependDir,'anat_freesurfer'),
-                    'rh_ribbon':self.getImage(self.dependDir,'rh_ribbon'),
-                    'lh_ribbon':self.getImage(self.dependDir,'lh_ribbon'),
-                    'brodmann':self.getImage(self.dependDir,'brodmann')}
+        images = {'aparc_aseg':self.getImage(self.dependDir, 'aparc_aseg'),
+                    'anat_freesurfer':self.getImage(self.dependDir, 'anat_freesurfer'),
+                    'rh_ribbon':self.getImage(self.dependDir, 'rh_ribbon'),
+                    'lh_ribbon':self.getImage(self.dependDir, 'lh_ribbon'),
+                    'brodmann':self.getImage(self.dependDir, 'brodmann')}
 
         for key, value in images.iteritems():
             if value:
@@ -46,8 +46,8 @@ class Parcellation(GenericTask):
                 if len(images) == 0:
                    missing = True
 
-            if missing:
 
+            if missing:
                 self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
                 os.environ["SUBJECTS_DIR"] = self.workingDir
 
@@ -66,6 +66,7 @@ class Parcellation(GenericTask):
 
 
     def __createBrodmannAreaFromMricronTemplate(self):
+
         brodmannTemplate = os.path.join(self.toadDir, self.get("templates_brodmann"))
         target = self.get("brodmann")
 

@@ -66,9 +66,6 @@ class Eddy(GenericTask):
         outputEddyImage = self.__correctionEddy2(dwi,
                                     mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
 
-        self.info("Uncompressing eddy output image: {}".format(outputEddyImage))
-        util.gunzip(outputEddyImage)
-
         #@TODO remove the glob and use getimage
         eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
         if len(eddyParameterFiles)>0:
@@ -109,11 +106,10 @@ class Eddy(GenericTask):
              The name of the resulting image
         """
 
-        tmp = os.path.join(self.workingDir, "tmp.nii")
+        tmp =  self.buildName(source, "tmp")
         target = self.buildName(source, "subset")
         cmd = "mrconvert {} {} -coord +2 {} -nthreads {} -quiet".format(source, tmp, volumes, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
-
         return self.rename(tmp, target)
 
 
@@ -183,7 +179,6 @@ class Eddy(GenericTask):
             return False
 
         target = os.path.join(self.workingDir, self.get(parameter))
-
         if not util.createScript(target, text):
             self.error("Unable to create script {}".format(target))
 
@@ -259,10 +254,7 @@ class Eddy(GenericTask):
 
         cmd = "bet {} {} -v -m".format(source, tmp)
         self.launchCommand(cmd)
-
-        self.info("uncompressing {}".format(tmp))
-        unzip = util.gunzip(tmp)
-        self.rename(unzip, target)
+        self.rename(tmp, target)
 
         self.info("Finish brain extraction from fsl")
         return target
@@ -295,9 +287,6 @@ class Eddy(GenericTask):
 
         self.getNTreadsEddy()
         self.launchCommand(cmd)
-
-        self.info(util.gunzip(tmp))
-        self.info("Finish eddy correction from fsl")
         return self.rename(tmp, target)
 
 

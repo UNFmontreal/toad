@@ -29,7 +29,7 @@ class Preprocessing(GenericTask):
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVal))
 
-        #B0 WM segementation is void
+        #B0 WM segmentation is void
         #whiteMatterDWI = self.__segmentation(b0Upsample)
 
         anat = self.getImage(self.preparationDir, 'anat')
