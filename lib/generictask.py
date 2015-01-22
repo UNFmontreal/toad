@@ -379,8 +379,7 @@ class GenericTask(Logger, Load):
             the relative filename if found, False otherwise
 
         """
-        absoluteImage = util.getImage(self.config, dir, prefix, postfix, ext)
-        return util.getFileWithParents(absoluteImage)
+        return util.getImage(self.config, dir, prefix, postfix, ext)
 
 
     def buildName(self, source, postfix, ext=None, absolute = True):

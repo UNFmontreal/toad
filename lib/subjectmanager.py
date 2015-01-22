@@ -91,7 +91,7 @@ class SubjectManager(Logger, Config):
 
         #Subject Load() class need to know how much valid subject are submit.
         for subject in subjects:
-            subject.setConfigItem("general", "nb_subjects", len(subjects))
+            subject.setConfigItem("general", "nb_subjects", str(len(subjects)))
 
         return subjects
 
@@ -202,7 +202,7 @@ class SubjectManager(Logger, Config):
 
         """
 
-        cmd = "echo {0}/bin/toad -u {1} -l {2} -p | qsub -notify -V -N {3} -o {4} -e {4} -q {5}".format(self.config.get('arguments', 'toadDir'),
+        cmd = "echo {0}/bin/toad -u {1} -l {2} -p | qsub -notify -V -N {3} -o {4} -e {4} -q {5}".format(self.config.get('arguments', 'toad_dir'),
               subject.getDir(), self.studyDir, subject.getName(), subject.getLogDir(), self.config.get('general','sge_queue'))
         self.info("Command launch: {}".format(cmd))
         #@DEBUG try to workaround deadlock

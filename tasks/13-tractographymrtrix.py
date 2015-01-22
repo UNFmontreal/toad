@@ -175,7 +175,7 @@ class MrtrixTractography(GenericTask):
     def isDirty(self, result = False):
 
         images = {"deterministic connectome matrix from a streamlines": self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'tck'),
-                  "deterministic connectome matrix from a streamlines csv ": self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'csv')
+                  "deterministic connectome matrix from a streamlines csv ": self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'csv'),
                   "tckgen streamlines tractography": self.getImage(self.workingDir, 'dwi', 'tckgen', 'tck'),
                   'tcksift': self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck')}
         return self.isSomeImagesMissing(images)

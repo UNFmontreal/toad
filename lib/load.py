@@ -124,7 +124,7 @@ class Load(object):
         if self.nbThreads is "unlimited" and self.nbSubjects == 1:
             value = 100
 
-        return value
+        return str(value)
 
 
     def isSystemOverloaded(self, serverName):

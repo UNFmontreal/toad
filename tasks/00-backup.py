@@ -29,7 +29,8 @@ class Backup(GenericTask):
                  self.getImage(self.subjectDir, 'grad', None, 'bval'),
                  self.getImage(self.subjectDir, 'grad', None, 'bvec'),
                  self.getImage(self.subjectDir, 'config', None, 'cfg')]
-
+	print "self.subjectDir=",self.subjectDir
+	print "images =",images
         for image in images:
             if image:
                 self.info("Moving file {} to {} directory".format(image, self.workingDir))
