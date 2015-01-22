@@ -88,18 +88,22 @@ class Load(object):
         #First compute the number of threads base on the server capacity
         if 'magma' in serverName:
             if self.nbSubjects <= 5:
-                value = 3
+                value = 4
             elif self.nbSubjects <= 10:
                 value = 3
+            elif self.nbSubjects <= 15:
+                value = 2
             else:
                 value = 1
 
         elif 'stark' in serverName:
             if self.nbSubjects <= 5:
-                value = 4
+                value = 5
             elif self.nbSubjects <= 10:
-                value = 3
+                value = 4
             elif self.nbSubjects <= 15:
+                value = 3
+            elif self.nbSubjects <= 20:
                 value = 2
             else:
                 value = 1

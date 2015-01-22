@@ -1,6 +1,6 @@
 from lib.generictask import GenericTask
 from lib import util
-import os
+import shutil, os
 
 __author__ = 'desmat'
 
@@ -23,20 +23,19 @@ class Denoising(GenericTask):
                     dwi = self.getImage(self.preparationDir, "dwi")
 
 
-            dwiUncompress = self.__uncompressAnImageForSpm(dwi)
+            self.info("Copying image {} into {} directory".format(dwi, self.workingDir))
+            shutil.copyfile(dwi, self.workingDir)
+            self.info("Denoising do not support compress nifti format. So unzip dwi image".format())
+            dwiUncompress = util.gunzip(self.getImage(self.workingDir, "dwi"))
+
             tmp = self.buildName(dwiUncompress, "tmp", 'nii')
             scriptName = self.__createLpcaScript(dwiUncompress, tmp)
             self.__launchMatlabExecution(scriptName)
 
-            #compress the output if needed
+            self.info("compressing {} image".format(tmp))
             tmpCompress = util.gzip(tmp)
             target = self.buildName(dwiUncompress, "denoise")
             self.rename(tmpCompress, target)
-
-    def __uncompressAnImageForSpm(self, source):
-        target = util.gunzip(source)
-        return target
-
 
     def __createLpcaScript(self, source, target):
 
