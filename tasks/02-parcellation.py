@@ -17,7 +17,7 @@ class Parcellation(GenericTask):
     def implement(self):
 
         images = {'aparc_aseg':self.getImage(self.dependDir, 'aparc_aseg'),
-                    'anat_freesurfer':self.getImage(self.dependDir, 'anat_freesurfer'),
+                    'freesurfer_anat':self.getImage(self.dependDir, 'freesurfer_anat'),
                     'rh_ribbon':self.getImage(self.dependDir, 'rh_ribbon'),
                     'lh_ribbon':self.getImage(self.dependDir, 'lh_ribbon'),
                     'brodmann':self.getImage(self.dependDir, 'brodmann')}
@@ -29,14 +29,14 @@ class Parcellation(GenericTask):
 
 
         if not (images['aparc_aseg']
-                and images['anat_freesurfer']
+                and images['freesurfer_anat']
                 and images['rh_ribbon']
                 and images['lh_ribbon']
                 and images['brodmann']):
 
             #Skip recon-all if most files could be found Look if freesurfer treee exist and may be exploited
             missing = False
-            dicts = {'anat_freesurfer': "{}/*/mri/T1.mgz",
+            dicts = {'freesurfer_anat': "{}/*/mri/T1.mgz",
                     'aparc_aseg': "{}/*/mri/aparc+aseg.mgz",
                     'rh_ribbon': "{}/*/mri/rh.ribbon.mgz",
                     'lh_ribbon': "{}/*/mri/lh.ribbon.mgz"}
@@ -129,7 +129,7 @@ class Parcellation(GenericTask):
     def isDirty(self):
 
         images = {'parcellation': self.getImage(self.workingDir,'aparc_aseg'),
-                    'anatomical': self.getImage(self.workingDir,'anat_freesurfer'),
+                    'anatomical': self.getImage(self.workingDir,'freesurfer_anat'),
                     'rh_ribbon':self.getImage(self.workingDir,'rh_ribbon'),
                     'lh_ribbon':self.getImage(self.workingDir,'lh_ribbon'),
                     'brodmann':self.getImage(self.workingDir,'brodmann')

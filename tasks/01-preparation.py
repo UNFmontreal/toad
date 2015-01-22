@@ -36,7 +36,7 @@ class Preparation(GenericTask):
                   'MR magnitude ': self.getImage(self.dependDir, 'mag'),
                   'MR phase ': self.getImage(self.dependDir, 'phase'),
                   'parcellation': self.getImage(self.dependDir,'aparc_aseg'),
-                  'anatomical': self.getImage(self.dependDir, 'anat_freesurfer'),
+                  'anatomical': self.getImage(self.dependDir, 'freesurfer_anat'),
                   'brodmann': self.getImage(self.dependDir, 'brodmann')}
 
         for key, value in images.iteritems():

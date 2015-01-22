@@ -16,7 +16,7 @@ class Validation(object):
             A diffusion tensor image
             A gradient encoding file, optionnaly in bval, bvec format
             Optionnaly, B0_Anterior-Posterior and/or B0_Posterior-Anterior image
-            Optionnal aparc_aseg, anat_freesurfer
+            Optionnal aparc_aseg, freesurfer_anat
             only one T1,dwi, .b per subject
 
         Args:

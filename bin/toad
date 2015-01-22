@@ -40,19 +40,29 @@ def __parseArguments():
              |         |- dwi_001.nii
              |         |- dwi_001.b ou (dwi_001.bval et dwi_001.bvec)
              |         |-(optionnal) aparc_aseg.nii
-             |         |-(optionnal) anat_freesurfer.nii
+             |         |-(optionnal) freesurfer_anat.nii.gz
+             |         |-(optionnal) lh_ribbon.nii.gz
+             |         |-(optionnal) rh_ribbon.nii.gz
+             |         |-(optionnal) brodmann.nii.gz
              |         |-(optionnal) b0ap_001.nii
              |         |-(optionnal) b0pa_001.nii
+             |         |-(optionnal) mag_001.nii
+             |         |-(optionnal) phase_001.nii
              |         |-(optionnal) config.cfg
              |
              |-suj002--\\
              |         |- t1_002.nii
-             .         |- dwi_002.nii
-             .         |- dwi_002.b ou (dwi_002.bval et dwi_002.bvec)
-             .         |-(optionnal) aparc_aseg.nii
-             |         |-(optionnal) anat_freesurfer.nii
+             |         |- dwi_002.nii
+             |         |- dwi_002.b ou (dwi_002.bval et dwi_002.bvec)
+             |         |-(optionnal) aparc_aseg.nii
+             |         |-(optionnal) freesurfer_anat.nii.gz
+             |         |-(optionnal) lh_ribbon.nii.gz
+             |         |-(optionnal) rh_ribbon.nii.gz
+             |         |-(optionnal) brodmann.nii.gz
              |         |-(optionnal) b0ap_001.nii
              |         |-(optionnal) b0pa_001.nii
+             |         |-(optionnal) mag_001.nii
+             |         |-(optionnal) phase_001.nii
              |         |-(optionnal) config.cfg
              |
              |-sujN

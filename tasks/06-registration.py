@@ -107,14 +107,14 @@ class Registration(GenericTask):
                   'right hemisphere ribbon': self.getImage(self.parcellationDir, 'rh_ribbon'),
                   'left hemisphere ribbon': self.getImage(self.parcellationDir, 'lh_ribbon'),
                   'brodmann': self.getImage(self.parcellationDir, 'brodmann'),
-                  'high resolution freesurfer': self.getImage(self.parcellationDir, 'anat_freesurfer')}
+                  'high resolution freesurfer': self.getImage(self.parcellationDir, 'freesurfer_anat')}
 
         return self.isAllImagesExists(images)
 
 
     def isDirty(self, result = False):
         #@TODO reimplement that
-        images = {'freesurfer anatomical': self.getImage(self.workingDir,'anat_freesurfer', 'resample'),
+        images = {'freesurfer anatomical': self.getImage(self.workingDir,'freesurfer_anat', 'resample'),
                   'parcellation': self.getImage(self.workingDir,'aparc_aseg', 'resample'),
                   'brodmann': self.getImage(self.workingDir,'brodmann', 'resample'),
                   'white matter segmented high resolution resampled': self.getImage(self.workingDir,'anat', ['brain','wm','resample']),

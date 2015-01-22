@@ -30,7 +30,6 @@ class Masking(GenericTask):
         self.__createMask(extended)
         self.__createMask(aparcAsegResample)
 
-
         #produce optionnal mask
         if self.get("start_seeds").strip():
             self.__createRegionMaskFromAparcAseg(aparcAsegResample, 'start')
@@ -47,8 +46,6 @@ class Masking(GenericTask):
 
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
         seed_gmwmi = self.__launch5tt2gmwmi(act)
-
-
 
         colorLut = "{}/templates/lookup_tables/FreeSurferColorLUT_ItkSnap.txt".format(self.toadDir)
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))

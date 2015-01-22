@@ -26,7 +26,7 @@ class Fieldmap(GenericTask):
         mag = self.getImage(self.dependDir, "mag")
         phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
-        anatFreesurfer = self.getImage(self.parcellationDir, 'anat_freesurfer')
+        freesurfer_anat = self.getImage(self.parcellationDir, 'freesurfer_anat')
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         mask = self. __createSegmentationMask(aparcAseg)
 
