@@ -22,6 +22,8 @@ class Backup(GenericTask):
                  self.getImage(self.subjectDir, 'phase'),
                  self.getImage(self.subjectDir, 'aparc_aseg'),
                  self.getImage(self.subjectDir, 'freesurfer_anat'),
+                 self.getImage(self.subjectDir, 'lh_ribbon'),
+                 self.getImage(self.subjectDir, 'rh_ribbon'),
                  self.getImage(self.subjectDir, 'brodmann'),
                  self.getImage(self.subjectDir, 'b0AP'),
                  self.getImage(self.subjectDir, 'b0PA'),

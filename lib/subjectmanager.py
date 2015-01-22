@@ -123,7 +123,6 @@ class SubjectManager(Logger, Config):
                 answer = util.displayContinueQuitRemoveMessage(msg)
             if answer == "y":
                 self.info("Locks subjects will be ignored during execution\n")
-                print locks
                 subjects = [subject for subject in subjects if subject not in locks]
             elif answer == "r":
                 self.info("Removing locks and continue the pipeline\n")
