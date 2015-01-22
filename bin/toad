@@ -106,7 +106,7 @@ def __parseArguments():
                                  "Usefull if you want to introduce your own freesurfer tree into the pipeline. "
                                  "This command will apply to all subject.")
     parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
-    parser.add_argument("-p","--noPrompt", help=("Disable command prompt, always assume yes as answer"), action="store_true")
+    parser.add_argument("-p","--noPrompt", help=("Disable command prompt and always assume yes as answer"), action="store_true")
     parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
     parser.add_argument("-v","--verbose", help="increase output verbosity (not implemented yet)", action="store_true")
     parser.add_argument("-e","--emergency", help=("Overwrite nb_threads parameter and deploy unlimited number of threads at each parallelizable steps. "

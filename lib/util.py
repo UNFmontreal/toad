@@ -311,7 +311,8 @@ def parseTemplate(dict, template):
     return Template(f.read()).safe_substitute(dict)
 
 
-def displayYesNoMessage(msg):
+
+def displayYesNoMessage(msg, question = "Continue? (y or n)"):
     """Utility that ask a question
 
 
@@ -321,17 +322,14 @@ def displayYesNoMessage(msg):
 
     Returns:
         the string substitute
-
     """
     print msg
     while True:
-        choice = raw_input("Continue? (y or n)")
+        choice = raw_input(question)
         if choice == 'y':
-            print "\nPipeline may failed during execution\n"
-            break
+            return True
         elif choice == 'n':
-            print "\nPlease submit the pipeline again\n"
-            sys.exit()
+            return False
 
 def displayContinueQuitRemoveMessage(msg):
     print msg

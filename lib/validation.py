@@ -49,7 +49,7 @@ class Validation(object):
             self.logger.error("Directory {} is not valid".format(self.workingDir))
             return False
 
-        if not self.__isValidStructure():
+        if not self.__isAValidStructure():
             self.logger.error("Directory {} does not appear to be a valid toad structure".format(self.workingDir))
             return False
 
@@ -69,60 +69,83 @@ class Validation(object):
         return not os.path.exists(self.backupDir)
 
 
-    def __isValidStructure(self):
+    def __isAValidStructure(self):
         """Determine if the directory is a valid structure
 
         Returns:
             a Boolean that represent if validation is required for that directory
 
         """
-        if not self.__validateImage(self.config.get('prefix','anat')):
+
+        #Anatomical, Dwi and gradient fieldmap are mandatory input
+        if not self.__validateNiftiImage(self.config.get('prefix', 'anat')):
             return False
 
-        if not self.__validateImage(self.config.get('prefix','dwi')):
+        if not self.__validateNiftiImage(self.config.get('prefix', 'dwi')):
             return False
-
-
-        dwi = util.getImage(self.config, self.workingDir,'dwi')
-
-        #@TODO send data layout warning if strides are not 1,2,3
-
-        #make sure that diffusion image Z scale layout is oriented correctly
-        #if not mriutil.isDataLayoutValid(dwiImage):
-        #    self.error("Data layout for {} image is unexpected. "
-        #                        "Only data layout = [ +0 +1 +2 +3 ] could be process".format(dwiImage))
-
-        nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
-        if nbDirections <= 45:
-            msg = "Found only {} directions into {} image. Hardi model will not be accurate with diffusion weighted image " \
-                  "that contain less than 45 directions\n\n".format(nbDirections, self.dwi)
-            if self.config.getboolean('arguments', 'prompt'):
-                util.displayYesNoMessage(msg)
-            else:
-                self.warning(msg)
-
 
         bEnc = util.getImage(self.config, self.workingDir,'grad', None, 'b')
         bVal = util.getImage(self.config, self.workingDir,'grad', None, 'bval')
         bVec = util.getImage(self.config, self.workingDir,'grad', None, 'bvec')
 
         if (not bEnc) and (not bVal or not bVec):
-            self.logger.warning("No valid .b encoding or pair of .bval, .bvec"
-                                " file found in directory: {}".format(self.workingDir))
-            return False
-        #@TODO uncomment and fix not all zero bvec value in the first line
-        """
-        if bEnc and not self.__isValidEncoding(nbDirections, '.b'):
-            self.logger.warning("Encoding file {} is invalid".format(bEnc))
-            return False
+            self.logger.error("No valid .b encoding or (.bval, .bvec) files found in directory: {}".format(self.workingDir))
+        else:
 
-        if bVal and not self.__isValidEncoding(nbDirections, '.bval'):
-            self.logger.warning("Encoding file {} is invalid".format(bEnc))
-            return False
-        if bVec and not self.__isValidEncoding(nbDirections, '.bvec'):
-            self.logger.warning("Encoding file {} is invalid".format(bVec))
-            return False
-        """
+            dwi = util.getImage(self.config, self.workingDir,'dwi')
+            nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
+            if nbDirections <= 45:
+                msg = "Found only {} directions into {} image. Hardi model will not be accurate with diffusion weighted image " \
+                      "that contain less than 45 directions\n\n".format(nbDirections, self.dwi)
+                if self.config.getboolean('arguments', 'prompt'):
+                    if util.displayYesNoMessage(msg):
+                        self.info("The pipeline may failed during the execution")
+                    else:
+                        self.quit()
+                else:
+                    self.warning(msg)
+
+            if bEnc and not self.__isValidEncoding(nbDirections, '.b'):
+                self.logger.warning("Encoding file {} is invalid".format(bEnc))
+                return False
+
+            if bVal and not self.__isValidEncoding(nbDirections, '.bval'):
+                self.logger.warning("Encoding file {} is invalid".format(bEnc))
+                return False
+            if bVec and not self.__isValidEncoding(nbDirections, '.bvec'):
+                self.logger.warning("Encoding file {} is invalid".format(bVec))
+                return False
+
+
+
+        #Validation of optionnal images
+        images = {
+                  'high resolution': util.getImage(self.config, self.workingDir, 'anat'),
+                  'diffusion weighted': util.getImage(self.config, self.workingDir,'dwi'),
+                  'MR magnitude ': util.getImage(self.config, self.workingDir, 'mag'),
+                  'MR phase ': util.getImage(self.config, self.workingDir, 'phase'),
+                  'parcellation': util.getImage(self.config, self.workingDir,'aparc_aseg'),
+                  'anatomical': util.getImage(self.config, self.workingDir, 'freesurfer_anat'),
+                  'left hemisphere ribbon': util.getImage(self.config, self.workingDir, 'lh_ribbon'),
+                  'right hemisphere ribbon': util.getImage(self.config, self.workingDir, 'rh_ribbon'),
+                  'brodmann': util.getImage(self.config, self.workingDir, 'brodmann'),
+                  "posterior to anterior b0 ": util.getImage(self.config, self.workingDir, 'b0PA'),
+                  "anterior to posterior b0": util.getImage(self.config, self.workingDir, 'b0AP')}
+
+        for key, value in images.iteritems():
+            if value:
+                if not mriutil.validateDataStrides(value):
+                    if self.config.getboolean('arguments', 'prompt') \
+                            and not self.config.has_option("general", "realign_strides"):
+
+                        msg = "Data strides layout for {} is unexpected. Would you like to reorient them? \
+                               If Yes.. All unexpected images will be realign.\
+                               Not that only copy of the original data will be alter."
+                        if util.displayYesNoMessage(msg, "Realiging Strides (y or n)"):
+                            self.config.set("preparation", "realign_strides", True)
+                        else:
+                            self.warning("Some images may fail during the pipeline execution")
+
         return True
 
 
@@ -136,7 +159,7 @@ class Validation(object):
             a Boolean that represent if the image filename exist
 
         """
-        #@TODO Uncompress uimages should warn right here
+
         files = glob.glob("{}/{}*.nii*".format(self.workingDir, prefix))
         if not files:
             self.logger.warning("No {} images found with pattern {}* in directory: {}"
@@ -146,8 +169,8 @@ class Validation(object):
             self.logger.warning("Found many {} images in directory {}, only one should be provided"
                                 .format(prefix.replace("_",""), self.workingDir))
             return False
-        filename = os.path.basename(files.pop())
 
+        filename = os.path.basename(files.pop())
         #make sure that some postfix are not contain in the image file
         for (key, item) in self.config.items("postfix"):
             if item in filename:
@@ -201,12 +224,6 @@ class Validation(object):
                 return False
 
             for index, line in enumerate(lines):
-                if index == 0:
-                    for token in line.split():
-                        if token not in "0" :
-                            self.logger.warning("Expecting only zero values in the first line of file {}, found value {}"
-                                                .format(encoding, token))
-                            return False
                 if len(line.split()) != 4:
                     self.logger.warning("Expecting 4 elements at line {} of file {}, counting {}"
                                         .format(index+1, encoding, len(line.split())))

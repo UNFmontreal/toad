@@ -12,7 +12,7 @@ class Preparation(GenericTask):
 
 
     def implement(self):
-
+        #@TODO STRIDES non align data
         dwi = self.getImage(self.dependDir, 'dwi')
         bEnc = self.getImage(self.dependDir, 'grad', None, 'b')
         bVal = self.getImage(self.dependDir, 'grad', None, 'bval')

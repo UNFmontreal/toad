@@ -147,12 +147,15 @@ class SubjectManager(Logger, Config):
             subjects:  a list of subjects
 
         """
-        if not self.config.getboolean('arguments', 'prompt'):
-            msg = "Are you sure you want to reinitialize your data at is initial stage"
-            util.displayYesNoMessage(msg)
 
+        if self.config.getboolean('arguments', 'prompt'):
+            if util.displayYesNoMessage("Are you sure you want to reinitialize your data at is initial stage"):
+                self.info("Reinitializing all subjects")
+            else:
+                self.quit("Exit the pipeline now as user request")
         else:
-            self.warning("Prompt message have been disabled")
+            self.warning("Prompt message have been disabled, reinitialisation will be force")
+
         for subject in subjects:
             tasksmanager = TasksManager(subject)
             for task in tasksmanager.getTasks():

@@ -141,6 +141,17 @@ class Logger(object):
         self.__log(message, 'ERROR')
 
 
+    def quit(self, message):
+        """Wrapper for user friendly message that have info level and quit the pipeline silently
+
+        Args:
+            message: the message to write
+
+        """
+        self.__log(message, 'INFO')
+        sys.exit()
+
+
     def getLogger(self):
         """Return that class instance
 

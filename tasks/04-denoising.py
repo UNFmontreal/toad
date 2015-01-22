@@ -24,7 +24,7 @@ class Denoising(GenericTask):
 
 
             self.info("Copying image {} into {} directory".format(dwi, self.workingDir))
-            shutil.copyfile(dwi, self.workingDir)
+            shutil.copy(dwi, self.workingDir)
             self.info("Denoising do not support compress nifti format. So unzip dwi image".format())
             dwiUncompress = util.gunzip(self.getImage(self.workingDir, "dwi"))
 

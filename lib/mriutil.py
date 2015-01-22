@@ -115,8 +115,9 @@ def getNbDirectionsFromDWI(source):
     return 0
 
 
-def isDataLayoutValid(source):
-    dataLayout = getMrinfoFieldValues(mrinfo(source), "Data strides:")
+def validateDataStrides(source):
+    strides = getMrinfoFieldValues(mrinfo(source), "Data strides:")
+    jksdhfakjdshf
     return dataLayout == "[ 1 2 3 4 ]"
 
 
