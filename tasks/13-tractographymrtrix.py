@@ -3,7 +3,7 @@ from lib.generictask import GenericTask
 
 __author__ = 'desmat'
 
-class MrtrixTractography(GenericTask):
+class TractographyMrtrix(GenericTask):
 
 
     def __init__(self, subject):

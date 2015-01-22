@@ -2,7 +2,7 @@ from lib.generictask import GenericTask
 
 __author__ = 'desmat'
 
-class Template(GenericTask):
+class TractographyDipy(GenericTask):
 
 
     def __init__(self, subject):

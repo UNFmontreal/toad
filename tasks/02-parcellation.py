@@ -28,13 +28,15 @@ class Parcellation(GenericTask):
                 util.symlink(value, self.workingDir)
 
 
+
         if not (images['aparc_aseg']
                 and images['freesurfer_anat']
                 and images['rh_ribbon']
                 and images['lh_ribbon']
                 and images['brodmann']):
 
-            #Skip recon-all if most files could be found Look if freesurfer treee exist and may be exploited
+
+            #Skip recon-all if most files could be found Look if freesurfer tree exist and may be exploited
             missing = False
             dicts = {'freesurfer_anat': "{}/*/mri/T1.mgz",
                     'aparc_aseg': "{}/*/mri/aparc+aseg.mgz",
@@ -45,7 +47,6 @@ class Parcellation(GenericTask):
                 images = glob.glob(value.format(self.workingDir))
                 if len(images) == 0:
                    missing = True
-
 
             if missing:
                 self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
@@ -61,8 +62,9 @@ class Parcellation(GenericTask):
                     self.__mgz2nii(images.pop(), os.path.join(self.workingDir, self.get(key)))
 
 
-            #create the brodmann image
-            self.__createBrodmannAreaFromMricronTemplate()
+            #create the brodmann image if not existing
+            if not images['brodmann']:
+                self.__createBrodmannAreaFromMricronTemplate()
 
 
     def __createBrodmannAreaFromMricronTemplate(self):
@@ -70,13 +72,12 @@ class Parcellation(GenericTask):
         brodmannTemplate = os.path.join(self.toadDir, self.get("templates_brodmann"))
         target = self.get("brodmann")
 
-
         #@TODO remove all trace of mgz file
         cmd = "mri_vol2vol --mov {} --targ $SUBJECTS_DIR/fsaverage/mri/T1.mgz" \
-              " --o brodmann_fsaverage.nii --regheader --interp nearest".format(brodmannTemplate)
+              " --o brodmann_fsaverage.nii.gz --regheader --interp nearest".format(brodmannTemplate)
         self.launchCommand(cmd)
 
-        cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/freesurfer/mri/norm.mgz --s freesurfer --targ brodmann_fsaverage.nii" \
+        cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/freesurfer/mri/norm.mgz --s freesurfer --targ brodmann_fsaverage.nii.gz" \
                " --m3z talairach.m3z --o {} --interp nearest --inv-morph".format(target)
         self.launchCommand(cmd)
         return target

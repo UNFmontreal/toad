@@ -37,6 +37,8 @@ class Preparation(GenericTask):
                   'MR phase ': self.getImage(self.dependDir, 'phase'),
                   'parcellation': self.getImage(self.dependDir,'aparc_aseg'),
                   'anatomical': self.getImage(self.dependDir, 'freesurfer_anat'),
+                  'left hemisphere ribbon': self.getImage(self.dependDir, 'lh_ribbon'),
+                  'right hemisphere ribbon': self.getImage(self.dependDir, 'rh_ribbon'),
                   'brodmann': self.getImage(self.dependDir, 'brodmann')}
 
         for key, value in images.iteritems():
@@ -63,6 +65,7 @@ class Preparation(GenericTask):
             mriutil.bEnc2BVec(bEnc, self.workingDir)
         else:
             util.symlink(bVec, self.workingDir)
+
 
     def meetRequirement(self, result=True):
 
