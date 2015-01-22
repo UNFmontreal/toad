@@ -117,8 +117,11 @@ def getNbDirectionsFromDWI(source):
 
 def validateDataStrides(source):
     strides = getMrinfoFieldValues(mrinfo(source), "Data strides:")
-    jksdhfakjdshf
-    return dataLayout == "[ 1 2 3 4 ]"
+    tokens = strides.strip("[]").split()
+    if len(tokens) >= 3:
+        if tokens[0].strip() in "1" and tokens[1].strip() in "2" and tokens[2].strip() in "3": 
+            return True
+    return False
 
 
 def getFirstB0IndexFromDwi(bval):

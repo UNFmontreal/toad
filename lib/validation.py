@@ -140,7 +140,7 @@ class Validation(object):
 
                         msg = "Data strides layout for {} is unexpected. Would you like to reorient them? \
                                If Yes.. All unexpected images will be realign.\
-                               Not that only copy of the original data will be alter."
+                               Not that only copy of the original data will be alter.".format(value)
                         if util.displayYesNoMessage(msg, "Realiging Strides (y or n)"):
                             self.config.set("preparation", "realign_strides", True)
                         else:
@@ -149,7 +149,7 @@ class Validation(object):
         return True
 
 
-    def __validateImage(self, prefix):
+    def __validateNiftiImage(self, prefix):
         """Determine if an image with a prefix exists into the subject directory
 
         Args:
