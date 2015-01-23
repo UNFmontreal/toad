@@ -32,7 +32,7 @@ class Fieldmap(GenericTask):
 
 
         phaseRescale = self.__rescaleFieldMap(phase)
-        fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, anatFreesurfer)
+        fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, freesurfer_anat)
 
         invertFielmapToAnat = mriutil.invertMatrix(fieldmapToAnat, self.buildName(fieldmapToAnat, 'inverse', 'mat'))
         interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, mag, invertFielmapToAnat, mask)

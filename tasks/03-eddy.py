@@ -230,8 +230,8 @@ class Eddy(GenericTask):
     def __topup(self, source, acqp, b02b0File):
 
         self.info("Launch topup from fsl.\n")
-        baseName = os.path.join(self.workingDir, self.get( 'topup_results_base_name'))
-        output = os.path.join(self.workingDir, self.get( 'topup_results_output'))
+        baseName = os.path.join(self.workingDir, self.get('topup_results_base_name'))
+        output = os.path.join(self.workingDir, self.get('topup_results_output'))
 
         cmd = "topup --imain={} --datain={} --config={} --out={}  --iout={} --verbose"\
               .format(source, acqp, b02b0File, baseName, output)

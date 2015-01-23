@@ -1,3 +1,4 @@
+from lib.util import launchCommand
 import util
 import numpy
 import nipy
@@ -82,6 +83,15 @@ def invertMatrix(source, target):
     return target
 
 
+def strideImage(source, target):
+    if len(getMriDimensions(source)) == 3:
+        cmd = "mrconvert {} {} -stride 1,2,3"
+    else:
+        cmd = "mrconvert {} {} -stride 1,2,3,4"
+    launchCommand(cmd.format(source, target))
+    return target
+
+
 def getMrinfoFieldValues(text, field, delimiter=""):
     output = []
     for line in text:
@@ -115,7 +125,7 @@ def getNbDirectionsFromDWI(source):
     return 0
 
 
-def validateDataStrides(source):
+def isDataStridesOrientationExpected(source):
     strides = getMrinfoFieldValues(mrinfo(source), "Data strides:")
     tokens = strides.strip("[]").split()
     if len(tokens) >= 3:

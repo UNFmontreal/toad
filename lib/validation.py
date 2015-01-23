@@ -134,17 +134,14 @@ class Validation(object):
 
         for key, value in images.iteritems():
             if value:
-                if not mriutil.validateDataStrides(value):
-                    if self.config.getboolean('arguments', 'prompt') \
-                            and not self.config.has_option("general", "realign_strides"):
+                if not mriutil.isDataStridesOrientationExpected(value) and self.config.getboolean('arguments', 'prompt') \
+                        and self.config.getBoolean("preparation", "force_realign_strides"):
 
-                        msg = "Data strides layout for {} is unexpected. Would you like to reorient them? \
-                               If Yes.. All unexpected images will be realign.\
-                               Not that only copy of the original data will be alter.".format(value)
-                        if util.displayYesNoMessage(msg, "Realiging Strides (y or n)"):
-                            self.config.set("preparation", "realign_strides", True)
-                        else:
-                            self.warning("Some images may fail during the pipeline execution")
+                    msg = "Data strides layout for {} is unexpected and force_realign_strides into preparation section \
+                           of config.cfg file is set to True. If you continue? All unexpected images will be realign.\
+                           Only a copy of the original images will be alter.".format(value)
+                    if not util.displayYesNoMessage(msg):
+                        self.quit("Quit the pipeline as user request")
 
         return True
 

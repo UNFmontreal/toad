@@ -43,8 +43,13 @@ class Preparation(GenericTask):
 
         for key, value in images.iteritems():
             if value:
-                self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
-                util.symlink(value, self.workingDir)
+                if not mriutil.isDataStridesOrientationExpected(value) \
+                        and self.config.getBoolean("preparation", "force_realign_strides"):
+                    mriutil.strideImage(value, self.buildName(value, "stride"))
+
+                else:
+                    self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
+                    util.symlink(value, self.workingDir)
 
 
     def __produceEncodingFiles(self, bEnc, bVal, bVec):
