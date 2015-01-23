@@ -13,7 +13,6 @@ class Parcellation(GenericTask):
         self.id = self.get('id')
         self.setCleanupBeforeImplement(False)
 
-
     def implement(self):
 
 
@@ -124,7 +123,7 @@ class Parcellation(GenericTask):
                 return os.path.join(root, image)
         return False
 
-    
+
     def __cleanup(self):
         """Utility method that delete some symbolic links that are not usefull
 
@@ -134,6 +133,13 @@ class Parcellation(GenericTask):
             self.info("Removing symbolic link {}".format(os.path.join(self.workingDir, source)))
             os.unlink(os.path.join(self.workingDir, source))
 
+        for source in ["brodmann_fsaverage.mgz","brodmann_fsaverage.mgz.lta","brodmann_fsaverage.mgz.reg"]:
+            if os.path.isfile(source):
+                os.remove(source)
+
+        for source in [self.getImage(self.workingDir, "brodmann", "lta"), self.getImage(self.workingDir, "brodmann", "reg")]:
+            if source:
+                os.remove(source)
 
     def meetRequirement(self):
 

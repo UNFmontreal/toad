@@ -305,8 +305,10 @@ class Eddy(GenericTask):
 
     def isDirty(self):
         images = {'diffusion weighted eddy corrected': self.getImage(self.workingDir, 'dwi', 'eddy'),
-                  'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', None, 'bval'),
-                  'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),
-                  'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b')}
-
+                  'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bval'),
+                  'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvec'),
+                  'gradient .b encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'b')}
+        print "EDDY EDDU DURR"
+        print images
+        ipeqwruioeru
         return self.isSomeImagesMissing(images)
