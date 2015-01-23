@@ -8,7 +8,6 @@ __author__ = 'desmat'
 
 class Parcellation(GenericTask):
 
-
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preparation')
         self.id = self.get('id')
@@ -16,57 +15,50 @@ class Parcellation(GenericTask):
 
     def implement(self):
 
+
         images = {'aparc_aseg':self.getImage(self.dependDir, 'aparc_aseg'),
                     'freesurfer_anat':self.getImage(self.dependDir, 'freesurfer_anat'),
                     'rh_ribbon':self.getImage(self.dependDir, 'rh_ribbon'),
                     'lh_ribbon':self.getImage(self.dependDir, 'lh_ribbon'),
                     'brodmann':self.getImage(self.dependDir, 'brodmann')}
 
+        natives = {'freesurfer_anat': "{}/*/mri/T1.mgz",
+                     'aparc_aseg': "{}/*/mri/aparc+aseg.mgz",
+                     'rh_ribbon': "{}/*/mri/rh.ribbon.mgz",
+                     'lh_ribbon': "{}/*/mri/lh.ribbon.mgz"}
+
+
+        self.__submitReconAllIfNeeded(natives, images)
+        unlinkedImages = self.__linkExistingImage(images)
+        self.__convertReconAllImageIntoNifti(natives, unlinkedImages)
+
+        #create the brodmann image if not existing
+        if not images['brodmann']:
+            self.__createBrodmannAreaFromMricronTemplate()
+
+        if self.getBoolean('cleanup'):
+            self.__cleanup()
+
+    def __convertReconAllImageIntoNifti(self, natives, images):
+        #convert images of interest into nifti
+        for key, value in images.iteritems():
+            images = glob.glob(natives[key].format(self.workingDir))
+            if len(images) > 0:
+                self.__convertAndRestride(images.pop(), os.path.join(self.workingDir, self.get(key)))
+
+
+    def __linkExistingImage(self, images):
+        unlinkedImages = {}
+        #look for existing map store into preparation and link it so they are not created
         for key, value in images.iteritems():
             if value:
                 self.info("Found {} area image, create link from {} to {}".format(key, value, self.workingDir))
                 util.symlink(value, self.workingDir)
+            else:
+                unlinkedImages[key] = value
+        return unlinkedImages
 
 
-
-        if not (images['aparc_aseg']
-                and images['freesurfer_anat']
-                and images['rh_ribbon']
-                and images['lh_ribbon']
-                and images['brodmann']):
-
-
-            #Skip recon-all if most files could be found Look if freesurfer tree exist and may be exploited
-            missing = False
-            dicts = {'freesurfer_anat': "{}/*/mri/T1.mgz",
-                    'aparc_aseg': "{}/*/mri/aparc+aseg.mgz",
-                    'rh_ribbon': "{}/*/mri/rh.ribbon.mgz",
-                    'lh_ribbon': "{}/*/mri/lh.ribbon.mgz"}
-
-            for key, value in dicts.iteritems():
-                images = glob.glob(value.format(self.workingDir))
-                if len(images) == 0:
-                   missing = True
-
-            if missing:
-                self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
-                os.environ["SUBJECTS_DIR"] = self.workingDir
-
-                anat = self.getImage(self.dependDir, 'anat')
-                self.__reconAll(anat)
-
-            #convert images of interest into nifti
-            for key, value in dicts.iteritems():
-                images = glob.glob(value.format(self.workingDir))
-                if len(images) > 0:
-                    self.__convertAndRestride(images.pop(), os.path.join(self.workingDir, self.get(key)))
-
-            #create the brodmann image if not existing
-            if not images['brodmann']:
-                self.__createBrodmannAreaFromMricronTemplate()
-
-
-    #@TODO introduce cleanup
     def __createBrodmannAreaFromMricronTemplate(self):
 
         brodmannTemplate = os.path.join(self.toadDir, self.get("templates_brodmann"))
@@ -80,8 +72,25 @@ class Parcellation(GenericTask):
         cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/freesurfer/mri/norm.mgz --s freesurfer --targ brodmann_fsaverage.mgz" \
                " --m3z talairach.m3z --o {} --interp nearest --inv-morph".format(target)
         self.launchCommand(cmd)
-
         return self.__convertAndRestride(target, target)
+
+
+    def __submitReconAllIfNeeded(self, natives, images):
+        if not (images['aparc_aseg'] and images['freesurfer_anat'] and images['rh_ribbon'] and images['lh_ribbon']):
+
+            for key, value in natives.iteritems():
+                images = glob.glob(value.format(self.workingDir))
+                if len(images) == 0:
+                    missing = True
+                else:
+                    missing = False
+
+            if missing:
+                #recon-all need to be resubmit
+                self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
+                os.environ["SUBJECTS_DIR"] = self.workingDir
+                anat = self.getImage(self.dependDir, 'anat')
+                self.__reconAll(anat)
 
 
     def __reconAll(self, source):
@@ -113,16 +122,15 @@ class Parcellation(GenericTask):
         return target
 
 
-    def __cleanupReconAll(self):
+    def __cleanup(self):
         """Utility method that delete some symbolic links that are not usefull
 
         """
         self.info("Cleaning up extra files")
         for source in ["rh.EC_average", "lh.EC_average", "fsaverage", "segment.dat"]:
             self.info("Removing symbolic link {}".format(os.path.join(self.workingDir, source)))
-            os.unlink(os.path.join(self.workingDir,source))
+            os.unlink(os.path.join(self.workingDir, source))
 
-        self.getImage()
 
     def meetRequirement(self):
 
