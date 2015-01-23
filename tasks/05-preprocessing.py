@@ -33,11 +33,11 @@ class Preprocessing(GenericTask):
         #whiteMatterDWI = self.__segmentation(b0Upsample)
 
         anat = self.getImage(self.preparationDir, 'anat')
-        brainAnat      = self.__bet(anat)
+        brainAnat  = self.__bet(anat)
 
         brainAnatUncompress = self.uncompressImage(brainAnat)
         whiteMatterAnat= self.__segmentation(brainAnatUncompress)
-        self.gzip(whiteMatterAnat)
+        util.gzip(whiteMatterAnat)
 
     def __upsampling(self, source):
         """Upsample an image specify as input

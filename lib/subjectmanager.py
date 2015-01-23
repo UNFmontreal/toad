@@ -121,14 +121,14 @@ class SubjectManager(Logger, Config):
 
             if self.config.getboolean('arguments', 'prompt'):
                 answer = util.displayContinueQuitRemoveMessage(msg)
-            if answer == "y":
-                self.info("Locks subjects will be ignored during execution\n")
-                subjects = [subject for subject in subjects if subject not in locks]
-            elif answer == "r":
-                self.info("Removing locks and continue the pipeline\n")
-                for lock in locks:
-                    if os.path.isfile(lock.getLock()):
-                        os.remove(lock.getLock())
+                if answer == "y":
+                    self.info("Locks subjects will be ignored during execution\n")
+                    subjects = [subject for subject in subjects if subject not in locks]
+                elif answer == "r":
+                    self.info("Removing locks and continue the pipeline\n")
+                    for lock in locks:
+                        if os.path.isfile(lock.getLock()):
+                            os.remove(lock.getLock())
                 else:
                     self.error("Please submit the pipeline again\n")
             else:

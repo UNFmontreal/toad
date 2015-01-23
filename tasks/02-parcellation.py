@@ -11,7 +11,7 @@ class Parcellation(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preparation')
         self.id = self.get('id')
-
+        self.setCleanupBeforeImplement(False)
 
     def implement(self):
 
@@ -39,7 +39,7 @@ class Parcellation(GenericTask):
 
 
     def __submitReconAllIfNeeded(self):
-        for image in ["T1.mgz", "parc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz"]:
+        for image in ["T1.mgz", "aparc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz"]:
             if not self.__findImageInDirectory(image):
                 self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
                 os.environ["SUBJECTS_DIR"] = self.workingDir
@@ -121,7 +121,7 @@ class Parcellation(GenericTask):
                 return os.path.join(root, image)
         return False
 
-    
+
     def __cleanup(self):
         """Utility method that delete some symbolic links that are not usefull
 
@@ -131,6 +131,13 @@ class Parcellation(GenericTask):
             self.info("Removing symbolic link {}".format(os.path.join(self.workingDir, source)))
             os.unlink(os.path.join(self.workingDir, source))
 
+        for source in ["brodmann_fsaverage.mgz","brodmann_fsaverage.mgz.lta","brodmann_fsaverage.mgz.reg"]:
+            if os.path.isfile(source):
+                os.remove(source)
+
+        for source in [self.getImage(self.workingDir, "brodmann", "lta"), self.getImage(self.workingDir, "brodmann", "reg")]:
+            if source:
+                os.remove(source)
 
     def meetRequirement(self):
 
@@ -147,3 +154,5 @@ class Parcellation(GenericTask):
                     'brodmann':self.getImage(self.workingDir,'brodmann')
                     }
         return self.isSomeImagesMissing(images)
+
+
