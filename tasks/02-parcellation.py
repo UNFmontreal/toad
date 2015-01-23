@@ -11,6 +11,7 @@ class Parcellation(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preparation')
         self.id = self.get('id')
+        self.setCleanupBeforeImplement(False)
 
 
     def implement(self):
@@ -39,7 +40,7 @@ class Parcellation(GenericTask):
 
 
     def __submitReconAllIfNeeded(self):
-        for image in ["T1.mgz", "parc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz"]:
+        for image in ["T1.mgz", "aparc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz", "talairach.m3z"]:
             if not self.__findImageInDirectory(image):
                 self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
                 os.environ["SUBJECTS_DIR"] = self.workingDir
@@ -74,14 +75,16 @@ class Parcellation(GenericTask):
 
         brodmannTemplate = os.path.join(self.toadDir, self.get("templates_brodmann"))
         target = self.get("brodmann")
+        self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
+        os.environ["SUBJECTS_DIR"] = self.workingDir
 
         #@TODO remove all trace of mgz file
         cmd = "mri_vol2vol --mov {} --targ $FREESURFER_HOME/subjects/fsaverage/mri/T1.mgz" \
               " --o brodmann_fsaverage.mgz --regheader --interp nearest".format(brodmannTemplate)
         self.launchCommand(cmd)
 
-        cmd =  "mri_vol2vol --mov {}/mri/norm.mgz --s freesurfer --targ brodmann_fsaverage.mgz" \
-               " --m3z talairach.m3z --o {} --interp nearest --inv-morph".format(self.id, target)
+        cmd =  "mri_vol2vol --mov {0}/mri/norm.mgz --targ brodmann_fsaverage.mgz --s {0} " \
+               " --m3z talairach.m3z --o {1} --interp nearest --inv-morph".format(self.id, target)
         self.launchCommand(cmd)
         return self.__convertAndRestride(target, target)
 

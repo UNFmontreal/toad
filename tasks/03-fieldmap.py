@@ -234,7 +234,7 @@ class Fieldmap(GenericTask):
         return self.isSomeImagesMissing({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')})
 
 
-    def meetRequirement(self):
+    def meetRequirement(self, result=True):
         """Validate if all requirements have been met prior to launch the task
 
         Returns:
