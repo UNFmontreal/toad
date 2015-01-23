@@ -22,7 +22,7 @@ class Denoising(GenericTask):
                 if not dwi:
                     dwi = self.getImage(self.preparationDir, "dwi")
 
-            dwiUncompress = self.__uncompressImage(self, dwi)
+            dwiUncompress = self.uncompressImage(self, dwi)
             tmp = self.buildName(dwiUncompress, "tmp", 'nii')
             scriptName = self.__createLpcaScript(dwiUncompress, tmp)
             self.__launchMatlabExecution(scriptName)
@@ -36,13 +36,6 @@ class Denoising(GenericTask):
             if self.getBoolean("cleanup"):
                 self.info("Removing redundant image {}".format(dwiUncompress))
                 os.remove(dwiUncompress)
-
-
-    def __uncompressImage(self, source):
-        self.info("Copying image {} into {} directory".format(source, self.workingDir))
-        shutil.copy(source, self.workingDir)
-        self.info("Denoising do not support compress nifti format. So unzip dwi image".format())
-        return util.gunzip(self.getImage(self.workingDir, "dwi"))
 
 
     def __createLpcaScript(self, source, target):

@@ -33,12 +33,12 @@ class TensorFsl(GenericTask):
         print "DEBUG mask name =", mask
         self.__tensorsFsl(dwi, bVec, bVal, mask)
 
-        l1 = self.getImage(self.workingDir, 'dwi', 'fsl_value1', 'nii.gz')
-        l2 = self.getImage(self.workingDir, 'dwi', 'fsl_value2', 'nii.gz')
-        l3 = self.getImage(self.workingDir, 'dwi', 'fsl_value3', 'nii.gz')
+        l1 = self.getImage(self.workingDir, 'dwi', 'fsl_value1')
+        l2 = self.getImage(self.workingDir, 'dwi', 'fsl_value2')
+        l3 = self.getImage(self.workingDir, 'dwi', 'fsl_value3')
 
-        ad = self.buildName(dwi, 'fsl_ad', 'nii.gz')
-        rd = self.buildName(dwi, 'fsl_rd', 'nii.gz')
+        ad = self.buildName(dwi, 'fsl_ad')
+        rd = self.buildName(dwi, 'fsl_rd')
 
         self.rename(l1, ad)
         self.__mean(l2, l3, rd)
@@ -86,7 +86,7 @@ class TensorFsl(GenericTask):
         cmd = "bet {} {} -f {} -g {} -v -m".format(source, target, fractionalIntensity, verticalGradient)
         self.launchCommand(cmd)
 
-        return self.getImage(self.workingDir, 'b0', ['brain','mask'], 'nii.gz')
+        return target
 
 
     def meetRequirement(self, result=True):
@@ -113,13 +113,13 @@ class TensorFsl(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        images = {"1st eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_vector1', 'nii.gz'),
-                  "2rd eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_vector2', 'nii.gz'),
-                  "3rd eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_vector3', 'nii.gz'),
-                  "selected eigenvalue(s) AD": self.getImage(self.workingDir, 'dwi', 'fsl_ad', 'nii.gz'),
-                  "selected eigenvalue(s) RD": self.getImage(self.workingDir, 'dwi', 'fsl_rd', 'nii.gz'),
-                  "mean diffusivity": self.getImage(self.workingDir, 'dwi', 'fsl_md', 'nii.gz'),
-                  "fractional anisotropy": self.getImage(self.workingDir, 'dwi', 'fsl_fa', 'nii.gz'),
-                  "raw T2 signal with no weighting": self.getImage(self.workingDir, 'dwi', 'fsl_so', 'nii.gz')}
+        images = {"1st eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_vector1'),
+                  "2rd eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_vector2'),
+                  "3rd eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_vector3'),
+                  "selected eigenvalue(s) AD": self.getImage(self.workingDir, 'dwi', 'fsl_ad'),
+                  "selected eigenvalue(s) RD": self.getImage(self.workingDir, 'dwi', 'fsl_rd'),
+                  "mean diffusivity": self.getImage(self.workingDir, 'dwi', 'fsl_md'),
+                  "fractional anisotropy": self.getImage(self.workingDir, 'dwi', 'fsl_fa'),
+                  "raw T2 signal with no weighting": self.getImage(self.workingDir, 'dwi', 'fsl_so')}
 
         return self.isSomeImagesMissing(images)

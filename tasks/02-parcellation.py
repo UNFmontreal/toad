@@ -59,14 +59,14 @@ class Parcellation(GenericTask):
             for key, value in dicts.iteritems():
                 images = glob.glob(value.format(self.workingDir))
                 if len(images) > 0:
-                    self.__mgz2nii(images.pop(), os.path.join(self.workingDir, self.get(key)))
-
+                    self.__convertAndRestride(images.pop(), os.path.join(self.workingDir, self.get(key)))
 
             #create the brodmann image if not existing
             if not images['brodmann']:
                 self.__createBrodmannAreaFromMricronTemplate()
 
 
+    #@TODO introduce cleanup
     def __createBrodmannAreaFromMricronTemplate(self):
 
         brodmannTemplate = os.path.join(self.toadDir, self.get("templates_brodmann"))
@@ -74,13 +74,14 @@ class Parcellation(GenericTask):
 
         #@TODO remove all trace of mgz file
         cmd = "mri_vol2vol --mov {} --targ $SUBJECTS_DIR/fsaverage/mri/T1.mgz" \
-              " --o brodmann_fsaverage.nii.gz --regheader --interp nearest".format(brodmannTemplate)
+              " --o brodmann_fsaverage.mgz --regheader --interp nearest".format(brodmannTemplate)
         self.launchCommand(cmd)
 
-        cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/freesurfer/mri/norm.mgz --s freesurfer --targ brodmann_fsaverage.nii.gz" \
+        cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/freesurfer/mri/norm.mgz --s freesurfer --targ brodmann_fsaverage.mgz" \
                " --m3z talairach.m3z --o {} --interp nearest --inv-morph".format(target)
         self.launchCommand(cmd)
-        return target
+
+        return self.__convertAndRestride(target, target)
 
 
     def __reconAll(self, source):
@@ -98,7 +99,7 @@ class Parcellation(GenericTask):
         self.launchCommand(cmd, None, None, 777600)
 
 
-    def __mgz2nii(self, source, target):
+    def __convertAndRestride(self, source, target):
         """Utility for converting between different file formats
 
         Args:
@@ -107,8 +108,9 @@ class Parcellation(GenericTask):
 
         """
         self.info("convert {} image to {} ".format(source, target))
-        cmd = "mrconvert {} {} -stride {}".format(source, target, self.get('stride_orientation'))
+        cmd = "mrconvert {} {} -stride {} -force".format(source, target, self.get('stride_orientation'))
         self.launchCommand(cmd, 'log', 'log')
+        return target
 
 
     def __cleanupReconAll(self):
@@ -120,6 +122,7 @@ class Parcellation(GenericTask):
             self.info("Removing symbolic link {}".format(os.path.join(self.workingDir, source)))
             os.unlink(os.path.join(self.workingDir,source))
 
+        self.getImage()
 
     def meetRequirement(self):
 

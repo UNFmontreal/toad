@@ -34,8 +34,10 @@ class Preprocessing(GenericTask):
 
         anat = self.getImage(self.preparationDir, 'anat')
         brainAnat      = self.__bet(anat)
-        whiteMatterAnat= self.__segmentation(brainAnat)
 
+        brainAnatUncompress = self.uncompressImage(brainAnat)
+        whiteMatterAnat= self.__segmentation(brainAnatUncompress)
+        self.gzip(whiteMatterAnat)
 
     def __upsampling(self, source):
         """Upsample an image specify as input
@@ -132,6 +134,8 @@ class Preprocessing(GenericTask):
         return target
 
 
+
+
     def __createSegmentationScript(self, source, options):
         """Create a file which contains all necessary instruction to launch a segmentation with spm
 
@@ -143,13 +147,14 @@ class Preprocessing(GenericTask):
             The resulting script file name
         """
 
-        scriptName = os.path.join(self.workingDir, os.path.basename(source).replace(".nii",".m"))
+        scriptName = self.buildName(source, None, ".m")
         self.info("Creating spm segmentation script {}".format(scriptName))
 
         tags={ 'source': source,
                'gm1': options[0], 'gm2': options[1], 'gm3': options[2],
                'csf1': options[3], 'csf2': options[4], 'csf3': options[5],
                'wm1': options[6], 'wm2': options[7], 'wm3': options[8]}
+
 
         template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/segment.tpl"))
         util.createScript(scriptName, template)

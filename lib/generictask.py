@@ -400,6 +400,26 @@ class GenericTask(Logger, Load):
         return os.path.basename(absoluteBuildName)
 
 
+    def uncompressImage(self, source):
+        """Copy a source image into current working directory and uncompress it
+
+        Args:
+            source:  name of the source file
+        Returns
+            name of the output file
+
+        """
+        if self.workingDir == os.getcwd():
+            target = source
+        else:
+            self.info("Copying image {} into {} directory".format(source, self.workingDir))
+            shutil.copy(source, self.workingDir)
+            target = os.path.join(self.workingDir, os.path.basename(source))
+
+        self.info("Uncompress image.".format(target))
+        return util.gunzip(target)
+
+
     def rename(self, source, target):
         """rename an image name specify as source
 
