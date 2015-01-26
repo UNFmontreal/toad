@@ -409,7 +409,8 @@ class GenericTask(Logger, Load):
             name of the output file
 
         """
-        if self.workingDir == os.getcwd():
+        imageDir = os.path.dirname(source)
+        if not imageDir or (imageDir in self.workingDir):
             target = source
         else:
             self.info("Copying image {} into {} directory".format(source, self.workingDir))

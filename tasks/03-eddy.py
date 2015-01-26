@@ -308,7 +308,4 @@ class Eddy(GenericTask):
                   'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bval'),
                   'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvec'),
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'b')}
-        print "EDDY EDDU DURR"
-        print images
-        ipeqwruioeru
         return self.isSomeImagesMissing(images)

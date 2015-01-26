@@ -37,6 +37,7 @@ class Preprocessing(GenericTask):
 
         brainAnatUncompress = self.uncompressImage(brainAnat)
         whiteMatterAnat= self.__segmentation(brainAnatUncompress)
+        util.gzip(brainAnatUncompress)
         util.gzip(whiteMatterAnat)
 
     def __upsampling(self, source):

@@ -24,11 +24,10 @@ class Parcellation(GenericTask):
 
 
         unlinkedImages = self.__linkExistingImage(images)
-
         if len(unlinkedImages) > 0:
             self.__submitReconAllIfNeeded()
-
-        if unlinkedImages.has_key('brodmann'):
+        
+	if unlinkedImages.has_key('brodmann'):
             self.__createBrodmannAreaImageFromMricronTemplate()
             del(unlinkedImages['brodmann'])
 
@@ -41,6 +40,11 @@ class Parcellation(GenericTask):
     def __submitReconAllIfNeeded(self):
         for image in ["T1.mgz", "aparc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz", "talairach.m3z"]:
             if not self.__findImageInDirectory(image):
+           	#cleanup the freesurfer if exists
+                treeName = "freesurfer_{}".format(self.getTimestamp().replace(" ","_"))
+                if os.path.isdir(self.id):
+                    self.info("renaming existing freesurfer tree {} to {}".format(self.id, treeName))
+                    os.rename(self.id, treeName)
                 self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
                 os.environ["SUBJECTS_DIR"] = self.workingDir
                 anat = self.getImage(self.dependDir, 'anat')
@@ -82,7 +86,7 @@ class Parcellation(GenericTask):
               " --o brodmann_fsaverage.mgz --regheader --interp nearest".format(brodmannTemplate)
         self.launchCommand(cmd)
 
-        cmd =  "mri_vol2vol --mov {0}/mri/norm.mgz --targ brodmann_fsaverage.mgz --s {0} " \
+        cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/{0}/mri/norm.mgz --targ brodmann_fsaverage.mgz --s {0} " \
                " --m3z talairach.m3z --o {1} --interp nearest --inv-morph".format(self.id, target)
         self.launchCommand(cmd)
         return self.__convertAndRestride(target, target)
@@ -118,7 +122,7 @@ class Parcellation(GenericTask):
 
 
     def __findImageInDirectory(self, image):
-        for root, dirs, files in os.walk(self.workingDir):
+        for root, dirs, files in os.walk(os.path.join(self.workingDir, self.id)):
             if image in files:
                 return os.path.join(root, image)
         return False
