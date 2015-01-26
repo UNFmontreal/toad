@@ -16,7 +16,7 @@ class Registration(GenericTask):
 
         b0 = self.getImage(self.dependDir, 'b0')
         anat = self.getImage(self.preparationDir, 'anat')
-        anatBrain = self.getImage(self.workingDir ,'anat', "brain")
+        anatBrain = self.getImage(self.dependDir ,'anat', "brain")
         aparcAsegFile =  self.getImage(self.parcellationDir, "aparc_aseg")
         rhRibbon = self.getImage(self.parcellationDir, "rh_ribbon")
         lhRibbon = self.getImage(self.parcellationDir, "lh_ribbon")
@@ -49,9 +49,8 @@ class Registration(GenericTask):
         self.__multiply(brodmannRegister, rhRibbonRegister, brodmannRRegister)
 
 
-
     def __multiply(self, source, ribbon, target):
-        cmd = "mrcalc {} -mul {} {}".format(source, ribbon, target)
+        cmd = "mrcalc {} {} -mult {} -quiet".format(source, ribbon, target)
         self.launchCommand(cmd)
         return target
 
@@ -78,6 +77,7 @@ class Registration(GenericTask):
             return a file containing the resulting transformation
         """
         self.info("Starting registration from fsl")
+	print "source =", source
         name = os.path.basename(source).replace(".nii","")
         target = self.buildName(name, "resample",'')
         cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {}".format(source, reference, matrix, target)
@@ -87,14 +87,14 @@ class Registration(GenericTask):
 
     def __transformMatrixFslToMrtrix(self, source, b0, matrix ):
         target = self.buildName(matrix, "mrtrix", ".mat")
-        cmd = "transformcalc -flirt_import {} {} {} {}".format(source, b0, matrix, target)
+        cmd = "transformcalc -flirt_import {} {} {} {} -quiet".format(source, b0, matrix, target)
         self.launchCommand(cmd)
         return target
 
 
     def __applyRegistrationMrtrix(self, source , matrix):
         target = self.buildName(source, "register")
-        cmd = "mrtransform  {} -linear {} {}".format(source, matrix, target)
+        cmd = "mrtransform  {} -linear {} {} -quiet".format(source, matrix, target)
         self.launchCommand(cmd)
         return target
 
@@ -120,4 +120,6 @@ class Registration(GenericTask):
                   'brodmann': self.getImage(self.workingDir,'brodmann', 'resample'),
                   'white matter segmented high resolution resampled': self.getImage(self.workingDir,'anat', ['brain','wm','resample']),
                   'high resolution resampled imgage':self.getImage(self.workingDir,'anat', ['brain','resample'])}
+        print "images =",images
+	print self.isSomeImagesMissing(images)
         return self.isSomeImagesMissing(images)
