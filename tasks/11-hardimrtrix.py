@@ -19,14 +19,13 @@ class HardiMrtrix(GenericTask, Logger):
         if not bFile:
             bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
 
-        maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['act','wm','mask'])
+        maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['act', 'wm', 'mask'])
         outputDwi2Response = self.__dwi2response(dwi, maskDwi2Response, bFile)
 
         maskDwi2fod =  self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
         fodImage = self.__dwi2fod(dwi, outputDwi2Response, maskDwi2fod, bFile)
 
-        #@TODO see with arnaud the proper mask to apply
-        #mask = self.getImage(self.maskingDir, 'anat',['extended','mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['extended','mask'])
         self.__fod2metric(fodImage, mask)
 
 

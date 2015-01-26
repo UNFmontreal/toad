@@ -40,6 +40,8 @@ class TensorDipy(GenericTask):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
 
+        mask = self.getImage(self.workingDir, 'anat', ['extended', 'mask'])
+
         #Look first if there is eddy b encoding files produces
         bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
         bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
@@ -50,16 +52,19 @@ class TensorDipy(GenericTask):
         if not bVecFile:
             bVecFile = self.getImage(self.preparationDir,'grad', None, 'bvec')
 
-        #@TODO define proper mask
-        self.__produceTensors(dwi, bValFile, bVecFile)
+        self.__produceTensors(dwi, bValFile, bVecFile, mask)
 
 
-    def __produceTensors(self, source, bValFile, bVecFile):
+    def __produceTensors(self, source, bValFile, bVecFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
         target = self.buildName(source, "dipy")
 
         dwiImage = nibabel.load(source)
+        maskImage = nibabel.load(mask)
+
         dwiData  = dwiImage.get_data()
+        dwiData = dipy.segment.mask.applymask(dwiData, maskImage)
+
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValFile), numpy.loadtxt(bVecFile))
 
         model = dipy.reconst.dti.TensorModel(gradientTable)

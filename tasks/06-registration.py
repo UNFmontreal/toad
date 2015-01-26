@@ -55,6 +55,7 @@ class Registration(GenericTask):
         self.launchCommand(cmd)
         return target
 
+
     def __applyResampleFsl(self, source, reference):
         """Register an image with symmetric normalization and mutual information metric
 
@@ -63,7 +64,7 @@ class Registration(GenericTask):
         """
         self.info("Starting registration from fsl")
         name = os.path.basename(source).replace(".nii","")
-        target = self.buildName(name, "transformation")
+        target = self.buildName(name, "transformation","")
         matrix = self.buildName(name, "transformation", ".mat")
         cmd = "flirt -in {} -ref {} -cost {} -omat {} -out {}".format(source, reference, self.get('cost'), matrix, target)
         self.launchCommand(cmd)
@@ -78,7 +79,7 @@ class Registration(GenericTask):
         """
         self.info("Starting registration from fsl")
         name = os.path.basename(source).replace(".nii","")
-        target = self.buildName(name, "resample")
+        target = self.buildName(name, "resample",'')
         cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {}".format(source, reference, matrix, target)
         self.launchCommand(cmd)
         return matrix
