@@ -136,8 +136,8 @@ class Fieldmap(GenericTask):
             .format(source, reference , target,
                 self.get("fieldmapToAnat"), self.get("cost"), self.get("searchcost"), self.get("dof"))
 
-        if self.getBoolean("usesqform"):
-            cmd += "-usesqform "
+        #if self.getBoolean("usesqform"):
+        #    cmd += "-usesqform "
 
         self.launchCommand(cmd)
         return self.get("fieldmapToAnat")
@@ -234,7 +234,7 @@ class Fieldmap(GenericTask):
         return self.isSomeImagesMissing({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')})
 
 
-    def meetRequirement(self):
+    def meetRequirement(self, result=True):
         """Validate if all requirements have been met prior to launch the task
 
         Returns:

@@ -22,7 +22,7 @@ class Denoising(GenericTask):
                 if not dwi:
                     dwi = self.getImage(self.preparationDir, "dwi")
 
-            dwiUncompress = self.uncompressImage(self, dwi)
+            dwiUncompress = self.uncompressImage(dwi)
             tmp = self.buildName(dwiUncompress, "tmp", 'nii')
             scriptName = self.__createLpcaScript(dwiUncompress, tmp)
             self.__launchMatlabExecution(scriptName)

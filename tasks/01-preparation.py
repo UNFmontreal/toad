@@ -44,7 +44,7 @@ class Preparation(GenericTask):
         for key, value in images.iteritems():
             if value:
                 if not mriutil.isDataStridesOrientationExpected(value) \
-                        and self.config.getBoolean("preparation", "force_realign_strides"):
+                        and self.getBoolean("force_realign_strides"):
                     mriutil.strideImage(value, self.buildName(value, "stride"))
 
                 else:

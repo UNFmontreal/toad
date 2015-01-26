@@ -23,9 +23,9 @@ class Registration(GenericTask):
         brodmann = self.getImage(self.parcellationDir, "brodmann")
 
 
-        b0ToAnatMatrix = self.__applyResampleFsl(b0, anat)
+        b0ToAnatMatrix = self.__computeResample(b0, anat)
         b0ToAnatMatrixInverse = mriutil.invertMatrix(b0ToAnatMatrix, self.buildName(b0ToAnatMatrix, 'inverse', 'mat'))
-        self.__resample(anat, b0, b0ToAnatMatrixInverse)
+        self.__applyResampleFsl(anat, b0, b0ToAnatMatrixInverse)
         mrtrixMatrix = self.__transformMatrixFslToMrtrix(anat, b0, b0ToAnatMatrixInverse)
 
 
@@ -56,7 +56,7 @@ class Registration(GenericTask):
         return target
 
 
-    def __applyResampleFsl(self, source, reference):
+    def __computeResample(self, source, reference):
         """Register an image with symmetric normalization and mutual information metric
 
         Returns:
@@ -71,7 +71,7 @@ class Registration(GenericTask):
         return matrix
 
 
-    def __resample(self, source, reference, matrix):
+    def __applyResampleFsl(self, source, reference, matrix):
         """Register an image with symmetric normalization and mutual information metric
 
         Returns:

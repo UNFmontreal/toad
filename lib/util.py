@@ -26,6 +26,8 @@ def symlink(source, target):
     [dir, name] = os.path.split(source)
     #output = os.path.join(target, name)
     src = "../{}/{}".format(os.path.basename(os.path.normpath(dir)), name)
+    if os.path.exists(name):
+        os.remove(name)
     os.symlink(src, name)
     return src
 

@@ -135,7 +135,7 @@ class Validation(object):
         for key, value in images.iteritems():
             if value:
                 if not mriutil.isDataStridesOrientationExpected(value) and self.config.getboolean('arguments', 'prompt') \
-                        and self.config.getBoolean("preparation", "force_realign_strides"):
+                        and self.config.getboolean("preparation", "force_realign_strides"):
 
                     msg = "Data strides layout for {} is unexpected and force_realign_strides is set to True.\n \
                            If you continue, all unexpected images will be realign accordingly.\n\

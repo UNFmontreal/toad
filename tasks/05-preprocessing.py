@@ -37,6 +37,7 @@ class Preprocessing(GenericTask):
 
         brainAnatUncompress = self.uncompressImage(brainAnat)
         whiteMatterAnat= self.__segmentation(brainAnatUncompress)
+        util.gzip(brainAnatUncompress)
         util.gzip(whiteMatterAnat)
 
     def __upsampling(self, source):
@@ -182,6 +183,5 @@ class Preprocessing(GenericTask):
 
         images = {'upsampled diffusion weighted': self.getImage(self.workingDir ,'dwi', "upsample"),
                     'high resolution brain extracted': self.getImage(self.workingDir ,'anat', "brain"),
-                    'high resolution white matter': self.getImage(self.workingDir ,'anat', "wm"),
-                    'b0 white matter': self.getImage(self.workingDir ,'b0', "wm")}
+                    'high resolution white matter': self.getImage(self.workingDir ,'anat', "wm")}
         return self.isSomeImagesMissing(images)
