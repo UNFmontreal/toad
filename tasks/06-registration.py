@@ -28,7 +28,6 @@ class Registration(GenericTask):
         self.__applyResampleFsl(anat, b0, b0ToAnatMatrixInverse)
         mrtrixMatrix = self.__transformMatrixFslToMrtrix(anat, b0, b0ToAnatMatrixInverse)
 
-
         self.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix)
         self.__applyResampleFsl(aparcAsegFile, b0, b0ToAnatMatrixInverse)
 
@@ -45,6 +44,7 @@ class Registration(GenericTask):
 
         brodmannLRegister =  self.buildName(brodmannRegister, "left_hemisphere")
         brodmannRRegister =  self.buildName(brodmannRegister, "right_hemisphere")
+
         self.__multiply(brodmannRegister, lhRibbonRegister, brodmannLRegister)
         self.__multiply(brodmannRegister, rhRibbonRegister, brodmannRRegister)
 
@@ -115,9 +115,13 @@ class Registration(GenericTask):
 
     def isDirty(self, result = False):
         #@TODO reimplement that
-        images = {'freesurfer anatomical': self.getImage(self.workingDir,'freesurfer_anat', 'resample'),
-                  'parcellation': self.getImage(self.workingDir,'aparc_aseg', 'resample'),
-                  'brodmann': self.getImage(self.workingDir,'brodmann', 'resample'),
-                  'white matter segmented high resolution resampled': self.getImage(self.workingDir,'anat', ['brain','wm','resample']),
-                  'high resolution resampled imgage':self.getImage(self.workingDir,'anat', ['brain','resample'])}
+        images = {'anatomical brain resampled': self.getImage(self.workingDir,'anat', ['brain', 'resample']),
+                  'anatomical resampled': self.getImage(self.workingDir,'anat', 'resample'),
+                  'parcellation resample': self.getImage(self.workingDir,'aparc_aseg', 'resample'),
+                  'parcellation register': self.getImage(self.workingDir,'aparc_aseg', 'register'),
+                  'brodmann register left hemisphere': self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]),
+                  'brodmann register right hemisphere': self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"])}
+        #@DEBUG
+        print "images =", images
+        print self.isSomeImagesMissing(images)
         return self.isSomeImagesMissing(images)
