@@ -24,7 +24,7 @@ class HardiDipy(GenericTask):
 
         """
 
-        GenericTask.__init__(self, subject)
+        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
         """Inherit from a generic Task.
 
         Args:
@@ -44,7 +44,7 @@ class HardiDipy(GenericTask):
         """
 
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
-        mask = self.getImage(self.workingDir, 'anat', ['extended', 'mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
 
         #Look first if there is eddy b encoding files produces
         bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
