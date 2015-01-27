@@ -15,8 +15,8 @@ class Registration(GenericTask):
 
 
         b0 = self.getImage(self.dependDir, 'b0')
-        anat = self.getImage(self.parcellationDir, 'freesurfer_anat')
-        #anatBrain = self.getImage(self.workingDir ,'anat', "brain")
+        anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
+        anatBrain = self.getImage(self.preprocessingDir ,'anat', 'brain')
         aparcAsegFile =  self.getImage(self.parcellationDir, "aparc_aseg")
         rhRibbon = self.getImage(self.parcellationDir, "rh_ribbon")
         lhRibbon = self.getImage(self.parcellationDir, "lh_ribbon")
@@ -29,11 +29,10 @@ class Registration(GenericTask):
         mrtrixMatrix = self.__transformMatrixFslToMrtrix(anat, b0, b0ToAnatMatrixInverse)
 
 
-
         self.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix)
         self.__applyResampleFsl(aparcAsegFile, b0, b0ToAnatMatrixInverse)
 
-        #anatBrainResampled = self.__applyResampleFsl(anatBrain, b0, b0ToAnatMatrixInverse)
+        anatBrainResampled = self.__applyResampleFsl(anatBrain, b0, b0ToAnatMatrixInverse)
 
         brodmannRegister = self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
         brodmannResampled = self.__applyResampleFsl(brodmann, b0, b0ToAnatMatrixInverse)
@@ -79,7 +78,6 @@ class Registration(GenericTask):
             return a file containing the resulting transformation
         """
         self.info("Starting registration from fsl")
-	print "source =", source
         name = os.path.basename(source).replace(".nii","")
         target = self.buildName(name, "resample",'')
         cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {}".format(source, reference, matrix, target)
@@ -103,8 +101,8 @@ class Registration(GenericTask):
 
     def meetRequirement(self):
 
-        images = {'high resolution': self.getImage(self.preparationDir, 'anat'),
-                  'anatomical brain extracted': self.getImage(self.dependDir, 'anat', 'brain'),
+        images = {'high resolution': self.getImage(self.parcellationDir, 'anat', 'freesurfer'),
+                  'freesurfer anatomical brain extracted': self.getImage(self.dependDir, 'anat', 'brain'),
                   'b0 upsampled': self.getImage(self.dependDir, 'b0'),
                   'parcellation': self.getImage(self.parcellationDir, 'aparc_aseg'),
                   'right hemisphere ribbon': self.getImage(self.parcellationDir, 'rh_ribbon'),

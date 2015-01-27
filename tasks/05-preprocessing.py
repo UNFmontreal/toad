@@ -9,7 +9,7 @@ class Preprocessing(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'eddy')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'eddy')
 
 
     def implement(self):
@@ -29,16 +29,14 @@ class Preprocessing(GenericTask):
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVal))
 
-        #B0 WM segmentation is void
-        #whiteMatterDWI = self.__segmentation(b0Upsample)
-
-        anat = self.getImage(self.preparationDir, 'anat')
+        anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
         brainAnat  = self.__bet(anat)
 
         brainAnatUncompress = self.uncompressImage(brainAnat)
         whiteMatterAnat= self.__segmentation(brainAnatUncompress)
         util.gzip(brainAnatUncompress)
         util.gzip(whiteMatterAnat)
+
 
     def __upsampling(self, source):
         """Upsample an image specify as input
@@ -174,10 +172,9 @@ class Preprocessing(GenericTask):
                 else:
                     self.info("Will take {} image instead".format(dwi))
 
-        images = {'high resolution': self.getImage(self.preparationDir, 'anat')}
+        images = {'freesurfer high resolution': self.getImage(self.parcellationDir, 'anat', 'freesurfer')}
         result = self.isAllImagesExists(images)
         return result
-
 
     def isDirty(self, result = False):
 
