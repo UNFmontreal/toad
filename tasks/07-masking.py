@@ -89,7 +89,7 @@ class Masking(GenericTask):
         self.launchCommand('mrcalc indices.mif 3 -eq  wm.mif')
         self.launchCommand('mrcalc indices.mif 4 -eq csf.mif')
         self.launchCommand('mrcalc indices.mif 5 -eq path.mif')
-        result_path = 'result' + os.path.splitext(target)[1]
+        result_path = 'result.nii.gz'
         self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32')
 
 

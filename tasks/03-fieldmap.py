@@ -136,9 +136,6 @@ class Fieldmap(GenericTask):
             .format(source, reference , target,
                 self.get("fieldmapToAnat"), self.get("cost"), self.get("searchcost"), self.get("dof"))
 
-        #if self.getBoolean("usesqform"):
-        #    cmd += "-usesqform "
-
         self.launchCommand(cmd)
         return self.get("fieldmapToAnat")
 
