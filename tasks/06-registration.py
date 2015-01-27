@@ -52,7 +52,7 @@ class Registration(GenericTask):
 
 
     def __multiply(self, source, ribbon, target):
-        cmd = "mrcalc {} -mul {} {}".format(source, ribbon, target)
+        cmd = "mrcalc {} {} -mult {} -quiet".format(source, ribbon, target)
         self.launchCommand(cmd)
         return target
 
@@ -79,6 +79,7 @@ class Registration(GenericTask):
             return a file containing the resulting transformation
         """
         self.info("Starting registration from fsl")
+	print "source =", source
         name = os.path.basename(source).replace(".nii","")
         target = self.buildName(name, "resample",'')
         cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {}".format(source, reference, matrix, target)
@@ -88,14 +89,14 @@ class Registration(GenericTask):
 
     def __transformMatrixFslToMrtrix(self, source, b0, matrix ):
         target = self.buildName(matrix, "mrtrix", ".mat")
-        cmd = "transformcalc -flirt_import {} {} {} {}".format(source, b0, matrix, target)
+        cmd = "transformcalc -flirt_import {} {} {} {} -quiet".format(source, b0, matrix, target)
         self.launchCommand(cmd)
         return target
 
 
     def __applyRegistrationMrtrix(self, source , matrix):
         target = self.buildName(source, "register")
-        cmd = "mrtransform  {} -linear {} {}".format(source, matrix, target)
+        cmd = "mrtransform  {} -linear {} {} -quiet".format(source, matrix, target)
         self.launchCommand(cmd)
         return target
 
@@ -115,7 +116,6 @@ class Registration(GenericTask):
 
 
     def isDirty(self, result = False):
-        #@TODO reimplement that
         images = {'anatomical brain resampled': self.getImage(self.workingDir,'anat', ['brain', 'resample']),
                   'anatomical resampled': self.getImage(self.workingDir,'anat', 'resample'),
                   'parcellation resample': self.getImage(self.workingDir,'aparc_aseg', 'resample'),
