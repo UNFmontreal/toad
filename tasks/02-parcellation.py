@@ -1,6 +1,5 @@
 from lib.generictask import GenericTask
 from lib import util
-import glob
 import os
 
 __author__ = 'desmat'
@@ -13,11 +12,12 @@ class Parcellation(GenericTask):
         self.id = self.get('id')
         self.setCleanupBeforeImplement(False)
 
+
     def implement(self):
 
-
+        anat = self.getImage(self.dependDir, 'anat')
         images = {'aparc_aseg': self.getImage(self.dependDir, 'aparc_aseg'),
-                    'freesurfer_anat': self.getImage(self.dependDir, 'freesurfer_anat'),
+                    'freesurfer_anat': self.getImage(self.dependDir, 'anat', 'freesurfer'),
                     'rh_ribbon': self.getImage(self.dependDir, 'rh_ribbon'),
                     'lh_ribbon': self.getImage(self.dependDir, 'lh_ribbon'),
                     'brodmann': self.getImage(self.dependDir, 'brodmann')}
@@ -25,30 +25,28 @@ class Parcellation(GenericTask):
 
         unlinkedImages = self.__linkExistingImage(images)
         if len(unlinkedImages) > 0:
-            self.__submitReconAllIfNeeded()
+            self.__submitReconAllIfNeeded(anat)
         
-	if unlinkedImages.has_key('brodmann'):
+        if unlinkedImages.has_key('brodmann'):
             self.__createBrodmannAreaImageFromMricronTemplate()
             del(unlinkedImages['brodmann'])
 
-        self.__convertFeesurferImageIntoNifti(unlinkedImages)
+            self.__convertFeesurferImageIntoNifti(unlinkedImages, anat)
 
         if self.getBoolean('cleanup'):
             self.__cleanup()
 
 
-    def __submitReconAllIfNeeded(self):
+    def __submitReconAllIfNeeded(self, anatomical):
         for image in ["T1.mgz", "aparc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz", "talairach.m3z"]:
             if not self.__findImageInDirectory(image):
-           	#cleanup the freesurfer if exists
                 treeName = "freesurfer_{}".format(self.getTimestamp().replace(" ","_"))
                 if os.path.isdir(self.id):
                     self.info("renaming existing freesurfer tree {} to {}".format(self.id, treeName))
                     os.rename(self.id, treeName)
                 self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
                 os.environ["SUBJECTS_DIR"] = self.workingDir
-                anat = self.getImage(self.dependDir, 'anat')
-                self.__reconAll(anat)
+                self.__reconAll(anatomical)
                 break
 
 
@@ -64,8 +62,8 @@ class Parcellation(GenericTask):
         return unlinkedImages
 
 
-    def __convertFeesurferImageIntoNifti(self, images):
-        natives = {'freesurfer_anat': "T1.mgz",
+    def __convertFeesurferImageIntoNifti(self, images, anatomicalName):
+        natives = { self.buildName(anatomicalName, 'freesurfer') : "T1.mgz",
                      'aparc_aseg': "aparc+aseg.mgz",
                      'rh_ribbon': "rh.ribbon.mgz",
                      'lh_ribbon': "lh.ribbon.mgz"}
@@ -154,9 +152,8 @@ class Parcellation(GenericTask):
     def isDirty(self):
 
         images = {'parcellation': self.getImage(self.workingDir,'aparc_aseg'),
-                    'anatomical': self.getImage(self.workingDir,'freesurfer_anat'),
+                    'anatomical': self.getImage(self.workingDir,'anat', 'freesurfer'),
                     'rh_ribbon':self.getImage(self.workingDir,'rh_ribbon'),
                     'lh_ribbon':self.getImage(self.workingDir,'lh_ribbon'),
-                    'brodmann':self.getImage(self.workingDir,'brodmann')
-                    }
+                    'brodmann':self.getImage(self.workingDir,'brodmann')}
         return self.isSomeImagesMissing(images)
