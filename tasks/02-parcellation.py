@@ -22,15 +22,12 @@ class Parcellation(GenericTask):
                     'lh_ribbon': self.getImage(self.dependDir, 'lh_ribbon'),
                     'brodmann': self.getImage(self.dependDir, 'brodmann')}
 
-
         unlinkedImages = self.__linkExistingImage(images)
         if len(unlinkedImages) > 0:
             self.__submitReconAllIfNeeded(anat)
-        
         if unlinkedImages.has_key('brodmann'):
             self.__createBrodmannAreaImageFromMricronTemplate()
             del(unlinkedImages['brodmann'])
-
             self.__convertFeesurferImageIntoNifti(unlinkedImages, anat)
 
         if self.getBoolean('cleanup'):
@@ -63,13 +60,13 @@ class Parcellation(GenericTask):
 
 
     def __convertFeesurferImageIntoNifti(self, images, anatomicalName):
-        natives = { self.buildName(anatomicalName, 'freesurfer') : "T1.mgz",
-                     'aparc_aseg': "aparc+aseg.mgz",
-                     'rh_ribbon': "rh.ribbon.mgz",
-                     'lh_ribbon': "lh.ribbon.mgz"}
+        natives = {  'freesurfer_anat': [self.buildName(anatomicalName, 'freesurfer'), "T1.mgz"],
+                     'aparc_aseg': [self.get('aparc_aseg'), "aparc+aseg.mgz"],
+                     'rh_ribbon': [self.get('rh_ribbon'), "rh.ribbon.mgz"],
+                     'lh_ribbon': [self.get('lh_ribbon'), "lh.ribbon.mgz"]}
 
         for key, value in images.iteritems():
-            self.__convertAndRestride(self.__findImageInDirectory(natives[key]),  self.get(key))
+            self.__convertAndRestride(self.__findImageInDirectory(natives[key][1]), natives[key][0])
 
 
     def __createBrodmannAreaImageFromMricronTemplate(self):
@@ -156,4 +153,5 @@ class Parcellation(GenericTask):
                     'rh_ribbon':self.getImage(self.workingDir,'rh_ribbon'),
                     'lh_ribbon':self.getImage(self.workingDir,'lh_ribbon'),
                     'brodmann':self.getImage(self.workingDir,'brodmann')}
+	print "Dirty image =",images
         return self.isSomeImagesMissing(images)

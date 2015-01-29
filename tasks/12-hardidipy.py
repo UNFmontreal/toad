@@ -42,7 +42,7 @@ class HardiDipy(GenericTask):
         """Placeholder for the business logic implementation
 
         """
-
+        """
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
         mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
 
@@ -57,7 +57,8 @@ class HardiDipy(GenericTask):
             bVecFile = self.getImage(self.preparationDir,'grad', None, 'bvec')
 
         self.__produceFodf(dwi, bValFile, bVecFile, mask)
-
+        """
+        pass
 
     def __produceFodf(self, source, bValFile, bVecFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))

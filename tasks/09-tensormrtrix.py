@@ -3,7 +3,6 @@ from lib.generictask import GenericTask
 
 __author__ = 'desmat'
 
-#@TODO apply masking on proper images
 class TensorMrtrix(GenericTask):
 
 
@@ -26,11 +25,11 @@ class TensorMrtrix(GenericTask):
             bValFile = self.getImage(self.preparationDir, 'grad', None, 'bval')
             bVecFile = self.getImage(self.preparationDir, 'grad', None, 'bvec')
 
-        anatBrainWMResampleMask = self.getImage(self.maskingDir, 'anat', ['brain', 'wm', 'resample', 'mask'])
+
         tensorsMrtrix = self.__produceTensors(dwi, bFile, mask)
-        #mask = self.getImage(self.maskingDir, 'anat',['extended','mask'])
-        #@TODO redefine that mask
-        self.__metricMrtrix(tensorsMrtrix, anatBrainWMResampleMask)
+
+        print 'tensor=',tensorsMrtrix
+        self.__metricMrtrix(tensorsMrtrix, mask)
 
 
     # convert diffusion-weighted images to tensor images.
@@ -48,7 +47,7 @@ class TensorMrtrix(GenericTask):
 
 
     def __metricMrtrix(self, source, mask = None):
-
+        print "source = ", source
         self.info("Launch tensor2metric from mrtrix.\n")
         adc = self.buildName(source, "adc")
         fa = self.buildName(source, "fa")
