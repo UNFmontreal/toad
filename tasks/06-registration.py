@@ -107,9 +107,7 @@ class Registration(GenericTask):
                   'parcellation': self.getImage(self.parcellationDir, 'aparc_aseg'),
                   'right hemisphere ribbon': self.getImage(self.parcellationDir, 'rh_ribbon'),
                   'left hemisphere ribbon': self.getImage(self.parcellationDir, 'lh_ribbon'),
-                  'brodmann': self.getImage(self.parcellationDir, 'brodmann'),
-                  'high resolution freesurfer': self.getImage(self.parcellationDir, 'freesurfer_anat')}
-
+                  'brodmann': self.getImage(self.parcellationDir, 'brodmann')}
         return self.isAllImagesExists(images)
 
 

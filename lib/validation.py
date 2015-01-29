@@ -96,7 +96,7 @@ class Validation(object):
             nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
             if nbDirections <= 45:
                 msg = "Found only {} directions into {} image. Hardi model will not be accurate with diffusion weighted image " \
-                      "that contain less than 45 directions\n\n".format(nbDirections, self.dwi)
+                      "that contain less than 45 directions\n\n".format(nbDirections, dwi)
                 if self.config.getboolean('arguments', 'prompt'):
                     if util.displayYesNoMessage(msg):
                         self.info("The pipeline may failed during the execution")

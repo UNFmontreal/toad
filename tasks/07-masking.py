@@ -42,7 +42,7 @@ class Masking(GenericTask):
         act = self.__actAnatPrepareFreesurfer(aparcAsegResample)
 
         #extract the white matter mask from the act
-        #whiteMatterAct = self.__extractWhiteMatterFromAct(act)
+        whiteMatterAct = self.__extractWhiteMatterFromAct(act)
 
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
         seed_gmwmi = self.__launch5tt2gmwmi(act)
@@ -165,9 +165,9 @@ class Masking(GenericTask):
                     'anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["act"]),
                     'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask']),
                     'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
-                    'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt')
+                    'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'),
+                    'white segmented mask': self.getImage(self.workingDir,"aparc_aseg", ["act", "wm", "mask"])
         }
-                    #'white segmented mask': self.getImage(self.workingDir,"aparc_aseg", ["act", "wm", "mask"]),
 
         if self.config.get('masking', "start_seeds").strip() != "":
             images['high resolution, start, brain extracted mask'] = self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask'])

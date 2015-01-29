@@ -1,5 +1,5 @@
 from lib.generictask import GenericTask
-import dipy.core.gradients, dipy.reconst.dti
+import dipy.core.gradients, dipy.reconst.dti, dipy.segment.mask, dipy.reconst.dti
 import numpy, nibabel
 
 __author__ = 'desmat'
@@ -40,13 +40,14 @@ class TensorDipy(GenericTask):
         if not bVecFile:
             bVecFile = self.getImage(self.preparationDir,'grad', None, 'bvec')
 
-        self.__produceTensors(dwi, bValFile, bVecFile, mask)
+        #@DEBUG  dipy.segment.mask.applymask(dwiData, maskImage)
+        #self.__produceTensors(dwi, bValFile, bVecFile, mask)
 
 
     def __produceTensors(self, source, bValFile, bVecFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
         target = self.buildName(source, "dipy")
-
+        print "mask =", mask
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
 
