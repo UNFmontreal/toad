@@ -77,8 +77,8 @@ class HardiDipy(GenericTask):
         csdModel = dipy.reconst.csdeconv.ConstrainedSphericalDeconvModel(gradientTable, response)
 
         self.info('Start fODF computation')
-        #@TODO nbr_processes harcoded
-        csd_peaks_parallel = dipy.direction.peaks_from_model(model=csdModel,
+
+        csdPeaks = dipy.direction.peaks_from_model(model=csdModel,
                                                                   data=dwiData,
                                                                   sphere=sphere,
                                                                   relative_peak_threshold=.5,
@@ -89,40 +89,35 @@ class HardiDipy(GenericTask):
                                                                   normalize_peaks=True,
                                                                   npeaks=5,
                                                                   parallel=True,
-                                                                  nbr_processes=None)
+                                                                  nbr_processes=int(self.getNTreads))
 
         #CSD
-        csd_coeff = csd_peaks_parallel.shm_coeff
-        csd_coeff_img = nibabel.Nifti1Image(csd_coeff.astype(numpy.float32), dwiImage.get_affine())
-        nibabel.save(csd_coeff_img, prefix+'_fodf.nii.gz')
-
+        target = self.buildName(source,'csd')
+        csdCoeff = csdPeaks.shm_coeff
+        csdCoeffImage = nibabel.Nifti1Image(csdCoeff.astype(numpy.float32), dwiImage.get_affine())
+        nibabel.save(csdCoeffImage, target)
 
 
         #GFA
-        gfa = csd_peaks_parallel.gfa
+        target = self.buildName(source,'gfa')
+        gfa = csdPeaks.gfa
         gfa[numpy.isnan(gfa)] = 0
-        csd_coeff_img = nibabel.Nifti1Image(gfa.astype(numpy.float32), dwiImage.get_affine())
-        nibabel.save(csd_coeff_img, prefix+'gfa.nii.gz')
+        csdCoeffImage = nibabel.Nifti1Image(gfa.astype(numpy.float32), dwiImage.get_affine())
+        nibabel.save(csdCoeffImage, target)
 
 
         #NUFO
-
-        NuDirs = GFA
-
-
-        #gqpeak_values = csd_peaks_parallel.peak_values
+        target = self.buildName(source,'nufo')
+        nuDirs = gfa
         for x in range(gfa.shape[0]):
             for y in range(gfa.shape[1]):
                 for z in range(gfa.shape[2]):
-                    NuDirs[x,y,z] = numpy.count_nonzero(csd_peaks_parallel.peak_dirs[x,y,z]!=0)/3
+                    nuDirs[x,y,z] = numpy.count_nonzero(csdPeaks.peak_dirs[x,y,z]!=0)/3
 
 
 
-        numdirs_img = nib.Nifti1Image(NuDirs.astype(np.float32), dwi.get_affine())
-        nib.save(numdirs_img, prefix+'_nufo.nii.gz')
-        print('Creation Nufo subject: '+prefix+' done')
-
-
+        numDirsImage = nibabel.Nifti1Image(nuDirs.astype(numpy.float32), dwiImage.get_affine())
+        nibabel.save(numDirsImage, target)
 
 
     def meetRequirement(self):

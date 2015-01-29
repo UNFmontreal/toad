@@ -120,7 +120,4 @@ class Registration(GenericTask):
                   'parcellation register': self.getImage(self.workingDir,'aparc_aseg', 'register'),
                   'brodmann register left hemisphere': self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]),
                   'brodmann register right hemisphere': self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"])}
-        #@DEBUG
-        print "images =", images
-        print self.isSomeImagesMissing(images)
         return self.isSomeImagesMissing(images)

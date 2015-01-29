@@ -151,9 +151,9 @@ class Parcellation(GenericTask):
 
     def isDirty(self):
 
-        images = {'parcellation': self.getImage(self.workingDir,'aparc_aseg'),
-                    'anatomical': self.getImage(self.workingDir,'anat', 'freesurfer'),
-                    'rh_ribbon':self.getImage(self.workingDir,'rh_ribbon'),
-                    'lh_ribbon':self.getImage(self.workingDir,'lh_ribbon'),
-                    'brodmann':self.getImage(self.workingDir,'brodmann')}
+        images = {'parcellation': self.getImage(self.workingDir, 'aparc_aseg'),
+                    'anatomical': self.getImage(self.workingDir, 'anat', 'freesurfer'),
+                    'rh_ribbon':self.getImage(self.workingDir, 'rh_ribbon'),
+                    'lh_ribbon':self.getImage(self.workingDir, 'lh_ribbon'),
+                    'brodmann':self.getImage(self.workingDir, 'brodmann')}
         return self.isSomeImagesMissing(images)

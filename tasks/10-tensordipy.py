@@ -24,25 +24,13 @@ class TensorDipy(GenericTask):
         """
 
         GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
-        """Inherit from a generic Task.
 
-        Args:
-            subject: Subject instance inherit by the subjectmanager.
-
-            Note that you may supply additional arguments to generic tasks.
-            Exemple: if you provide Task.__init__(self, subject, foo, bar ...)
-            toad will create an variable fooDir and barDir and then create an alias 'dependDir'
-            that will point to the first additionnal argurments fooDir.
-
-        """
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
-
         mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
 
-        #Look first if there is eddy b encoding files produces
         bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
         bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
 
