@@ -16,8 +16,8 @@ class Masking(GenericTask):
 
 
     def implement(self):
-
         aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
+        aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
         anatBrainResample = self.getImage(self.dependDir,'anat', ['brain','resample'] )
 
         #anatBrainWMResample = self.getImage(self.dependDir, 'anat', ['brain','wm','resample'])
@@ -39,7 +39,7 @@ class Masking(GenericTask):
             self.__createRegionMaskFromAparcAseg(aparcAsegResample, 'exclude')
 
         #Launch act_anat_prepare_freesurfer
-        act = self.__actAnatPrepareFreesurfer(aparcAsegResample)
+        act = self.__actAnatPrepareFreesurfer(aparcAsegRegister)
 
         #extract the white matter mask from the act
         whiteMatterAct = self.__extractWhiteMatterFromAct(act)
@@ -160,7 +160,7 @@ class Masking(GenericTask):
 
 
     def isDirty(self, result = False):
-        images ={'aparc anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
+        images ={'register anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["register", "mask"]),
                     'aparc_aseg mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
                     'anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["act"]),
                     'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask']),

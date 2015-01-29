@@ -161,7 +161,7 @@ class TractographyMrtrix(GenericTask):
                 result = False
 
         images = {'upsampled diffusion weighted':self.getImage(self.preprocessingDir,'dwi','upsample'),
-                    'resampled anatomically constrained tractography':self.getImage(self.maskingDir, "aparc_aseg", ["resample", "act"]),
+                    'resampled anatomically constrained tractography':self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"]),
                     'seeding streamlines 5tt2gmwmi' :self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi"),
                     'resampled brodmann area':self.getImage(self.registrationDir, "brodmann", "resample"),
                     'ultimate extended mask': self.getImage(self.maskingDir, 'anat',['extended','mask'])}
