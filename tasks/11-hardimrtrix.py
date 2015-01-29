@@ -19,7 +19,7 @@ class HardiMrtrix(GenericTask, Logger):
         if not bFile:
             bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
 
-        maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['act', 'wm', 'mask'])
+        maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask'])
         outputDwi2Response = self.__dwi2response(dwi, maskDwi2Response, bFile)
 
         maskDwi2fod =  self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
@@ -81,7 +81,7 @@ class HardiMrtrix(GenericTask, Logger):
     def meetRequirement(self, result = True):
 
         images = {'diffusion weighted': self.getImage(self.dependDir,'dwi','upsample'),
-                  'white matter segmented mask': self.getImage(self.maskingDir, 'aparc_aseg', ['act','wm','mask']),
+                  'white matter segmented mask': self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask']),
                   'ultimate extended mask': self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
 
         if self.isSomeImagesMissing(images):

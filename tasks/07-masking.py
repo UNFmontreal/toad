@@ -39,13 +39,14 @@ class Masking(GenericTask):
             self.__createRegionMaskFromAparcAseg(aparcAsegResample, 'exclude')
 
         #Launch act_anat_prepare_freesurfer
-        act = self.__actAnatPrepareFreesurfer(aparcAsegRegister)
+        actRegister = self.__actAnatPrepareFreesurfer(aparcAsegRegister)
+        actResample = self.__actAnatPrepareFreesurfer(aparcAsegResample)
 
         #extract the white matter mask from the act
-        whiteMatterAct = self.__extractWhiteMatterFromAct(act)
+        whiteMatterAct = self.__extractWhiteMatterFromAct(actResample)
 
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
-        seed_gmwmi = self.__launch5tt2gmwmi(act)
+        seed_gmwmi = self.__launch5tt2gmwmi(actRegister)
 
         colorLut = "{}/templates/lookup_tables/FreeSurferColorLUT_ItkSnap.txt".format(self.toadDir)
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
@@ -160,13 +161,13 @@ class Masking(GenericTask):
 
 
     def isDirty(self, result = False):
-        images ={'register anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["register", "mask"]),
+        images ={'register anatomically constrained tractography': self.getImage(self.workingDir, "aparc_aseg", ["register", "mask"]),
                     'aparc_aseg mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
                     'anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["act"]),
                     'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask']),
                     'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
                     'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'),
-                    'white segmented mask': self.getImage(self.workingDir,"aparc_aseg", ["act", "wm", "mask"])
+                    'resample white segmented act mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"])
         }
 
         if self.config.get('masking', "start_seeds").strip() != "":
