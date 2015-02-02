@@ -24,43 +24,23 @@ class HardiDipy(GenericTask):
 
         """
 
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
-        """Inherit from a generic Task.
-
-        Args:
-            subject: Subject instance inherit by the subjectmanager.
-
-            Note that you may supply additional arguments to generic tasks.
-            Exemple: if you provide Task.__init__(self, subject, foo, bar ...)
-            toad will create an variable fooDir and barDir and then create an alias 'dependDir'
-            that will point to the first additionnal argurments fooDir.
-
-        """
-
+        GenericTask.__init__(self, subject, 'preprocessing', 'masking')
 
     def implement(self):
         """Placeholder for the business logic implementation
 
         """
-        """
+
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
         mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
 
         #Look first if there is eddy b encoding files produces
-        bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
-        bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
+        bValFile = self.getImage(self.dependDir, 'grad', None, 'bval')
+        bVecFile = self.getImage(self.dependDir, 'grad', None, 'bvec')
+        self.__produceHardiMetric(dwi, bValFile, bVecFile, mask)
 
-        if not bValFile:
-            bValFile = self.getImage(self.preparationDir,'grad', None, 'bval')
 
-        if not bVecFile:
-            bVecFile = self.getImage(self.preparationDir,'grad', None, 'bvec')
-
-        self.__produceFodf(dwi, bValFile, bVecFile, mask)
-        """
-        pass
-
-    def __produceFodf(self, source, bValFile, bVecFile, mask):
+    def __produceHardiMetric(self, source, bValFile, bVecFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
         target = self.buildName(source, "dipy")
 
@@ -116,25 +96,13 @@ class HardiDipy(GenericTask):
                 for z in range(gfa.shape[2]):
                     nuDirs[x,y,z] = numpy.count_nonzero(csdPeaks.peak_dirs[x,y,z]!=0)/3
 
-
-
         numDirsImage = nibabel.Nifti1Image(nuDirs.astype(numpy.float32), dwiImage.get_affine())
         nibabel.save(numDirsImage, target)
 
 
     def meetRequirement(self):
-        """Validate if all requirements have been met prior to launch the task
-
-        Returns:
-            True if all requirement are meet, False otherwise
-        """
         return True
 
 
     def isDirty(self):
-        """Validate if this tasks need to be submit during the execution
-
-        Returns:
-            True if any expected file or resource is missing, False otherwise
-        """
         return False

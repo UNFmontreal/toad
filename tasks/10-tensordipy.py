@@ -23,22 +23,15 @@ class TensorDipy(GenericTask):
 
         """
 
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
+        GenericTask.__init__(self, subject, 'preprocessing', 'masking')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
+        bValFile = self.getImage(self.dependDir, 'grad', None, 'bval')
+        bVecFile = self.getImage(self.dependDir, 'grad', None, 'bvec')
         mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
-
-        bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
-        bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
-
-        if not bValFile:
-            bValFile = self.getImage(self.preparationDir,'grad', None, 'bval')
-
-        if not bVecFile:
-            bVecFile = self.getImage(self.preparationDir,'grad', None, 'bvec')
 
         self.__produceTensors(dwi, bValFile, bVecFile, mask)
 
@@ -46,7 +39,6 @@ class TensorDipy(GenericTask):
     def __produceTensors(self, source, bValFile, bVecFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
         target = self.buildName(source, "dipy")
-        print "mask =", mask
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
         maskData = maskImage.get_data()
@@ -62,41 +54,42 @@ class TensorDipy(GenericTask):
         tensorsValuesReordered = tensorsValues[:,:,:,correctOrder]
         tensorsImage = nibabel.Nifti1Image(tensorsValuesReordered.astype(numpy.float32), dwiImage.get_affine())
         nibabel.save(tensorsImage, target)
-        self.info("End tensor creation from dipy, resulting file is {} ".format(target))
+
+        fa = dipy.reconst.dti.fractional_anisotropy(fit.evals)
+        fa[numpy.isnan(fa)] = 0
+
+
+        faImage = nibabel.Nifti1Image(fa.astype(numpy.float32), dwiImage.get_affine())
+        nibabel.save(faImage, self.buildName(target, "fa"))
+
+        md = dipy.reconst.dti.mean_diffusivity(fit.evals)
+        nibabel.save(nibabel.Nifti1Image(md.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "md"))
+
+        #@TODO implement values and tendors creations
+        [values, vectors] = dipy.reconst.dti.decompose_tensor(tensorsValuesReordered)
+
+        faColor = numpy.clip(fa, 0, 1)
+        rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
+        nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(target, "rgb"))
+
+        self.info("End tensor and metrics creation from dipy, resulting file is {} ".format(target))
         return target
 
 
-    def meetRequirement(self, result = True):
+    def meetRequirement(self):
+        images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
+                  "gradient value bval encoding file":  self.getImage(self.dependDir, 'grad', None, 'bval'),
+                  "gradient vector bvec encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvec'),
+                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
 
-        #Look first if there is eddy b encoding files produces
-        bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
-        bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
-
-        if (not bValFile) or (not bVecFile):
-
-            if not self.getImage(self.preparationDir,'grad', None, 'bval'):
-                self.info("Dipy .bval gradient encoding file is missing in directory {}".format(self.preparationDir))
-                result = False
-
-            if not self.getImage(self.preparationDir,'grad', None, 'bvec'):
-                self.info("Dipy .bvec gradient encoding file is missing in directory {}".format(self.preparationDir))
-                result = False
-
-        if not self.getImage(self.dependDir, 'dwi', 'upsample'):
-            self.info("Cannot find any DWI image in {} directory".format(self.dependDir))
-            result = False
-
-        if not self.getImage(self.maskingDir, 'anat', ['extended', 'mask']):
-            self.info("Cannot find any ultimate extended mask {} directory".format(self.maskingDir))
-            result = False
-
-        return result
+        return self.isSomeImagesMissing(images)
 
 
     def isDirty(self):
-
-        images ={"dipy tensor": self.getImage(self.workingDir, "dwi", "dipy")}
-        return self.isSomeImagesMissing(images)
+        return True
+        #@Impelement that
+        #images ={"dipy tensor": self.getImage(self.workingDir, "dwi", "dipy")}
+        #return self.isSomeImagesMissing(images)
 
         #@TODO see with Arnaud for that feature
         #if not self.getImage(self.workingDir, 'dwi', ['dipy', 'mask']):

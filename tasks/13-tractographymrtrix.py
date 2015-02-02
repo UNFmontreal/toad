@@ -7,7 +7,7 @@ class TractographyMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'hardimrtrix' , 'masking', 'eddy', 'preprocessing', 'preparation', 'registration')
+        GenericTask.__init__(self, subject, 'preprocessing', 'hardimrtrix', 'masking', 'registration')
 
 
     def implement(self):
@@ -16,11 +16,9 @@ class TractographyMrtrix(GenericTask):
         seed_gmwmi = self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi")
         brodmann = self.getImage(self.registrationDir, "brodmann", "resample")
 
-        dwi = self.getImage(self.preprocessingDir, 'dwi', 'upsample')
-        bFile = self.getImage(self.eddyDir, 'grad', None, 'b')
-        if not bFile:
-            bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
+        dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
 
+        bFile = self.getImage(self.dependDir, 'grad', None, 'b')
         mask = self.getImage(self.maskingDir, 'anat', ['extended','mask'])
 
         tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tckgen_det', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Det')
@@ -31,10 +29,9 @@ class TractographyMrtrix(GenericTask):
 
 
         #HARDI part
-
         dwi2fod =  self.getImage(self.hardimrtrixDir,'dwi','fod')
-        mask = self.getImage(self.maskingDir, 'anat',['extended','mask'])
-        tckgen = self.__tckgenHardi(dwi2fod, mask, act)
+
+        tckgen = self.__tckgenHardi(dwi2fod, act)
         self.__tck2connectome(tckgen, brodmann, self.buildName(dwi2fod, 'tckgen_prob', 'csv'))
         self.__tcksift(tckgen, dwi2fod)
 
@@ -96,7 +93,7 @@ class TractographyMrtrix(GenericTask):
         return self.rename(tmp, target)
 
 
-    def __tckgenHardi(self, source, mask = None, act = None, bFile = None, algorithm = "iFOD2"):
+    def __tckgenHardi(self, source, act = None, bFile = None, algorithm = "iFOD2"):
         """
          perform streamlines tractography.
 
@@ -122,8 +119,8 @@ class TractographyMrtrix(GenericTask):
         self.info("Starting tckgen creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
         target = self.buildName(source, 'tckgen','.tck')
-        cmd = "tckgen {} {}  -mask {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} -algorithm {} -backtrack -nthreads {} -quiet"\
-            .format(source, tmp, mask, act, source, self.get('step'), self.get('maxlength'), self.get( 'number_tracks'), algorithm, self.getNTreadsMrtrix())
+        cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} -algorithm {} -backtrack -nthreads {} -quiet"\
+            .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'number_tracks'), algorithm, self.getNTreadsMrtrix())
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)
@@ -154,43 +151,24 @@ class TractographyMrtrix(GenericTask):
 
 
 
-    def meetRequirement(self, result = True):
+    def meetRequirement(self):
 
-
-        if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'b')}):
-            if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.preparationDir, 'grad', None, 'b')}):
-                result = False
-
-        images = {'upsampled diffusion weighted':self.getImage(self.preprocessingDir,'dwi','upsample'),
+        images = {'upsampled diffusion weighted':self.getImage(self.dependDir,'dwi','upsample'),
+                    '.b gradient encoding file': self.getImage(self.dependDir, 'grad', None, 'b'),
                     'resampled anatomically constrained tractography':self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"]),
                     'seeding streamlines 5tt2gmwmi' :self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi"),
                     'resampled brodmann area':self.getImage(self.registrationDir, "brodmann", "resample"),
                     'ultimate extended mask': self.getImage(self.maskingDir, 'anat',['extended','mask'])}
 
-        if self.isSomeImagesMissing(images):
-            result = False
-
-        return result
+        return self.isSomeImagesMissing(images)
 
 
     def isDirty(self, result = False):
 
         images = {"deterministic connectome matrix from a streamlines": self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'tck'),
                   "deterministic connectome matrix from a streamlines csv ": self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'csv'),
+                  "probabilistic connectome matrix from a streamlines": self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'tck'),
+                  "probabilistic connectome matrix from a streamlines csv ": self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'csv'),
                   "tckgen streamlines tractography": self.getImage(self.workingDir, 'dwi', 'tckgen', 'tck'),
                   'tcksift': self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck')}
         return self.isSomeImagesMissing(images)
-
-
-"""
-    def meetRequirement(self, result = True):
-
-        images = {"constrained spherical deconvolution": self.getImage(self.dependDir, 'dwi', 'fod'),
-                  "resampled anatomically constrained tractography": self.getImage(self.maskingDir, "aparc_aseg", ["resample", "act"]),
-                  'ultimate extended mask': self.getImage(self.maskingDir, 'anat',['extended','mask'])}
-
-        if self.isSomeImagesMissing(images):
-            result = False
-
-        return result
-"""

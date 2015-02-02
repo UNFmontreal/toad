@@ -9,15 +9,13 @@ class HardiMrtrix(GenericTask, Logger):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
+        GenericTask.__init__(self, subject, 'preprocessing', 'masking')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir,'dwi', 'upsample')
-        bFile = self.getImage(self.eddyDir, 'grad', None, 'b')
-        if not bFile:
-            bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
+        bFile = self.getImage(self.dependDir, 'grad', None, 'b')
 
         maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask'])
         outputDwi2Response = self.__dwi2response(dwi, maskDwi2Response, bFile)
@@ -57,6 +55,7 @@ class HardiMrtrix(GenericTask, Logger):
 
         return target
 
+
     def __fod2metric(self, source, mask=None):
         self.info("Starting fod2metric creation from mrtrix on {}".format(source))
 
@@ -64,8 +63,8 @@ class HardiMrtrix(GenericTask, Logger):
         'gfaTmp':self.buildName(self.workingDir, "tmp"),
         'nufoImage':self.buildName(source, 'nufo'),
         'nufoTmp':self.buildName(self.workingDir,"tmp1"),
-        'fixelPeakImage':self.buildName(self.workingDir,"fixel_peak"),
-        'fixelPeakTmp':self.buildName(self.workingDir,"tmp2",'msf')}
+        'fixel_peakImage':self.buildName(self.workingDir,"fixel_peak", 'msf'),
+        'fixel_peakTmp':self.buildName(self.workingDir, "tmp2" ,'msf')}
 
         cmd = "fod2metric {} -gfa {} -count {} -fixel_peak {} -nthreads {} -force -quiet"\
             .format(source, images['gfaTmp'], images['nufoTmp'], images['fixelPeakTmp'], self.getNTreadsMrtrix())
@@ -73,25 +72,19 @@ class HardiMrtrix(GenericTask, Logger):
             cmd += " -mask {} ".format(mask)
 
         self.launchCommand(cmd)
-        for prefix in ["gfa", "nufo", "fixelPeak" ]:
+        for prefix in ["gfa", "nufo", "fixel_peak"]:
             self.info("renaming {} to {}".format(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)]))
             self.rename(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)])
 
 
-    def meetRequirement(self, result = True):
+    def meetRequirement(self):
 
         images = {'diffusion weighted': self.getImage(self.dependDir,'dwi','upsample'),
+                  "gradient encoding b file":  self.getImage(self.dependDir, 'grad', None, 'b'),
                   'white matter segmented mask': self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask']),
                   'ultimate extended mask': self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
 
-        if self.isSomeImagesMissing(images):
-            result = False
-
-        if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'b')}):
-            if self.isSomeImagesMissing({'.b gradient encoding file': self.getImage(self.preparationDir, 'grad', None, 'b')}):
-                result = False
-
-        return result
+        return self.isSomeImagesMissing(images)
 
 
     def isDirty(self, result = False):
@@ -99,6 +92,7 @@ class HardiMrtrix(GenericTask, Logger):
         images = {"response function estimation text file": self.getImage(self.workingDir, 'dwi', None, 'txt'),
                   "fibre orientation distribution estimation": self.getImage(self.workingDir, 'dwi', 'fod'),
                   "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
-                  'nufo': self.getImage(self.workingDir,'dwi','nufo')}
+                  'nufo': self.getImage(self.workingDir,'dwi','nufo'),
+                  'fixel peak image': self.getImage(self.workingDir,'dwi', 'fixel_peak', 'msf')}
 
         return self.isSomeImagesMissing(images)

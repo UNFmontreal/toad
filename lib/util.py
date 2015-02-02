@@ -208,6 +208,9 @@ def getImage(config, dir, prefix, postfix=None, ext="nii.gz"):
         the absolute filename if found, False otherwise
 
     """
+    if (postfix is not None) and (not config.has_option('postfix', postfix)):
+        postfix = "_{}".format(postfix)
+
     if ext.find('.') == 0:
         ext=ext.replace(".","",1)
     if postfix is None:
@@ -242,6 +245,7 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
     Returns:
         a file name that contain the postfix and the current working directory
     """
+
     parts = []
     if config.has_option('prefix', source):
         targetName = config.get('prefix',source)
@@ -249,12 +253,19 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
         parts = os.path.basename(source).split(os.extsep)
         targetName = parts.pop(0)
 
+
     if postfix is not None:
         if type(postfix) is list:
             for item in postfix:
-                targetName += config.get('postfix', item)
+                if config.has_option('postfix', postfix):
+                    targetName += config.get('postfix', item)
+                else:
+                    targetName += "_{}".format(postfix)
         else:
-            targetName += config.get('postfix', postfix)
+            if config.has_option('postfix', postfix):
+                targetName += config.get('postfix', postfix)
+            else:
+                targetName += "_{}".format(postfix)
 
     extension = ""
     for part in parts:

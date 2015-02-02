@@ -9,22 +9,24 @@ class Preprocessing(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'eddy')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'eddy', 'fieldmap')
 
 
     def implement(self):
 
-        dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
-        if not dwi:
-            dwi = self.getImage(self.eddyDir, 'dwi', 'eddy')
-            if not dwi:
-                dwi = self.getImage(self.dependDir, 'dwi')
+        dwi = self.__linkDwiImage()
+        if self.config.getBoolean("eddy", "ignore"):
+            bFile= self.getImage(self.preparationDir, 'grad', None, 'b')
+            bVal= self.getImage(self.preparationDir, 'grad', None, 'bval')
+            bVec= self.getImage(self.preparationDir, 'grad', None, 'bvec')
+        else:
+            bFile= self.getImage(self.eddyDir, 'grad', None, 'b')
+            bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
+            bVec= self.getImage(self.eddyDir, 'grad', None, 'bvec')
 
-
-        bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
-        if not bVal:
-            bVal= self.getImage(self.preparationDir, 'grad', None, 'b')
-
+        bFile = util.symlink(bFile, self.workingDir)
+        bVal = util.symlink(bVal, self.workingDir)
+        bVec = util.symlink(bVec, self.workingDir)
 
         dwiUpsample=  self.__upsampling(dwi)
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
@@ -37,6 +39,20 @@ class Preprocessing(GenericTask):
         whiteMatterAnat= self.__segmentation(brainAnatUncompress)
         util.gzip(brainAnatUncompress)
         util.gzip(whiteMatterAnat)
+
+
+    def __linkDwiImage(self):
+        if self.config.get("denoising", "algorithm") is not "None":
+            dwi =  self.getImage(self.dependDir, 'dwi', 'denoise')
+
+        elif not self.getImage(self.fieldmapDir, 'dwi','unwarp'):
+            dwi =  self.getImage(self.fieldmapDir, 'dwi','unwarp')
+
+        elif not self.config.getBoolean("eddy", "ignore"):
+            dwi =  self.getImage(self.eddyDir,'dwi', 'eddy')
+        else:
+            dwi =  self.getImage(self.preparationDir, 'dwi')
+        return util.symlink(dwi, self.workingDir)
 
 
     def __upsampling(self, source):
@@ -134,8 +150,6 @@ class Preprocessing(GenericTask):
         return target
 
 
-
-
     def __createSegmentationScript(self, source, options):
         """Create a file which contains all necessary instruction to launch a segmentation with spm
 
@@ -163,7 +177,7 @@ class Preprocessing(GenericTask):
 
 
     def meetRequirement(self, result=True):
-
+        #@TODO add gradient files validation and correct this function
         if self.isSomeImagesMissing({'denoised': self.getImage(self.dependDir, "dwi", 'denoise')}):
             dwi = self.getImage(self.eddyDir, "dwi", 'eddy')
             if self.isSomeImagesMissing({'eddy corrected': dwi}):
@@ -176,6 +190,7 @@ class Preprocessing(GenericTask):
         images = {'freesurfer high resolution': self.getImage(self.parcellationDir, 'anat', 'freesurfer')}
         result = self.isAllImagesExists(images)
         return result
+
 
     def isDirty(self, result = False):
 

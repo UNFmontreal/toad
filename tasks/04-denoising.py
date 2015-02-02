@@ -15,14 +15,11 @@ class Denoising(GenericTask):
 
         if self.get("algorithm") is "None":
             self.info("Skipping denoising process")
-        else:
-            dwi = self.getImage(self.fieldmapDir, "dwi", 'unwarp')
-            if not dwi:
-                dwi = self.getImage(self.dependDir, "dwi", 'eddy')
-                if not dwi:
-                    dwi = self.getImage(self.preparationDir, "dwi")
 
+        else:
+            dwi = self.__getDwiImage()
             dwiUncompress = self.uncompressImage(dwi)
+
             tmp = self.buildName(dwiUncompress, "tmp", 'nii')
             scriptName = self.__createLpcaScript(dwiUncompress, tmp)
             self.__launchMatlabExecution(scriptName)
@@ -36,6 +33,15 @@ class Denoising(GenericTask):
             if self.getBoolean("cleanup"):
                 self.info("Removing redundant image {}".format(dwiUncompress))
                 os.remove(dwiUncompress)
+
+
+    def __getDwiImage(self):
+        if self.getImage(self.fieldmapDir, "dwi", 'unwarp'):
+            return self.getImage(self.fieldmapDir, "dwi", 'unwarp')
+        elif self.getImage(self.dependDir, "dwi", 'eddy'):
+            return self.getImage(self.dependDir, "dwi", 'eddy')
+        else:
+            return self.getImage(self.preparationDir, "dwi")
 
 
     def __createLpcaScript(self, source, target):

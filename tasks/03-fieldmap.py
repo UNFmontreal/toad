@@ -17,8 +17,12 @@ class Fieldmap(GenericTask):
 
     def implement(self):
 
-        dwi =  self.getImage(self.eddyDir,"dwi", "eddy")
-        bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+        if not self.config.getBoolean("eddy", "ignore"):
+            dwi = self.getImage(self.eddyDir, "dwi", "eddy")
+            bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+        else:
+            dwi = self.getImage(self.preparationDir, "dwi")
+            bVal=  self.getImage(self.preparationDir, 'grad',  None, 'bval')
 
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVal))

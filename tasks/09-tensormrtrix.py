@@ -7,24 +7,14 @@ class TensorMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'preparation', 'eddy', 'masking')
+        GenericTask.__init__(self, subject, 'preprocessing', 'masking')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir,'dwi','upsample')
-
-        bFile = self.getImage(self.eddyDir, 'grad',  None, 'b')
-        bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
-        bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
-
+        bFile = self.getImage(self.dependDir, 'grad',  None, 'b')
         mask = self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
-
-        if (not bFile) or (not bValFile) or (not bVecFile):
-            bFile = self.getImage(self.preparationDir, 'grad', None, 'b')
-            bValFile = self.getImage(self.preparationDir, 'grad', None, 'bval')
-            bVecFile = self.getImage(self.preparationDir, 'grad', None, 'bvec')
-
 
         tensorsMrtrix = self.__produceTensors(dwi, bFile, mask)
 
@@ -74,37 +64,11 @@ class TensorMrtrix(GenericTask):
         self.launchCommand(cmd)
 
 
-    def meetRequirement(self, result = True):
-
-        #Look first if there is eddy b encoding files produces
-        bFile = self.getImage(self.eddyDir, 'grad', None, 'b')
-        bValFile = self.getImage(self.eddyDir, 'grad', None, 'bval')
-        bVecFile = self.getImage(self.eddyDir, 'grad', None, 'bvec')
-
-        if (not bFile) or (not bValFile) or (not bVecFile):
-
-            if not self.getImage(self.preparationDir, 'grad', None, 'b'):
-                self.info("Mrtrix gradient encoding file is missing in directory {}".format(self.preparationDir))
-                result = False
-
-            if not self.getImage(self.preparationDir,'grad', None, 'bval'):
-                self.info("Dipy .bval gradient encoding file is missing in directory {}".format(self.preparationDir))
-                result = False
-
-            if not self.getImage(self.preparationDir,'grad', None, 'bvec'):
-                self.info("Dipy .bvec gradient encoding file is missing in directory {}".format(self.preparationDir))
-                result = False
-
-        if not self.getImage(self.dependDir, 'dwi', 'upsample'):
-            self.info("Cannot find any DWI image in {} directory".format(self.dependDir))
-            result = False
-
-        if not self.getImage(self.maskingDir, 'anat', ['extended', 'mask']):
-            self.info("Cannot find any ultimate extended mask {} directory".format(self.maskingDir))
-            result = False
-
-        return result
-
+    def meetRequirement(self):
+        images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
+                  "gradient encoding b file":  self.getImage(self.dependDir, 'grad', None, 'b'),
+                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
+        return self.isSomeImagesMissing(images)
 
 
     def isDirty(self):
