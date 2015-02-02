@@ -8,7 +8,7 @@ class Registration(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'parcellation', 'preparation')
+        GenericTask.__init__(self, subject, 'preprocessing', 'parcellation')
 
 
     def implement(self):

@@ -32,7 +32,7 @@ class TractographyMrtrix(GenericTask):
 
         #HARDI part
         dwi2fod =  self.getImage(self.dependDir,'dwi','fod')
-        mask = self.getImage(self.maskingDir, 'anat',['extended','mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['extended','mask'])
         tckgen = self.__tckgenHardi(dwi2fod, mask, act)
         self.__tck2connectome(tckgen, brodmann, self.buildName(dwi2fod, 'tckgen_prob', 'csv'))
         self.__tcksift(tckgen, dwi2fod)

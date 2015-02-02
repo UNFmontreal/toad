@@ -20,6 +20,7 @@ class Preprocessing(GenericTask):
             if not dwi:
                 dwi = self.getImage(self.dependDir, 'dwi')
 
+
         bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
         if not bVal:
             bVal= self.getImage(self.preparationDir, 'grad', None, 'b')
