@@ -37,7 +37,7 @@ class TensorMrtrix(GenericTask):
         self.info("Starting DWI2Tensor from mrtrix")
 
         tmp =  self.buildName(source, "tmp")
-        target = self.buildName(source, "mrtrix")
+        target = self.buildName(source, "tensor")
         cmd = "dwi2tensor {} {} -grad {} -nthreads {} -quiet ".format(source, tmp, encodingFile, self.getNTreadsMrtrix())
         if mask is not None:
             cmd += "-mask {}".format(mask)
@@ -109,7 +109,7 @@ class TensorMrtrix(GenericTask):
 
     def isDirty(self):
 
-        images ={"mrtrix tensor": self.getImage(self.workingDir, "dwi", "mrtrix"),
+        images ={"mrtrix tensor": self.getImage(self.workingDir, "dwi", "tensor"),
                     "mean apparent diffusion coefficient (ADC)" : self.getImage(self.workingDir, 'dwi', 'adc'),
                     "selected eigenvector(s)" : self.getImage(self.workingDir, 'dwi', 'vector'),
                     "fractional anisotropy" : self.getImage(self.workingDir, 'dwi', 'fa'),

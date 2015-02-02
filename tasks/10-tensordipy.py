@@ -40,8 +40,7 @@ class TensorDipy(GenericTask):
         if not bVecFile:
             bVecFile = self.getImage(self.preparationDir,'grad', None, 'bvec')
 
-        #@DEBUG  dipy.segment.mask.applymask(dwiData, maskImage)
-        #self.__produceTensors(dwi, bValFile, bVecFile, mask)
+        self.__produceTensors(dwi, bValFile, bVecFile, mask)
 
 
     def __produceTensors(self, source, bValFile, bVecFile, mask):
@@ -50,9 +49,9 @@ class TensorDipy(GenericTask):
         print "mask =", mask
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
-
+        maskData = maskImage.get_data()
         dwiData  = dwiImage.get_data()
-        dwiData = dipy.segment.mask.applymask(dwiData, maskImage)
+        dwiData = dipy.segment.mask.applymask(dwiData, maskData)
 
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValFile), numpy.loadtxt(bVecFile))
 

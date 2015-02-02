@@ -61,11 +61,11 @@ class HardiMrtrix(GenericTask, Logger):
         self.info("Starting fod2metric creation from mrtrix on {}".format(source))
 
         images = {'gfaImage': self.buildName(source, 'gfa'),
-        'gfaTmp':self.buildName(self.workingDir, "tmp", 'nii'),
+        'gfaTmp':self.buildName(self.workingDir, "tmp"),
         'nufoImage':self.buildName(source, 'nufo'),
-        'nufoTmp':self.buildName(self.workingDir,"tmp1", 'nii'),
-        'fixelPeakImage':self.buildName(self.workingDir,"tmp1", 'nii'),
-        'fixelPeakTmp':self.buildName(self.workingDir,"tmp",'msf','nii')}
+        'nufoTmp':self.buildName(self.workingDir,"tmp1"),
+        'fixelPeakImage':self.buildName(self.workingDir,"fixel_peak"),
+        'fixelPeakTmp':self.buildName(self.workingDir,"tmp2",'msf')}
 
         cmd = "fod2metric {} -gfa {} -count {} -fixel_peak {} -nthreads {} -force -quiet"\
             .format(source, images['gfaTmp'], images['nufoTmp'], images['fixelPeakTmp'], self.getNTreadsMrtrix())

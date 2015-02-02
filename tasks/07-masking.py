@@ -161,9 +161,8 @@ class Masking(GenericTask):
 
 
     def isDirty(self, result = False):
-        images ={'register anatomically constrained tractography': self.getImage(self.workingDir, "aparc_aseg", ["register", "mask"]),
+        images ={'register anatomically constrained tractography': self.getImage(self.workingDir, "aparc_aseg", ["register", "act"]),
                     'aparc_aseg mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
-                    'anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["act"]),
                     'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask']),
                     'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
                     'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'),

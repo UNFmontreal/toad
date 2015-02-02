@@ -7,11 +7,11 @@ class TractographyMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'tensors', 'masking', 'eddy', 'preprocessing', 'preparation', 'registration')
+        GenericTask.__init__(self, subject, 'hardimrtrix' , 'masking', 'eddy', 'preprocessing', 'preparation', 'registration')
 
 
     def implement(self):
-
+        #@TODO work on dirtyness
         act = self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"])
         seed_gmwmi = self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi")
         brodmann = self.getImage(self.registrationDir, "brodmann", "resample")
@@ -31,7 +31,7 @@ class TractographyMrtrix(GenericTask):
 
 
         #HARDI part
-        dwi2fod =  self.getImage(self.dependDir,'dwi','fod')
+        dwi2fod =  self.getImage(self.hardimrtrixDir,'dwi','fod')
         mask = self.getImage(self.maskingDir, 'anat',['extended','mask'])
         tckgen = self.__tckgenHardi(dwi2fod, mask, act)
         self.__tck2connectome(tckgen, brodmann, self.buildName(dwi2fod, 'tckgen_prob', 'csv'))

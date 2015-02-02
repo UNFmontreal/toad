@@ -68,7 +68,8 @@ class HardiDipy(GenericTask):
         maskImage = nibabel.load(mask)
 
         dwiData  = dwiImage.get_data()
-        dwiData = dipy.segment.mask.applymask(dwiData, maskImage)
+        maskData = maskImage.get_data()
+        dwiData = dipy.segment.mask.applymask(dwiData, maskData)
 
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValFile), numpy.loadtxt(bVecFile))
 
@@ -136,4 +137,4 @@ class HardiDipy(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        return True
+        return False
