@@ -19,7 +19,9 @@ class Masking(GenericTask):
         aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
         aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
         anatBrainResample = self.getImage(self.dependDir,'anat', ['brain','resample'] )
-
+	print aparcAsegResample
+	print aparcAsegRegister
+	print anatBrainResample
         #anatBrainWMResample = self.getImage(self.dependDir, 'anat', ['brain','wm','resample'])
         #self.__createMask(anatBrainWMResample)
 
@@ -155,6 +157,7 @@ class Masking(GenericTask):
     def meetRequirement(self):
 
         images = {'resampled parcellation':self.getImage(self.dependDir,"aparc_aseg", "resample"),
+                    'register parcellation':self.getImage(self.dependDir,"aparc_aseg", "register"),
                     'brain extracted, resampled high resolution':self.getImage(self.dependDir,'anat',['brain','resample'])}
 
         return self.isAllImagesExists(images)

@@ -88,8 +88,8 @@ class TensorDipy(GenericTask):
                   "gradient value bval encoding file":  self.getImage(self.dependDir, 'grad', None, 'bval'),
                   "gradient vector bvec encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvec'),
                   'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
-
-        return self.isSomeImagesMissing(images)
+	print images
+        return self.isAllImagesExists(images)
 
 
     def isDirty(self):

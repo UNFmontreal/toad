@@ -28,12 +28,12 @@ class TensorFsl(GenericTask):
         mask = self.__createMask(b0)
         self.__tensorsFsl(dwi, bVec, bVal, mask)
 
-        l1 = self.getImage(self.workingDir, 'dwi', 'l1')
-        l2 = self.getImage(self.workingDir, 'dwi', 'l2')
-        l3 = self.getImage(self.workingDir, 'dwi', 'l3')
+        l1 = self.getImage(self.workingDir, 'dwi', 'fsl_l1')
+        l2 = self.getImage(self.workingDir, 'dwi', 'fsl_l2')
+        l3 = self.getImage(self.workingDir, 'dwi', 'fsl_l3')
 
-        ad = self.buildName(dwi, 'ad')
-        rd = self.buildName(dwi, 'rd')
+        ad = self.buildName(dwi, 'fsl_ad')
+        rd = self.buildName(dwi, 'fsl_rd')
 
         self.rename(l1, ad)
         self.__mean(l2, l3, rd)
@@ -100,13 +100,13 @@ class TensorFsl(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        images = {"1st eigenvector": self.getImage(self.workingDir, 'dwi', 'v1'),
-                  "2rd eigenvector": self.getImage(self.workingDir, 'dwi', 'v2'),
-                  "3rd eigenvector": self.getImage(self.workingDir, 'dwi', 'v3'),
-                  "selected eigenvalue(s) AD": self.getImage(self.workingDir, 'dwi', 'ad'),
-                  "selected eigenvalue(s) RD": self.getImage(self.workingDir, 'dwi', 'rd'),
-                  "mean diffusivity": self.getImage(self.workingDir, 'dwi', 'md'),
-                  "fractional anisotropy": self.getImage(self.workingDir, 'dwi', 'fa'),
-                  "raw T2 signal with no weighting": self.getImage(self.workingDir, 'dwi', 'so')}
+        images = {"1st eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_v1'),
+                  "2rd eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_v2'),
+                  "3rd eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_v3'),
+                  "selected eigenvalue(s) AD": self.getImage(self.workingDir, 'dwi', 'fsl_ad'),
+                  "selected eigenvalue(s) RD": self.getImage(self.workingDir, 'dwi', 'fsl_rd'),
+                  "mean diffusivity": self.getImage(self.workingDir, 'dwi', 'fsl_md'),
+                  "fractional anisotropy": self.getImage(self.workingDir, 'dwi', 'fsl_fa'),
+                  "raw T2 signal with no weighting": self.getImage(self.workingDir, 'dwi', 'fsl_so')}
 
         return self.isSomeImagesMissing(images)
