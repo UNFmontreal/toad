@@ -11,7 +11,7 @@ class TensorFsl(GenericTask):
         """Fits a diffusion tensor model at each voxel
 
         """
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'eddy')
+        GenericTask.__init__(self, subject, 'denoising', 'preprocessing')
 
 
     def implement(self):
@@ -19,26 +19,21 @@ class TensorFsl(GenericTask):
 
         """
         dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
-
-        bVal = self.getImage(self.eddyDir, 'grad', None, 'bval')
-        bVec = self.getImage(self.eddyDir, 'grad', None, 'bvec')
-        if (not bVal) or (not bVec):
-            bVal = self.getImage(self.preparationDir,'grad', None, 'bval')
-            bVec = self.getImage(self.preparationDir,'grad', None, 'bvec')
+        bVal = self.getImage(self.preprocessingDir, 'grad', None, 'bval')
+        bVec = self.getImage(self.preprocessingDir, 'grad', None, 'bvec')
 
         #dtifit required a mask
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVal))
         mask = self.__createMask(b0)
-        print "DEBUG mask name =", mask
         self.__tensorsFsl(dwi, bVec, bVal, mask)
 
-        l1 = self.getImage(self.workingDir, 'dwi', 'fsl_value1')
-        l2 = self.getImage(self.workingDir, 'dwi', 'fsl_value2')
-        l3 = self.getImage(self.workingDir, 'dwi', 'fsl_value3')
+        l1 = self.getImage(self.workingDir, 'dwi', 'l1')
+        l2 = self.getImage(self.workingDir, 'dwi', 'l2')
+        l3 = self.getImage(self.workingDir, 'dwi', 'l3')
 
-        ad = self.buildName(dwi, 'fsl_ad')
-        rd = self.buildName(dwi, 'fsl_rd')
+        ad = self.buildName(dwi, 'ad')
+        rd = self.buildName(dwi, 'rd')
 
         self.rename(l1, ad)
         self.__mean(l2, l3, rd)
@@ -55,7 +50,7 @@ class TensorFsl(GenericTask):
 
         """
         self.info("Starting dtifit from fsl")
-        target = self.buildName(source, 'fsl', '')
+        target = self.buildName(source, 'tensor', '')
         cmd ="dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVec, bVal)
         if mask:
             cmd += "-m {}".format(mask)
@@ -93,33 +88,25 @@ class TensorFsl(GenericTask):
         """Validate if all requirements have been met prior to launch the task
 
         """
+        images = {'diffusion weighted':  self.getImage(self.dependDir, 'dwi', 'denoise'),
+                '.bval gradient encoding file': self.getImage(self.preprocessingDir, 'grad', None, 'bval'),
+                '.bvec gradient encoding file': self.getImage(self.preprocessingDir, 'grad', None, 'bvec'),
+                }
 
-        images = {'.bval gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'bval'),
-                '.bvec gradient encoding file': self.getImage(self.eddyDir, 'grad', None, 'bvec')}
-
-        if self.isSomeImagesMissing(images):
-            images = {'.bval gradient encoding file': self.getImage(self.preparationDir, 'grad', None, 'bval'),
-                    '.bvec gradient encoding file': self.getImage(self.preparationDir, 'grad', None, 'bvec')}
-            if self.isSomeImagesMissing(images):
-                result=False
-
-        if self.isSomeImagesMissing({'diffusion weighted':  self.getImage(self.dependDir, 'dwi', 'denoise')}):
-            result=False
-
-        return result
+        return self.isAllImagesExists(images)
 
 
     def isDirty(self):
         """Validate if this tasks need to be submit for implementation
 
         """
-        images = {"1st eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_vector1'),
-                  "2rd eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_vector2'),
-                  "3rd eigenvector": self.getImage(self.workingDir, 'dwi', 'fsl_vector3'),
-                  "selected eigenvalue(s) AD": self.getImage(self.workingDir, 'dwi', 'fsl_ad'),
-                  "selected eigenvalue(s) RD": self.getImage(self.workingDir, 'dwi', 'fsl_rd'),
-                  "mean diffusivity": self.getImage(self.workingDir, 'dwi', 'fsl_md'),
-                  "fractional anisotropy": self.getImage(self.workingDir, 'dwi', 'fsl_fa'),
-                  "raw T2 signal with no weighting": self.getImage(self.workingDir, 'dwi', 'fsl_so')}
+        images = {"1st eigenvector": self.getImage(self.workingDir, 'dwi', 'v1'),
+                  "2rd eigenvector": self.getImage(self.workingDir, 'dwi', 'v2'),
+                  "3rd eigenvector": self.getImage(self.workingDir, 'dwi', 'v3'),
+                  "selected eigenvalue(s) AD": self.getImage(self.workingDir, 'dwi', 'ad'),
+                  "selected eigenvalue(s) RD": self.getImage(self.workingDir, 'dwi', 'rd'),
+                  "mean diffusivity": self.getImage(self.workingDir, 'dwi', 'md'),
+                  "fractional anisotropy": self.getImage(self.workingDir, 'dwi', 'fa'),
+                  "raw T2 signal with no weighting": self.getImage(self.workingDir, 'dwi', 'so')}
 
         return self.isSomeImagesMissing(images)
