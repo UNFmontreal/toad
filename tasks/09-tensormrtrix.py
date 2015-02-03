@@ -14,7 +14,7 @@ class TensorMrtrix(GenericTask):
 
         dwi = self.getImage(self.dependDir,'dwi','upsample')
         bFile = self.getImage(self.dependDir, 'grad',  None, 'b')
-        mask = self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
 
         tensorsMrtrix = self.__produceTensors(dwi, bFile, mask)
 
@@ -42,8 +42,8 @@ class TensorMrtrix(GenericTask):
         adc = self.buildName(source, "adc")
         fa = self.buildName(source, "fa")
         vector = self.buildName(source, "vector")
-        adImage = self.buildName(source, "value_ad")
-        rdImage = self.buildName(source, "value_rd")
+        adImage = self.buildName(source, "ad")
+        rdImage = self.buildName(source, "rd")
         value2 = self.buildName(source, "value2")
         value3 = self.buildName(source, "value3")
         modulate = self.get('modulate')
@@ -77,6 +77,6 @@ class TensorMrtrix(GenericTask):
                     "mean apparent diffusion coefficient (ADC)" : self.getImage(self.workingDir, 'dwi', 'adc'),
                     "selected eigenvector(s)" : self.getImage(self.workingDir, 'dwi', 'vector'),
                     "fractional anisotropy" : self.getImage(self.workingDir, 'dwi', 'fa'),
-                    "selected eigenvalue(s) AD" : self.getImage(self.workingDir, 'dwi', 'value_ad'),
-                    "selected eigenvalue(s) RD" : self.getImage(self.workingDir, 'dwi', 'value_rd')}
+                    "selected eigenvalue(s) AD" : self.getImage(self.workingDir, 'dwi', 'ad'),
+                    "selected eigenvalue(s) RD" : self.getImage(self.workingDir, 'dwi', 'rd')}
         return self.isSomeImagesMissing(images)
