@@ -68,6 +68,13 @@ class TensorDipy(GenericTask):
         #@TODO implement values and tendors creations
         [values, vectors] = dipy.reconst.dti.decompose_tensor(tensorsValuesReordered)
 
+        nibabel.save(nibabel.Nifti1Image(values[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "l1"))
+        nibabel.save(nibabel.Nifti1Image(values[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "l2"))
+        nibabel.save(nibabel.Nifti1Image(values[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "l3"))
+        nibabel.save(nibabel.Nifti1Image(vectors[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v1"))
+        nibabel.save(nibabel.Nifti1Image(vectors[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v2"))
+        nibabel.save(nibabel.Nifti1Image(vectors[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v3"))
+
         faColor = numpy.clip(fa, 0, 1)
         rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
         nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(target, "rgb"))

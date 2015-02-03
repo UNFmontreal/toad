@@ -13,7 +13,6 @@ class Registration(GenericTask):
 
     def implement(self):
 
-
         b0 = self.getImage(self.dependDir, 'b0')
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
         anatBrain = self.getImage(self.preprocessingDir ,'anat', 'brain')
