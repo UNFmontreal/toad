@@ -17,7 +17,7 @@ class Fieldmap(GenericTask):
 
     def implement(self):
 
-        if not self.config.getBoolean("eddy", "ignore"):
+        if not self.config.getboolean("eddy", "ignore"):
             dwi = self.getImage(self.eddyDir, "dwi", "eddy")
             bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
         else:

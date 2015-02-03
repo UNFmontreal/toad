@@ -208,9 +208,6 @@ def getImage(config, dir, prefix, postfix=None, ext="nii.gz"):
         the absolute filename if found, False otherwise
 
     """
-    if (postfix is not None) and (not config.has_option('postfix', postfix)):
-        postfix = "_{}".format(postfix)
-
     if ext.find('.') == 0:
         ext=ext.replace(".","",1)
     if postfix is None:
@@ -218,11 +215,18 @@ def getImage(config, dir, prefix, postfix=None, ext="nii.gz"):
     else:
         pfixs = ""
         if isinstance(postfix, str):
-            pfixs = config.get('postfix', postfix)
+            if config.has_option('postfix', postfix):
+                pfixs = config.get('postfix', postfix)
+            else:
+                postfix = "_{}".format(postfix)
         else:
             for element in postfix:
-                pfixs = pfixs + config.get('postfix', element)
+                if config.has_option('postfix', element):
+                    pfixs = pfixs + config.get('postfix', element)
+                else:
+                    pfixs = pfixs + "_{}".format(postfix)
         images = glob.glob("{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, ext))
+
     if len(images) > 0:
         return images.pop()
     return False

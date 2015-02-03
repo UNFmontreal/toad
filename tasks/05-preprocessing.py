@@ -15,7 +15,7 @@ class Preprocessing(GenericTask):
     def implement(self):
 
         dwi = self.__linkDwiImage()
-        if self.config.getBoolean("eddy", "ignore"):
+        if self.config.getboolean("eddy", "ignore"):
             bFile= self.getImage(self.preparationDir, 'grad', None, 'b')
             bVal= self.getImage(self.preparationDir, 'grad', None, 'bval')
             bVec= self.getImage(self.preparationDir, 'grad', None, 'bvec')
@@ -48,7 +48,7 @@ class Preprocessing(GenericTask):
         elif not self.getImage(self.fieldmapDir, 'dwi','unwarp'):
             dwi =  self.getImage(self.fieldmapDir, 'dwi','unwarp')
 
-        elif not self.config.getBoolean("eddy", "ignore"):
+        elif not self.config.getboolean("eddy", "ignore"):
             dwi =  self.getImage(self.eddyDir,'dwi', 'eddy')
         else:
             dwi =  self.getImage(self.preparationDir, 'dwi')
@@ -196,5 +196,5 @@ class Preprocessing(GenericTask):
 
         images = {'upsampled diffusion weighted': self.getImage(self.workingDir ,'dwi', "upsample"),
                     'high resolution brain extracted': self.getImage(self.workingDir ,'anat', "brain"),
-                    'high resolution white matter': self.getImage(self.workingDir ,'anat', "wm")}
+                    'high resolution white matter brain extracted': self.getImage(self.workingDir ,'anat',["brain", "wm"])}
         return self.isSomeImagesMissing(images)
