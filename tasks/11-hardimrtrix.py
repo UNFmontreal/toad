@@ -60,14 +60,14 @@ class HardiMrtrix(GenericTask, Logger):
         self.info("Starting fod2metric creation from mrtrix on {}".format(source))
 
         images = {'gfaImage': self.buildName(source, 'gfa'),
-        'gfaTmp':self.buildName(self.workingDir, "tmp"),
+        'gfaTmp':self.buildName(source, "tmp"),
         'nufoImage':self.buildName(source, 'nufo'),
-        'nufoTmp':self.buildName(self.workingDir,"tmp1"),
-        'fixel_peakImage':self.buildName(self.workingDir,"fixel_peak", 'msf'),
-        'fixel_peakTmp':self.buildName(self.workingDir, "tmp2" ,'msf')}
+        'nufoTmp':self.buildName(source,"tmp1"),
+        'fixel_peakImage':self.buildName(source,"fixel_peak", 'msf'),
+        'fixel_peakTmp':self.buildName(source, "tmp2" ,'msf')}
 
         cmd = "fod2metric {} -gfa {} -count {} -fixel_peak {} -nthreads {} -force -quiet"\
-            .format(source, images['gfaTmp'], images['nufoTmp'], images['fixelPeakTmp'], self.getNTreadsMrtrix())
+            .format(source, images['gfaTmp'], images['nufoTmp'], images['fixel_peakTmp'], self.getNTreadsMrtrix())
         if mask is not None:
             cmd += " -mask {} ".format(mask)
 
@@ -83,8 +83,7 @@ class HardiMrtrix(GenericTask, Logger):
                   "gradient encoding b file":  self.getImage(self.dependDir, 'grad', None, 'b'),
                   'white matter segmented mask': self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask']),
                   'ultimate extended mask': self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
-
-        return self.isSomeImagesMissing(images)
+        return self.isAllImagesExists(images)
 
 
     def isDirty(self, result = False):

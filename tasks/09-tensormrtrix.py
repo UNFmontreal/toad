@@ -68,7 +68,7 @@ class TensorMrtrix(GenericTask):
         images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
                   "gradient encoding b file":  self.getImage(self.dependDir, 'grad', None, 'b'),
                   'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
-        return self.isSomeImagesMissing(images)
+        return self.isAllImagesExists(images)
 
 
     def isDirty(self):

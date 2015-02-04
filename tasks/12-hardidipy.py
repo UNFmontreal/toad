@@ -1,5 +1,7 @@
 from lib.generictask import GenericTask
 import dipy
+import dipy.direction
+import dipy.reconst.csdeconv
 import nibabel
 import numpy
 
@@ -9,27 +11,10 @@ class HardiDipy(GenericTask):
 
 
     def __init__(self, subject):
-        """A preset format, used as a starting point for developing a toad task
-
-        Simply copy and rename this file:  cp xxxxx.template yourtaskname.py into the tasks folder.
-            XX is simply a 2 digit number that represent the order the tasks will be executed.
-            yourtaskname is any name at your convenience. the name must be lowercase
-        Change the class name Template for Yourtaskname. Note the first letter of the name should be capitalized
-
-        A directory called XX-yourtaskname will be create into the subject dir. A local variable self.workingDir will
-        be initialize to that directory
-
-        Args:
-            subject: a Subject instance inherit by the subjectmanager.
-
-        """
-
         GenericTask.__init__(self, subject, 'preprocessing', 'masking')
 
-    def implement(self):
-        """Placeholder for the business logic implementation
 
-        """
+    def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
         mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
@@ -42,7 +27,7 @@ class HardiDipy(GenericTask):
 
     def __produceHardiMetric(self, source, bValFile, bVecFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
-        target = self.buildName(source, "dipy")
+        #target = self.buildName(source, "dipy")
 
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
@@ -65,13 +50,13 @@ class HardiDipy(GenericTask):
                                                                   sphere=sphere,
                                                                   relative_peak_threshold=.5,
                                                                   min_separation_angle=25,
-                                                                  mask=dwiData,
+                                                                  mask=maskData,
                                                                   return_sh=True,
                                                                   return_odf=False,
                                                                   normalize_peaks=True,
                                                                   npeaks=5,
                                                                   parallel=True,
-                                                                  nbr_processes=int(self.getNTreads))
+                                                                  nbr_processes=int(self.getNTreads()))
 
         #CSD
         target = self.buildName(source,'csd')
@@ -101,8 +86,15 @@ class HardiDipy(GenericTask):
 
 
     def meetRequirement(self):
-        return True
+        images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
+                  "gradient value bval encoding file":  self.getImage(self.dependDir, 'grad', None, 'bval'),
+                  "gradient vector bvec encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvec'),
+                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
+        return self.isAllImagesExists(images)
 
 
     def isDirty(self):
-        return False
+        images = {"csd": self.getImage(self.workingDir, 'dwi', 'csd'),
+                  "generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi', 'gfa'),
+                  'nufo': self.getImage(self.workingDir,'dwi', 'nufo')}
+        return self.isSomeImagesMissing(images)

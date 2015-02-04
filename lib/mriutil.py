@@ -22,10 +22,11 @@ def fslmaths(source1, target, operator="bin", source2=None):
         cmd = "fslmaths {} -{} {} ".format(source1, operator, target)
     else:
         cmd = "fslmaths {} -{} {} {}".format(source1, operator, source2, target)
-
+    print 'cmd=',cmd
     result = util.launchCommand(cmd)
     #Spm do not support .gz format, so uncompress nifty file
-    util.gunzip("{}.gz".format(target))
+    print "result =", result
+    #util.gunzip("{}.gz".format(target))
     return result
 
 

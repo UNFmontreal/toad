@@ -61,19 +61,14 @@ smooth3: 2.00
 
 [denoising]
 
-#algorithm chosen for denoising the dwi. Valid values are: lpca, aonlm, nlmeans, None
-algorithm: lpca
-
-#threshold were values into the first b0 image will be consider noise. nlmeans only
-nlmeans_mask_threshold: 80
+#algorithm chosen for denoising the dwi. Valid values are: lpca, aonlm, None
+algorithm = lpca
 
 #matlab script filename with .m extension omit
 script_name: denoise
 
 #matlab script filename with .m extension omit
 matlab_script: pyscript
-
-
 
 # undocumented
 beta: 1
@@ -235,6 +230,8 @@ config: config
 
 [postfix]
 
+value2:         _value2
+value3:         _value3
 tmp:            _temporary
 tmp1:           _temporary1
 tmp2:           _temporary2

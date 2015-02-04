@@ -38,7 +38,7 @@ class TensorDipy(GenericTask):
 
     def __produceTensors(self, source, bValFile, bVecFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
-        target = self.buildName(source, "dipy")
+        target = self.buildName(source, "tensor")
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
         maskData = maskImage.get_data()
@@ -57,24 +57,15 @@ class TensorDipy(GenericTask):
 
         fa = dipy.reconst.dti.fractional_anisotropy(fit.evals)
         fa[numpy.isnan(fa)] = 0
+        nibabel.save(nibabel.Nifti1Image(fa.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "fa"))
 
-
-        faImage = nibabel.Nifti1Image(fa.astype(numpy.float32), dwiImage.get_affine())
-        nibabel.save(faImage, self.buildName(target, "fa"))
-
-        md = dipy.reconst.dti.mean_diffusivity(fit.evals)
-        nibabel.save(nibabel.Nifti1Image(md.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "md"))
-
-        #@TODO implement values and tendors creations
-        [values, vectors] = dipy.reconst.dti.decompose_tensor(tensorsValuesReordered)
-
-        nibabel.save(nibabel.Nifti1Image(values[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "l1"))
-        nibabel.save(nibabel.Nifti1Image(values[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "l2"))
-        nibabel.save(nibabel.Nifti1Image(values[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "l3"))
-        nibabel.save(nibabel.Nifti1Image(vectors[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v1"))
-        nibabel.save(nibabel.Nifti1Image(vectors[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v2"))
-        nibabel.save(nibabel.Nifti1Image(vectors[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v3"))
-
+        nibabel.save(nibabel.Nifti1Image(fit.ad.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "ad"))
+        nibabel.save(nibabel.Nifti1Image(fit.rd.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "rd"))
+        nibabel.save(nibabel.Nifti1Image(fit.md.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "md"))
+	nibabel.save(nibabel.Nifti1Image(fit.evecs[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v1"))
+	nibabel.save(nibabel.Nifti1Image(fit.evecs[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v2"))
+	nibabel.save(nibabel.Nifti1Image(fit.evecs[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v3")) 
+	
         faColor = numpy.clip(fa, 0, 1)
         rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
         nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(target, "rgb"))
@@ -88,17 +79,17 @@ class TensorDipy(GenericTask):
                   "gradient value bval encoding file":  self.getImage(self.dependDir, 'grad', None, 'bval'),
                   "gradient vector bvec encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvec'),
                   'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
-
-        return self.isSomeImagesMissing(images)
+        return self.isAllImagesExists(images)
 
 
     def isDirty(self):
-        return True
-        #@Impelement that
-        #images ={"dipy tensor": self.getImage(self.workingDir, "dwi", "dipy")}
-        #return self.isSomeImagesMissing(images)
+        images ={"dipy tensor": self.getImage(self.workingDir, "dwi", "tensor"),
+                    "selected eigenvector 1" : self.getImage(self.workingDir, 'dwi', 'v1'),
+                    "selected eigenvector 2" : self.getImage(self.workingDir, 'dwi', 'v2'),
+                    "selected eigenvector 3" : self.getImage(self.workingDir, 'dwi', 'v3'),
+                    "fractional anisotropy" : self.getImage(self.workingDir, 'dwi', 'fa'),
+                    "mean diffusivity MD" : self.getImage(self.workingDir, 'dwi', 'md'),
+                    "selected eigenvalue(s) AD" : self.getImage(self.workingDir, 'dwi', 'ad'),
+                    "selected eigenvalue(s) RD" : self.getImage(self.workingDir, 'dwi', 'rd')}
+        return self.isSomeImagesMissing(images)
 
-        #@TODO see with Arnaud for that feature
-        #if not self.getImage(self.workingDir, 'dwi', ['dipy', 'mask']):
-        #    self.info("No dipy tensor mask found in directory {}"{}elf.workingDir)
-        #    result = True
