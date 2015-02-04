@@ -1,5 +1,7 @@
 from lib.generictask import GenericTask
 import dipy
+import dipy.direction
+import dipy.reconst.csdeconv
 import nibabel
 import numpy
 
@@ -10,6 +12,7 @@ class HardiDipy(GenericTask):
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preprocessing', 'masking')
+
 
     def implement(self):
 
@@ -24,7 +27,7 @@ class HardiDipy(GenericTask):
 
     def __produceHardiMetric(self, source, bValFile, bVecFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
-        target = self.buildName(source, "dipy")
+        #target = self.buildName(source, "dipy")
 
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
@@ -47,13 +50,13 @@ class HardiDipy(GenericTask):
                                                                   sphere=sphere,
                                                                   relative_peak_threshold=.5,
                                                                   min_separation_angle=25,
-                                                                  mask=dwiData,
+                                                                  mask=maskData,
                                                                   return_sh=True,
                                                                   return_odf=False,
                                                                   normalize_peaks=True,
                                                                   npeaks=5,
                                                                   parallel=True,
-                                                                  nbr_processes=int(self.getNTreads))
+                                                                  nbr_processes=int(self.getNTreads()))
 
         #CSD
         target = self.buildName(source,'csd')
@@ -87,9 +90,11 @@ class HardiDipy(GenericTask):
                   "gradient value bval encoding file":  self.getImage(self.dependDir, 'grad', None, 'bval'),
                   "gradient vector bvec encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvec'),
                   'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
-	print images
         return self.isAllImagesExists(images)
 
 
     def isDirty(self):
-        return False
+        images = {"csd": self.getImage(self.workingDir, 'dwi', 'csd'),
+                  "generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi', 'gfa'),
+                  'nufo': self.getImage(self.workingDir,'dwi', 'nufo')}
+        return self.isSomeImagesMissing(images)

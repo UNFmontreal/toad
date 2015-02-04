@@ -160,7 +160,7 @@ class TractographyMrtrix(GenericTask):
                     'resampled brodmann area':self.getImage(self.registrationDir, "brodmann", "resample"),
                     'ultimate extended mask': self.getImage(self.maskingDir, 'anat',['extended','mask'])}
 
-        return self.isSomeImagesMissing(images)
+        return self.isAllImagesExists(images)
 
 
     def isDirty(self, result = False):
