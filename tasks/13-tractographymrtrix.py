@@ -11,7 +11,7 @@ class TractographyMrtrix(GenericTask):
 
 
     def implement(self):
-        #@TODO work on dirtyness
+
         act = self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"])
         seed_gmwmi = self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi")
         brodmann = self.getImage(self.registrationDir, "brodmann", "resample")
@@ -148,7 +148,6 @@ class TractographyMrtrix(GenericTask):
         self.launchCommand(cmd)
 
         return self.rename(tmp, target)
-
 
 
     def meetRequirement(self):

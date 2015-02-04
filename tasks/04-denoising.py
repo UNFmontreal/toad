@@ -1,6 +1,9 @@
 from lib.generictask import GenericTask
-from lib import util
-import shutil, os
+from lib import util, mriutil
+from dipy.denoise.nlmeans
+import numpy
+import nibabel
+import os
 
 __author__ = 'desmat'
 
@@ -15,24 +18,45 @@ class Denoising(GenericTask):
 
         if self.get("algorithm") is "None":
             self.info("Skipping denoising process")
-
         else:
             dwi = self.__getDwiImage()
-            dwiUncompress = self.uncompressImage(dwi)
-
-            tmp = self.buildName(dwiUncompress, "tmp", 'nii')
-            scriptName = self.__createLpcaScript(dwiUncompress, tmp)
-            self.__launchMatlabExecution(scriptName)
-
-            self.info("compressing {} image".format(tmp))
-            tmpCompress = util.gzip(tmp)
-
             target = self.buildName(dwi, "denoise")
-            self.rename(tmpCompress, target)
 
-            if self.getBoolean("cleanup"):
-                self.info("Removing redundant image {}".format(dwiUncompress))
-                os.remove(dwiUncompress)
+            if self.get("algorithm") is "nlmeans":
+                if not self.config.getboolean("eddy", "ignore"):
+                    bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+                else:
+                    bVal=  self.getImage(self.preparationDir, 'grad',  None, 'bval')
+                b0Index = mriutil.getFirstB0IndexFromDwi(bVal)
+
+                try:
+                    threshold = int(self.get("nlmeans_mask_threshold"))
+                except ValueError:
+                    threshold = 80
+
+                dwiImage = nibabel.load(dwi)
+                dwiData  = dwiImage.get_data()
+                mask = dwiData[..., b0Index] > threshold
+                b0Data = dwiData[..., b0Index]
+                sigma = numpy.std(b0Data[~mask])
+                denoisingData = dipy.denoise.nlmeans(dwiData, sigma, mask)
+                nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
+
+            else:
+                dwi = self.__getDwiImage()
+                dwiUncompress = self.uncompressImage(dwi)
+
+                tmp = self.buildName(dwiUncompress, "tmp", 'nii')
+                scriptName = self.__createLpcaScript(dwiUncompress, tmp)
+                self.__launchMatlabExecution(scriptName)
+
+                self.info("compressing {} image".format(tmp))
+                tmpCompress = util.gzip(tmp)
+                self.rename(tmpCompress, target)
+
+                if self.getBoolean("cleanup"):
+                    self.info("Removing redundant image {}".format(dwiUncompress))
+                    os.remove(dwiUncompress)
 
 
     def __getDwiImage(self):

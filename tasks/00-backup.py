@@ -13,6 +13,7 @@ class Backup(GenericTask):
         GenericTask.__init__(self, subject)
         self.setCleanupBeforeImplement(False)
 
+
     def implement(self):
         self.info("Build directories structure for subject: {}".format(os.path.basename(self.workingDir)))
 
@@ -32,8 +33,6 @@ class Backup(GenericTask):
                  self.getImage(self.subjectDir, 'grad', None, 'bvec'),
                  self.getImage(self.subjectDir, 'config', None, 'cfg')]
 
-        print "self.subjectDir=",self.subjectDir
-        print "images =",images
         for image in images:
             if image:
                 self.info("Moving file {} to {} directory".format(image, self.workingDir))

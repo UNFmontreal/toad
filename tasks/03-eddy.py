@@ -8,6 +8,28 @@ __author__ = 'desmat'
 
 class Eddy(GenericTask):
 
+"""
+import numpy as np
+from time import time
+import nibabel as nib
+from dipy.denoise.nlmeans import nlmeans
+from dipy.data import fetch_sherbrooke_3shell, read_sherbrooke_3shell
+
+fetch_sherbrooke_3shell()
+img, gtab = read_sherbrooke_3shell()
+data = img.get_data()
+aff = img.get_affine()
+mask = data[..., 0] > 80
+data = data[..., 0]
+print("vol size", data.shape)
+t = time()
+In order to call nlmeans first you need to estimate the standard deviation of the noise.
+sigma = np.std(data[~mask])
+den = nlmeans(data, sigma=sigma, mask=mask)
+"""
+
+
+
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preparation')
@@ -242,14 +264,14 @@ class Eddy(GenericTask):
     def __fslmathsTmean(self, source):
 
         target = source.replace(".nii", "_tmean.nii")
-        mriutil.fslmaths(source, target , 'Tmean')
+        mriutil.fslmaths(source, target, 'Tmean')
         return target
 
 
     def __bet(self, source):
 
         self.info("Launch brain extraction from fsl")
-        tmp = self.buildName(source, "tmp", "nii.gz")
+        tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "brain")
 
         cmd = "bet {} {} -v -m".format(source, tmp)
