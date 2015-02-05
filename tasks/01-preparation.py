@@ -36,7 +36,7 @@ class Preparation(GenericTask):
                   'MR magnitude ': self.getImage(self.dependDir, 'mag'),
                   'MR phase ': self.getImage(self.dependDir, 'phase'),
                   'parcellation': self.getImage(self.dependDir,'aparc_aseg'),
-                  'anatomical': self.getImage(self.dependDir, 'freesurfer_anat'),
+                  'freesurfer anatomical': self.getImage(self.dependDir, 'anat', 'freesurfer'),
                   'left hemisphere ribbon': self.getImage(self.dependDir, 'lh_ribbon'),
                   'right hemisphere ribbon': self.getImage(self.dependDir, 'rh_ribbon'),
                   'brodmann': self.getImage(self.dependDir, 'brodmann')}

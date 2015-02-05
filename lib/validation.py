@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from lib import mriutil, util
-import glob
 import os
 
 
@@ -78,11 +77,19 @@ class Validation(object):
         """
 
         #Anatomical, Dwi and gradient fieldmap are mandatory input
-        if not self.__validateNiftiImage(self.config.get('prefix', 'anat')):
-            return False
+        anat = util.getImage(self.config, self.workingDir, 'anat')
+        if not anat:
+            if util.getImage(self.config, self.workingDir, 'anat', None, 'nii'):
+                self.error("Found some uncompressed images into {} directory. "
+                           "gzip those images and resubmit the pipeline again".format(self.workingDir))
+            self.error("No high resolution image found into {} directory".format(self.workingDir))
 
-        if not self.__validateNiftiImage(self.config.get('prefix', 'dwi')):
-            return False
+        dwi = util.getImage(self.config, self.workingDir, 'dwi')
+        if not dwi:
+            if util.getImage(self.config, self.workingDir, 'dwi', None, 'nii'):
+                self.error("Found some uncompressed image into {} directory. "
+                           "gzip those images and resubmit the pipeline again".format(self.workingDir))
+            self.error("No diffusion weight image found into {} directory".format(self.workingDir))
 
         bEnc = util.getImage(self.config, self.workingDir,'grad', None, 'b')
         bVal = util.getImage(self.config, self.workingDir,'grad', None, 'bval')
@@ -92,7 +99,6 @@ class Validation(object):
             self.logger.error("No valid .b encoding or (.bval, .bvec) files found in directory: {}".format(self.workingDir))
         else:
 
-            dwi = util.getImage(self.config, self.workingDir,'dwi')
             nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
             if nbDirections <= 45:
                 msg = "Found only {} directions into {} image. Hardi model will not be accurate with diffusion weighted image " \
@@ -117,15 +123,14 @@ class Validation(object):
                 return False
 
 
-
         #Validation of optionnal images
         images = {
-                  'high resolution': util.getImage(self.config, self.workingDir, 'anat'),
-                  'diffusion weighted': util.getImage(self.config, self.workingDir,'dwi'),
+                  'high resolution': anat,
+                  'diffusion weighted': dwi,
                   'MR magnitude ': util.getImage(self.config, self.workingDir, 'mag'),
                   'MR phase ': util.getImage(self.config, self.workingDir, 'phase'),
                   'parcellation': util.getImage(self.config, self.workingDir,'aparc_aseg'),
-                  'anatomical': util.getImage(self.config, self.workingDir, 'freesurfer_anat'),
+                  'anatomical': util.getImage(self.config, self.workingDir, 'anat','freesurfer'),
                   'left hemisphere ribbon': util.getImage(self.config, self.workingDir, 'lh_ribbon'),
                   'right hemisphere ribbon': util.getImage(self.config, self.workingDir, 'rh_ribbon'),
                   'brodmann': util.getImage(self.config, self.workingDir, 'brodmann'),
@@ -136,7 +141,6 @@ class Validation(object):
             if value:
                 if not mriutil.isDataStridesOrientationExpected(value) and self.config.getboolean('arguments', 'prompt') \
                         and self.config.getboolean("preparation", "force_realign_strides"):
-
                     msg = "Data strides layout for {} is unexpected and force_realign_strides is set to True.\n \
                            If you continue, all unexpected images will be realign accordingly.\n\
                            Only a copy of the original images will be alter.".format(value)
@@ -147,9 +151,9 @@ class Validation(object):
 
         return True
 
-
+    """
     def __validateNiftiImage(self, prefix):
-        """Determine if an image with a prefix exists into the subject directory
+        Determine if an image with a prefix exists into the subject directory
 
         Args:
             prefix: prefix that is required into the filename
@@ -157,7 +161,7 @@ class Validation(object):
         Returns:
             a Boolean that represent if the image filename exist
 
-        """
+
 
         files = glob.glob("{}/{}*.nii*".format(self.workingDir, prefix))
         if not files:
@@ -176,7 +180,7 @@ class Validation(object):
                 self.logger.warning("Image name {} contain postfix {} which is prohibited".format(filename,item))
                 return False
         return True
-
+    """
 
     def __isValidEncoding(self, nbDirection, type):
         """Determine if an image with a prefix exists into the subject directory
