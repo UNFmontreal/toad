@@ -22,7 +22,7 @@ class Backup(GenericTask):
                  self.getImage(self.subjectDir, 'mag',),
                  self.getImage(self.subjectDir, 'phase'),
                  self.getImage(self.subjectDir, 'aparc_aseg'),
-                 self.getImage(self.subjectDir, 'freesurfer_anat'),
+                 self.getImage(self.subjectDir, 'anat', 'freesurfer'),
                  self.getImage(self.subjectDir, 'lh_ribbon'),
                  self.getImage(self.subjectDir, 'rh_ribbon'),
                  self.getImage(self.subjectDir, 'brodmann'),

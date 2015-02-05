@@ -232,7 +232,8 @@ class Fieldmap(GenericTask):
 
 
     def isIgnore(self):
-        return self.isSomeImagesMissing({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')})
+        return not (self.isAllImagesExists({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')}) or
+            self.isAllImagesExists({'magnitude':self.getImage(self.subjectDir, 'mag'), 'phase':self.getImage(self.subjectDir, 'phase')}))
 
 
     def meetRequirement(self, result=True):

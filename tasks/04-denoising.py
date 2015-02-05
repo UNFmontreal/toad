@@ -1,6 +1,6 @@
 from lib.generictask import GenericTask
 from lib import util, mriutil
-from dipy.denoise.nlmeans
+import dipy.denoise.nlmeans
 import numpy
 import nibabel
 import os
