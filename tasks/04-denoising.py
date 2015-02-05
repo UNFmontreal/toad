@@ -21,8 +21,7 @@ class Denoising(GenericTask):
         else:
             dwi = self.__getDwiImage()
             target = self.buildName(dwi, "denoise")
-
-            if self.get("algorithm") is "nlmeans":
+            if self.get("algorithm") == "nlmeans":
                 if not self.config.getboolean("eddy", "ignore"):
                     bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
                 else:
@@ -39,7 +38,7 @@ class Denoising(GenericTask):
                 mask = dwiData[..., b0Index] > threshold
                 b0Data = dwiData[..., b0Index]
                 sigma = numpy.std(b0Data[~mask])
-                denoisingData = dipy.denoise.nlmeans(dwiData, sigma, mask)
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, mask)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
 
             else:
