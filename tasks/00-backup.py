@@ -13,6 +13,7 @@ class Backup(GenericTask):
         GenericTask.__init__(self, subject)
         self.setCleanupBeforeImplement(False)
 
+
     def implement(self):
         self.info("Build directories structure for subject: {}".format(os.path.basename(self.workingDir)))
 
@@ -21,7 +22,9 @@ class Backup(GenericTask):
                  self.getImage(self.subjectDir, 'mag',),
                  self.getImage(self.subjectDir, 'phase'),
                  self.getImage(self.subjectDir, 'aparc_aseg'),
-                 self.getImage(self.subjectDir, 'anat_freesurfer'),
+                 self.getImage(self.subjectDir, 'anat', 'freesurfer'),
+                 self.getImage(self.subjectDir, 'lh_ribbon'),
+                 self.getImage(self.subjectDir, 'rh_ribbon'),
                  self.getImage(self.subjectDir, 'brodmann'),
                  self.getImage(self.subjectDir, 'b0AP'),
                  self.getImage(self.subjectDir, 'b0PA'),
@@ -43,7 +46,7 @@ class Backup(GenericTask):
     def isDirty(self):
 
         images = {'high resolution': self.getImage(self.workingDir, 'anat'), 'diffusion weighted': self.getImage(self.workingDir, 'dwi')}
-        #@TODO vbal bvec may be iotionnal
+        #@TODO vbal bvec may be optionnal
         #images = {'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', None, 'bval'),
         #          'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),
         #          'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b'),

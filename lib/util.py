@@ -26,6 +26,8 @@ def symlink(source, target):
     [dir, name] = os.path.split(source)
     #output = os.path.join(target, name)
     src = "../{}/{}".format(os.path.basename(os.path.normpath(dir)), name)
+    if os.path.exists(name):
+        os.remove(name)
     os.symlink(src, name)
     return src
 
@@ -192,7 +194,7 @@ def arrayOfString(source):
     return __arrayOf(source, 'String')
 
 
-def getImage(config, dir, prefix, postfix=None, ext="nii"):
+def getImage(config, dir, prefix, postfix=None, ext="nii.gz"):
     """A simple utility function that return an mri image given certain criteria
 
     Args:
@@ -200,12 +202,13 @@ def getImage(config, dir, prefix, postfix=None, ext="nii"):
         dir:     the directory where looking for the image
         prefix:  an expression that the filename should start with
         postfix: an expression that the filename should end with (excluding the extension)
-        ext:     name of the extension of the filename
+        ext:     name of the extension of the filename. defaults: nii.gz
 
     Returns:
         the absolute filename if found, False otherwise
 
     """
+
     if ext.find('.') == 0:
         ext=ext.replace(".","",1)
     if postfix is None:
@@ -213,14 +216,21 @@ def getImage(config, dir, prefix, postfix=None, ext="nii"):
     else:
         pfixs = ""
         if isinstance(postfix, str):
-            pfixs = config.get('postfix', postfix)
+            if config.has_option('postfix', postfix):
+                pfixs = config.get('postfix', postfix)
+            else:
+                pfixs = "_{}".format(postfix)
         else:
             for element in postfix:
-                pfixs = pfixs + config.get('postfix', element)
-        images = glob.glob("{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, ext))
+                if config.has_option('postfix', element):
+                    pfixs = pfixs + config.get('postfix', element)
+                else:
+                    pfixs = pfixs + "_{}".format(element)
+        criterias = "{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, ext)
+        images = glob.glob(criterias)
+
     if len(images) > 0:
         return images.pop()
-
     return False
 
 
@@ -236,11 +246,12 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
         source: The input file name, a config prefix or simply a string
         postfix: An option item specified in config at the postfix section
         ext: the Extension of the new target
-        absolute: a bolean if the full path must be absolute
+        absolute: a boolean if the full path must be absolute
 
     Returns:
         a file name that contain the postfix and the current working directory
     """
+
     parts = []
     if config.has_option('prefix', source):
         targetName = config.get('prefix',source)
@@ -251,9 +262,15 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
     if postfix is not None:
         if type(postfix) is list:
             for item in postfix:
-                targetName += config.get('postfix', item)
+                if config.has_option('postfix', item):
+                    targetName += config.get('postfix', item)
+                else:
+                    targetName += "_{}".format(item)
         else:
-            targetName += config.get('postfix', postfix)
+            if config.has_option('postfix', postfix):
+                targetName += config.get('postfix', postfix)
+            else:
+                targetName += "_{}".format(postfix)
 
     extension = ""
     for part in parts:
@@ -270,6 +287,13 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
         targetName = os.path.join(target, targetName)
     
     return targetName
+
+
+def getFileWithParents(source, levels=1):
+    common = source
+    for i in range(levels + 1):
+        common = os.path.dirname(common)
+    return os.path.relpath(source, common)
 
 
 def which(source):
@@ -304,13 +328,34 @@ def parseTemplate(dict, template):
     f = open(template, 'r')
     return Template(f.read()).safe_substitute(dict)
 
-def displayYesNoMessage(msg):
+
+
+def displayYesNoMessage(msg, question = "Continue? (y or n)"):
+    """Utility that ask a question
+
+
+    Args:
+       msg: A message to display before prompt
+       template: object passed to the constructors template argument.
+
+    Returns:
+        the string substitute
+    """
     print msg
     while True:
-        choice = raw_input("Continue? (y or n)")
+        choice = raw_input(question)
         if choice == 'y':
-            print "\n Subjects will failed during the execution\n"
-            break
+            return True
         elif choice == 'n':
-            print "\nSubmit the pipeline again\n"
-            sys.exit()
+            return False
+
+def displayContinueQuitRemoveMessage(msg):
+    print msg
+    while True:
+        choice = raw_input("Continue? (y, n or r)")
+        if choice.lower() == 'y':
+            return "y"
+        elif choice.lower() == 'n':
+            return "n"
+        elif choice.lower() == 'r':
+            return "r"

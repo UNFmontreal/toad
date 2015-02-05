@@ -16,36 +16,39 @@ class Masking(GenericTask):
 
 
     def implement(self):
-
-        aparcAseg = self.getImage(self.dependDir,"aparc_aseg", "resample")
+        aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
+        aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
         anatBrainResample = self.getImage(self.dependDir,'anat', ['brain','resample'] )
+	print aparcAsegResample
+	print aparcAsegRegister
+	print anatBrainResample
+        #anatBrainWMResample = self.getImage(self.dependDir, 'anat', ['brain','wm','resample'])
+        #self.__createMask(anatBrainWMResample)
 
-        anatBrainWMResample = self.getImage(self.dependDir, 'anat', ['brain','wm','resample'])
-        self.__createMask(anatBrainWMResample)
-
-        extended = self.buildName('anat', 'extended','nii')
+        extended = self.buildName('anat', 'extended')
         self.info("Add {} and {} images together in order to create the ultimate image"
-                  .format(anatBrainResample, aparcAseg))
-        mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAseg)
+                  .format(anatBrainResample, aparcAsegResample))
+        mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAsegResample)
         self.__createMask(extended)
-        self.__createMask(aparcAseg)
+        self.__createMask(aparcAsegResample)
 
         #produce optionnal mask
         if self.get("start_seeds").strip():
-            self.__createRegionMaskFromAparcAseg(aparcAseg, 'start')
+            self.__createRegionMaskFromAparcAseg(aparcAsegResample, 'start')
         if self.get("stop_seeds").strip():
-            self.__createRegionMaskFromAparcAseg(aparcAseg, 'stop')
+            self.__createRegionMaskFromAparcAseg(aparcAsegResample, 'stop')
         if self.get("exclude_seeds").strip():
-            self.__createRegionMaskFromAparcAseg(aparcAseg, 'exclude')
+            self.__createRegionMaskFromAparcAseg(aparcAsegResample, 'exclude')
 
         #Launch act_anat_prepare_freesurfer
-        act = self.__actAnatPrepareFreesurfer(aparcAseg)
+        actRegister = self.__actAnatPrepareFreesurfer(aparcAsegRegister)
+        actResample = self.__actAnatPrepareFreesurfer(aparcAsegResample)
 
         #extract the white matter mask from the act
-        whiteMatterAct = self.__extractWhiteMatterFromAct(act)
+        whiteMatterAct = self.__extractWhiteMatterFromAct(actResample)
 
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
-        seed_gmwmi = self.__launch5tt2gmwmi(act)
+        seed_gmwmi = self.__launch5tt2gmwmi(actRegister)
 
         colorLut = "{}/templates/lookup_tables/FreeSurferColorLUT_ItkSnap.txt".format(self.toadDir)
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
@@ -53,8 +56,8 @@ class Masking(GenericTask):
 
 
     def __createRegionMaskFromAparcAseg(self, source, operand):
-        option = "{}_seeds".format(operand)
 
+        option = "{}_seeds".format(operand)
         self.info("Extract {} regions from {} image".format(operand, source))
         regions = util.arrayOfInteger(self.get( option))
         self.info("Regions to extract: {}".format(regions))
@@ -67,7 +70,6 @@ class Masking(GenericTask):
     def __actAnatPrepareFreesurfer(self, source):
 
         sys.path.append(os.environ["MRTRIX_PYTHON_SCRIPTS"])
-
         target = self.buildName(source, 'act')
         freesurfer_lut = os.path.join(os.environ['FREESURFER_HOME'], 'FreeSurferColorLUT.txt')
 
@@ -90,7 +92,7 @@ class Masking(GenericTask):
         self.launchCommand('mrcalc indices.mif 3 -eq  wm.mif')
         self.launchCommand('mrcalc indices.mif 4 -eq csf.mif')
         self.launchCommand('mrcalc indices.mif 5 -eq path.mif')
-        result_path = 'result' + os.path.splitext(target)[1]
+        result_path = 'result.nii.gz'
         self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32')
 
 
@@ -155,21 +157,19 @@ class Masking(GenericTask):
     def meetRequirement(self):
 
         images = {'resampled parcellation':self.getImage(self.dependDir,"aparc_aseg", "resample"),
-                    'brain extracted, white matter segmented, resampled high resolution':self.getImage(self.dependDir,'anat',['brain','wm','resample']),
+                    'register parcellation':self.getImage(self.dependDir,"aparc_aseg", "register"),
                     'brain extracted, resampled high resolution':self.getImage(self.dependDir,'anat',['brain','resample'])}
 
         return self.isAllImagesExists(images)
 
 
     def isDirty(self, result = False):
-        images ={'aparc anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["resample","mask"]),
+        images ={'register anatomically constrained tractography': self.getImage(self.workingDir, "aparc_aseg", ["register", "act"]),
                     'aparc_aseg mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
-                    'anatomically constrained tractography': self.getImage(self.workingDir,"aparc_aseg", ["act"]),
-                    'white segmented mask': self.getImage(self.workingDir,"aparc_aseg", ["act", "wm", "mask"]),
-                    'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
-                    'high resolution, brain extracted, white matter segmented, resampled mask': self.getImage(self.workingDir, 'anat', ['brain', 'wm', 'resample', 'mask']),
                     'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask']),
-                    'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt' )
+                    'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
+                    'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'),
+                    'resample white segmented act mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"])
         }
 
         if self.config.get('masking', "start_seeds").strip() != "":

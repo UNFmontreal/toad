@@ -36,19 +36,25 @@ class Preparation(GenericTask):
                   'MR magnitude ': self.getImage(self.dependDir, 'mag'),
                   'MR phase ': self.getImage(self.dependDir, 'phase'),
                   'parcellation': self.getImage(self.dependDir,'aparc_aseg'),
-                  'anatomical': self.getImage(self.dependDir, 'anat_freesurfer'),
+                  'freesurfer anatomical': self.getImage(self.dependDir, 'anat', 'freesurfer'),
+                  'left hemisphere ribbon': self.getImage(self.dependDir, 'lh_ribbon'),
+                  'right hemisphere ribbon': self.getImage(self.dependDir, 'rh_ribbon'),
                   'brodmann': self.getImage(self.dependDir, 'brodmann')}
 
         for key, value in images.iteritems():
             if value:
-                self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
-                util.symlink(value, self.workingDir)
+                if not mriutil.isDataStridesOrientationExpected(value) \
+                        and self.getBoolean("force_realign_strides"):
+                    mriutil.strideImage(value, self.buildName(value, "stride"))
+
+                else:
+                    self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
+                    util.symlink(value, self.workingDir)
 
 
     def __produceEncodingFiles(self, bEnc, bVal, bVec):
 
         #produire les fichiers gradient encoding pour dipy ainsi que mrtrix
-
         self.info("Produce .b .bval and .bvec gradient file if not existing")
         if not bEnc:
             mriutil.bValBVec2BEnc(bVal, bVec, self.workingDir)
@@ -64,6 +70,7 @@ class Preparation(GenericTask):
             mriutil.bEnc2BVec(bEnc, self.workingDir)
         else:
             util.symlink(bVec, self.workingDir)
+
 
     def meetRequirement(self, result=True):
 

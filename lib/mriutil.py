@@ -1,3 +1,4 @@
+from lib.util import launchCommand
 import util
 import numpy
 import nipy
@@ -21,10 +22,11 @@ def fslmaths(source1, target, operator="bin", source2=None):
         cmd = "fslmaths {} -{} {} ".format(source1, operator, target)
     else:
         cmd = "fslmaths {} -{} {} {}".format(source1, operator, source2, target)
-
+    print 'cmd=',cmd
     result = util.launchCommand(cmd)
     #Spm do not support .gz format, so uncompress nifty file
-    util.gunzip("{}.gz".format(target))
+    print "result =", result
+    #util.gunzip("{}.gz".format(target))
     return result
 
 
@@ -76,6 +78,21 @@ def mrinfo(source):
     return stdout.splitlines()
 
 
+def invertMatrix(source, target):
+    cmd = "convert_xfm -inverse {} -omat {}".format(source, target)
+    (stdout, stderr) = util.launchCommand(cmd)
+    return target
+
+
+def strideImage(source, target):
+    if len(getMriDimensions(source)) == 3:
+        cmd = "mrconvert {} {} -stride 1,2,3"
+    else:
+        cmd = "mrconvert {} {} -stride 1,2,3,4"
+    launchCommand(cmd.format(source, target))
+    return target
+
+
 def getMrinfoFieldValues(text, field, delimiter=""):
     output = []
     for line in text:
@@ -109,9 +126,13 @@ def getNbDirectionsFromDWI(source):
     return 0
 
 
-def isDataLayoutValid(source):
-    dataLayout = getMrinfoFieldValues(mrinfo(source), "Data strides:")
-    return dataLayout == "[ 1 2 3 4 ]"
+def isDataStridesOrientationExpected(source):
+    strides = getMrinfoFieldValues(mrinfo(source), "Data strides:")
+    tokens = strides.strip("[]").split()
+    if len(tokens) >= 3:
+        if tokens[0].strip() in "1" and tokens[1].strip() in "2" and tokens[2].strip() in "3": 
+            return True
+    return False
 
 
 def getFirstB0IndexFromDwi(bval):
@@ -136,17 +157,17 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
 
     for index, line in enumerate(eddys):
         row_four_to_six_eddy = line.split('  ')[3:6]
-        x= numpy.matrix([[ 1, 0, 0],
-                         [0,numpy.cos(float(row_four_to_six_eddy[0])) , numpy.sin(float(row_four_to_six_eddy[0]))] ,
-                         [0,-numpy.sin(float(row_four_to_six_eddy[0])),numpy.cos(float(row_four_to_six_eddy[0]))]])
+        x= numpy.matrix([[1, 0, 0],
+                         [0,numpy.cos(float(row_four_to_six_eddy[0])), numpy.sin(float(row_four_to_six_eddy[0]))],
+                         [0,-numpy.sin(float(row_four_to_six_eddy[0])), numpy.cos(float(row_four_to_six_eddy[0]))]])
 
-        y= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])) , 0, numpy.sin(float(row_four_to_six_eddy[1])) ] ,
-                     [ 0, 1, 0],
-                     [-numpy.sin(float(row_four_to_six_eddy[1])) , 0 , numpy.cos(float(row_four_to_six_eddy[1]))]])
+        y= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])), 0, numpy.sin(float(row_four_to_six_eddy[1]))],
+                     [0, 1, 0],
+                     [-numpy.sin(float(row_four_to_six_eddy[1])), 0, numpy.cos(float(row_four_to_six_eddy[1]))]])
 
-        z= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])) , numpy.sin(float(row_four_to_six_eddy[1])) , 0] ,
-                     [-numpy.sin(float(row_four_to_six_eddy[1])),numpy.cos(float(row_four_to_six_eddy[1])),0]    ,
-                     [ 0, 0, 1]])
+        z= numpy.matrix([[numpy.cos(float(row_four_to_six_eddy[1])), numpy.sin(float(row_four_to_six_eddy[1])), 0],
+                     [-numpy.sin(float(row_four_to_six_eddy[1])), numpy.cos(float(row_four_to_six_eddy[1])), 0],
+                     [0, 0, 1]])
         matrix = (z*y*x).I
         b_values = b_line[index].replace('\t',' ').split()
         gradient = numpy.matrix([[float(b_values[0]), float(b_values[1]),float(b_values[2])]])

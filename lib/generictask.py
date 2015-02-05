@@ -6,6 +6,7 @@ from lib.load import Load
 import subprocess
 import shutil
 import glob
+import sys
 import os
 
 __author__ = 'desmat'
@@ -28,13 +29,14 @@ class GenericTask(Logger, Load):
 
         self.__order = None
         self.__name = self.__class__.__name__.lower()
+        self.__moduleName = self.__class__.__module__.split(".")[-1]
         self.__cleanupBeforeImplement = True
         self.config = subject.getConfig()
         self.subjectDir = subject.getDir()
-        self.toadDir = self.config.get('arguments', 'toadDir')
-        self.workingDir = os.path.join(self.subjectDir,  self.__class__.__module__.split(".")[-1])
+        self.toadDir = self.config.get('arguments', 'toad_dir')
+        self.workingDir = os.path.join(self.subjectDir, self.__moduleName)
         Logger.__init__(self, subject.getLogDir())
-        Load.__init__(self, self.config.get('general', 'nthreads'))
+        Load.__init__(self, self.config.get('general', 'nb_subjects'), self.config.get('general', 'nb_threads'))
         self.dependencies = []
         self.__dependenciesDirNames = {}
         for arg in args:
@@ -91,12 +93,19 @@ class GenericTask(Logger, Load):
         if not os.path.exists(self.workingDir):
             self.info("Creating {} directory".format(self.workingDir))
             os.mkdir(self.workingDir)
+
+        if self.config.has_option("arguments", "stop_before_task"):
+            if (self.config.get("arguments","stop_before_task") == self.__name or
+                self.config.get("arguments","stop_before_task") == self.__moduleName.lower()):
+                self.warning("Reach {} which is the value set by stop_before_task. Stopping the pipeline now"
+                             .format(self.config.get("arguments","stop_before_task")))
+                sys.exit()
+
         currentDir = os.getcwd()
         os.chdir(self.workingDir)
         util.symlink(self.getLogFileName(), self.workingDir)
         self.implement()
         os.chdir(currentDir)
-
 
 
     #this is where all the science occurs
@@ -234,7 +243,7 @@ class GenericTask(Logger, Load):
         start = datetime.now()
         if self.__meetRequirement():
             try:
-                nbSubmission = int(self.config.get('general','nbsubmissions'))
+                nbSubmission = int(self.config.get('general','nb_submissions'))
             except ValueError:
                 nbSubmission = 3
 
@@ -335,32 +344,27 @@ class GenericTask(Logger, Load):
         self.info("------------------------\n")
 
 
-    def launchMatlabCommand(self, source, singleThread = True):
+    def launchMatlabCommand(self, source):
         """Execute a Matlab script in a new process
 
         The script must contains all paths and program that are necessary to run the script
 
         Args:
             source: A matlab script to execute in the current working directory
-            singleThread: If matlab should run in multithread mode
+
         Returns
             return a 3 elements tuples representing the command execute, the standards output and the standard error message
 
         """
 
-        if singleThread:
-            singleCompThread = "-singleCompThread"
-        else:
-            singleCompThread=""
-
         [scriptName, ext] = os.path.splitext(os.path.basename(source))
-        tags={ 'script': scriptName, 'workingDir': self.workingDir, 'singleCompThread': singleCompThread}
+        tags={ 'script': scriptName, 'workingDir': self.workingDir}
         cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/matlab.tpl"))
         self.info("Launching matlab command: {}".format(cmd))
         self.launchCommand(cmd, 'log')
 
 
-    def getImage(self, dir, prefix, postfix=None, ext="nii"):
+    def getImage(self, dir, prefix, postfix=None, ext="nii.gz"):
         """A simple utility function that return an mri image given certain criteria
 
         this is a wrapper over mriutil getImage function
@@ -369,10 +373,10 @@ class GenericTask(Logger, Load):
             dir:     the directory where looking for the image
             prefix:  an expression that the filename should start with
             postfix: an expression that the filename should end with (excluding the extension)
-            ext:     name of the extension of the filename
+            ext:     name of the extension of the filename. defaults: nii.gz
 
         Returns:
-            the absolute filename if found, False otherwise
+            the relative filename if found, False otherwise
 
         """
         return util.getImage(self.config, dir, prefix, postfix, ext)
@@ -381,7 +385,7 @@ class GenericTask(Logger, Load):
     def buildName(self, source, postfix, ext=None, absolute = True):
         """A simple utility function that return a file name that contain the postfix and the current working directory
 
-        The path of the filename contain the current working  directory
+        The filename is always into the current working  directory
         The extension name will be the same as source unless specify as argument
 
         Args:
@@ -392,7 +396,29 @@ class GenericTask(Logger, Load):
         Returns:
             a file name that contain the postfix and the current working directory
         """
-        return util.buildName(self.config, self.workingDir, source, postfix, ext, absolute)
+        absoluteBuildName = util.buildName(self.config, self.workingDir, source, postfix, ext, absolute)
+        return os.path.basename(absoluteBuildName)
+
+
+    def uncompressImage(self, source):
+        """Copy a source image into current working directory and uncompress it
+
+        Args:
+            source:  name of the source file
+        Returns
+            name of the output file
+
+        """
+        imageDir = os.path.dirname(source)
+        if not imageDir or (imageDir in self.workingDir):
+            target = source
+        else:
+            self.info("Copying image {} into {} directory".format(source, self.workingDir))
+            shutil.copy(source, self.workingDir)
+            target = os.path.join(self.workingDir, os.path.basename(source))
+
+        self.info("Uncompress image.".format(target))
+        return util.gunzip(target)
 
 
     def rename(self, source, target):

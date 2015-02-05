@@ -24,7 +24,7 @@ class QA(GenericTask):
 
 
     def implement(self):
-        
+        """
         #Usefull images for the QA
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
@@ -35,7 +35,7 @@ class QA(GenericTask):
         dwi_up = self.getImage(self.preprocessingDir, 'dwi' ,'upsample')
         b0_up = os.path.join(self.workingDir, os.path.basename(dwi_up).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwi_up, b0_up, bval))
-        anatfs = self.getImage(self.parcellationDir, 'anat_freesurfer')
+        anatfs = self.getImage(self.parcellationDir, 'freesurfer_anat')
         aparcaseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         brodmann = self.getImage(self.parcellationDir, 'brodmann')
         brain_rs = self.getImage(self.registrationDir,'anat',['brain','resample'])
@@ -188,7 +188,7 @@ class QA(GenericTask):
         tags = {'parseT1Here': parseT1Here, 'parseDWIHere': parseDWIHere, 'parseRegistrationHere': parseRegistrationHere }
         htmlCode = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/qa.main.tpl"))
         util.createScript(self.reportName, htmlCode)
-
+        """
         self.dirty = False
         
     def __idGenerator(self, size=6, chars=ascii_uppercase + digits):
@@ -411,14 +411,14 @@ class QA(GenericTask):
 
 
     def meetRequirement(self, result=True):
-        
+        """
         anat = self.getImage(self.preparationDir,'anat')
         dwi = self.getImage(self.preparationDir,'dwi')
         bvec = self.getImage(self.preparationDir, 'grad',  None, 'bvec')
         brain = self.getImage(self.preprocessingDir,'anat','brain')
         wm = self.getImage(self.preprocessingDir,'anat','wm')
         #b0_up = self.getImage(self.preprocessingDir, 'b0' ,'upsample')
-        anatfs = self.getImage(self.parcellationDir, 'anat_freesurfer')
+        anatfs = self.getImage(self.parcellationDir, 'freesurfer_anat')
         aparcaseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         brodmann = self.getImage(self.parcellationDir, 'brodmann')
         brain_rs = self.getImage(self.registrationDir,'anat',['brain','resample'])
@@ -448,10 +448,12 @@ class QA(GenericTask):
                 result = False
                 
         return result
+        """
 
+        return True
 
     def isDirty(self):
         """Validate if this tasks need to be submit for implementation
 
         """
-	return self.dirty
+        return self.dirty

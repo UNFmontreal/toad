@@ -66,9 +66,6 @@ class Eddy(GenericTask):
         outputEddyImage = self.__correctionEddy2(dwi,
                                     mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
 
-        self.info("Uncompressing eddy output image: {}".format(outputEddyImage))
-        util.gunzip(outputEddyImage)
-
         #@TODO remove the glob and use getimage
         eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
         if len(eddyParameterFiles)>0:
@@ -109,11 +106,10 @@ class Eddy(GenericTask):
              The name of the resulting image
         """
 
-        tmp = os.path.join(self.workingDir, "tmp.nii")
+        tmp =  self.buildName(source, "tmp")
         target = self.buildName(source, "subset")
         cmd = "mrconvert {} {} -coord +2 {} -nthreads {} -quiet".format(source, tmp, volumes, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
-
         return self.rename(tmp, target)
 
 
@@ -183,7 +179,6 @@ class Eddy(GenericTask):
             return False
 
         target = os.path.join(self.workingDir, self.get(parameter))
-
         if not util.createScript(target, text):
             self.error("Unable to create script {}".format(target))
 
@@ -235,8 +230,8 @@ class Eddy(GenericTask):
     def __topup(self, source, acqp, b02b0File):
 
         self.info("Launch topup from fsl.\n")
-        baseName = os.path.join(self.workingDir, self.get( 'topup_results_base_name'))
-        output = os.path.join(self.workingDir, self.get( 'topup_results_output'))
+        baseName = os.path.join(self.workingDir, self.get('topup_results_base_name'))
+        output = os.path.join(self.workingDir, self.get('topup_results_output'))
 
         cmd = "topup --imain={} --datain={} --config={} --out={}  --iout={} --verbose"\
               .format(source, acqp, b02b0File, baseName, output)
@@ -247,22 +242,19 @@ class Eddy(GenericTask):
     def __fslmathsTmean(self, source):
 
         target = source.replace(".nii", "_tmean.nii")
-        mriutil.fslmaths(source, target , 'Tmean')
+        mriutil.fslmaths(source, target, 'Tmean')
         return target
 
 
     def __bet(self, source):
 
         self.info("Launch brain extraction from fsl")
-        tmp = self.buildName(source, "tmp", "nii.gz")
+        tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "brain")
 
         cmd = "bet {} {} -v -m".format(source, tmp)
         self.launchCommand(cmd)
-
-        self.info("uncompressing {}".format(tmp))
-        unzip = util.gunzip(tmp)
-        self.rename(unzip, target)
+        self.rename(tmp, target)
 
         self.info("Finish brain extraction from fsl")
         return target
@@ -295,9 +287,6 @@ class Eddy(GenericTask):
 
         self.getNTreadsEddy()
         self.launchCommand(cmd)
-
-        self.info(util.gunzip(tmp))
-        self.info("Finish eddy correction from fsl")
         return self.rename(tmp, target)
 
 
@@ -316,8 +305,7 @@ class Eddy(GenericTask):
 
     def isDirty(self):
         images = {'diffusion weighted eddy corrected': self.getImage(self.workingDir, 'dwi', 'eddy'),
-                  'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', None, 'bval'),
-                  'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),
-                  'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b')}
-
+                  'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bval'),
+                  'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvec'),
+                  'gradient .b encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'b')}
         return self.isSomeImagesMissing(images)

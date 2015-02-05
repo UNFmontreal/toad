@@ -152,7 +152,7 @@ class TasksManager(object):
 
         """
         tasks =[]
-        tasksFiles = glob.glob("{}/tasks/*.py".format(self.__subject.getConfig().get('arguments','toadDir')))
+        tasksFiles = glob.glob("{}/tasks/*.py".format(self.__subject.getConfig().get('arguments','toad_dir')))
         for taskFile in tasksFiles:
             task= self.__instanciateFromFile(taskFile)
             if task is not None:

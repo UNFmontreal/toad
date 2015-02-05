@@ -53,8 +53,11 @@ class Config(object):
 
         #parse command line arguments in the config file
         config.add_section('arguments')
-        config.set('arguments', 'toadDir', arguments.toadDir)
+        config.set('arguments', 'toad_dir', arguments.toadDir)
         config.set('arguments', 'studyDir', arguments.studyDir)
+
+        if arguments.stopBeforeTask and isinstance(arguments.stopBeforeTask, basestring):
+            config.set('arguments', 'stop_before_task', arguments.stopBeforeTask)
 
         #add local options to config file
         if arguments.local:
@@ -79,6 +82,11 @@ class Config(object):
 
         if arguments.subject and isinstance(arguments.subject, basestring):
             config.set('arguments', 'subjectDir', arguments.subject)
+
+
+        #Should be safe to overwrite value base on command line arguments here
+        if arguments.emergency:
+            config.set('general', 'nb_threads', 'unlimited')
 
         return config
 

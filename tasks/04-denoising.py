@@ -1,5 +1,8 @@
 from lib.generictask import GenericTask
-from lib import util
+from lib import util, mriutil
+import dipy.denoise.nlmeans
+import numpy
+import nibabel
 import os
 
 __author__ = 'desmat'
@@ -13,26 +16,59 @@ class Denoising(GenericTask):
 
     def implement(self):
 
-
         if self.get("algorithm") is "None":
             self.info("Skipping denoising process")
         else:
-            dwi = self.getImage(self.fieldmapDir, "dwi", 'unwarp')
-            if not dwi:
-                dwi = self.getImage(self.dependDir, "dwi", 'eddy')
-                if not dwi:
-                    dwi = self.getImage(self.preparationDir, "dwi")
-
-
+            dwi = self.__getDwiImage()
             target = self.buildName(dwi, "denoise")
-            tmp = self.buildName(dwi, "tmp")
-            scriptName = self.__createLpcaScript(dwi, tmp)
-            self.__launchMatlabExecution(scriptName)
-            self.rename(tmp, target)
+
+            if self.get("algorithm") is "nlmeans":
+                if not self.config.getboolean("eddy", "ignore"):
+                    bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+                else:
+                    bVal=  self.getImage(self.preparationDir, 'grad',  None, 'bval')
+                b0Index = mriutil.getFirstB0IndexFromDwi(bVal)
+
+                try:
+                    threshold = int(self.get("nlmeans_mask_threshold"))
+                except ValueError:
+                    threshold = 80
+
+                dwiImage = nibabel.load(dwi)
+                dwiData  = dwiImage.get_data()
+                mask = dwiData[..., b0Index] > threshold
+                b0Data = dwiData[..., b0Index]
+                sigma = numpy.std(b0Data[~mask])
+                denoisingData = dipy.denoise.nlmeans(dwiData, sigma, mask)
+                nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
+
+            else:
+                dwi = self.__getDwiImage()
+                dwiUncompress = self.uncompressImage(dwi)
+
+                tmp = self.buildName(dwiUncompress, "tmp", 'nii')
+                scriptName = self.__createLpcaScript(dwiUncompress, tmp)
+                self.__launchMatlabExecution(scriptName)
+
+                self.info("compressing {} image".format(tmp))
+                tmpCompress = util.gzip(tmp)
+                self.rename(tmpCompress, target)
+
+                if self.getBoolean("cleanup"):
+                    self.info("Removing redundant image {}".format(dwiUncompress))
+                    os.remove(dwiUncompress)
+
+
+    def __getDwiImage(self):
+        if self.getImage(self.fieldmapDir, "dwi", 'unwarp'):
+            return self.getImage(self.fieldmapDir, "dwi", 'unwarp')
+        elif self.getImage(self.dependDir, "dwi", 'eddy'):
+            return self.getImage(self.dependDir, "dwi", 'eddy')
+        else:
+            return self.getImage(self.preparationDir, "dwi")
 
 
     def __createLpcaScript(self, source, target):
-
 
         scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
         self.info("Creating denoising script {}".format(scriptName))
@@ -54,7 +90,7 @@ class Denoising(GenericTask):
     def __launchMatlabExecution(self, pyscript):
 
         self.info("Launch DWIDenoisingLPCA from matlab.")
-        self.launchMatlabCommand(pyscript, self.isSingleThread())
+        self.launchMatlabCommand(pyscript)
 
 
     def isIgnore(self):

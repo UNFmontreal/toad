@@ -17,8 +17,12 @@ class Fieldmap(GenericTask):
 
     def implement(self):
 
-        dwi =  self.getImage(self.eddyDir,"dwi", "eddy")
-        bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+        if not self.config.getboolean("eddy", "ignore"):
+            dwi = self.getImage(self.eddyDir, "dwi", "eddy")
+            bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+        else:
+            dwi = self.getImage(self.preparationDir, "dwi")
+            bVal=  self.getImage(self.preparationDir, 'grad',  None, 'bval')
 
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVal))
@@ -26,14 +30,15 @@ class Fieldmap(GenericTask):
         mag = self.getImage(self.dependDir, "mag")
         phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
-        anatFreesurfer = self.getImage(self.parcellationDir, 'anat_freesurfer')
+        freesurfer_anat = self.getImage(self.parcellationDir, 'freesurfer_anat')
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         mask = self. __createSegmentationMask(aparcAseg)
 
 
         phaseRescale = self.__rescaleFieldMap(phase)
-        fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, anatFreesurfer)
-        invertFielmapToAnat = self.__invertFieldmapToAnat(fieldmapToAnat)
+        fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, freesurfer_anat)
+
+        invertFielmapToAnat = mriutil.invertMatrix(fieldmapToAnat, self.buildName(fieldmapToAnat, 'inverse', 'mat'))
         interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, mag, invertFielmapToAnat, mask)
         fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
 
@@ -46,7 +51,8 @@ class Fieldmap(GenericTask):
 
         matrixName = self.get("epiTo_b0fm")
         self.__coregisterEpiLossyMap(b0, warped, matrixName, lossy)
-        invertMatrixName = self.__invertComputeMatrix(matrixName)
+
+        invertMatrixName = mriutil.invertMatrix(matrixName, self.buildName(matrixName, 'inverse', 'mat'))
         magnitudeIntoDwiSpace = self.__interpolateFieldmapInEpiSpace(warped, b0, invertMatrixName)
         magnitudeIntoDwiSpaceMask = self.__mask(magnitudeIntoDwiSpace)
         interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
@@ -134,19 +140,8 @@ class Fieldmap(GenericTask):
             .format(source, reference , target,
                 self.get("fieldmapToAnat"), self.get("cost"), self.get("searchcost"), self.get("dof"))
 
-        if self.getBoolean("usesqform"):
-            cmd += "-usesqform "
-
         self.launchCommand(cmd)
         return self.get("fieldmapToAnat")
-
-
-    def __invertFieldmapToAnat(self, source):
-
-        target = self.buildName(source, 'inverse', 'mat')
-        cmd = "convert_xfm  -inverse {} -omat {}".format(source, target)
-        self.launchCommand(cmd)
-        return target
 
 
     def __interpolateAnatMaskToFieldmap(self, source, mag, inverseMatrix,  mask):
@@ -205,14 +200,6 @@ class Fieldmap(GenericTask):
         return target
 
 
-    def __invertComputeMatrix(self, source):
-
-        target = self.buildName(source, 'inverse', 'mat')
-        cmd = "convert_xfm -omat {} -inverse {}".format(target , source)
-        self.launchCommand(cmd)
-        return target
-
-
     def __interpolateFieldmapInEpiSpace(self, source, reference, initMatrix):
         target = self.buildName(source, 'flirt')
         outputMatrixName = self.buildName(source, 'flirt', 'mat')
@@ -245,10 +232,11 @@ class Fieldmap(GenericTask):
 
 
     def isIgnore(self):
-        return self.isSomeImagesMissing({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')})
+        return not (self.isAllImagesExists({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')}) or
+            self.isAllImagesExists({'magnitude':self.getImage(self.subjectDir, 'mag'), 'phase':self.getImage(self.subjectDir, 'phase')}))
 
 
-    def meetRequirement(self):
+    def meetRequirement(self, result=True):
         """Validate if all requirements have been met prior to launch the task
 
         Returns:

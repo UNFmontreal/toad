@@ -8,7 +8,7 @@ class Subject(Lock):
 
 
     def __init__(self, config):
-        """A valid individual able to run tasks.
+        """A valid individual who have the capability to run tasks.
 
         Must be validated as a prerequisite
 
@@ -36,15 +36,15 @@ class Subject(Lock):
     def getLogDir(self):
         return self.__logDir
 
-
     def removeLogDir(self):
         if os.path.exists(self.__logDir):
             shutil.rmtree(self.__logDir)
 
-
     def getConfig(self):
         return self.__config
 
+    def setConfigItem(self, section, item, value):
+        self.__config.set(section, item, value)
 
     def getDir(self):
         return self.__subjectDir

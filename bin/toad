@@ -40,19 +40,29 @@ def __parseArguments():
              |         |- dwi_001.nii
              |         |- dwi_001.b ou (dwi_001.bval et dwi_001.bvec)
              |         |-(optionnal) aparc_aseg.nii
-             |         |-(optionnal) anat_freesurfer.nii
+             |         |-(optionnal) freesurfer_anat.nii.gz
+             |         |-(optionnal) lh_ribbon.nii.gz
+             |         |-(optionnal) rh_ribbon.nii.gz
+             |         |-(optionnal) brodmann.nii.gz
              |         |-(optionnal) b0ap_001.nii
              |         |-(optionnal) b0pa_001.nii
+             |         |-(optionnal) mag_001.nii
+             |         |-(optionnal) phase_001.nii
              |         |-(optionnal) config.cfg
              |
              |-suj002--\\
              |         |- t1_002.nii
-             .         |- dwi_002.nii
-             .         |- dwi_002.b ou (dwi_002.bval et dwi_002.bvec)
-             .         |-(optionnal) aparc_aseg.nii
-             |         |-(optionnal) anat_freesurfer.nii
+             |         |- dwi_002.nii
+             |         |- dwi_002.b ou (dwi_002.bval et dwi_002.bvec)
+             |         |-(optionnal) aparc_aseg.nii
+             |         |-(optionnal) freesurfer_anat.nii.gz
+             |         |-(optionnal) lh_ribbon.nii.gz
+             |         |-(optionnal) rh_ribbon.nii.gz
+             |         |-(optionnal) brodmann.nii.gz
              |         |-(optionnal) b0ap_001.nii
              |         |-(optionnal) b0pa_001.nii
+             |         |-(optionnal) mag_001.nii
+             |         |-(optionnal) phase_001.nii
              |         |-(optionnal) config.cfg
              |
              |-sujN
@@ -63,10 +73,11 @@ def __parseArguments():
         sujN--\\
               |- 00-backup
               |- 01-preparation
-              |- 02-eddy
-              |- 03-denoising
-              |- 04-preprocessing
-              |- 05-parcellation
+              |- 02-parcellation
+              |- 03-eddy
+              |- 03-fieldmap
+              |- 04-denoising
+              |- 05-preprocessing
               |- 06-registration
               |- 07-masking
               |- 08-dtifit
@@ -76,8 +87,8 @@ def __parseArguments():
               |- 12-hardi
               |- 13-hardimetric
               |- 14-harditractography
-              |- 15-results
-              |- 16-qa
+              |- 15-qa
+              |- 16-results
 
 
         Please report bugs to mathieu.desrosiers@criugm.qc.ca
@@ -86,16 +97,22 @@ def __parseArguments():
     parser.add_argument("studyDir", help="The directory where we should find the input stucture")
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Specify the location of an alternative the config.cfg file")
-    parser.add_argument("-t", "--tasks", nargs='?', required=False,
-                            help="Begin the pipeline at a specific tasks. This will apply to all subject. not implemented")
     parser.add_argument("-u", "--subject",action='append', nargs='?',metavar=('directory'), required=False,
                             help="Explicitly specify the subject directory to submit. This option may be repeat several time")
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
+    parser.add_argument("-t", "--stopBeforeTask", nargs='?',metavar=('task name'), required=False,
+                            help="Stop the pipeline at a specific task. TOAD will create the working directory."
+                                 "Usefull if you want to introduce your own freesurfer tree into the pipeline. "
+                                 "This command will apply to all subject.")
     parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
-    parser.add_argument("-p","--noPrompt", help=("Disable command prompt, always assume yes as answer"), action="store_true")
+    parser.add_argument("-p","--noPrompt", help=("Disable command prompt and always assume yes as answer"), action="store_true")
     parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
     parser.add_argument("-v","--verbose", help="increase output verbosity (not implemented yet)", action="store_true")
+    parser.add_argument("-e","--emergency", help=("Overwrite nb_threads parameter and deploy unlimited number of threads at each parallelizable steps. "
+                        "If more than one subject is submit, this parameter will be ignored "
+                        "(This parameter is dangerous and may crash the server or create deadlocks.)"
+                        ), action="store_true")
     args = parser.parse_args()
     return args
 
@@ -143,7 +160,7 @@ def __manageEnvironnement(logger):
 
         #setup variable PATH
         os.environ["PATH"] = ("/usr/local/fsl/bin:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:"
-                              "/usr/local/mrtrix3/scripts:/usr/local/ants/bin:/usr/local/freesurfer/fsfast/bin:"
+                              "/usr/local/mrtrix3/scripts:/usr/local/freesurfer/fsfast/bin:"
                               "/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:"
                               "/usr/local/freesurfer/tktools:/usr/local/c3d/bin:") + os.environ["PATH"]
 
@@ -174,9 +191,6 @@ def __manageEnvironnement(logger):
             logger.error("Mrtrix3 not found. Please install the package or set the environment variable $PATH correctly")
         else:
             os.environ["MRTRIX_PYTHON_SCRIPTS"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))),"scripts")
-
-        if util.which("ANTS") is None:
-            logger.error("ANTS registration not found. Please install the package or set the environment variable $PATH correctly")
 
         if util.which("matlab") is None:
             logger.error("Matlab not found. Please install matlab or set the environment variable $PATH correctly")

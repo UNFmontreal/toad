@@ -9,30 +9,50 @@ class Preprocessing(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'eddy')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'eddy', 'fieldmap')
 
 
     def implement(self):
 
-        dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
-        if not dwi:
-            dwi = self.getImage(self.eddyDir, 'dwi', 'eddy')
-            if not dwi:
-                dwi = self.getImage(self.dependDir, 'dwi')
+        dwi = self.__linkDwiImage()
+        if self.config.getboolean("eddy", "ignore"):
+            bFile= self.getImage(self.preparationDir, 'grad', None, 'b')
+            bVal= self.getImage(self.preparationDir, 'grad', None, 'bval')
+            bVec= self.getImage(self.preparationDir, 'grad', None, 'bvec')
+        else:
+            bFile= self.getImage(self.eddyDir, 'grad', None, 'b')
+            bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
+            bVec= self.getImage(self.eddyDir, 'grad', None, 'bvec')
 
-        bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
-        if not bVal:
-            bVal= self.getImage(self.preparationDir, 'grad', None, 'b')
-
+        bFile = util.symlink(bFile, self.workingDir)
+        bVal = util.symlink(bVal, self.workingDir)
+        bVec = util.symlink(bVec, self.workingDir)
 
         dwiUpsample=  self.__upsampling(dwi)
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVal))
-        whiteMatterDWI = self.__segmentation(b0Upsample)
 
-        anat = self.getImage(self.preparationDir, 'anat')
-        brainAnat      = self.__bet(anat)
-        whiteMatterAnat= self.__segmentation(brainAnat)
+        anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
+        brainAnat  = self.__bet(anat)
+
+        brainAnatUncompress = self.uncompressImage(brainAnat)
+        whiteMatterAnat= self.__segmentation(brainAnatUncompress)
+        util.gzip(brainAnatUncompress)
+        util.gzip(whiteMatterAnat)
+
+
+    def __linkDwiImage(self):
+        if self.config.get("denoising", "algorithm") is not "None":
+            dwi =  self.getImage(self.dependDir, 'dwi', 'denoise')
+
+        elif not self.getImage(self.fieldmapDir, 'dwi','unwarp'):
+            dwi =  self.getImage(self.fieldmapDir, 'dwi','unwarp')
+
+        elif not self.config.getboolean("eddy", "ignore"):
+            dwi =  self.getImage(self.eddyDir,'dwi', 'eddy')
+        else:
+            dwi =  self.getImage(self.preparationDir, 'dwi')
+        return util.symlink(dwi, self.workingDir)
 
 
     def __upsampling(self, source):
@@ -105,7 +125,7 @@ class Preprocessing(GenericTask):
             self.error("White matter map should be produce as a requirement, the third element must be set to 1")
 
         scriptName = self.__createSegmentationScript(source, options)
-        self.launchMatlabCommand(scriptName,  self.isSingleThread())
+        self.launchMatlabCommand(scriptName)
         fileBasename = self.buildName(source, None, "", False)
         dict = {'c1':'gw','c2':'wm','c3':'csf',
                 'wc1':'wgw','wc2':'wwm','wc3':'wcsf',
@@ -141,13 +161,14 @@ class Preprocessing(GenericTask):
             The resulting script file name
         """
 
-        scriptName = os.path.join(self.workingDir, os.path.basename(source).replace(".nii",".m"))
+        scriptName = self.buildName(source, None, ".m")
         self.info("Creating spm segmentation script {}".format(scriptName))
 
         tags={ 'source': source,
                'gm1': options[0], 'gm2': options[1], 'gm3': options[2],
                'csf1': options[3], 'csf2': options[4], 'csf3': options[5],
                'wm1': options[6], 'wm2': options[7], 'wm3': options[8]}
+
 
         template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/segment.tpl"))
         util.createScript(scriptName, template)
@@ -156,7 +177,7 @@ class Preprocessing(GenericTask):
 
 
     def meetRequirement(self, result=True):
-
+        #@TODO add gradient files validation and correct this function
         if self.isSomeImagesMissing({'denoised': self.getImage(self.dependDir, "dwi", 'denoise')}):
             dwi = self.getImage(self.eddyDir, "dwi", 'eddy')
             if self.isSomeImagesMissing({'eddy corrected': dwi}):
@@ -166,16 +187,14 @@ class Preprocessing(GenericTask):
                 else:
                     self.info("Will take {} image instead".format(dwi))
 
-
-        images = {'high resolution': self.getImage(self.preparationDir, 'anat')}
+        images = {'freesurfer high resolution': self.getImage(self.parcellationDir, 'anat', 'freesurfer')}
         result = self.isAllImagesExists(images)
         return result
 
 
     def isDirty(self, result = False):
 
-        images = {'high resolution brain extracted': self.getImage(self.workingDir ,'anat', "brain"),
-                  'high resolution white matter': self.getImage(self.workingDir ,'anat', "wm"),
-                  'b0 white matter': self.getImage(self.workingDir ,'b0', "wm")}
-
+        images = {'upsampled diffusion weighted': self.getImage(self.workingDir ,'dwi', "upsample"),
+                    'high resolution brain extracted': self.getImage(self.workingDir ,'anat', "brain"),
+                    'high resolution white matter brain extracted': self.getImage(self.workingDir ,'anat',["brain", "wm"])}
         return self.isSomeImagesMissing(images)

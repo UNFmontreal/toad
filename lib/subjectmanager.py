@@ -35,7 +35,7 @@ class SubjectManager(Logger, Config):
         return self.__class__.__name__.lower()
 
 
-    def __isDirAValidSubject(self, source):
+    def __isDirectoryAValidSubject(self, source):
         """Verify if the directory source may be consider a valid subject
 
         Args:
@@ -62,7 +62,7 @@ class SubjectManager(Logger, Config):
         return result
 
 
-    def __getSubjectsDirectories(self):
+    def __instantiateSubjectsFromDirectories(self):
         """Return directories who qualified for the pipeline
 
         Look into each subdirectory if it meet all the requirements. If yes, the subdirectory is consider
@@ -72,18 +72,26 @@ class SubjectManager(Logger, Config):
             subjects: a list of directory containing qualified subjects
 
         """
-        self.info("Looking for valid subjects.")
         subjects = []
+
+        self.info("Directory {} have been specified by the user.".format(self.studyDir))
+        self.info("Looking for valid subjects.")
 
         if self.arguments.subject:
             for dir in self.arguments.subject:
-                if self.__isDirAValidSubject(dir):
+                if self.__isDirectoryAValidSubject(dir):
                     subjects.append(Subject(self.__copyConfig(dir)))
         else:
             dirs = glob.glob("{}/*".format(self.studyDir))
             for dir in dirs:
-                if self.__isDirAValidSubject(dir):
+                if self.__isDirectoryAValidSubject(dir):
                     subjects.append(Subject(self.__copyConfig(dir)))
+
+        subjects = self.__processLocksSubjects(subjects)
+
+        #Subject Load() class need to know how much valid subject are submit.
+        for subject in subjects:
+            subject.setConfigItem("general", "nb_subjects", str(len(subjects)))
 
         return subjects
 
@@ -98,23 +106,34 @@ class SubjectManager(Logger, Config):
                 locks.append(subject)
         if locks:
             if len(locks) == 1:
-                subject = locks.pop()
+                subject = locks[0]
                 tags = {"name": subject.getName(), "lock":subject.getLock()}
                 msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/lock.tpl"))
 
             else:
-                names = []
-                arrayOfLocks = []
+                subjectsNames = []
+                locksFileNames = []
                 for subject in locks:
-                    names.append(subject.getName())
-                    arrayOfLocks.append(subject.getLock())
-                    tags = {"names": ", ".join(names) ,"locks":"\t,\n".join(arrayOfLocks)}
+                    subjectsNames.append(subject.getName())
+                    locksFileNames.append(subject.getLock())
+                    tags = {"names": ", ".join(subjectsNames) ,"locks":"\t,\n".join(locksFileNames)}
                     msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/locks.tpl"))
 
             if self.config.getboolean('arguments', 'prompt'):
-                util.displayYesNoMessage(msg)
+                answer = util.displayContinueQuitRemoveMessage(msg)
+                if answer == "y":
+                    self.info("Locks subjects will be ignored during execution\n")
+                    subjects = [subject for subject in subjects if subject not in locks]
+                elif answer == "r":
+                    self.info("Removing locks and continue the pipeline\n")
+                    for lock in locks:
+                        if os.path.isfile(lock.getLock()):
+                            os.remove(lock.getLock())
+                else:
+                    self.error("Please submit the pipeline again\n")
             else:
                 self.warning(msg)
+        return subjects
 
 
     def __reinitialize(self, subjects):
@@ -128,12 +147,15 @@ class SubjectManager(Logger, Config):
             subjects:  a list of subjects
 
         """
-        if not self.config.getboolean('arguments', 'prompt'):
-            msg = "Are you sure you want to reinitialize your data at is initial stage"
-            util.displayYesNoMessage(msg)
 
+        if self.config.getboolean('arguments', 'prompt'):
+            if util.displayYesNoMessage("Are you sure you want to reinitialize your data at is initial stage"):
+                self.info("Reinitializing all subjects")
+            else:
+                self.quit("Exit the pipeline now as user request")
         else:
-            self.warning("Prompt message have been disabled")
+            self.warning("Prompt message have been disabled, reinitialisation will be force")
+
         for subject in subjects:
             tasksmanager = TasksManager(subject)
             for task in tasksmanager.getTasks():
@@ -182,7 +204,7 @@ class SubjectManager(Logger, Config):
 
         """
 
-        cmd = "echo {0}/bin/toad -u {1} -l {2} -p | qsub -notify -V -N {3} -o {4} -e {4} -q {5}".format(self.config.get('arguments', 'toadDir'),
+        cmd = "echo {0}/bin/toad -u {1} -l {2} -p | qsub -notify -V -N {3} -o {4} -e {4} -q {5}".format(self.config.get('arguments', 'toad_dir'),
               subject.getDir(), self.studyDir, subject.getName(), subject.getLogDir(), self.config.get('general','sge_queue'))
         self.info("Command launch: {}".format(cmd))
         #@DEBUG try to workaround deadlock
@@ -222,15 +244,12 @@ class SubjectManager(Logger, Config):
                 functionnality should be probably render obsolete during the next versions
 
         """
-        self.info("Directory {} have been specified by the user.".format(self.studyDir))
-        subjects = self.__getSubjectsDirectories()
-        self.__processLocksSubjects(subjects)
+        subjects = self.__instantiateSubjectsFromDirectories()
 
         if self.config.getboolean('arguments', 'reinitialize'):
             self.__reinitialize(subjects)
         else:
             for subject in subjects:
-
                     if self.config.getboolean('arguments', 'local'):
                         self.__submitLocal(subject)
                     else:
