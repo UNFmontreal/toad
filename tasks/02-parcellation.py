@@ -193,3 +193,13 @@ class Parcellation(GenericTask):
                     'lh_ribbon':self.getImage(self.workingDir, 'lh_ribbon'),
                     'brodmann':self.getImage(self.workingDir, 'brodmann')}
         return self.isSomeImagesMissing(images)
+
+
+    def qaSupplier(self):
+
+        anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
+        aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
+        brodmann = self.getImage(self.workingDir, 'brodmann')
+        self.pngSlicerImage(anatFreesurfer)
+        self.c3dSegmentation(anatFreesurfer, aparcAseg, '2', '0.5')
+        self.c3dSegmentation(anatFreesurfer, brodmann, '2', '0.5')

@@ -193,8 +193,21 @@ class Preprocessing(GenericTask):
 
 
     def isDirty(self, result = False):
-
+        #@TODO include b0Upsampled image
         images = {'upsampled diffusion weighted': self.getImage(self.workingDir ,'dwi', "upsample"),
                     'high resolution brain extracted': self.getImage(self.workingDir ,'anat', "brain"),
                     'high resolution white matter brain extracted': self.getImage(self.workingDir ,'anat',["brain", "wm"])}
         return self.isSomeImagesMissing(images)
+
+
+    def qaSupplier(self):
+
+        b0Upsampled = self.getImage(self.workingDir, 'b0', "upsample")
+
+        #@DEBUG
+        self.info("Produce {} image".format(b0Upsampled))
+        anatBrain = self.getImage(self.workingDir ,'anat', "brain")
+        anatBrainWhiteMatter = self.getImage(self.workingDir ,'anat',["brain", "wm"])
+
+        self.pngSlicerImage(b0Upsampled, anatBrain)
+        self.pngSlicerImage(b0Upsampled, anatBrainWhiteMatter)

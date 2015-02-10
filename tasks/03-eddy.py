@@ -1,7 +1,12 @@
 from lib.generictask import GenericTask
 from lib import util, mriutil
+import numpy
 import glob
 import os
+
+import matplotlib, mpl_toolkits
+matplotlib.use('Agg')
+
 
 __author__ = 'desmat'
 
@@ -288,6 +293,80 @@ class Eddy(GenericTask):
         self.getNTreadsEddy()
         self.launchCommand(cmd)
         return self.rename(tmp, target)
+
+
+
+    def __plotMvt(self, eddypm, translationOutput, rotationOutput):
+        """
+
+        """
+        parameters = numpy.loadtxt(eddypm)
+
+        Vsize = len(parameters)
+        vols = range(0,Vsize-1)
+
+        translations = parameters[1:Vsize,0:3]
+
+        rotations = parameters[1:Vsize,3:6]
+        rotations = rotations / numpy.pi * 180
+
+        plotdata = [
+            (translations,'translation (mm)',translationOutput),
+            (rotations,'rotation (degree)',rotationOutput)
+            ]
+
+        for data, ylabel, pngoutput in plotdata:
+            matplotlib.pyplot.clf()
+            px, = matplotlib.pyplot.plot(vols, data[:,0])
+            py, = matplotlib.pyplot.plot(vols, data[:,1])
+            pz, = matplotlib.pyplot.plot(vols, data[:,2])
+            matplotlib.pyplot.xlabel('DWI volumes')
+            matplotlib.pyplot.xlim([0,Vsize+10])
+            matplotlib.pyplot.ylabel(ylabel)
+            matplotlib.pyplot.legend([px, py, pz], ['x', 'y', 'z'])
+            matplotlib.pyplot.savefig(pngoutput)
+
+
+    def __plotVectors(self, rawBvec, eddyBvec, outputfile):
+        """
+
+        """
+        gifId = self.idGenerator()
+        fig = matplotlib.pyplot.figure()
+        ax = mpl_toolkits.mplot3d.Axes3D(fig)
+
+        bvec1 = numpy.loadtxt(rawBvec)
+        bvec0= -bvec1
+
+        graphParam = [(80, 'b', 'o', bvec0), (80, 'r', 'o', bvec1)]
+
+        if eddyBvec:
+            bvec2 = numpy.loadtxt(eddyBvec)
+            graphParam.append((20, 'k', '+', bvec2))
+
+        for s, c, m, bv in graphParam:
+            x = bv[0,1:]
+            y = bv[1,1:]
+            z = bv[2,1:]
+            ax.scatter(x, y, z, s=s, c=c, marker=m)
+
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax.set_xlim([-1,1])
+        ax.set_ylim([-1,1])
+        ax.set_zlim([-1,1])
+        matplotlib.pyplot.axis('off')
+
+        cmd = 'convert '
+        for ii in xrange(0,360,2):
+            ax.view_init(elev=10., azim=ii)
+            matplotlib.pyplot.savefig(gifId+str(ii)+'.png')
+            cmd += '-delay 10 ' + gifId + str(ii) + '.png '
+        cmd += outputfile
+        self.launchCommand(cmd)
+        cmd = 'rm ' + gifId + '*'
+        self.launchCommand(cmd)
 
 
     def isIgnore(self):

@@ -37,12 +37,10 @@ class HardiDipy(GenericTask):
         dwiData = dipy.segment.mask.applymask(dwiData, maskData)
 
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValFile), numpy.loadtxt(bVecFile))
-
         sphere = dipy.data.get_sphere('symmetric724')
 
         response, ratio = dipy.reconst.csdeconv.auto_response(gradientTable, dwiData, roi_radius=10, fa_thr=0.7)
         csdModel = dipy.reconst.csdeconv.ConstrainedSphericalDeconvModel(gradientTable, response)
-
         self.info('Start fODF computation')
 
         csdPeaks = dipy.direction.peaks_from_model(model=csdModel,
