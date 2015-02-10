@@ -52,6 +52,8 @@ class Preparation(GenericTask):
                     util.symlink(value, self.workingDir)
 
 
+
+
     def __produceEncodingFiles(self, bEnc, bVal, bVec):
 
         #produire les fichiers gradient encoding pour dipy ainsi que mrtrix
@@ -90,8 +92,6 @@ class Preparation(GenericTask):
 
     def isDirty(self):
 
-        #@TODO Implement AP PA dirtyness
-        #@TODO Implement mag phase dirtyness
         images = {'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', None, 'bval'),
                   'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b'),
@@ -99,3 +99,9 @@ class Preparation(GenericTask):
                   'diffusion weighted': self.getImage(self.workingDir, 'dwi')}
 
         return self.isSomeImagesMissing(images)
+
+
+    def qa(self):
+        produire les images nécessaires
+        produires les métriques et les tâches nécessaire
+

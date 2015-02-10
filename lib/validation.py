@@ -111,6 +111,7 @@ class Validation(object):
                 else:
                     self.warning(msg)
 
+
             if bEnc and not self.__isValidEncoding(nbDirections, '.b'):
                 self.logger.warning("Encoding file {} is invalid".format(bEnc))
                 return False
@@ -118,12 +119,13 @@ class Validation(object):
             if bVal and not self.__isValidEncoding(nbDirections, '.bval'):
                 self.logger.warning("Encoding file {} is invalid".format(bEnc))
                 return False
+
             if bVec and not self.__isValidEncoding(nbDirections, '.bvec'):
                 self.logger.warning("Encoding file {} is invalid".format(bVec))
                 return False
 
 
-        #Validation of optionnal images
+        #Validate optionnal images
         images = {
                   'high resolution': anat,
                   'diffusion weighted': dwi,

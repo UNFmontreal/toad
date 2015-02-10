@@ -25,8 +25,9 @@ class Parcellation(GenericTask):
         unlinkedImages = self.__linkExistingImage(images)
         if len(unlinkedImages) > 0:
             self.__submitReconAllIfNeeded(anat)
+
         if unlinkedImages.has_key('brodmann'):
-            self.__createBrodmannAreaImageFromMricronTemplate()
+            self.__createBrodmannImage()
             del(unlinkedImages['brodmann'])
             self.__convertFeesurferImageIntoNifti(unlinkedImages, anat)
 
@@ -48,6 +49,16 @@ class Parcellation(GenericTask):
 
 
     def __linkExistingImage(self, images):
+        """
+            Create symbolic link for each existing input images into the current working directory.
+
+        Args:
+            images: A list of image
+
+        Returns:
+            A list of invalid images
+
+        """
         unlinkedImages = {}
         #look for existing map store into preparation and link it so they are not created
         for key, value in images.iteritems():
@@ -60,6 +71,19 @@ class Parcellation(GenericTask):
 
 
     def __convertFeesurferImageIntoNifti(self, images, anatomicalName):
+
+        """
+            Convert a List of mgz fresurfer into nifti compress format
+
+        Args:
+            images: A list of mgz image
+            anatomicalName: The subject anatomical image is need to identify the proper T1
+
+        Returns:
+            A list of invalid images
+
+        """
+        #@TODO see if we could substitute anatomivalName
         natives = {  'freesurfer_anat': [self.buildName(anatomicalName, 'freesurfer'), "T1.mgz"],
                      'aparc_aseg': [self.get('aparc_aseg'), "aparc+aseg.mgz"],
                      'rh_ribbon': [self.get('rh_ribbon'), "rh.ribbon.mgz"],
@@ -69,8 +93,14 @@ class Parcellation(GenericTask):
             self.__convertAndRestride(self.__findImageInDirectory(natives[key][1]), natives[key][0])
 
 
-    def __createBrodmannAreaImageFromMricronTemplate(self):
+    def __createBrodmannImage(self):
+        """
+            Create a brodmann area map
 
+        Returns:
+            A brodmann area images
+
+        """
         brodmannTemplate = os.path.join(self.toadDir, self.get("templates_brodmann"))
         target = self.get("brodmann")
         self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
@@ -117,6 +147,15 @@ class Parcellation(GenericTask):
 
 
     def __findImageInDirectory(self, image):
+        """Utility method that look if a input image could be found in a directory and his subdirectory
+
+        Args:
+            image: an input image name
+
+        Returns:
+            the file name if found, False otherwise
+
+        """
         for root, dirs, files in os.walk(os.path.join(self.workingDir, self.id)):
             if image in files:
                 return os.path.join(root, image)
