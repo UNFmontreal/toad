@@ -5,8 +5,8 @@ import os
 
 class Qa(object):
 
-    def __init__(self):
-        pass
+#    def __init__(self):
+#        pass
 
     def idGenerator(self, size=6, chars=ascii_uppercase + digits):
         """
@@ -26,9 +26,9 @@ class Qa(object):
             target : output in png format
         """
         if (target is None) and (optionalOverlay is None):
-            target = self.buildName(backgroundImage, '', 'png')
+            target = self.buildName(backgroundImage, None, 'png')
         elif (target is None) and (optionalOverlay is not None):
-            target = self.buildName(optionalOverlay, '', 'png')
+            target = self.buildName(optionalOverlay, None, 'png')
 
         cmd = 'slicer {} '.format(backgroundImage)
         if optionalOverlay is not None:
@@ -55,9 +55,9 @@ class Qa(object):
 
         lutImage = os.path.join(self.toadDir, "templates/lookup_tables/",'FreeSurferColorLUT_ItkSnap.txt')
         for axes in ['x', 'y', 'z']:
-            target = self.buildName(axes,'', 'png')
+            tmp = self.buildName(axes,'', 'png')
             cmd = 'c3d {}  -scale  {} {} -foreach -slice {} 50% -endfor -oli {} {} -type uchar -omc {}'\
-                .format(backgroundImage, scale, segmentationImage, axes, lutImage, opacity, target)
+                .format(backgroundImage, scale, segmentationImage, axes, lutImage, opacity, tmp)
             self.launchCommand(cmd)
 
         cmd = 'pngappend x.png + y.png + z.png {}'.format(target)
@@ -93,17 +93,17 @@ class Qa(object):
 
         # Extracting pngs from all volumes
         for vol in vols:
-            self.__slicer(vol)
+            self.pngSlicerImage(vol)
 
         # Creating .gif
         cmd = 'convert '
         for vol in vols:
             tmp = self.buildName(vol, '', 'png')
-            cmd += '-delay {} {}'.format(str(gifSpeed), tmp)
+            cmd += '-delay {} {} '.format(str(gifSpeed), tmp)
 
         cmd += target
         self.launchCommand(cmd)
 
         # Cleaning temp files
-        cmd = 'rm {} *'.format(gifId)
+        cmd = 'rm {0}*.png {0}*.nii.gz'.format(gifId)
         self.launchCommand(cmd)

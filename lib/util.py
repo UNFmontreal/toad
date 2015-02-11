@@ -259,7 +259,7 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
         parts = os.path.basename(source).split(os.extsep)
         targetName = parts.pop(0)
 
-    if postfix is not None:
+    if (postfix is not None) and postfix !='':
         if type(postfix) is list:
             for item in postfix:
                 if config.has_option('postfix', item):

@@ -12,7 +12,7 @@ import os
 __author__ = 'desmat'
 
 
-class GenericTask(Logger, Load):
+class GenericTask(Logger, Load, Qa):
 
     def __init__(self, subject, *args):
         """Set up a TASK child class environment.
@@ -37,7 +37,6 @@ class GenericTask(Logger, Load):
         self.workingDir = os.path.join(self.subjectDir, self.__moduleName)
         Logger.__init__(self, subject.getLogDir())
         Load.__init__(self, self.config.get('general', 'nb_subjects'), self.config.get('general', 'nb_threads'))
-        Qa.__init__(self)
         self.dependencies = []
         self.__dependenciesDirNames = {}
         for arg in args:
@@ -105,6 +104,8 @@ class GenericTask(Logger, Load):
         os.chdir(self.workingDir)
         util.symlink(self.getLogFileName(), self.workingDir)
         self.implement()
+        self.info("Create and supply images to the qa report ")
+        self.qaSupplier()	
         os.chdir(currentDir)
 
 
@@ -267,9 +268,6 @@ class GenericTask(Logger, Load):
                     self.info("A problems occur during the execution of this task, resubmitting this task again")
                     attempt += 1
                 else:
-                    self.info("Create and supply images to the qa report ")
-                    self.qaSupplier()
-
                     finish = datetime.now()
                     self.info("Time to finish the task = {} seconds".format(str(timedelta(seconds=(finish - start).seconds))))
                     self.logFooter("implement")
