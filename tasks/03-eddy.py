@@ -291,7 +291,7 @@ class Eddy(GenericTask):
             cmd += " --topup={}".format(topup)
 
         self.getNTreadsEddy()
-        self.launchCommand(cmd)
+        self.launchCommand(cmd, None, None, 5*60*60)
         return self.rename(tmp, target)
 
 

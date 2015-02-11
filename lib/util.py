@@ -62,15 +62,16 @@ def gzip(source):
     return "{}.gz".format(source)
 
 
-def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-1, nice=0):
+def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=None, nice=0):
     """Execute a program in a new process
 
     Args:
-       command: a string representing a unix command to execute
-       stdout: this attribute is a file object that provides output from the child process
-       stderr: this attribute is a file object that provides error from the child process
-       nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
-       timeout: Number of seconds before a process is consider void, usefull against deadlock
+        command: a string representing a unix command to execute
+        stdout: this attribute is a file object that provides output from the child process
+        stderr: this attribute is a file object that provides error from the child process
+        timeout: Number of seconds before a process is consider inactive, usefull against deadlock
+        nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
+
 
     Returns
         return a 2 elements tuples representing the standards output and the standard error message
@@ -84,7 +85,7 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-
     start = datetime.datetime.now()
     process = subprocess.Popen(cmd, preexec_fn=lambda: os.nice(nice), stdout=stdout, stderr=stderr, shell=True)
 
-    if timeout == -1:
+    if timeout is None:
         process.wait()
     else:
         while process.poll() is None:

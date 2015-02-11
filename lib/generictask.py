@@ -312,14 +312,15 @@ class GenericTask(Logger, Load, Qa):
         return self.config.getboolean(self.getName(), option)
 
 
-    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-1, nice=0):
+    def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=None, nice=0):
         """Execute a program in a new process
 
         Args:
-           command: a string representing a unix command to execute
-           stdout: this attribute is a file object that provides output from the child process
-           stderr: this attribute is a file object that provides error from the child process
-           nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
+            command: a string representing a unix command to execute
+            stdout: this attribute is a file object that provides output from the child process
+            stderr: this attribute is a file object that provides error from the child process
+            timeout: Number of seconds before a process is consider inactive, usefull against deadlock
+            nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
 
         Returns
             return a 3 elements tuples representing the command execute, the standards output and the standard error message
