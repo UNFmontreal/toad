@@ -23,7 +23,7 @@ class Eddy(GenericTask):
         dwi = self.getImage(self.dependDir, 'dwi')
         b0AP= self.getImage(self.dependDir, 'b0AP')
         b0PA= self.getImage(self.dependDir, 'b0PA')
-        bFile=  self.getImage(self.dependDir, 'grad',  None, 'b')
+        bEnc=  self.getImage(self.dependDir, 'grad',  None, 'b')
         bVals=  self.getImage(self.dependDir, 'grad',  None, 'bval')
         bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvec')
 
@@ -74,10 +74,10 @@ class Eddy(GenericTask):
         #@TODO remove the glob and use getimage
         eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
         if len(eddyParameterFiles)>0:
-            bCorrected = mriutil.applyGradientCorrection(bFile, eddyParameterFiles.pop(0), self.workingDir)
+            bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles.pop(0), self.builName(outputEddyImage, None, 'b'))
             #produce the bVal and bVec file accordingly
-            mriutil.bEnc2BVec(bCorrected, self.workingDir)
-            mriutil.bEnc2BVal(bCorrected, self.workingDir)
+            mriutil.bEnc2BVec(bCorrected, self.builName(outputEddyImage, None, 'bvec'))
+            mriutil.bEnc2BVal(bCorrected, self.builName(outputEddyImage, None, 'bval'))
 
 
     def  __oddImagesWithEvenNumberOfSlices(self, sources):

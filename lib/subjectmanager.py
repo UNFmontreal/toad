@@ -245,7 +245,6 @@ class SubjectManager(Logger, Config):
 
         """
         subjects = self.__instantiateSubjectsFromDirectories()
-
         if self.config.getboolean('arguments', 'reinitialize'):
             self.__reinitialize(subjects)
         else:

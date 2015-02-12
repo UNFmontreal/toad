@@ -156,8 +156,6 @@ def getFirstB0IndexFromDwi(bval):
 
 def applyGradientCorrection(bFilename, eddyFilename, target):
 
-    output = os.path.join(target, os.path.basename(bFilename).replace(".b","_eddy.b"))
-
     f = open(eddyFilename, 'r')
     g = open(bFilename, 'r')
     eddys = f.readlines()
@@ -165,7 +163,7 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
     f.close()
     g.close()
 
-    h = open(output, 'w')
+    h = open(target, 'w')
 
     for index, line in enumerate(eddys):
         row_four_to_six_eddy = line.split('  ')[3:6]
@@ -189,7 +187,7 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
         h.write(values)
 
     h.close()
-    return output
+    return target
 
 
 def bValBVec2BEnc(bvalFilename, bvecFilename, target):
