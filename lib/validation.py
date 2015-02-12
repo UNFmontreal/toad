@@ -81,14 +81,14 @@ class Validation(object):
         if not anat:
             if util.getImage(self.config, self.workingDir, 'anat', None, 'nii'):
                 self.logger.error("Found some uncompressed images into {} directory. "
-                           "gzip those images and resubmit the pipeline again".format(self.workingDir))
+                           "Please gzip those images and resubmit the pipeline again".format(self.workingDir))
             self.logger.error("No high resolution image found into {} directory".format(self.workingDir))
 
         dwi = util.getImage(self.config, self.workingDir, 'dwi')
         if not dwi:
             if util.getImage(self.config, self.workingDir, 'dwi', None, 'nii'):
                 self.logger.error("Found some uncompressed image into {} directory. "
-                           "gzip those images and resubmit the pipeline again".format(self.workingDir))
+                           "Please gzip those images and resubmit the pipeline again".format(self.workingDir))
             self.logger.error("No diffusion weight image found into {} directory".format(self.workingDir))
 
         bEnc = util.getImage(self.config, self.workingDir,'grad', None, 'b')
@@ -147,7 +147,7 @@ class Validation(object):
                            If you continue, all unexpected images will be realign accordingly.\n\
                            Only a copy of the original images will be alter.".format(value)
                     if not util.displayYesNoMessage(msg):
-                        self.quit("Quit the pipeline as user request")
+                        self.logger.quit("Quit the pipeline as user request")
                     else:
                         break
 

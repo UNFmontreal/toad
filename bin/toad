@@ -201,6 +201,12 @@ def __manageEnvironnement(logger):
                 logger.error("Spm package not found, Please install spm or set the pathdef variable correctly")
 
 
+    result = util.which("convert")
+    if result is None:
+        logger.error("ImageMagick not found. Please install the package or set the environment variable $PATH correctly")
+
+
+
 if __name__ == '__main__':
 
     #create a logger

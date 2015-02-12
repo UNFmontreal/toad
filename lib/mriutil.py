@@ -126,11 +126,23 @@ def getNbDirectionsFromDWI(source):
     return 0
 
 
+def getDataStridesOrientation(source):
+    """ return datas stride layout
+
+    Args:
+        source: A mri image
+
+    Returns:
+        An array of string elements representing the layout of the image
+
+    """
+    return getMrinfoFieldValues(mrinfo(source), "Data strides:").strip("[]").split()
+
+
 def isDataStridesOrientationExpected(source):
-    strides = getMrinfoFieldValues(mrinfo(source), "Data strides:")
-    tokens = strides.strip("[]").split()
-    if len(tokens) >= 3:
-        if tokens[0].strip() in "1" and tokens[1].strip() in "2" and tokens[2].strip() in "3": 
+    strides = getDataStridesOrientation(source)
+    if len(strides) >= 3:
+        if strides[0].strip() in "1" and strides[1].strip() in "2" and strides[2].strip() in "3":
             return True
     return False
 
@@ -180,8 +192,7 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
     return output
 
 
-def bValBVec2BEnc(bvalFilename, bvecFilename, outputDir):
-    bEncodingFilename = os.path.join(outputDir, os.path.basename(bvalFilename).replace(".bval",".b"))
+def bValBVec2BEnc(bvalFilename, bvecFilename, target):
 
     b = open(bvalFilename,"r")
     v = open(bvecFilename,"r")
@@ -194,15 +205,14 @@ def bValBVec2BEnc(bvalFilename, bvecFilename, outputDir):
     for bVec in bVecsLines:
         bVecs.append(bVec.strip().split())
 
-    f = open(bEncodingFilename,'w')
+    f = open(target,'w')
     for index, bval in enumerate(bvals.pop().strip().split()):
-        f.write("{}\t{}\t{}\t{}\n".format(bVecs[0][index], bVecs[1][index], bVecs[2][index],bval, ))
+        f.write("{}\t{}\t{}\t{}\n".format(bVecs[0][index], bVecs[1][index], bVecs[2][index],bval))
     f.close()
-    return bEncodingFilename
+    return target
 
 
-def bEnc2BVec(source, outputDir):
-    bvecFilename = os.path.join(outputDir, os.path.basename(source).replace(".b",".bvec"))
+def bEnc2BVec(source, target):
     bvecs = []
 
     f = open(source, 'r')
@@ -214,7 +224,7 @@ def bEnc2BVec(source, outputDir):
             bvecs.append(tokens[0:3])
     bvecs = zip(*bvecs)
 
-    v = open(bvecFilename,"w")
+    v = open(target,"w")
 
     for items in bvecs:
         for item in items:
@@ -222,12 +232,11 @@ def bEnc2BVec(source, outputDir):
         v.write("\n")
     v.close()
 
-    return bvecFilename
+    return target
 
 
-def bEnc2BVal(source, outputDir):
+def bEnc2BVal(source, target):
 
-    bvalFilename = os.path.join(outputDir,os.path.basename(source).replace(".b",".bval"))
     bvals = []
 
     f = open(source,'r')
@@ -237,14 +246,92 @@ def bEnc2BVal(source, outputDir):
         tokens = line.split()
         bvals.append(tokens.pop(3))
 
-    b = open(bvalFilename,"w")
+    b = open(target,"w")
 
     for bval in bvals:
         b.write("{} ".format(bval))
     b.close()
 
-    return bvalFilename
+    return target
 
+
+def strideEncodingFile(source, originalLayout, target):
+    """
+        Change strides from an encoding file to  layout 1,2,3
+    Args:
+        source: An Vector encoding file with .b or .bvec  extension
+        originalLayout: the initial layout of the dwi image
+        target: the output filename
+
+    Return:
+        the output filename
+
+    """
+
+    def changeSignBEnc(lines):
+        results = []
+        for line in lines:
+            tokens = line.split()
+            for i in [0, 1, 2]:
+                if int(originalLayout[i]) < 0:
+                    if tokens[i][0] == "-":
+                        tokens[i] = tokens[i].replace("-",'')
+                    else:
+                        tokens[i] = "-{}".format(tokens[i])
+            results.append(tokens)
+        return results
+
+    def changeSignBVec(lines):
+        results = []
+        for i in [0, 1, 2]:
+            vector = []
+            for element in lines[i].split():
+                if int(originalLayout[i]) < 0:
+                    if element[0] == "-":
+                        element = element.replace("-", '')
+                    else:
+                        element = "-{}".format(element)
+                vector.append(element)
+            results.append(vector)
+        return results
+
+    def permuteColumnBEnc(lines):
+        results = []
+        for line in lines:
+            results.append([line[indexes['1']],line[indexes['2']],line[indexes['3']],line[3]])
+        return results
+
+
+    def permuteColumnBVec(lines):
+        return [lines[indexes['1']], lines[indexes['2']],lines[indexes['3']]]
+
+    indexes = {originalLayout[0].replace('-',''): 0,
+               originalLayout[1].replace('-',''): 1,
+               originalLayout[2].replace('-',''): 2}
+
+    f = open(source,'r')
+    lines = f.readlines()
+    f.close()
+
+    b = open(target, "w")
+    if len(lines[0].split()) == 4:
+        lines = changeSignBEnc(lines)
+        lines = permuteColumnBEnc(lines)
+        for line in lines:
+                b.write("{}\t{}\t{}\t{}\n".format(line[0], line[1], line[2], line[3]))
+
+    elif len(lines) == 3:
+        print "orig =",lines
+        lines = changeSignBVec(lines)
+        lines = permuteColumnBVec(lines)
+        print "finish =",lines
+        for items in lines:
+            for item in items:
+                b.write("{} ".format(item))
+            b.write("\n")
+
+    b.close()
+    return target
 
 def extractFreesurferStructure(l, source, target):
     a = nipy.io.api.load_image(source)

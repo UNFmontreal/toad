@@ -9,7 +9,6 @@ import os
 
 __author__ = 'mathieu'
 
-
 def symlink(source, target):
     """link a file into the target directory. the link name is the same as the file
 
@@ -21,14 +20,17 @@ def symlink(source, target):
         the relative link name created
 
     """
-    if not os.path.isabs(source):
-        source = os.path.abspath(source)
-    [dir, name] = os.path.split(source)
-    #output = os.path.join(target, name)
-    src = "../{}/{}".format(os.path.basename(os.path.normpath(dir)), name)
-    if os.path.exists(name):
-        os.remove(name)
-    os.symlink(src, name)
+    if os.path.exists(os.path.join(target, os.path.basename(source))):
+        src = source
+    else:
+        if not os.path.isabs(source):
+            source = os.path.abspath(source)
+        [dir, name] = os.path.split(source)
+        src = "../{}/{}".format(os.path.basename(os.path.normpath(dir)), name)
+        if os.path.exists(name):
+            os.remove(name)
+        os.symlink(src, name)
+
     return src
 
 
@@ -349,6 +351,7 @@ def displayYesNoMessage(msg, question = "Continue? (y or n)"):
             return True
         elif choice == 'n':
             return False
+
 
 def displayContinueQuitRemoveMessage(msg):
     print msg
