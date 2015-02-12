@@ -18,28 +18,35 @@ class Preparation(GenericTask):
         bVal = self.getImage(self.dependDir, 'grad', None, 'bval')
         bVec = self.getImage(self.dependDir, 'grad', None, 'bvec')
 
-        b0PA = self.getImage(self.dependDir, 'b0PA')
-        b0AP = self.getImage(self.dependDir, 'b0AP')
 
-        self.__produceEncodingFiles(bEnc, bVal, bVec)
+        if not mriutil.isDataStridesOrientationExpected(dwi) and self.getBoolean("force_realign_strides"):
 
-        if b0PA:
-            self.info("Found B0 posterior to anterior image, linking file {} to {}".format(b0AP, self.workingDir))
-            util.symlink(b0PA, self.workingDir)
+            self.warning("Reorienting stride for image {}".format(dwi))
+            originalLayout = mriutil.getDataStridesOrientation(dwi)
+            dwi = mriutil.strideImage(dwi, self.buildName(dwi, "stride"))
+            if bEnc:
+                bEnc = mriutil.strideEncodingFile(bEnc, originalLayout, self.buildName(dwi, None, 'b'))
+            if bVec:
+                print bVec
+                bVec = mriutil.strideEncodingFile(bVec, originalLayout, self.buildName(dwi, None, 'bvec'))
+                print bVec
+        else:
+            util.symlink(dwi, self.workingDir)
 
-        if b0AP:
-            self.info("Found B0 anterior to posterior image, linking file {} to {}".format(b0AP, self.workingDir))
-            util.symlink(b0AP, self.workingDir)
+        #produce missing gradient files
+        (bEnc, bVal, bVec) = self.__produceEncodingFiles(bEnc, bVal, bVec, dwi)
+
 
         images = {'high resolution': self.getImage(self.dependDir, 'anat'),
-                  'diffusion weighted': dwi,
-                  'MR magnitude ': self.getImage(self.dependDir, 'mag'),
-                  'MR phase ': self.getImage(self.dependDir, 'phase'),
-                  'parcellation': self.getImage(self.dependDir,'aparc_aseg'),
-                  'freesurfer anatomical': self.getImage(self.dependDir, 'anat', 'freesurfer'),
-                  'left hemisphere ribbon': self.getImage(self.dependDir, 'lh_ribbon'),
-                  'right hemisphere ribbon': self.getImage(self.dependDir, 'rh_ribbon'),
-                  'brodmann': self.getImage(self.dependDir, 'brodmann')}
+                    'B0 posterior to anterior': self.getImage(self.dependDir, 'b0PA'),
+                    'B0 anterior to posterior': self.getImage(self.dependDir, 'b0AP'),
+                    'MR magnitude ': self.getImage(self.dependDir, 'mag'),
+                    'MR phase ': self.getImage(self.dependDir, 'phase'),
+                    'parcellation': self.getImage(self.dependDir,'aparc_aseg'),
+                    'freesurfer anatomical': self.getImage(self.dependDir, 'anat', 'freesurfer'),
+                    'left hemisphere ribbon': self.getImage(self.dependDir, 'lh_ribbon'),
+                    'right hemisphere ribbon': self.getImage(self.dependDir, 'rh_ribbon'),
+                    'brodmann': self.getImage(self.dependDir, 'brodmann')}
 
         for key, value in images.iteritems():
             if value:
@@ -52,24 +59,28 @@ class Preparation(GenericTask):
                     util.symlink(value, self.workingDir)
 
 
-    def __produceEncodingFiles(self, bEnc, bVal, bVec):
+    def __produceEncodingFiles(self, bEnc, bVal, bVec, dwi):
 
-        #produire les fichiers gradient encoding pour dipy ainsi que mrtrix
+
         self.info("Produce .b .bval and .bvec gradient file if not existing")
         if not bEnc:
-            mriutil.bValBVec2BEnc(bVal, bVec, self.workingDir)
+            mriutil.bValBVec2BEnc(bVal, bVec, self.buildName(dwi, None, "b"))
         else:
             util.symlink(bEnc, self.workingDir)
 
         if not bVal:
-            mriutil.bEnc2BVal(bEnc, self.workingDir)
+            mriutil.bEnc2BVal(bEnc, self.buildName(dwi, None, "bval"))
         else:
             util.symlink(bVal, self.workingDir)
 
         if not bVec:
-            mriutil.bEnc2BVec(bEnc, self.workingDir)
+            mriutil.bEnc2BVec(bEnc, self.buildName(dwi, None, "bvec"))
         else:
             util.symlink(bVec, self.workingDir)
+
+        return (self.getImage(self.workingDir, 'grad', None, 'b'),
+                self.getImage(self.workingDir, 'grad', None, 'bval'),
+                self.getImage(self.workingDir, 'grad', None, 'bvec'))
 
 
     def meetRequirement(self, result=True):
@@ -90,8 +101,6 @@ class Preparation(GenericTask):
 
     def isDirty(self):
 
-        #@TODO Implement AP PA dirtyness
-        #@TODO Implement mag phase dirtyness
         images = {'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', None, 'bval'),
                   'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b'),
@@ -99,3 +108,16 @@ class Preparation(GenericTask):
                   'diffusion weighted': self.getImage(self.workingDir, 'dwi')}
 
         return self.isSomeImagesMissing(images)
+
+
+    def qaSupplier(self):
+        """Create and supply images for the report generated by qa task
+
+        """
+        anat = self.getImage(self.workingDir, 'anat')
+        dwi = self.getImage(self.workingDir, 'dwi')
+        self.pngSlicerImage(anat)
+        self.nifti4dtoGif(dwi)
+
+
+

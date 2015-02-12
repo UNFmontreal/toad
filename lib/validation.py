@@ -80,16 +80,16 @@ class Validation(object):
         anat = util.getImage(self.config, self.workingDir, 'anat')
         if not anat:
             if util.getImage(self.config, self.workingDir, 'anat', None, 'nii'):
-                self.error("Found some uncompressed images into {} directory. "
-                           "gzip those images and resubmit the pipeline again".format(self.workingDir))
-            self.error("No high resolution image found into {} directory".format(self.workingDir))
+                self.logger.error("Found some uncompressed images into {} directory. "
+                           "Please gzip those images and resubmit the pipeline again".format(self.workingDir))
+            self.logger.error("No high resolution image found into {} directory".format(self.workingDir))
 
         dwi = util.getImage(self.config, self.workingDir, 'dwi')
         if not dwi:
             if util.getImage(self.config, self.workingDir, 'dwi', None, 'nii'):
-                self.error("Found some uncompressed image into {} directory. "
-                           "gzip those images and resubmit the pipeline again".format(self.workingDir))
-            self.error("No diffusion weight image found into {} directory".format(self.workingDir))
+                self.logger.error("Found some uncompressed image into {} directory. "
+                           "Please gzip those images and resubmit the pipeline again".format(self.workingDir))
+            self.logger.error("No diffusion weight image found into {} directory".format(self.workingDir))
 
         bEnc = util.getImage(self.config, self.workingDir,'grad', None, 'b')
         bVal = util.getImage(self.config, self.workingDir,'grad', None, 'bval')
@@ -111,6 +111,7 @@ class Validation(object):
                 else:
                     self.warning(msg)
 
+
             if bEnc and not self.__isValidEncoding(nbDirections, '.b'):
                 self.logger.warning("Encoding file {} is invalid".format(bEnc))
                 return False
@@ -118,12 +119,13 @@ class Validation(object):
             if bVal and not self.__isValidEncoding(nbDirections, '.bval'):
                 self.logger.warning("Encoding file {} is invalid".format(bEnc))
                 return False
+
             if bVec and not self.__isValidEncoding(nbDirections, '.bvec'):
                 self.logger.warning("Encoding file {} is invalid".format(bVec))
                 return False
 
 
-        #Validation of optionnal images
+        #Validate optionnal images
         images = {
                   'high resolution': anat,
                   'diffusion weighted': dwi,
@@ -145,7 +147,7 @@ class Validation(object):
                            If you continue, all unexpected images will be realign accordingly.\n\
                            Only a copy of the original images will be alter.".format(value)
                     if not util.displayYesNoMessage(msg):
-                        self.quit("Quit the pipeline as user request")
+                        self.logger.quit("Quit the pipeline as user request")
                     else:
                         break
 

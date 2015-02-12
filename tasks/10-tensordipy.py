@@ -58,14 +58,13 @@ class TensorDipy(GenericTask):
         fa = dipy.reconst.dti.fractional_anisotropy(fit.evals)
         fa[numpy.isnan(fa)] = 0
         nibabel.save(nibabel.Nifti1Image(fa.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "fa"))
-
         nibabel.save(nibabel.Nifti1Image(fit.ad.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "ad"))
         nibabel.save(nibabel.Nifti1Image(fit.rd.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "rd"))
         nibabel.save(nibabel.Nifti1Image(fit.md.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "md"))
-	nibabel.save(nibabel.Nifti1Image(fit.evecs[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v1"))
-	nibabel.save(nibabel.Nifti1Image(fit.evecs[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v2"))
-	nibabel.save(nibabel.Nifti1Image(fit.evecs[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v3")) 
-	
+        nibabel.save(nibabel.Nifti1Image(fit.evecs[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v1"))
+        nibabel.save(nibabel.Nifti1Image(fit.evecs[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v2"))
+        nibabel.save(nibabel.Nifti1Image(fit.evecs[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v3"))
+
         faColor = numpy.clip(fa, 0, 1)
         rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
         nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(target, "rgb"))

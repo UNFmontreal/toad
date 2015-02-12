@@ -96,6 +96,11 @@ class Denoising(GenericTask):
         return self.get("algorithm") is "None"
 
 
+    def qaSupplier(self):
+        denoise = self.getImage(self.workingDir, "dwi", 'denoise')
+        self.nifti4dtoGif(denoise)
+
+
     def meetRequirement(self, result = True):
         if self.isSomeImagesMissing({'fieldmap': self.getImage(self.fieldmapDir, "dwi", 'unwarp')}) and \
                 self.isSomeImagesMissing({'eddy corrected': self.getImage(self.dependDir, "dwi", 'eddy')}) and \
@@ -108,5 +113,3 @@ class Denoising(GenericTask):
     def isDirty(self, result = False):
         dict = {'denoised': self.getImage(self.workingDir, "dwi", 'denoise')}
         return self.isSomeImagesMissing(dict)
-
-

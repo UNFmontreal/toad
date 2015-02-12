@@ -9,7 +9,6 @@ import os
 
 __author__ = 'mathieu'
 
-
 def symlink(source, target):
     """link a file into the target directory. the link name is the same as the file
 
@@ -21,14 +20,17 @@ def symlink(source, target):
         the relative link name created
 
     """
-    if not os.path.isabs(source):
-        source = os.path.abspath(source)
-    [dir, name] = os.path.split(source)
-    #output = os.path.join(target, name)
-    src = "../{}/{}".format(os.path.basename(os.path.normpath(dir)), name)
-    if os.path.exists(name):
-        os.remove(name)
-    os.symlink(src, name)
+    if os.path.exists(os.path.join(target, os.path.basename(source))):
+        src = source
+    else:
+        if not os.path.isabs(source):
+            source = os.path.abspath(source)
+        [dir, name] = os.path.split(source)
+        src = "../{}/{}".format(os.path.basename(os.path.normpath(dir)), name)
+        if os.path.exists(name):
+            os.remove(name)
+        os.symlink(src, name)
+
     return src
 
 
@@ -62,15 +64,16 @@ def gzip(source):
     return "{}.gz".format(source)
 
 
-def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-1, nice=0):
+def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=None, nice=0):
     """Execute a program in a new process
 
     Args:
-       command: a string representing a unix command to execute
-       stdout: this attribute is a file object that provides output from the child process
-       stderr: this attribute is a file object that provides error from the child process
-       nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
-       timeout: Number of seconds before a process is consider void, usefull against deadlock
+        command: a string representing a unix command to execute
+        stdout: this attribute is a file object that provides output from the child process
+        stderr: this attribute is a file object that provides error from the child process
+        timeout: Number of seconds before a process is consider inactive, usefull against deadlock
+        nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
+
 
     Returns
         return a 2 elements tuples representing the standards output and the standard error message
@@ -84,7 +87,7 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=-
     start = datetime.datetime.now()
     process = subprocess.Popen(cmd, preexec_fn=lambda: os.nice(nice), stdout=stdout, stderr=stderr, shell=True)
 
-    if timeout == -1:
+    if timeout is None:
         process.wait()
     else:
         while process.poll() is None:
@@ -259,7 +262,7 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
         parts = os.path.basename(source).split(os.extsep)
         targetName = parts.pop(0)
 
-    if postfix is not None:
+    if (postfix is not None) and postfix !='':
         if type(postfix) is list:
             for item in postfix:
                 if config.has_option('postfix', item):
@@ -348,6 +351,7 @@ def displayYesNoMessage(msg, question = "Continue? (y or n)"):
             return True
         elif choice == 'n':
             return False
+
 
 def displayContinueQuitRemoveMessage(msg):
     print msg
