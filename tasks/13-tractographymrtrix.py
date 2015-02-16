@@ -63,7 +63,7 @@ class TractographyMrtrix(GenericTask):
         self.info("Starting tckgen creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
         cmd = "tckgen {} {}  -mask {} -act {} -seed_gmwmi {} -number {} -algorithm {} -nthreads {} -quiet"\
-            .format(source, tmp, mask,  act, seed_gmwmi, self.get( 'number_tracks'), algorithm, self.getNTreadsMrtrix())
+            .format(source, tmp, mask,  act, seed_gmwmi, self.get('number_tracks'), algorithm, self.getNTreadsMrtrix())
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)

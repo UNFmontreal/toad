@@ -141,7 +141,8 @@ class Parcellation(GenericTask):
 
         """
         self.info("convert {} image to {} ".format(source, target))
-        cmd = "mrconvert {} {} -stride {} -force".format(source, target, self.get('stride_orientation'))
+        cmd = "mrconvert {} {} -stride {} -force"\
+            .format(source, target, self.config.get('preparation', 'stride_orientation'))
         self.launchCommand(cmd, 'log', 'log')
         return target
 

@@ -18,24 +18,22 @@ class Preparation(GenericTask):
         bVal = self.getImage(self.dependDir, 'grad', None, 'bval')
         bVec = self.getImage(self.dependDir, 'grad', None, 'bvec')
 
-
-        if not mriutil.isDataStridesOrientationExpected(dwi) and self.getBoolean("force_realign_strides"):
+        expectedLayout = self.get('stride_orientation')
+        if not mriutil.isDataStridesOrientationExpected(dwi, expectedLayout) \
+                and self.getBoolean("force_realign_strides"):
 
             self.warning("Reorienting stride for image {}".format(dwi))
             originalLayout = mriutil.getDataStridesOrientation(dwi)
-            dwi = mriutil.strideImage(dwi, self.buildName(dwi, "stride"))
+            dwi = mriutil.strideImage(dwi, expectedLayout, self.buildName(dwi, "stride"))
             if bEnc:
-                bEnc = mriutil.strideEncodingFile(bEnc, originalLayout, self.buildName(dwi, None, 'b'))
+                bEnc = mriutil.strideEncodingFile(bEnc, originalLayout, expectedLayout, self.buildName(dwi, None, 'b'))
             if bVec:
-                print bVec
-                bVec = mriutil.strideEncodingFile(bVec, originalLayout, self.buildName(dwi, None, 'bvec'))
-                print bVec
+                bVec = mriutil.strideEncodingFile(bVec, originalLayout, expectedLayout, self.buildName(dwi, None, 'bvec'))
         else:
             util.symlink(dwi, self.workingDir)
 
         #produce missing gradient files
         (bEnc, bVal, bVec) = self.__produceEncodingFiles(bEnc, bVal, bVec, dwi)
-
 
         images = {'high resolution': self.getImage(self.dependDir, 'anat'),
                     'B0 posterior to anterior': self.getImage(self.dependDir, 'b0PA'),
@@ -50,17 +48,15 @@ class Preparation(GenericTask):
 
         for key, value in images.iteritems():
             if value:
-                if not mriutil.isDataStridesOrientationExpected(value) \
+                if not mriutil.isDataStridesOrientationExpected(value, expectedLayout) \
                         and self.getBoolean("force_realign_strides"):
-                    mriutil.strideImage(value, self.buildName(value, "stride"))
+                    mriutil.strideImage(value, expectedLayout, self.buildName(value, "stride"))
 
                 else:
                     self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
                     util.symlink(value, self.workingDir)
 
-
     def __produceEncodingFiles(self, bEnc, bVal, bVec, dwi):
-
 
         self.info("Produce .b .bval and .bvec gradient file if not existing")
         if not bEnc:
