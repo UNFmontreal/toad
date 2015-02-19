@@ -26,7 +26,7 @@ class SubjectManager(Logger, Config):
 
 
     def getName(self):
-        """Return the name of the SubjectManager class  in a lower case
+        """Return the name of the SubjectManager class in a lower case
 
         Return:
             name of this class in a lower case
@@ -97,8 +97,13 @@ class SubjectManager(Logger, Config):
 
 
     def __processLocksSubjects(self, subjects):
-        """look if some subject are currently lock into the pipeline
+        """look if some subjects from a list currently are locked into the pipeline
 
+        Args:
+            subjects: a list of the subject
+
+        Returns:
+            a list of subjects that is not lock
         """
         locks = []
         for subject in subjects:
@@ -200,14 +205,13 @@ class SubjectManager(Logger, Config):
         """Submit execution of the subject into the grid engine
 
         Args:
-            config:  a configuration structure containing pipeline options
+            subject:  a subject
 
         """
 
         cmd = "echo {0}/bin/toad -u {1} -l {2} -p | qsub -notify -V -N {3} -o {4} -e {4} -q {5}".format(self.config.get('arguments', 'toad_dir'),
-              subject.getDir(), self.studyDir, subject.getName(), subject.getLogDir(), self.config.get('general','sge_queue'))
+              subject.getDir(), self.studyDir, subject.getName(), subject.getLogDir(), self.config.get('general', 'sge_queue'))
         self.info("Command launch: {}".format(cmd))
-        #@DEBUG try to workaround deadlock
         import subprocess
         process = subprocess.Popen(cmd, stdout=None, stderr=None, shell=True)
         process.wait()
@@ -238,11 +242,6 @@ class SubjectManager(Logger, Config):
 
     def run(self):
         """Launch the pipeline
-
-        Raises:
-            NotImplementedError: multitasks into a shell should be avoid at all cost, this
-                functionnality should be probably render obsolete during the next versions
-
         """
         subjects = self.__instantiateSubjectsFromDirectories()
         if self.config.getboolean('arguments', 'reinitialize'):

@@ -16,7 +16,7 @@ def symlink(source, target):
         source:  name of the source file
         target:  destination directory
 
-    Returns
+    Returns:
         the relative link name created
 
     """
@@ -40,7 +40,7 @@ def gunzip(source):
     Args:
         source:  a filename to uncompress
 
-    Returns
+    Returns:
         the filename resulting from the compression
 
     """
@@ -55,7 +55,7 @@ def gzip(source):
     Args:
         source:  a filename to compress
 
-    Returns
+    Returns:
         the filename resulting from the compression
 
     """
@@ -109,7 +109,8 @@ def createScript(source, text):
         text: Text to write into the script
 
     Returns:
-        True if the file
+        True if the file have been created
+
     """
     try:
         f = open(source, 'w')
@@ -293,6 +294,9 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
 
 
 def getFileWithParents(source, levels=1):
+    """
+
+    """
     common = source
     for i in range(levels + 1):
         common = os.path.dirname(common)
@@ -300,6 +304,9 @@ def getFileWithParents(source, levels=1):
 
 
 def which(source):
+    """
+
+    """
     def isExecutable(sourcePath):
         return os.path.isfile(sourcePath) and os.access(sourcePath, os.X_OK)
 

@@ -9,9 +9,15 @@ class Qa(object):
 #        pass
 
     def idGenerator(self, size=6, chars=ascii_uppercase + digits):
-        """
-        Generate random strings
-        Default: length of 6 uppercase and digits
+        """Generate random strings
+
+        Args:
+            size: length of 6 uppercase and digits. default: 6 characters
+            #@Christophe comment
+            chars: ascii_uppercase + digits
+
+        Returns:
+            a string of lenght (size) that contain random number
         """
         return ''.join(choice(chars) for _ in range(size))
 
@@ -38,15 +44,16 @@ class Qa(object):
 
 
     def c3dSegmentation(self, backgroundImage, segmentationImage, scale, opacity, target=None):
-        """
-        Utility method to use c3d from ITKSnap package
+        """Utility method to use c3d from ITKSnap package
+
+        if target is None, the output filename will be base on the segmentation image name
 
         Args:
             backgroundImage : background image
             segmentationImage : segmentation image
             scale the background image
             opacity of the segmentation between 0 and 1
-            target : output in png format
+            target : output filename in png format
 
         """
 
@@ -68,15 +75,15 @@ class Qa(object):
 
 
     def nifti4dtoGif(self, source, target=None, gifSpeed=30):
-        """
-        Create a animated gif from a 4d NIfTI
+        """ Create a animated gif from a 4d NIfTI
 
-        Compulsory arguments :
-        source 4D NIfTI image
-        target : outputfile gif name
+        if target is None, the output filename will be base on source name
 
-        Optional arguments :
-        gifSpeed    : delay between images (tens of ms), default=30
+        Args:
+            source: 4D NIfTI image
+            target : outputfile gif name
+            gifSpeed    : delay between images (tens of ms), default=30
+
         """
         if target is None:
             target = self.buildName(source, '', 'gif')

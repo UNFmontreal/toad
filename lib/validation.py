@@ -154,37 +154,6 @@ class Validation(object):
 
         return True
 
-    """
-    def __validateNiftiImage(self, prefix):
-        Determine if an image with a prefix exists into the subject directory
-
-        Args:
-            prefix: prefix that is required into the filename
-
-        Returns:
-            a Boolean that represent if the image filename exist
-
-
-
-        files = glob.glob("{}/{}*.nii*".format(self.workingDir, prefix))
-        if not files:
-            self.logger.warning("No {} images found with pattern {}* in directory: {}"
-                                .format(prefix.replace("_",""), prefix, self.workingDir))
-            return False
-        if len(files) > 1:
-            self.logger.warning("Found many {} images in directory {}, only one should be provided"
-                                .format(prefix.replace("_",""), self.workingDir))
-            return False
-
-        filename = os.path.basename(files.pop())
-        #make sure that some postfix are not contain in the image file
-        for (key, item) in self.config.items("postfix"):
-            if item in filename:
-                self.logger.warning("Image name {} contain postfix {} which is prohibited".format(filename,item))
-                return False
-        return True
-    """
-
     def __isValidEncoding(self, nbDirection, type):
         """Determine if an image with a prefix exists into the subject directory
 

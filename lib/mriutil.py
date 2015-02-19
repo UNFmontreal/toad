@@ -79,14 +79,33 @@ def mrinfo(source):
 
 
 def invertMatrix(source, target):
+    """ invert a transformation matrices
+
+    Args:
+        source: an input transformation matrices
+        target: an output transformation matrices name
+
+    Returns:
+        the resulting output transformation matrices name
+
+    """
     cmd = "convert_xfm -inverse {} -omat {}".format(source, target)
     (stdout, stderr) = util.launchCommand(cmd)
     return target
 
 
 def strideImage(source, layout, target):
+    """perform a reorientation of the axes and flip the image
 
+    Args:
+        source: the input image
+        layout: comma-separated list that specify the strides.
+        target: the name of the resulting filename
 
+    Returns:
+        the name of the resulting filename
+
+    """
     if len(getMriDimensions(source)) == 3:
         cmd = "mrconvert {} {} -stride {}"
     else:
@@ -96,7 +115,18 @@ def strideImage(source, layout, target):
     return target
 
 
-def getMrinfoFieldValues(text, field, delimiter=""):
+def __getMrinfoFieldValues(text, field, delimiter=""):
+    """Utility function that extract valuable array information from mrinfo metadata
+    this function is not portale
+    Args:
+        text: the data info return by an mrinfo command call
+        field: the fieldname to extract values of.
+        delimiter: use to split an string elements into array
+
+    Returns:
+        an array of elements (strings or float... whatever)
+
+    """
     output = []
     for line in text:
         if field in line:
@@ -115,14 +145,41 @@ def getMrinfoFieldValues(text, field, delimiter=""):
 
 
 def getMriDimensions(source):
-    return getMrinfoFieldValues(mrinfo(source), "Dimensions:", "x")
+    """get the image dimension along each axis of the source image
+
+    Args:
+        source: A mri image
+
+    Returns:
+        the image dimension along each axis
+
+    """
+    return __getMrinfoFieldValues(mrinfo(source), "Dimensions:", "x")
 
 
 def getMriVoxelSize(source):
-    return getMrinfoFieldValues(mrinfo(source), "Voxel size:", "x")
+    """get the voxel size of the source image
+
+    Args:
+        source: A mri image
+
+    Returns:
+        the voxel size of the source image
+
+    """
+    return __getMrinfoFieldValues(mrinfo(source), "Voxel size:", "x")
 
 
 def getNbDirectionsFromDWI(source):
+    """get the number of directions contains into the source image
+
+    Args:
+        source: A mri image
+
+    Returns:
+        the number of directions contains into the source image
+
+    """
     dimensions =  getMriDimensions(source)
     if len(dimensions) == 4:
             return int(dimensions[3])
@@ -139,7 +196,7 @@ def getDataStridesOrientation(source):
         An array of string elements representing the layout of the image
 
     """
-    return ",".join(getMrinfoFieldValues(mrinfo(source), "Data strides:").strip("[]").split())
+    return ",".join(__getMrinfoFieldValues(mrinfo(source), "Data strides:").strip("[]").split())
 
 
 def isDataStridesOrientationExpected(source, layouts):

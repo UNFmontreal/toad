@@ -163,12 +163,30 @@ class Logger(object):
 
 
     def getLogFileName(self):
+        """Return the filename of the log file
+
+        Returns:
+            Return the filename of the log file
+
+        """
         return self.filename
 
 
     def getLog(self):
+        """Open the log file and return the handle of that log
+
+        Returns:
+            Return the handle of the log file
+
+        """
         return open(self.filename,'a')
 
 
     def closeLog(self, handle):
+        """Close the handle of the file
+
+        Args:
+            handle: the handle of the log file
+
+        """
         handle.close()

@@ -82,7 +82,6 @@ class Load(object):
             the suggested number of threads that should be deploy
 
         """
-
         serverName = socket.gethostname()
 
         #First compute the number of threads base on the server capacity
@@ -148,4 +147,10 @@ class Load(object):
 
 
     def getNTreads(self):
+        """Define the number of thread that should be deploy without stressing the server too much
+
+        Returns:
+            the suggested number of threads that should be deploy
+
+        """
         return self.__getNTreads()
