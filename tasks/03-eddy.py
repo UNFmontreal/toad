@@ -370,7 +370,7 @@ class Eddy(GenericTask):
 
 
     def isIgnore(self):
-        return self.get("ignore") is "True"
+        return self.get("ignore").lower() in "true"
 
 
     def meetRequirement(self):

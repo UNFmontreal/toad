@@ -16,7 +16,7 @@ class Denoising(GenericTask):
 
     def implement(self):
 
-        if self.get("algorithm") is "None":
+        if self.get("algorithm").lower() in "none":
             self.info("Skipping denoising process")
         else:
             dwi = self.__getDwiImage()
@@ -93,7 +93,7 @@ class Denoising(GenericTask):
 
 
     def isIgnore(self):
-        return self.get("algorithm") is "None"
+        return self.get("algorithm").lower() in "none"
 
 
     def qaSupplier(self):

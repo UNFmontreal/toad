@@ -186,6 +186,7 @@ class GenericTask(Logger, Load, Qa):
 
         """
         self.logHeader("isDirty")
+
         if self.isIgnore():
             self.logFooter("isDirty", None)
             return False

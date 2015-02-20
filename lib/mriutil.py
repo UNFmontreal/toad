@@ -338,7 +338,7 @@ def strideEncodingFile(source, originalStrides, expectedStrides, target):
 
         """
         results = []
-        signChanges = __isSignChange(originalLayout, expectedLayout)
+        signChanges = __isSignChange()
         for line in lines:
             tokens = line.split()
             for i in [0, 1, 2]:
@@ -363,7 +363,7 @@ def strideEncodingFile(source, originalStrides, expectedStrides, target):
 
         """
         results = []
-        signChanges = __isSignChange(originalLayout, expectedLayout)
+        signChanges = __isSignChange()
         for i in [0, 1, 2]:
             vector = []
             for element in lines[i].split():
