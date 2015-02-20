@@ -42,16 +42,13 @@ class Preprocessing(GenericTask):
 
 
     def __linkDwiImage(self):
-        if self.config.get("denoising", "algorithm") is not "None":
-            dwi =  self.getImage(self.dependDir, 'dwi', 'denoise')
-
-        elif not self.getImage(self.fieldmapDir, 'dwi','unwarp'):
-            dwi =  self.getImage(self.fieldmapDir, 'dwi','unwarp')
-
-        elif not self.config.getboolean("eddy", "ignore"):
-            dwi =  self.getImage(self.eddyDir,'dwi', 'eddy')
-        else:
-            dwi =  self.getImage(self.preparationDir, 'dwi')
+	dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
+	if not dwi:
+	    dwi = self.getImage(self.fieldmapDir, 'dwi', 'unwarp')
+	if not dwi:
+            dwi = self.getImage(self.eddyDir,'dwi', 'eddy')
+	if not dwi:
+            dwi = self.getImage(self.preparationDir, 'dwi')            
         return util.symlink(dwi, self.workingDir)
 
 
