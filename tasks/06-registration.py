@@ -14,6 +14,8 @@ class Registration(GenericTask):
     def implement(self):
 
         b0 = self.getImage(self.dependDir, 'b0')
+        b02x2x2 = self.getImage(self.dependDir, 'b0','2x2x2')
+
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
         anatBrain = self.getImage(self.preprocessingDir ,'anat', 'brain')
         aparcAsegFile =  self.getImage(self.parcellationDir, "aparc_aseg")
@@ -26,12 +28,16 @@ class Registration(GenericTask):
         b0ToAnatMatrixInverse = mriutil.invertMatrix(b0ToAnatMatrix, self.buildName(b0ToAnatMatrix, 'inverse', 'mat'))
         self.__applyResampleFsl(anat, b0, b0ToAnatMatrixInverse)
         mrtrixMatrix = self.__transformMatrixFslToMrtrix(anat, b0, b0ToAnatMatrixInverse)
-
-
+        anatBrainResampled = self.__applyResampleFsl(anatBrain, b0, b0ToAnatMatrixInverse)
         self.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix)
         self.__applyResampleFsl(aparcAsegFile, b0, b0ToAnatMatrixInverse)
 
-        anatBrainResampled = self.__applyResampleFsl(anatBrain, b0, b0ToAnatMatrixInverse)
+
+        b02x2x2ToAnatMatrix = self.__computeResample(b02x2x2, anat)
+        b02x2x2ToAnatMatrixInverse = mriutil.invertMatrix(b02x2x2ToAnatMatrix, self.buildName(b02x2x2ToAnatMatrix, 'inverse', 'mat'))
+        #self.__applyResampleFsl(anat, b02x2x2, b02x2x2ToAnatMatrixInverse)
+        self.__applyResampleFsl(aparcAsegFile, b02x2x2, b02x2x2ToAnatMatrixInverse)
+        anatBrain2x2x2Resampled = self.__applyResampleFsl(anatBrain, b02x2x2, b02x2x2ToAnatMatrixInverse)
 
         brodmannRegister = self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
         brodmannResampled = self.__applyResampleFsl(brodmann, b0, b0ToAnatMatrixInverse)
@@ -111,6 +117,7 @@ class Registration(GenericTask):
 
 
     def isDirty(self, result = False):
+        #@TODO add anatBrain2x2x2Resampled
         images = {'anatomical brain resampled': self.getImage(self.workingDir,'anat', ['brain', 'resample']),
                   'anatomical resampled': self.getImage(self.workingDir,'anat', 'resample'),
                   'parcellation resample': self.getImage(self.workingDir,'aparc_aseg', 'resample'),

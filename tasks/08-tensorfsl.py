@@ -9,23 +9,19 @@ class TensorFsl(GenericTask):
 
     def __init__(self, subject):
         """Fits a diffusion tensor model at each voxel
-
         """
-        GenericTask.__init__(self, subject, 'denoising', 'preprocessing')
+        GenericTask.__init__(self, subject, 'preprocessing', 'masking')
 
 
     def implement(self):
         """Placeholder for the business logic implementation
 
         """
-        dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
-        bVal = self.getImage(self.preprocessingDir, 'grad', None, 'bval')
-        bVec = self.getImage(self.preprocessingDir, 'grad', None, 'bvec')
+        dwi = self.getImage(self.dependDir, 'dwi', '2x2x2')
+        bVal = self.getImage(self.dependDir, 'grad', None, 'bval')
+        bVec = self.getImage(self.dependDir, 'grad', None, 'bvec')
+        mask = self.getImage(self.maskingDir, 'anat', ['2x2x2', 'extended', 'mask'])
 
-        #dtifit required a mask
-        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
-        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVal))
-        mask = self.__createMask(b0)
         self.__tensorsFsl(dwi, bVec, bVal, mask)
 
         l1 = self.getImage(self.workingDir, 'dwi', 'fsl_l1')
@@ -88,9 +84,10 @@ class TensorFsl(GenericTask):
         """Validate if all requirements have been met prior to launch the task
 
         """
-        images = {'diffusion weighted':  self.getImage(self.dependDir, 'dwi', 'denoise'),
-                '.bval gradient encoding file': self.getImage(self.preprocessingDir, 'grad', None, 'bval'),
-                '.bvec gradient encoding file': self.getImage(self.preprocessingDir, 'grad', None, 'bvec'),
+        images = {'diffusion weighted':  self.getImage(self.dependDir, 'dwi', '2x2x2'),
+                  'ultimate 2x2x2 mask': self.getImage(self.maskingDir, 'anat', ['2x2x2', 'extended', 'mask']),
+                  '.bval gradient encoding file': self.getImage(self.dependDir, 'grad', None, 'bval'),
+                  '.bvec gradient encoding file': self.getImage(self.dependDir, 'grad', None, 'bvec'),
                 }
 
         return self.isAllImagesExists(images)

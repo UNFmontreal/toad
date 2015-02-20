@@ -16,14 +16,10 @@ class Masking(GenericTask):
 
 
     def implement(self):
-        aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
         aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
+
+        aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
         anatBrainResample = self.getImage(self.dependDir,'anat', ['brain','resample'] )
-	print aparcAsegResample
-	print aparcAsegRegister
-	print anatBrainResample
-        #anatBrainWMResample = self.getImage(self.dependDir, 'anat', ['brain','wm','resample'])
-        #self.__createMask(anatBrainWMResample)
 
         extended = self.buildName('anat', 'extended')
         self.info("Add {} and {} images together in order to create the ultimate image"
@@ -31,6 +27,17 @@ class Masking(GenericTask):
         mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAsegResample)
         self.__createMask(extended)
         self.__createMask(aparcAsegResample)
+
+
+        aparcAseg2x2x2Resample = self.getImage(self.dependDir,"aparc_aseg", ["2x2x2", "resample"])
+        anatBrain2x2x2Resample = self.getImage(self.dependDir,'anat', ["2x2x2", 'brain','resample'] )
+
+        extended2x2x2 = self.buildName('anat', ['2x2x2', 'extended'])
+        self.info("Add {} and {} images together in order to create the ultimate image"
+                  .format(anatBrain2x2x2Resample, aparcAseg2x2x2Resample))
+        mriutil.fslmaths(anatBrain2x2x2Resample, extended2x2x2, 'add', aparcAseg2x2x2Resample)
+        self.__createMask(extended2x2x2)
+
 
         #produce optionnal mask
         if self.get("start_seeds").strip():
@@ -54,6 +61,20 @@ class Masking(GenericTask):
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
         shutil.copy(colorLut, self.workingDir)
 
+
+    def __resample(self, source, reference):
+        """Register an image with symmetric normalization and mutual information metric
+
+        Returns:
+            return a file containing the resulting transformation
+        """
+        self.info("Starting registration from fsl")
+        name = os.path.basename(source).replace(".nii","")
+        target = self.buildName(name, "transformation","")
+        matrix = self.buildName(name, "transformation", ".mat")
+        cmd = "flirt -in {} -ref {} -cost {} -out {}".format(source, reference, self.get('cost'), target)
+        self.launchCommand(cmd)
+        return matrix
 
     def __createRegionMaskFromAparcAseg(self, source, operand):
 
@@ -155,7 +176,7 @@ class Masking(GenericTask):
 
 
     def meetRequirement(self):
-
+        #@TODO add 2x2x2 mask
         images = {'resampled parcellation':self.getImage(self.dependDir,"aparc_aseg", "resample"),
                     'register parcellation':self.getImage(self.dependDir,"aparc_aseg", "register"),
                     'brain extracted, resampled high resolution':self.getImage(self.dependDir,'anat',['brain','resample'])}
