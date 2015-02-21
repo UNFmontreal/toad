@@ -198,6 +198,7 @@ class Preprocessing(GenericTask):
     def isDirty(self, result = False):
 
         images = {'upsampled diffusion weighted': self.getImage(self.workingDir, 'dwi', "upsample"),
+                    '2x2x2 diffusion weighted': self.getImage(self.workingDir, 'dwi', "2x2x2"),
                     'upsampled b0': self.getImage(self.workingDir, 'b0', "upsample"),
                     '2x2x2 b0': self.getImage(self.workingDir, 'b0', "2x2x2"),
                     'high resolution brain extracted': self.getImage(self.workingDir, 'anat', "brain"),
