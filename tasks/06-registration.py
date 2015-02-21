@@ -25,30 +25,29 @@ class Registration(GenericTask):
 
         b0ToAnatMatrix = self.__computeResample(b0, anat)
         b0ToAnatMatrixInverse = mriutil.invertMatrix(b0ToAnatMatrix, self.buildName(b0ToAnatMatrix, 'inverse', 'mat'))
-        self.__applyResampleFsl(anat, b0, b0ToAnatMatrixInverse)
+
+        self.__applyResampleFsl(anat, b0, b0ToAnatMatrixInverse, self.buildName(anat, "resample"))
         mrtrixMatrix = self.__transformMatrixFslToMrtrix(anat, b0, b0ToAnatMatrixInverse)
-        anatBrainResampled = self.__applyResampleFsl(anatBrain, b0, b0ToAnatMatrixInverse)
+
+        self.__applyResampleFsl(anatBrain, b0, b0ToAnatMatrixInverse, self.buildName(anatBrain, "resample"))
         self.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix)
-        self.__applyResampleFsl(aparcAsegFile, b0, b0ToAnatMatrixInverse)
+        self.__applyResampleFsl(aparcAsegFile, b0, b0ToAnatMatrixInverse, self.buildName(aparcAsegFile, "resample"))
 
 
         b02x2x2ToAnatMatrix = self.__computeResample(b02x2x2, anat)
         b02x2x2ToAnatMatrixInverse = mriutil.invertMatrix(b02x2x2ToAnatMatrix, self.buildName(b02x2x2ToAnatMatrix, 'inverse', 'mat'))
-        #self.__applyResampleFsl(anat, b02x2x2, b02x2x2ToAnatMatrixInverse)
-        aparcAsegFile2x2x2Resampled = self.__applyResampleFsl(aparcAsegFile, b02x2x2, b02x2x2ToAnatMatrixInverse)
-        anatBrain2x2x2Resampled = self.__applyResampleFsl(anatBrain, b02x2x2, b02x2x2ToAnatMatrixInverse)
-	print aparcAsegFile2x2x2Resampled
-	print anatBrain2x2x2Resampled
-	afjslj
+        self.__applyResampleFsl(aparcAsegFile, b02x2x2, b02x2x2ToAnatMatrixInverse, self.buildName(aparcAsegFile, "2x2x2"))
+        self.__applyResampleFsl(anatBrain, b02x2x2, b02x2x2ToAnatMatrixInverse, self.buildName(anatBrain, "2x2x2"))
+
 
         brodmannRegister = self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
-        brodmannResampled = self.__applyResampleFsl(brodmann, b0, b0ToAnatMatrixInverse)
+        self.__applyResampleFsl(brodmann, b0, b0ToAnatMatrixInverse, self.buildName(brodmann, "resample"))
 
         lhRibbonRegister = self.__applyRegistrationMrtrix(lhRibbon, mrtrixMatrix)
         rhRibbonRegister = self.__applyRegistrationMrtrix(rhRibbon, mrtrixMatrix)
 
-        lhRibbonResampled = self.__applyResampleFsl(lhRibbon, b0, b0ToAnatMatrixInverse)
-        rhRibbonResampled = self.__applyResampleFsl(rhRibbon, b0, b0ToAnatMatrixInverse)
+        self.__applyResampleFsl(lhRibbon, b0, b0ToAnatMatrixInverse, self.buildName(lhRibbon, "resample"))
+        self.__applyResampleFsl(rhRibbon, b0, b0ToAnatMatrixInverse, self.buildName(rhRibbon, "resample"))
 
         brodmannLRegister =  self.buildName(brodmannRegister, "left_hemisphere")
         brodmannRRegister =  self.buildName(brodmannRegister, "right_hemisphere")
@@ -58,6 +57,7 @@ class Registration(GenericTask):
 
 
     def __multiply(self, source, ribbon, target):
+
         cmd = "mrcalc {} {} -mult {} -quiet".format(source, ribbon, target)
         self.launchCommand(cmd)
         return target
@@ -78,18 +78,18 @@ class Registration(GenericTask):
         return matrix
 
 
-    def __applyResampleFsl(self, source, reference, matrix):
+    def __applyResampleFsl(self, source, reference, matrix, target):
         """Register an image with symmetric normalization and mutual information metric
 
         Returns:
             return a file containing the resulting transformation
         """
         self.info("Starting registration from fsl")
-        name = os.path.basename(source).replace(".nii","")
-        target = self.buildName(name, "resample",'')
+        #name = os.path.basename(source).replace(".nii","")
+        #target = self.buildName(name, "resample")
         cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {}".format(source, reference, matrix, target)
         self.launchCommand(cmd)
-        return matrix
+        return target
 
 
     def __transformMatrixFslToMrtrix(self, source, b0, matrix ):
