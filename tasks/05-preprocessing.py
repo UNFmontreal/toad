@@ -72,13 +72,13 @@ class Preprocessing(GenericTask):
             The resulting output file name
         """
         self.info("Launch upsampling from freesurfer.\n")
-
+	tmp = self.buildName(source, "tmp")
         if len(voxelSize.strip().split(" "))!=3:
             self.warning("Voxel size not specified correctly during upsampling")
 
-        cmd = "mri_convert -voxsize {} --input_volume {} --output_volume {}".format(voxelSize, source, target)
+        cmd = "mri_convert -voxsize {} --input_volume {} --output_volume {}".format(voxelSize, source, tmp)
         self.launchCommand(cmd)
-        return target
+        return self.rename(tmp, target)
 
 
     def __bet(self, source):
