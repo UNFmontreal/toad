@@ -56,7 +56,7 @@ class Preprocessing(GenericTask):
             dwi = self.getImage(self.eddyDir,'dwi', 'eddy')
         if not dwi:
             dwi = self.getImage(self.preparationDir, 'dwi')
-            return util.symlink(dwi, self.workingDir)
+        return util.symlink(dwi, self.workingDir)
 
 
     def __upsampling(self, source, voxelSize, target):

@@ -46,7 +46,7 @@ class TensorFsl(GenericTask):
 
         """
         self.info("Starting dtifit from fsl")
-        target = self.buildName(source, 'tensor', '')
+        target = self.buildName(source, None,  '')
         cmd ="dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVec, bVal)
         if mask:
             cmd += "-m {}".format(mask)

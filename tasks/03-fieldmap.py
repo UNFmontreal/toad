@@ -30,16 +30,24 @@ class Fieldmap(GenericTask):
         mag = self.getImage(self.dependDir, "mag")
         phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
-        freesurfer_anat = self.getImage(self.parcellationDir, 'freesurfer_anat')
+	
+        freesurfer_anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
+
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         mask = self. __createSegmentationMask(aparcAseg)
 
-
+	self.info("rescaling the phase image")
         phaseRescale = self.__rescaleFieldMap(phase)
+        #magRescale = self.__rescaleFieldMap(mag)
+
+	self.info('Coregistring magnitude image with the anatomical image produce by freesurfer')
         fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, freesurfer_anat)
 
+	self.info('Compute the transformation from the anatomical image produce by freesurfer to the magnitude image')
         invertFielmapToAnat = mriutil.invertMatrix(fieldmapToAnat, self.buildName(fieldmapToAnat, 'inverse', 'mat'))
-        interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, mag, invertFielmapToAnat, mask)
+	
+	self.info('Resampling the anatomical mask into the phase image space')
+        interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
         fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
 
         lossy = self.__simulateLossyMap(fieldmap, interpolateMask)
@@ -249,8 +257,14 @@ class Fieldmap(GenericTask):
             else:
                 self.info("Will take {} image instead".format(dwi))
 
-        return result
+        images = {"freesurfer anatomical":self.getImage(self.parcellationDir, 'anat', 'freesurfer'),
+                  "parcellation":self.getImage(self.parcellationDir, 'aparc_aseg'),
+		  "high resolution":self.getImage(self.dependDir, 'anat'),
+		  "magnitude":self.getImage(self.dependDir, 'mag'),
+		  "phase":self.getImage(self.dependDir, 'phase')}
 
+        result = self.isAllImagesExists(images)
+        return result
 
     def isDirty(self):
         """Validate if this tasks need to be submit during the execution

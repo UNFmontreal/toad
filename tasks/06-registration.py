@@ -120,11 +120,10 @@ class Registration(GenericTask):
 
 
     def isDirty(self, result = False):
-        #@TODO add anatBrain2x2x2Resampled
         images = {'anatomical brain resampled': self.getImage(self.workingDir,'anat', ['brain', 'resample']),
-                  'anatomical resampled': self.getImage(self.workingDir,'anat',['2x2x2', 'resample']),
-                  'anatomical 2x2x2 brain resampled': self.getImage(self.workingDir,'anat', ['2x2x2', 'brain', 'resample']),
-                  'anatomical 2x2x2 resampled': self.getImage(self.workingDir,'anat', 'resample'),
+                  'anatomical resampled': self.getImage(self.workingDir,'anat','resample'),
+                  'anatomical 2x2x2 brain for dtifit': self.getImage(self.workingDir,'anat', ['brain', '2x2x2']),
+                  'parcellation 2x2x2 for dtifit': self.getImage(self.workingDir,'aparc_aseg', '2x2x2'),
                   'parcellation resample': self.getImage(self.workingDir,'aparc_aseg', 'resample'),
                   'parcellation register': self.getImage(self.workingDir,'aparc_aseg', 'register'),
                   'brodmann register left hemisphere': self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]),

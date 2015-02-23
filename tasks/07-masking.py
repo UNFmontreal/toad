@@ -29,8 +29,8 @@ class Masking(GenericTask):
         self.__createMask(aparcAsegResample)
 
 
-        aparcAseg2x2x2Resample = self.getImage(self.dependDir,"aparc_aseg", ["2x2x2", "resample"])
-        anatBrain2x2x2Resample = self.getImage(self.dependDir,'anat', ["2x2x2", 'brain','resample'])
+        aparcAseg2x2x2Resample = self.getImage(self.dependDir,"aparc_aseg", "2x2x2")
+        anatBrain2x2x2Resample = self.getImage(self.dependDir,'anat', ['brain', '2x2x2'])
 
         extended2x2x2 = self.buildName('anat', ['2x2x2', 'extended'])
         self.info("Add {} and {} images together in order to create the ultimate image"
@@ -185,12 +185,10 @@ class Masking(GenericTask):
 
 
     def isDirty(self, result = False):
-        aparcAseg2x2x2Resample = self.getImage(self.dependDir,"aparc_aseg", ["2x2x2", "resample"])
-        anatBrain2x2x2Resample = self.getImage(self.dependDir,'anat', ["2x2x2", 'brain','resample'] )
-
         images ={'register anatomically constrained tractography': self.getImage(self.workingDir, "aparc_aseg", ["register", "act"]),
                     'aparc_aseg mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
                     'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask']),
+                    'ultimate 2x2x2 extended mask': self.getImage(self.workingDir, 'anat',['2x2x2', 'extended', 'mask']),
                     'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
                     'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'),
                     'resample white segmented act mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"])
