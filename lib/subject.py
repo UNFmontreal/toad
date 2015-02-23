@@ -28,23 +28,51 @@ class Subject(Lock):
         return self.__name
 
     def getName(self):
+        """get the name of that instance
+
+        Returns
+            the name of that instance
+
+        """
         return self.__name
 
-    def getSubjectDir(self):
-        return self.__subjectDir
-
     def getLogDir(self):
+        """get the name of the log directory
+
+        Returns
+            the name of the log directory
+
+        """
         return self.__logDir
 
     def removeLogDir(self):
+        """Utility function that delete the subject log directory
+
+        """
         if os.path.exists(self.__logDir):
             shutil.rmtree(self.__logDir)
 
     def getConfig(self):
+        """Utility function that return the ConfigParser 
+
+        Returns
+            the ConfigParser
+        """
         return self.__config
 
     def setConfigItem(self, section, item, value):
+        """Utility function that register a value into the config parser
+
+        Returns
+            the ConfigParser
+        """
         self.__config.set(section, item, value)
 
     def getDir(self):
+        """get the name of the subject directory
+
+        Returns
+            the name of the subject directory
+
+        """
         return self.__subjectDir

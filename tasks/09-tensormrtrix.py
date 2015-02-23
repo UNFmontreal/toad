@@ -26,7 +26,7 @@ class TensorMrtrix(GenericTask):
     def __produceTensors(self, source, encodingFile, mask=None):
         self.info("Starting DWI2Tensor from mrtrix")
 
-        tmp =  self.buildName(source, "tmp")
+        tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "tensor")
         cmd = "dwi2tensor {} {} -grad {} -nthreads {} -quiet ".format(source, tmp, encodingFile, self.getNTreadsMrtrix())
         if mask is not None:

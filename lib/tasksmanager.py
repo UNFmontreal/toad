@@ -15,6 +15,9 @@ class TasksManager(object):
         self.__runnableTasks = self.__initializeRunnableTasks(self.__tasks)
 
     def getSubjectName(self):
+        """get the name of the current subject
+
+        """
         return self.__subject
 
 
@@ -209,6 +212,9 @@ class TasksManager(object):
         Args:
             tasks: a list containing all tasks into the pipeline
 
+        Returns:
+            a list of dirty tasks
+
         """
         dirtyTasks=[]
         for task in tasks:
@@ -222,6 +228,10 @@ class TasksManager(object):
 
         Args:
             tasks: a list of tasks
+
+        Returns:
+            a list of task, all ignore task have been remove
+
         """
         mandatory = []
         for task in tasks:
@@ -264,10 +274,10 @@ class TasksManager(object):
 
 
     def __resolveDependencies(self, tasks):
-        """Produce a list of sets of tasks in topological order.
+        """Produce a list of sets of tasks in topological order base on dependencies.
 
         Args:
-            tasks: A list of task to order in topological order
+            tasks: A list of task
 
         Returns:
             a list of set of Tasks in topological order

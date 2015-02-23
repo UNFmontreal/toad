@@ -141,7 +141,8 @@ class Validation(object):
 
         for key, value in images.iteritems():
             if value:
-                if not mriutil.isDataStridesOrientationExpected(value) and self.config.getboolean('arguments', 'prompt') \
+                if not mriutil.isDataStridesOrientationExpected(value, self.config.get('preparation','stride_orientation'))\
+                        and self.config.getboolean('arguments', 'prompt')\
                         and self.config.getboolean("preparation", "force_realign_strides"):
                     msg = "Data strides layout for {} is unexpected and force_realign_strides is set to True.\n \
                            If you continue, all unexpected images will be realign accordingly.\n\
@@ -152,37 +153,6 @@ class Validation(object):
                         break
 
         return True
-
-    """
-    def __validateNiftiImage(self, prefix):
-        Determine if an image with a prefix exists into the subject directory
-
-        Args:
-            prefix: prefix that is required into the filename
-
-        Returns:
-            a Boolean that represent if the image filename exist
-
-
-
-        files = glob.glob("{}/{}*.nii*".format(self.workingDir, prefix))
-        if not files:
-            self.logger.warning("No {} images found with pattern {}* in directory: {}"
-                                .format(prefix.replace("_",""), prefix, self.workingDir))
-            return False
-        if len(files) > 1:
-            self.logger.warning("Found many {} images in directory {}, only one should be provided"
-                                .format(prefix.replace("_",""), self.workingDir))
-            return False
-
-        filename = os.path.basename(files.pop())
-        #make sure that some postfix are not contain in the image file
-        for (key, item) in self.config.items("postfix"):
-            if item in filename:
-                self.logger.warning("Image name {} contain postfix {} which is prohibited".format(filename,item))
-                return False
-        return True
-    """
 
     def __isValidEncoding(self, nbDirection, type):
         """Determine if an image with a prefix exists into the subject directory

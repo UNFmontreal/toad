@@ -129,7 +129,7 @@ class Parcellation(GenericTask):
         cmd = "recon-all -{} -i {} -subjid {} -sd {} -openmp {}"\
             .format(self.get('directive'), source, self.id, self.workingDir, self.getNTreads())
         self.info("Log could be found at {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
-        self.launchCommand(cmd, None, None, 777600)
+        self.launchCommand(cmd, None, None, 86400)
 
 
     def __convertAndRestride(self, source, target):
@@ -141,7 +141,8 @@ class Parcellation(GenericTask):
 
         """
         self.info("convert {} image to {} ".format(source, target))
-        cmd = "mrconvert {} {} -stride {} -force".format(source, target, self.get('stride_orientation'))
+        cmd = "mrconvert {} {} -stride {} -force"\
+            .format(source, target, self.config.get('preparation', 'stride_orientation'))
         self.launchCommand(cmd, 'log', 'log')
         return target
 

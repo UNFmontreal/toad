@@ -74,10 +74,10 @@ class Eddy(GenericTask):
         #@TODO remove the glob and use getimage
         eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
         if len(eddyParameterFiles)>0:
-            bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles.pop(0), self.builName(outputEddyImage, None, 'b'))
+            bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles.pop(0), self.buildName(outputEddyImage, None, 'b'))
             #produce the bVal and bVec file accordingly
-            mriutil.bEnc2BVec(bCorrected, self.builName(outputEddyImage, None, 'bvec'))
-            mriutil.bEnc2BVal(bCorrected, self.builName(outputEddyImage, None, 'bval'))
+            mriutil.bEnc2BVec(bCorrected, self.buildName(outputEddyImage, None, 'bvec'))
+            mriutil.bEnc2BVal(bCorrected, self.buildName(outputEddyImage, None, 'bval'))
 
 
     def  __oddImagesWithEvenNumberOfSlices(self, sources):
@@ -370,7 +370,7 @@ class Eddy(GenericTask):
 
 
     def isIgnore(self):
-        return self.get("ignore") is "True"
+        return self.get("ignore").lower() in "true"
 
 
     def meetRequirement(self):

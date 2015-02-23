@@ -15,67 +15,70 @@ class Preprocessing(GenericTask):
     def implement(self):
 
         dwi = self.__linkDwiImage()
-        if self.config.getboolean("eddy", "ignore"):
-            bFile= self.getImage(self.preparationDir, 'grad', None, 'b')
-            bVal= self.getImage(self.preparationDir, 'grad', None, 'bval')
-            bVec= self.getImage(self.preparationDir, 'grad', None, 'bvec')
-        else:
+
+        bFile= self.getImage(self.preparationDir, 'grad', None, 'b')
+        if not bFile:
             bFile= self.getImage(self.eddyDir, 'grad', None, 'b')
+        bVal= self.getImage(self.preparationDir, 'grad', None, 'bval')
+        if not bVal:
             bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
-            bVec= self.getImage(self.eddyDir, 'grad', None, 'bvec')
+        bVec= self.getImage(self.eddyDir, 'grad', None, 'bvec')
+        if not bVec:
+            bVec= self.getImage(self.preparationDir, 'grad', None, 'bvec')
 
         bFile = util.symlink(bFile, self.workingDir)
         bVal = util.symlink(bVal, self.workingDir)
         bVec = util.symlink(bVec, self.workingDir)
 
-        dwiUpsample=  self.__upsampling(dwi)
-        b0Upsample = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
+        b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVal))
+
+        dwi2x2X2 = self.__upsampling(dwi, "2 2 2", self.buildName(dwi, "2x2x2"))
+        b02x2x2 = os.path.join(self.workingDir, os.path.basename(dwi2x2X2).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        self.info(mriutil.extractFirstB0FromDwi(dwi2x2X2, b02x2x2, bVal))
 
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
         brainAnat  = self.__bet(anat)
 
         brainAnatUncompress = self.uncompressImage(brainAnat)
-        whiteMatterAnat= self.__segmentation(brainAnatUncompress)
+        whiteMatterAnat = self.__segmentation(brainAnatUncompress)
         util.gzip(brainAnatUncompress)
         util.gzip(whiteMatterAnat)
 
 
     def __linkDwiImage(self):
-        if self.config.get("denoising", "algorithm") is not "None":
-            dwi =  self.getImage(self.dependDir, 'dwi', 'denoise')
 
-        elif not self.getImage(self.fieldmapDir, 'dwi','unwarp'):
-            dwi =  self.getImage(self.fieldmapDir, 'dwi','unwarp')
-
-        elif not self.config.getboolean("eddy", "ignore"):
-            dwi =  self.getImage(self.eddyDir,'dwi', 'eddy')
-        else:
-            dwi =  self.getImage(self.preparationDir, 'dwi')
+        dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
+        if not dwi:
+            dwi = self.getImage(self.fieldmapDir, 'dwi', 'unwarp')
+        if not dwi:
+            dwi = self.getImage(self.eddyDir,'dwi', 'eddy')
+        if not dwi:
+            dwi = self.getImage(self.preparationDir, 'dwi')
         return util.symlink(dwi, self.workingDir)
 
 
-    def __upsampling(self, source):
+    def __upsampling(self, source, voxelSize, target):
         """Upsample an image specify as input
 
         The upsampling value should be specified into the config.cfg file
 
         Args:
             source: The input file
+            voxelSize: Size of the voxel
 
         Return:
             The resulting output file name
         """
         self.info("Launch upsampling from freesurfer.\n")
-
-        voxelSize = self.get('voxel_size')
+	tmp = self.buildName(source, "tmp")
         if len(voxelSize.strip().split(" "))!=3:
             self.warning("Voxel size not specified correctly during upsampling")
 
-        target = self.buildName(source, "upsample")
-        cmd = "mri_convert -voxsize {} --input_volume {} --output_volume {}".format(voxelSize, source, target)
+        cmd = "mri_convert -voxsize {} --input_volume {} --output_volume {}".format(voxelSize, source, tmp)
         self.launchCommand(cmd)
-        return target
+        return self.rename(tmp, target)
 
 
     def __bet(self, source):
@@ -193,10 +196,13 @@ class Preprocessing(GenericTask):
 
 
     def isDirty(self, result = False):
-        #@TODO include b0Upsampled image
-        images = {'upsampled diffusion weighted': self.getImage(self.workingDir ,'dwi', "upsample"),
-                    'high resolution brain extracted': self.getImage(self.workingDir ,'anat', "brain"),
-                    'high resolution white matter brain extracted': self.getImage(self.workingDir ,'anat',["brain", "wm"])}
+
+        images = {'upsampled diffusion weighted': self.getImage(self.workingDir, 'dwi', "upsample"),
+                    '2x2x2 diffusion weighted': self.getImage(self.workingDir, 'dwi', "2x2x2"),
+                    'upsampled b0': self.getImage(self.workingDir, 'b0', "upsample"),
+                    '2x2x2 b0': self.getImage(self.workingDir, 'b0', "2x2x2"),
+                    'high resolution brain extracted': self.getImage(self.workingDir, 'anat', "brain"),
+                    'high resolution white matter brain extracted': self.getImage(self.workingDir, 'anat', ["brain", "wm"])}
         return self.isSomeImagesMissing(images)
 
 
