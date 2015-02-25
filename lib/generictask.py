@@ -521,4 +521,12 @@ class GenericTask(Logger, Load, Qa):
         return util.parseTemplate(dict, template)
 
 
+    def __reload(self):
+        """
+        1- call self.qaSupplier
+        2- produire le html a partir du xml
+        3- effacer le fichier du repertoire qa
+        4- injecter le html dans un fichier du repertoire qa
 
+        """
+        pass

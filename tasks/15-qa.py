@@ -1,5 +1,8 @@
 from lib.generictask import GenericTask
-from lib import util, mriutil
+import shutil
+from lib import util
+
+
 from string import ascii_uppercase, digits
 from random import choice
 import numpy as np
@@ -16,14 +19,13 @@ __author__ = 'cbedetti'
 class QA(GenericTask):
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preparation', 'eddy', 'denoising', 'preprocessing', 'parcellation',  'registration')
-        self.reportName = self.config.get('qa','report_name')
-        self.imgWidth = 650
-        self.dirty = True #change to False after one execution of implement
-        self.debug = False
+        GenericTask.__init__(self, subject)
+        self.setCleanupBeforeImplement(False)
 
 
     def implement(self):
+        shutil.copyfile(os.path.join(self.toadDir, "templates/files/qa.main.tpl"), 'index.html')
+        
         """
         #Usefull images for the QA
         anat = self.getImage(self.preparationDir,'anat')
@@ -189,8 +191,6 @@ class QA(GenericTask):
         htmlCode = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/qa.main.tpl"))
         util.createScript(self.reportName, htmlCode)
         """
-        self.dirty = False
-
         
 
     

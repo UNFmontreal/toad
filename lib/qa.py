@@ -41,6 +41,7 @@ class Qa(object):
             cmd += "{} ".format(optionalOverlay)
         cmd += "-a {}".format(target)
         self.launchCommand(cmd)
+        return target
 
 
     def c3dSegmentation(self, backgroundImage, segmentationImage, scale, opacity, target=None):
@@ -114,3 +115,4 @@ class Qa(object):
         # Cleaning temp files
         cmd = 'rm {0}*.png {0}*.nii.gz'.format(gifId)
         self.launchCommand(cmd)
+        return target
