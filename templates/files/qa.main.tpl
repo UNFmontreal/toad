@@ -19,7 +19,7 @@
     <body>
         <header>
             <div id="logo_titre">
-                <img src="frog3.png" alt="Toad logo" id="logo"/>
+                <img src="img/logo.png" alt="Toad logo" id="logo"/>
                 <h1>Toad-Qa</h1>
             </div>
             <nav>
@@ -34,6 +34,7 @@
         </header>
         
         <section id="results">
+$parseHtmlTables
         </section>
         
         <footer>

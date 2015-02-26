@@ -116,7 +116,7 @@ class Preparation(GenericTask):
         #dwiGif = self.nifti4dtoGif(dwi)
         
         imageArray = [('High resolution anatomical image',anatPng),
-                      ('Diffusion image',dwiGif)]
+                      ('Diffusion image','dwiGif')]
         return imageArray
 
 

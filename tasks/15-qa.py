@@ -1,4 +1,5 @@
 from lib.generictask import GenericTask
+import os
 import shutil
 from lib import util
 
@@ -13,9 +14,12 @@ class QA(GenericTask):
 
 
     def implement(self):
-        shutil.copyfile(os.path.join(self.toadDir, "templates/files/qa.main.tpl"), 'index.html')
+        if not os.path.exists('img'):
+            os.makedirs('img')
+        shutil.copyfile(os.path.join(self.toadDir, 'templates/files/logo.png'), 'img/logo.png')
+        htmlCode = self.parseTemplate({'parseHtmlTables':''}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
+        util.createScript('index.html', htmlCode)
         
-
 
     def meetRequirement(self, result=True):
         """
@@ -28,4 +32,5 @@ class QA(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        return self.dirty
+        files = {'QA index.html': 'index.html', 'toad logo': 'img/logo.png'}
+        return self.isSomeImagesMissing(files)
