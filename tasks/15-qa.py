@@ -10,7 +10,7 @@ class QA(GenericTask):
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject)
-        #self.setCleanupBeforeImplement(False)
+        self.setCleanupBeforeImplement(False)
 
 
     def implement(self):

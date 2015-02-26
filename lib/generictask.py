@@ -524,19 +524,19 @@ class GenericTask(Logger, Load, Qa):
 
 
     def createQaReport(self, imagesArray):
-        """
-        1- call self.qaSupplier
-        2- produire le html a partir du xml
-        3- effacer le fichier du repertoire qa
-        4- injecter le html dans un fichier du repertoire qa
+        """create html report for a task with qaSupplier implemented
 
+        Args:
+           imagesArray : array of tupple [(imageLink, legend), ...]
         """
+        #@TODO Implement qaDir into subject
         qaDir = os.path.join(self.subjectDir, '15-qa')
         imgDir = os.path.join(qaDir, 'img')
         
         tablesCode = ''
         for imageLink, legend in imagesArray:
-            util.symlink(imageLink, imgDir)
+            #@TODO Take into account multiple run of QA
+            shutil.copyfile(imageLink, os.path.join(imgDir, imageLink))
             tags = {'imageLink':imageLink,'legend':legend}
             tablesCode += self.parseTemplate(tags, os.path.join(self.toadDir, 'templates/files/qa.table.tpl'))
         
