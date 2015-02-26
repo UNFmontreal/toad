@@ -12,7 +12,6 @@
                 display: inline-block;
                 margin-right: 15px;}
         </style>
-        <script type="text/javascript" language="javascript" src="qa.js"></script>
         <title>TOAD-Qa</title>
     </head>
 
@@ -24,11 +23,11 @@
             </div>
             <nav>
                 <ul>
-                    <li><input type="button" id="preparation" value="preparation" onClick="preparation();" /></li>
-                    <li><input type="button" id="parcellation" value="parcellation" onClick="parcellation();" /></li>
-                    <li><input type="button" id="eddy" value="eddy" onClick="eddy();" /></li>
-                    <li><input type="button" id="denoising" value="denoising" onClick="denoising();" /></li>
-                    <li><input type="button" id="preprocessing" value="preprocessing" onClick="preprocessing();" /></li>
+                    <li><a id="preparation" href="preparation.html">preparation</a></li>
+                    <li><a id="parcellation" href="parcellation.html">parcellation</a></li>
+                    <li><a id="eddy" href="eddy.html">eddy</a></li>
+                    <li><a id="denoising" href="denoising.html">denoising</a></li>
+                    <li><a id="preprocessing" href="preprocessing.html">preprocessing</a></li>
                 </ul>
             </nav>
         </header>
