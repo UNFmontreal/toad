@@ -11,6 +11,11 @@
             nav li{
                 display: inline-block;
                 margin-right: 15px;}
+            table{
+                background-color:white;
+                text-align:center; 
+                margin-left:auto; 
+                margin-right:auto;}
         </style>
         <title>TOAD-Qa</title>
     </head>
@@ -18,7 +23,7 @@
     <body>
         <header>
             <div id="logo_titre">
-                <img src="img/logo.png" alt="Toad logo" id="logo"/>
+                <a href="index.html"><img src="img/logo.png" alt="Toad logo" id="logo"/></a>
                 <h1>Toad-Qa</h1>
             </div>
             <nav>

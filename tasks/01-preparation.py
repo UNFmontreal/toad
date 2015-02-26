@@ -115,9 +115,9 @@ class Preparation(GenericTask):
         anatPng = self.pngSlicerImage(anat)
         #dwiGif = self.nifti4dtoGif(dwi)
         
-        imageArray = [('High resolution anatomical image',anatPng),
-                      ('Diffusion image','dwiGif')]
-        return imageArray
+        imagesArray = [(anatPng, 'High resolution anatomical image'),
+                      ('dwiGif', 'Diffusion image')]
+        return imagesArray
 
 
 

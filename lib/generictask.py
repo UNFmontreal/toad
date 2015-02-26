@@ -115,7 +115,9 @@ class GenericTask(Logger, Load, Qa):
         util.symlink(self.getLogFileName(), self.workingDir)
         self.implement()
         self.info("Create and supply images to the qa report ")
-        self.qaSupplier()	
+        imagesArray = self.qaSupplier()
+        if imagesArray is not None:
+            self.createQaReport(imagesArray)	
         os.chdir(currentDir)
 
 
@@ -521,7 +523,7 @@ class GenericTask(Logger, Load, Qa):
         return util.parseTemplate(dict, template)
 
 
-    def __reload(self):
+    def createQaReport(self, imagesArray):
         """
         1- call self.qaSupplier
         2- produire le html a partir du xml
@@ -529,4 +531,17 @@ class GenericTask(Logger, Load, Qa):
         4- injecter le html dans un fichier du repertoire qa
 
         """
-        pass
+        qaDir = os.path.join(self.subjectDir, '15-qa')
+        imgDir = os.path.join(qaDir, 'img')
+        
+        tablesCode = ''
+        for imageLink, legend in imagesArray:
+            util.symlink(imageLink, imgDir)
+            tags = {'imageLink':imageLink,'legend':legend}
+            tablesCode += self.parseTemplate(tags, os.path.join(self.toadDir, 'templates/files/qa.table.tpl'))
+        
+        htmlCode = self.parseTemplate({'parseHtmlTables':tablesCode}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl')) 
+        
+        htmlFile = os.path.join(qaDir,'{}.html'.format(self.getName()))
+        util.createScript(htmlFile, htmlCode)
+
