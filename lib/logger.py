@@ -100,7 +100,7 @@ class Logger(object):
         if level not in ['INFO','WARNING','ERROR']:
             return False
 
-        message = "{}: {}\n".format(level, message)
+        message = "{}: {}".format(level, message)
         print message
         if self.__logIntoFile:
             self.handle = open(self.filename,'a')
@@ -141,14 +141,15 @@ class Logger(object):
         self.__log(message, 'ERROR')
 
 
-    def quit(self, message):
+    def quit(self, message = None):
         """Wrapper for user friendly message that have info level and quit the pipeline silently
 
         Args:
             message: the message to write
 
         """
-        self.__log(message, 'INFO')
+        if message is not None:
+            self.__log(message, 'INFO')
         sys.exit()
 
 
