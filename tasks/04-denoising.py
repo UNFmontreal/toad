@@ -98,7 +98,9 @@ class Denoising(GenericTask):
 
     def qaSupplier(self):
         denoise = self.getImage(self.workingDir, "dwi", 'denoise')
-        self.nifti4dtoGif(denoise)
+        denoiseGif = self.nifti4dtoGif(denoise)
+        imagesArray = [(denoiseGif,'Denoised diffusion image')]
+        return imagesArray
 
 
     def meetRequirement(self, result = True):
