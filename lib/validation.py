@@ -71,6 +71,7 @@ class Validation(object):
             a Boolean that represent if the directory is a valid subject
 
         """
+        self.logger.info("Start validation of {} directory".format(self.workingDir))
 
         if not self.isDirty():
             #@TODO evaluate if 00-backup should be a valid toad structure
@@ -79,6 +80,10 @@ class Validation(object):
 
         if not os.path.exists(self.workingDir) or not os.path.isdir(self.workingDir):
             self.logger.warning("Directory {} is not valid".format(self.workingDir))
+            return False
+
+        #make sure there is no space into filename
+        if self.__isSpaceFoundIntoSubject():
             return False
 
         if not self.__isAValidStructure():
@@ -99,6 +104,23 @@ class Validation(object):
 
         """
         return not os.path.exists(self.backupDir)
+
+
+    def __isSpaceFoundIntoSubject(self):
+        """Look into the entire structure if some filename or directory contains space character
+
+        Returns:
+            a Boolean that represent if space have been found into filename, False otherwise
+
+        """
+        for root, directories, filenames in os.walk(self.workingDir):
+            for filename in filenames:
+                absoluteName = os.path.join(root, filename)
+                if " " in absoluteName:
+                    self.logger.warning("Space character in {} is not supported by all toad dependencies tools. "
+                                        .format(absoluteName))
+                    return True
+        return False
 
 
     def __isAValidStructure(self):
@@ -183,7 +205,6 @@ class Validation(object):
                         return False
                     else:
                         break
-
         return True
 
 
