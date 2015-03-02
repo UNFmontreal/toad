@@ -71,15 +71,18 @@ class GenericTask(Logger, Load, Qa):
 
 
     def __repr__(self):
+        """Return the name of the task as a a printable representation of the task object."""
         return self.__name
 
 
     def __eq__(self, other):
+        """Override method of the operator equal"""
         return (isinstance(other, type(self))
                 and (self.__name, self.__order) == (other.__name, other.__order))
 
 
     def __ne__(self, other):
+        """Override method of the operator not equal"""
         result = self.__eq__(other)
         if result is NotImplemented:
             return result
@@ -87,10 +90,12 @@ class GenericTask(Logger, Load, Qa):
 
 
     def __lt__(self, other):
+        """Override method of the operator less than"""
         return self.__order < other.__order
 
 
     def __hash__(self):
+        """Called for operations on members of collections dictionnary. Should return an integer"""
         return (hash(self.__name)<<1) ^ hash(self.__order)
 
 

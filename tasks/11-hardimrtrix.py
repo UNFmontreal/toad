@@ -20,10 +20,10 @@ class HardiMrtrix(GenericTask, Logger):
         maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask'])
         outputDwi2Response = self.__dwi2response(dwi, maskDwi2Response, bFile)
 
-        maskDwi2fod =  self.getImage(self.maskingDir, 'anat',['extended', 'mask'])
+        maskDwi2fod =  self.getImage(self.maskingDir, 'anat',['resample', 'extended', 'mask'])
         fodImage = self.__dwi2fod(dwi, outputDwi2Response, maskDwi2fod, bFile)
 
-        mask = self.getImage(self.maskingDir, 'anat', ['extended','mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
         self.__fod2metric(fodImage, mask)
 
 
@@ -82,7 +82,7 @@ class HardiMrtrix(GenericTask, Logger):
         images = {'diffusion weighted': self.getImage(self.dependDir,'dwi','upsample'),
                   "gradient encoding b file":  self.getImage(self.dependDir, 'grad', None, 'b'),
                   'white matter segmented mask': self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask']),
-                  'ultimate extended mask': self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
+                  'ultimate extended mask': self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
         return self.isAllImagesExists(images)
 
 

@@ -14,7 +14,7 @@ class TensorMrtrix(GenericTask):
 
         dwi = self.getImage(self.dependDir,'dwi','upsample')
         bFile = self.getImage(self.dependDir, 'grad',  None, 'b')
-        mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
         tensorsMrtrix = self.__produceTensors(dwi, bFile, mask)
 
@@ -67,7 +67,7 @@ class TensorMrtrix(GenericTask):
     def meetRequirement(self):
         images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
                   "gradient encoding b file":  self.getImage(self.dependDir, 'grad', None, 'b'),
-                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
+                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
         return self.isAllImagesExists(images)
 
 

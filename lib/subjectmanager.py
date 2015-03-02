@@ -35,37 +35,10 @@ class SubjectManager(Logger, Config):
         return self.__class__.__name__.lower()
 
 
-    def __isDirectoryAValidSubject(self, source):
-        """Verify if the directory source may be consider a valid subject
+    def __createSubjects(self):
+        """Return a list of directories who qualified for the pipeline
 
-        Args:
-            source: an input directory
-
-        returns:
-            True if the current directory qualify as a toad subject, False otherwise
-
-        """
-        result = False
-        dir = os.path.abspath(source)
-        if os.path.isdir(dir):
-            if self.config.getboolean('arguments','validation'):
-                if Validation(dir, self.getLogger(), self.__copyConfig(dir)).run():
-                    self.info("{} is a valid subject, adding it to the list.".format(os.path.basename(dir)))
-                    result = True
-                else:
-                    self.warning("{} will be discarded".format(os.path.basename(dir)))
-            else:
-                self.warning("Skipping validation have been requested, this option is dangerous")
-                result = True
-        else:
-            self.warning("{} doesn't look a directory, it will be discarded".format(dir))
-        return result
-
-
-    def __instantiateSubjectsFromDirectories(self):
-        """Return directories who qualified for the pipeline
-
-        Look into each subdirectory if it meet all the requirements. If yes, the subdirectory is consider
+        Look into each subdirectory if they look like a toad structure. If yes, the subdirectory is consider
         a subject and is register into a list
 
         Returns:
@@ -79,21 +52,48 @@ class SubjectManager(Logger, Config):
 
         if self.arguments.subject:
             for dir in self.arguments.subject:
-                if self.__isDirectoryAValidSubject(dir):
+                if Validation(dir, self.getLogger(), self.__copyConfig(dir)).isAToadSubject():
                     subjects.append(Subject(self.__copyConfig(dir)))
         else:
-            dirs = glob.glob("{}/*".format(self.studyDir))
-            for dir in dirs:
-                if self.__isDirectoryAValidSubject(dir):
-                    subjects.append(Subject(self.__copyConfig(dir)))
-
-        subjects = self.__processLocksSubjects(subjects)
-
-        #Subject Load() class need to know how much valid subject are submit.
-        for subject in subjects:
-            subject.setConfigItem("general", "nb_subjects", str(len(subjects)))
-
+            directories = glob.glob("{}/*".format(self.studyDir))
+            for directory in directories:
+                if Validation(directory, self.getLogger(), self.__copyConfig(directory)).isAToadSubject():
+                    subjects.append(Subject(self.__copyConfig(directory)))
         return subjects
+
+
+    def __validateSubjects(self, subjects):
+        """Verify into a list of toad subjects the integrity and validity of each subject
+
+        Args:
+            subjects: a list of toad subjects
+
+        returns:
+            a list of valid subjects
+
+        """
+        validSubjects = []
+        if self.config.getboolean('arguments','validation'):
+            for subject in subjects:
+                if Validation(subject.getDir(), self.getLogger(), self.__copyConfig(subject.getDir())).validate():
+                    self.info("{} is a valid subject, adding it to the list.".format(subject))
+                    validSubjects.append(subject)
+                elif self.config.getboolean('arguments', 'prompt'):
+                        msg = "It seem\'m like {} is having an issue and will probably fail!".format(subject)
+                        if util.displayYesNoMessage(msg, "Would you like to remove it from the list (y or n)"):
+                            self.info("Removing subject {} from the submitting list\n".format(subject))
+                        else:
+                            self.warning("Keeping {} even if we found issues will probably make the pipeline failing\n"
+                            .format(subject))
+                            validSubjects.append(subject)
+                else:
+                    self.warning("Command prompt disabled, this submit will be submit anyway")
+                    validSubjects.append(subject)
+        else:
+            self.warning("Skipping validation have been requested, this is a unwise and dangerous decision")
+            validSubjects = subjects
+
+        return validSubjects
 
 
     def __processLocksSubjects(self, subjects):
@@ -243,7 +243,20 @@ class SubjectManager(Logger, Config):
     def run(self):
         """Launch the pipeline
         """
-        subjects = self.__instantiateSubjectsFromDirectories()
+
+        #determine which directories are qualified subject for the pipeline
+        subjects = self.__createSubjects()
+
+        #look for each subjects integrity
+        subjects = self.__validateSubjects(subjects)
+
+        #determine if subject that are locks
+        subjects = self.__processLocksSubjects(subjects)
+
+        #update into each subject how many subjects should be submit. This information is sensitive for load balancing the grid
+        for subject in subjects:
+            subject.setConfigItem("general", "nb_subjects", str(len(subjects)))
+
         if self.config.getboolean('arguments', 'reinitialize'):
             self.__reinitialize(subjects)
         else:

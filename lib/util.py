@@ -339,28 +339,37 @@ def parseTemplate(dict, template):
     return Template(f.read()).safe_substitute(dict)
 
 
-
 def displayYesNoMessage(msg, question = "Continue? (y or n)"):
-    """Utility that ask a question
+    """Utility function that display a convenient message, ask a question, and record the answer
 
-
+    this function will loop until character y or n is press
     Args:
        msg: A message to display before prompt
-       template: object passed to the constructors template argument.
+       question: A yes no question. the answer must be y or n
 
     Returns:
-        the string substitute
+       A boolean True if the user press y, False otherwise
     """
     print msg
     while True:
         choice = raw_input(question)
-        if choice == 'y':
+        if choice.lower() == 'y':
             return True
-        elif choice == 'n':
+        elif choice.lower() == 'n':
             return False
 
 
 def displayContinueQuitRemoveMessage(msg):
+    """Utility function that display a convenient message, ask a question, and record the answer
+
+    this function will loop until character y or n is press
+
+    Args:
+       msg: A message to display before prompt
+
+    Returns:
+       A String y, n or r
+    """
     print msg
     while True:
         choice = raw_input("Continue? (y, n or r)")
