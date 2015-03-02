@@ -120,7 +120,9 @@ class GenericTask(Logger, Load, Qa):
         util.symlink(self.getLogFileName(), self.workingDir)
         self.implement()
         self.info("Create and supply images to the qa report ")
-        self.qaSupplier()	
+        imagesArray = self.qaSupplier()
+        if imagesArray is not None:
+            self.createQaReport(imagesArray)	
         os.chdir(currentDir)
 
 
@@ -526,4 +528,25 @@ class GenericTask(Logger, Load, Qa):
         return util.parseTemplate(dict, template)
 
 
+    def createQaReport(self, imagesArray):
+        """create html report for a task with qaSupplier implemented
+
+        Args:
+           imagesArray : array of tupple [(imageLink, legend), ...]
+        """
+        #@TODO Implement qaDir into subject
+        qaDir = os.path.join(self.subjectDir, '15-qa')
+        imgDir = os.path.join(qaDir, 'img')
+        
+        tablesCode = ''
+        for imageLink, legend in imagesArray:
+            #@TODO Take into account multiple run of QA
+            shutil.copyfile(imageLink, os.path.join(imgDir, imageLink))
+            tags = {'imageLink':imageLink,'legend':legend}
+            tablesCode += self.parseTemplate(tags, os.path.join(self.toadDir, 'templates/files/qa.table.tpl'))
+        
+        htmlCode = self.parseTemplate({'parseHtmlTables':tablesCode}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl')) 
+        
+        htmlFile = os.path.join(qaDir,'{}.html'.format(self.getName()))
+        util.createScript(htmlFile, htmlCode)
 
