@@ -43,23 +43,27 @@ class Validation(object):
         """
         result = True
 
-        if not (util.getImage(self.config, self.workingDir, 'anat') or
-                    util.getImage(self.config, self.workingDir, 'anat', None, 'nii')):
-            self.logger.warning("No high resolution image found into {} directory".format(self.workingDir))
-            result = False
+	if os.path.exists(self.backupDir):
+            self.logger.info("{} directory exists, assuming validation have already done before".format(self.backupDir))
+            result = True
+	else:
+		if not (util.getImage(self.config, self.workingDir, 'anat') or
+		            util.getImage(self.config, self.workingDir, 'anat', None, 'nii')):
+		    self.logger.warning("No high resolution image found into {} directory".format(self.workingDir))
+		    result = False
 
-        if not (util.getImage(self.config, self.workingDir, 'dwi') or
-                util.getImage(self.config, self.workingDir, 'dwi', None, 'nii')):
-            self.logger.warning("No diffusion weight image found into {} directory".format(self.workingDir))
-            result = False
+		if not (util.getImage(self.config, self.workingDir, 'dwi') or
+		        util.getImage(self.config, self.workingDir, 'dwi', None, 'nii')):
+		    self.logger.warning("No diffusion weight image found into {} directory".format(self.workingDir))
+		    result = False
 
-        if (not util.getImage(self.config, self.workingDir,'grad', None, 'b')) and \
-                (not util.getImage(self.config, self.workingDir,'grad', None, 'bval') or not
-                util.getImage(self.config, self.workingDir,'grad', None, 'bvec')):
-            self.logger.warning("No valid .b encoding or (.bval, .bvec) files found in directory: {}".format(self.workingDir))
-            result = False
+		if (not util.getImage(self.config, self.workingDir,'grad', None, 'b')) and \
+		        (not util.getImage(self.config, self.workingDir,'grad', None, 'bval') or not
+		        util.getImage(self.config, self.workingDir,'grad', None, 'bvec')):
+		    self.logger.warning("No valid .b encoding or (.bval, .bvec) files found in directory: {}".format(self.workingDir))
+		    result = False
 
-        return result
+	return result
 
 
     def validate(self):
@@ -72,7 +76,7 @@ class Validation(object):
 
         """
 
-        if not self.isDirty():
+        if os.path.exists(self.backupDir):
             #@TODO evaluate if 00-backup should be a valid toad structure
             self.logger.info("{} directory exists, assuming validation have already done before".format(self.backupDir))
             return True
@@ -86,19 +90,6 @@ class Validation(object):
             return False
 
         return True
-
-
-    def isDirty(self):
-        """Determine if a validation tasks should be executed for that directory
-
-        if raw directory exists, we consider that validation have already done prior,
-        @TODO this trivial stategy should be improve in a future version
-
-        Returns:
-            a Boolean that represent if validation is required for that directory
-
-        """
-        return not os.path.exists(self.backupDir)
 
 
     def __isAValidStructure(self):

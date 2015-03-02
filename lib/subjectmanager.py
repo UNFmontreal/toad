@@ -258,7 +258,8 @@ class SubjectManager(Logger, Config):
             subject.setConfigItem("general", "nb_subjects", str(len(subjects)))
 
         print "__processLocksSubjects=", subjects
-        self.quit()
+
+
         if self.config.getboolean('arguments', 'reinitialize'):
             self.__reinitialize(subjects)
         else:

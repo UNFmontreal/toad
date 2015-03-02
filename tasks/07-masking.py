@@ -21,7 +21,7 @@ class Masking(GenericTask):
         aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
         anatBrainResample = self.getImage(self.dependDir,'anat', ['brain','resample'] )
 
-        extended = self.buildName('anat', 'extended')
+        extended = self.buildName('anat', ['resample', 'extended'])
         self.info("Add {} and {} images together in order to create the ultimate image"
                   .format(anatBrainResample, aparcAsegResample))
         mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAsegResample)
@@ -187,7 +187,7 @@ class Masking(GenericTask):
     def isDirty(self, result = False):
         images ={'register anatomically constrained tractography': self.getImage(self.workingDir, "aparc_aseg", ["register", "act"]),
                     'aparc_aseg mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
-                    'ultimate extended mask': self.getImage(self.workingDir, 'anat',['extended', 'mask']),
+                    'ultimate extended mask': self.getImage(self.workingDir, 'anat',['resample', 'extended', 'mask']),
                     'ultimate 2x2x2 extended mask': self.getImage(self.workingDir, 'anat',['2x2x2', 'extended', 'mask']),
                     'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
                     'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'),

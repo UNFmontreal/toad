@@ -17,7 +17,7 @@ class HardiDipy(GenericTask):
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
-        mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
         #Look first if there is eddy b encoding files produces
         bValFile = self.getImage(self.dependDir, 'grad', None, 'bval')
@@ -87,7 +87,7 @@ class HardiDipy(GenericTask):
         images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
                   "gradient value bval encoding file":  self.getImage(self.dependDir, 'grad', None, 'bval'),
                   "gradient vector bvec encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvec'),
-                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
+                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
         return self.isAllImagesExists(images)
 
 
