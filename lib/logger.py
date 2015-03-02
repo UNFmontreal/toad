@@ -101,7 +101,7 @@ class Logger(object):
             return False
 
         message = "{}: {}".format(level, message)
-        print message
+        print message+"\n"
         if self.__logIntoFile:
             self.handle = open(self.filename,'a')
             self.handle.write(message)

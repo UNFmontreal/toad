@@ -79,7 +79,7 @@ class SubjectManager(Logger, Config):
                     self.info("{} is a valid subject, adding it to the list.".format(subject))
                     validSubjects.append(subject)
                 elif self.config.getboolean('arguments', 'prompt'):
-                        msg = "It seem\'m like {} is having an issue!".format(subject)
+                        msg = "It seem\'m like {} is having an issue and will probably fail!".format(subject)
                         if util.displayYesNoMessage(msg, "Would you like to remove it from the list (y or n)"):
                             self.info("Removing subject {} from the submitting list\n".format(subject))
                         else:
@@ -90,7 +90,7 @@ class SubjectManager(Logger, Config):
                     self.warning("Command prompt disabled, this submit will be submit anyway")
                     validSubjects.append(subject)
         else:
-            self.warning("Skipping validation have been requested, this option is dangerous")
+            self.warning("Skipping validation have been requested, this is a unwise and dangerous decision")
             validSubjects = subjects
 
         return validSubjects
@@ -256,9 +256,6 @@ class SubjectManager(Logger, Config):
         #update into each subject how many subjects should be submit. This information is sensitive for load balancing the grid
         for subject in subjects:
             subject.setConfigItem("general", "nb_subjects", str(len(subjects)))
-
-        print "__processLocksSubjects=", subjects
-
 
         if self.config.getboolean('arguments', 'reinitialize'):
             self.__reinitialize(subjects)
