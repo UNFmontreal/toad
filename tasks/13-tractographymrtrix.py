@@ -19,7 +19,7 @@ class TractographyMrtrix(GenericTask):
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
 
         bFile = self.getImage(self.dependDir, 'grad', None, 'b')
-        mask = self.getImage(self.maskingDir, 'anat', ['extended','mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
 
         tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tckgen_det', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Det')
         tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tckgen_prob', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Prob')
@@ -157,7 +157,7 @@ class TractographyMrtrix(GenericTask):
                     'resampled anatomically constrained tractography':self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"]),
                     'seeding streamlines 5tt2gmwmi' :self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi"),
                     'resampled brodmann area':self.getImage(self.registrationDir, "brodmann", "resample"),
-                    'ultimate extended mask': self.getImage(self.maskingDir, 'anat',['extended','mask'])}
+                    'ultimate extended mask': self.getImage(self.maskingDir, 'anat',['resample', 'extended','mask'])}
 
         return self.isAllImagesExists(images)
 

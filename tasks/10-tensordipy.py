@@ -31,7 +31,7 @@ class TensorDipy(GenericTask):
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
         bValFile = self.getImage(self.dependDir, 'grad', None, 'bval')
         bVecFile = self.getImage(self.dependDir, 'grad', None, 'bvec')
-        mask = self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
         self.__produceTensors(dwi, bValFile, bVecFile, mask)
 
@@ -77,7 +77,7 @@ class TensorDipy(GenericTask):
         images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
                   "gradient value bval encoding file":  self.getImage(self.dependDir, 'grad', None, 'bval'),
                   "gradient vector bvec encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvec'),
-                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['extended', 'mask'])}
+                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
         return self.isAllImagesExists(images)
 
 

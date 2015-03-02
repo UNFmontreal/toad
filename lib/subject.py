@@ -27,6 +27,7 @@ class Subject(Lock):
     def __repr__(self):
         return self.__name
 
+
     def getName(self):
         """get the name of that instance
 
