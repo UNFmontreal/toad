@@ -36,17 +36,16 @@ class Fieldmap(GenericTask):
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
         mask = self. __createSegmentationMask(aparcAseg)
 
-	self.info("rescaling the phase image")
+        self.info("rescaling the phase image")
         phaseRescale = self.__rescaleFieldMap(phase)
-        #magRescale = self.__rescaleFieldMap(mag)
 
-	self.info('Coregistring magnitude image with the anatomical image produce by freesurfer')
+        self.info('Coregistring magnitude image with the anatomical image produce by freesurfer')
         fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, freesurfer_anat)
 
-	self.info('Compute the transformation from the anatomical image produce by freesurfer to the magnitude image')
+        self.info('Compute the transformation from the anatomical image produce by freesurfer to the magnitude image')
         invertFielmapToAnat = mriutil.invertMatrix(fieldmapToAnat, self.buildName(fieldmapToAnat, 'inverse', 'mat'))
 	
-	self.info('Resampling the anatomical mask into the phase image space')
+        self.info('Resampling the anatomical mask into the phase image space')
         interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
         fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
 
@@ -130,7 +129,6 @@ class Fieldmap(GenericTask):
 
 
     def __createSegmentationMask(self, source):
-
         target = self.buildName(source, 'mask')
         nii = nibabel.load(source)
         op = ((numpy.mgrid[:5,:5,:5]-2.0)**2).sum(0)<=4
@@ -210,8 +208,7 @@ class Fieldmap(GenericTask):
 
     def __interpolateFieldmapInEpiSpace(self, source, reference, initMatrix):
         target = self.buildName(source, 'flirt')
-        outputMatrixName = self.buildName(source, 'flirt', 'mat')
-        cmd = "flirt -in {} -ref {} -out {} -omat {} -applyxfm -init {}".format(source, reference, target, outputMatrixName, initMatrix)
+        cmd = "flirt -in {} -ref {} -out {} -applyxfm -init {}".format(source, reference, target, initMatrix)
         self.launchCommand(cmd)
         return target
 
@@ -226,7 +223,8 @@ class Fieldmap(GenericTask):
     def __performDistortionCorrection(self, source, fieldmap, mask):
         unwarp = self.buildName(source, 'unwarp')
         target = self.buildName(source, 'vsm')
-        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} ".format(source,  fieldmap, mask, target, self.__getUnwarpDirection(), unwarp, self.__getDwellTime())
+        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} "\
+            .format(source,  fieldmap, mask, target, self.__getUnwarpDirection(), unwarp, self.__getDwellTime())
         self.launchCommand(cmd)
         return target
 
@@ -234,7 +232,8 @@ class Fieldmap(GenericTask):
     def __performDistortionCorrectionToDWI(self, source, mask, shift):
 
         target = self.buildName(source, 'unwarp')
-        cmd= "fugue --in={} --mask={} --loadshift={} --unwarp={}".format(source, mask, shift, target)
+        cmd= "fugue --in={} --mask={} --loadshift={}  --unwarpdir={} --unwarp={}  "\
+            .format(source, mask, shift, self.__getUnwarpDirection(), target)
         self.launchCommand(cmd)
         return target
 
@@ -259,9 +258,9 @@ class Fieldmap(GenericTask):
 
         images = {"freesurfer anatomical":self.getImage(self.parcellationDir, 'anat', 'freesurfer'),
                   "parcellation":self.getImage(self.parcellationDir, 'aparc_aseg'),
-		  "high resolution":self.getImage(self.dependDir, 'anat'),
-		  "magnitude":self.getImage(self.dependDir, 'mag'),
-		  "phase":self.getImage(self.dependDir, 'phase')}
+                  "high resolution":self.getImage(self.dependDir, 'anat'),
+                  "magnitude":self.getImage(self.dependDir, 'mag'),
+                  "phase":self.getImage(self.dependDir, 'phase')}
 
         result = self.isAllImagesExists(images)
         return result
