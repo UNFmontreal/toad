@@ -50,8 +50,14 @@ class Eddy(GenericTask):
         else:
 
             #concatenate B0 image together
-            b0Image = self.__concatenateB0(b0PA, b0AP,
-                            os.path.join(self.workingDir, self.get('b0s_filename')))
+
+            if self.get("phase_enc_dir") == "0":
+                b0Image = self.__concatenateB0(b0PA, b0AP,
+                                os.path.join(self.workingDir, self.get('b0s_filename')))
+
+            elif self.get("phase_enc_dir") == "1":
+                 b0Image = self.__concatenateB0(b0AP, b0PA,
+                                os.path.join(self.workingDir, self.get('b0s_filename')))
 
             #create the acquisition parameter file
             acqpTopup = self.__createAcquisitionParameterFile('topup')
@@ -165,20 +171,12 @@ class Eddy(GenericTask):
 
         if type=='topup':
             parameter='acqp_topup'
-            text = "0 -1 0 {}\n0 1 0 {}\n".format(factor, factor)
+            text = "0 1 0 {}\n0 -1 0 {}\n".format(factor, factor)
 
         elif type=='eddy':
             parameter='acqp_eddy'
-            if phaseEncDir==0:    #P>>A
-                    text = "0 1 0 {}\n".format(factor)
-            elif phaseEncDir==1:  #A>>P
-                    text = "0 -1 0 {}\n".format(factor)
-            elif phaseEncDir==2:  #R>>L
-                    text = "1 0 0 {}\n".format(factor)
-            elif phaseEncDir==3:  #L>>R
-                    text = "-1 0 0 {}\n".format(factor)
-            else:
-                self.error("Cannot determine the phase encoding direction, got value of: {}".format(phaseEncDir))
+            text = "0 1 0 {}\n".format(factor)
+
         else:
             self.error("Type must be of value: topup or eddy")
             return False

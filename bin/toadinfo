@@ -49,6 +49,31 @@ def __getPhaseEncodingDirection(source):
         return 1
 
 
+def __getPatFactor(source):
+    f = open(source, 'r')
+    lines = f.readlines()
+    f.close()
+    for line in lines:
+        if "sPat.lAccelFactPE" in line:
+            try:
+                return float(line.split("=")[-1].strip())
+            except ValueError:
+                return 1
+    return 1
+
+
+def __getEpiFactor(source):
+    f = open(source, 'r')
+    lines = f.readlines()
+    f.close()
+    for line in lines:
+        if "sKSpace.lPhaseEncodingLines" in line:
+            try:
+                return int(line.split("=")[-1].strip())
+            except ValueError:
+                return 1
+    return 1
+
 def __returnPhaseEncodingDirection(line):
 
     tolerance = 0.2
@@ -73,14 +98,13 @@ def __returnPhaseEncodingDirection(line):
     return 1
 
 
-def __getUnwarpFieldFromDicom(source):
+def __getEchoSpacing(source, epiFactor, patFactor = 1):
 
     header=dicomwrappers.wrapper_from_file(source, force=True)
 
     try:
-        epiFactor = max(header['AcquisitionMatrix'])
         bpppe = header.csa_header['tags']['BandwidthPerPixelPhaseEncode']['items'][0]
-        echoSpacing = 1/(epiFactor*bpppe)*1000
+        echoSpacing = 1/(epiFactor*bpppe)*1000 *patFactor
 
     except AttributeError:
         print "Cannot read csa header from ", source
@@ -90,7 +114,7 @@ def __getUnwarpFieldFromDicom(source):
         print "Some field(s) cannot be found in the header"
         return (None,None)
 
-    return (epiFactor, echoSpacing)
+    return echoSpacing
 
 
 def writeConfig(source, phaseEncDir, epiFactor, echoSpacing):
@@ -118,9 +142,9 @@ if __name__ == '__main__':
 
     #found information into the ASCCONV tags
     phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
-    epiFactor = None
-    echoSpacing=None
-    (epiFactor, echoSpacing) = __getUnwarpFieldFromDicom(arguments.dcmFile)
+    patFactor = __getPatFactor(arguments.dcmFile)
+    epiFactor = __getEpiFactor(arguments.dcmFile)
+    echoSpacing = __getEchoSpacing(arguments.dcmFile, epiFactor, patFactor)
 
     if arguments.config:
         writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing)

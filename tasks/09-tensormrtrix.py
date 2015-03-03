@@ -44,6 +44,7 @@ class TensorMrtrix(GenericTask):
         vector = self.buildName(source, "vector")
         adImage = self.buildName(source, "ad")
         rdImage = self.buildName(source, "rd")
+        mdImage = self.buildName(source, "md")
         value2 = self.buildName(source, "value2")
         value3 = self.buildName(source, "value3")
         modulate = self.get('modulate')
@@ -63,6 +64,8 @@ class TensorMrtrix(GenericTask):
         cmd = "mrmath {} {} mean {} -nthreads {} -quiet ".format(value2, value3, rdImage, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
+        cmd = "mrmath {} {} {} mean {} -nthreads {} -quiet ".format(adImage, value2, value3, mdImage, self.getNTreadsMrtrix())
+        self.launchCommand(cmd)
 
     def meetRequirement(self):
         images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
@@ -78,5 +81,6 @@ class TensorMrtrix(GenericTask):
                     "selected eigenvector(s)" : self.getImage(self.workingDir, 'dwi', 'vector'),
                     "fractional anisotropy" : self.getImage(self.workingDir, 'dwi', 'fa'),
                     "selected eigenvalue(s) AD" : self.getImage(self.workingDir, 'dwi', 'ad'),
-                    "selected eigenvalue(s) RD" : self.getImage(self.workingDir, 'dwi', 'rd')}
+                    "selected eigenvalue(s) RD" : self.getImage(self.workingDir, 'dwi', 'rd'),
+                    "mean diffusivity" : self.getImage(self.workingDir, 'dwi', 'md')}
         return self.isSomeImagesMissing(images)

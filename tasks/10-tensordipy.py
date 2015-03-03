@@ -69,6 +69,10 @@ class TensorDipy(GenericTask):
         rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
         nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(target, "rgb"))
 
+        #produce adc images
+        adc = dipy.reconst.dti.apparent_diffusion_coef(tensorsValuesReordered, dipy.data.get_sphere('symmetric724'))
+        nibabel.save(nibabel.Nifti1Image(adc.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "adc"))
+
         self.info("End tensor and metrics creation from dipy, resulting file is {} ".format(target))
         return target
 
@@ -89,6 +93,7 @@ class TensorDipy(GenericTask):
                     "fractional anisotropy" : self.getImage(self.workingDir, 'dwi', 'fa'),
                     "mean diffusivity MD" : self.getImage(self.workingDir, 'dwi', 'md'),
                     "selected eigenvalue(s) AD" : self.getImage(self.workingDir, 'dwi', 'ad'),
-                    "selected eigenvalue(s) RD" : self.getImage(self.workingDir, 'dwi', 'rd')}
+                    "selected eigenvalue(s) RD" : self.getImage(self.workingDir, 'dwi', 'rd'),
+                    "apparent diffusion coefficient" : self.getImage(self.workingDir, 'dwi', 'adc')}
         return self.isSomeImagesMissing(images)
 

@@ -23,10 +23,6 @@ class Config(object):
     def buildConfiguration(self, arguments):
         """Read various config files and return configurations value as a dictionary
 
-        First read master config file: etc/config.cfg
-        Second, Process .toad.cfg in the user home directory
-        Third, Process any users input file enter as the command line option -c
-
         Args:
             arguments: an ArgumentParser containing command line invocation
 
@@ -34,27 +30,14 @@ class Config(object):
             a RawConfigParser dictionaries containing configurations
 
         """
+
         config = ConfigParser.ConfigParser()
-        configFiles = ["{}/etc/config.cfg".format(arguments.toadDir)]
-        config.read(configFiles)
+        config.read(self.__getConfigFiles(arguments))
 
-        configFiles = ['~/.toad.cfg',
-                       "{}/config.cfg".format(arguments.studyDir)]
-
-        if arguments.subject and isinstance(arguments.subject, basestring):
-            subjectFile = "{}/config.cfg".format(arguments.subject)
-            if os.path.exists(subjectFile):
-                configFiles.append(subjectFile)
-            subjectFile = "{}/config.cfg".format(os.path.join(arguments.subject, "00-backup"))
-            if os.path.exists(subjectFile):
-                configFiles.append(subjectFile)
-
-        config.read(configFiles)
 
         #parse command line arguments in the config file
         config.add_section('arguments')
         config.set('arguments', 'toad_dir', arguments.toadDir)
-        config.set('arguments', 'studyDir', arguments.studyDir)
 
         if arguments.stopBeforeTask and isinstance(arguments.stopBeforeTask, basestring):
             config.set('arguments', 'stop_before_task', arguments.stopBeforeTask)
@@ -99,3 +82,36 @@ class Config(object):
 
         """
         return self.config
+
+
+    def __getConfigFiles(self, arguments):
+        """Utility fonctions that find all configuration file that apply to a given toad subject
+
+
+        First read master config file: etc/config.cfg
+        Second, Process .toad.cfg in the user home directory
+        Third, Look if there is a config file into the root of the study
+        Fouth, Process any users input file enter as the command line option -c
+
+
+        Args:
+            arguments: a ArgumentParser pass by the constructor
+
+        Returns:
+            a list of all config files
+        """
+        configFiles = ["{}/etc/config.cfg".format(arguments.toadDir), '~/.toad.cfg']
+
+        #config file could be found into the root of the project, into the subject and into the backup directory
+        if arguments.subject:
+            for directory in [os.path.dirname(arguments.subject),
+                           arguments.subject,
+                           os.path.join(arguments.subject, "00-backup")]:
+                configFile = "{}/config.cfg".format(directory)
+                if os.path.exists(configFile):
+                    configFiles.append(configFile)
+
+        if arguments.config:
+            if os.path.isfile(arguments.config):
+                configFiles.append(arguments.config)
+        return configFiles

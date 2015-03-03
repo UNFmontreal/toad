@@ -72,7 +72,7 @@ class Preprocessing(GenericTask):
             The resulting output file name
         """
         self.info("Launch upsampling from freesurfer.\n")
-	tmp = self.buildName(source, "tmp")
+        tmp = self.buildName(source, "tmp")
         if len(voxelSize.strip().split(" "))!=3:
             self.warning("Voxel size not specified correctly during upsampling")
 
