@@ -180,9 +180,8 @@ class SubjectManager(Logger, Config):
             subject:  a subject
 
         """
-
-        cmd = "echo {}/bin/toad {} -l -p | qsub -notify -V -N {} -o {} -e {} -q {}".format(self.config.get('arguments', 'toad_dir'),
-              subject.getDir(), subject.getName(), subject.getLogDir(), self.config.get('general', 'sge_queue'))
+        cmd = "echo {0}/bin/toad {1} -l -p | qsub -notify -V -N {2} -o {3} -e {3} -q {4}".format(self.config.get('arguments', 'toad_dir'),
+              subject.getDir(), subject.getName(), subject.getLogDir(),subject.getConfig().get('general', 'sge_queue'))
         self.info("Command launch: {}".format(cmd))
         import subprocess
         process = subprocess.Popen(cmd, stdout=None, stderr=None, shell=True)
