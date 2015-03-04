@@ -86,7 +86,7 @@ class Eddy(GenericTask):
             mriutil.bEnc2BVal(bCorrected, self.buildName(outputEddyImage, None, 'bval'))
 
 
-    def  __oddImagesWithEvenNumberOfSlices(self, sources):
+    def __oddImagesWithEvenNumberOfSlices(self, sources):
         """return a list of images that will count a odd number of slices in z direction
 
             If an even number of slices is found, the upper volume will be remove

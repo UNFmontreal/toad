@@ -206,8 +206,8 @@ class Parcellation(GenericTask):
         aparcAsegPng = self.c3dSegmentation(anatFreesurfer, aparcAseg, '2', '0.5')
         brodmannPng = self.c3dSegmentation(anatFreesurfer, brodmann, '2', '0.5')
 
-        imagesArray = [(anatFreesurferPng,'High resolution anatomical image of freesurfer'),
+        images = [(anatFreesurferPng,'High resolution anatomical image of freesurfer'),
                        (aparcAsegPng,'aparcaseg segmentaion from freesurfer'),
                        (brodmannPng,'Brodmann segmentation from freesurfer')]
 
-        return imagesArray
+        return images

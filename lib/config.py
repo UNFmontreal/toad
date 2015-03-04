@@ -17,10 +17,10 @@ class Config(object):
 
         """
         if(arguments is not None):
-            self.config = self.buildConfiguration(arguments)
+            self.config = self.__buildConfiguration(arguments)
 
 
-    def buildConfiguration(self, arguments):
+    def __buildConfiguration(self, arguments):
         """Read various config files and return configurations value as a dictionary
 
         Args:

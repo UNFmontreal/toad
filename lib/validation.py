@@ -43,27 +43,27 @@ class Validation(object):
         """
         result = True
 
-	if os.path.exists(self.backupDir):
-            self.logger.info("{} directory exists, assuming validation have already done before".format(self.backupDir))
-            result = True
-	else:
-		if not (util.getImage(self.config, self.workingDir, 'anat') or
-		            util.getImage(self.config, self.workingDir, 'anat', None, 'nii')):
-		    self.logger.warning("No high resolution image found into {} directory".format(self.workingDir))
-		    result = False
+        if os.path.exists(self.backupDir):
+                self.logger.info("{} directory exists, assuming validation have already done before".format(self.backupDir))
+                result = True
+        else:
+            if not (util.getImage(self.config, self.workingDir, 'anat') or
+                        util.getImage(self.config, self.workingDir, 'anat', None, 'nii')):
+                self.logger.warning("No high resolution image found into {} directory".format(self.workingDir))
+                result = False
 
-		if not (util.getImage(self.config, self.workingDir, 'dwi') or
-		        util.getImage(self.config, self.workingDir, 'dwi', None, 'nii')):
-		    self.logger.warning("No diffusion weight image found into {} directory".format(self.workingDir))
-		    result = False
+            if not (util.getImage(self.config, self.workingDir, 'dwi') or
+                    util.getImage(self.config, self.workingDir, 'dwi', None, 'nii')):
+                self.logger.warning("No diffusion weight image found into {} directory".format(self.workingDir))
+                result = False
 
-		if (not util.getImage(self.config, self.workingDir,'grad', None, 'b')) and \
-		        (not util.getImage(self.config, self.workingDir,'grad', None, 'bval') or not
-		        util.getImage(self.config, self.workingDir,'grad', None, 'bvec')):
-		    self.logger.warning("No valid .b encoding or (.bval, .bvec) files found in directory: {}".format(self.workingDir))
-		    result = False
+            if (not util.getImage(self.config, self.workingDir,'grad', None, 'b')) and \
+                    (not util.getImage(self.config, self.workingDir,'grad', None, 'bval') or not
+                    util.getImage(self.config, self.workingDir,'grad', None, 'bvec')):
+                self.logger.warning("No valid .b encoding or (.bval, .bvec) files found in directory: {}".format(self.workingDir))
+                result = False
 
-	return result
+        return result
 
 
     def validate(self):
