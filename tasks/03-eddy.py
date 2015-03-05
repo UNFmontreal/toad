@@ -404,7 +404,7 @@ class Eddy(GenericTask):
         
         rawBvec = self.getImage(self.dependDir, 'grad', None, 'bvec')
         eddyBvec = self.getImage(self.workingDir, 'grad', 'eddy', 'bvec')
-        bvecs_tg = 'bvecs,gif'
+        bvecs_tg = 'bvecs.gif'
         self.__plotVectors(self, rawBvec, eddyBvec, bvecs_tg)
         
         images = [(eddyGif,'DWI eddy'),
