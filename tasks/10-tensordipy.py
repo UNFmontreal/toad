@@ -29,14 +29,14 @@ class TensorDipy(GenericTask):
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
-        bValFile = self.getImage(self.dependDir, 'grad', None, 'bval')
-        bVecFile = self.getImage(self.dependDir, 'grad', None, 'bvec')
+        bValsFile = self.getImage(self.dependDir, 'grad', None, 'bvals')
+        bVecsFile = self.getImage(self.dependDir, 'grad', None, 'bvecs')
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
-        self.__produceTensors(dwi, bValFile, bVecFile, mask)
+        self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
 
 
-    def __produceTensors(self, source, bValFile, bVecFile, mask):
+    def __produceTensors(self, source, bValsFile, bVecsFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
         target = self.buildName(source, "tensor")
         dwiImage = nibabel.load(source)
@@ -45,7 +45,7 @@ class TensorDipy(GenericTask):
         dwiData  = dwiImage.get_data()
         dwiData = dipy.segment.mask.applymask(dwiData, maskData)
 
-        gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValFile), numpy.loadtxt(bVecFile))
+        gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
 
         model = dipy.reconst.dti.TensorModel(gradientTable)
         fit = model.fit(dwiData)
@@ -79,8 +79,8 @@ class TensorDipy(GenericTask):
 
     def meetRequirement(self):
         images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
-                  "gradient value bval encoding file":  self.getImage(self.dependDir, 'grad', None, 'bval'),
-                  "gradient vector bvec encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvec'),
+                  "gradient value bvals encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvals'),
+                  "gradient vector bvecs encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvecs'),
                   'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
         return self.isAllImagesExists(images)
 

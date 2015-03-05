@@ -23,10 +23,10 @@ class Denoising(GenericTask):
             target = self.buildName(dwi, "denoise")
             if self.get("algorithm") == "nlmeans":
                 if not self.config.getboolean("eddy", "ignore"):
-                    bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+                    bVals=  self.getImage(self.eddyDir, 'grad',  None, 'bvals')
                 else:
-                    bVal=  self.getImage(self.preparationDir, 'grad',  None, 'bval')
-                b0Index = mriutil.getFirstB0IndexFromDwi(bVal)
+                    bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
+                b0Index = mriutil.getFirstB0IndexFromDwi(bVals)
 
                 try:
                     threshold = int(self.get("nlmeans_mask_threshold"))

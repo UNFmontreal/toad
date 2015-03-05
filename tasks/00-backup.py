@@ -29,8 +29,8 @@ class Backup(GenericTask):
                  self.getImage(self.subjectDir, 'b0AP'),
                  self.getImage(self.subjectDir, 'b0PA'),
                  self.getImage(self.subjectDir, 'grad', None, 'b'),
-                 self.getImage(self.subjectDir, 'grad', None, 'bval'),
-                 self.getImage(self.subjectDir, 'grad', None, 'bvec'),
+                 self.getImage(self.subjectDir, 'grad', None, 'bvals'),
+                 self.getImage(self.subjectDir, 'grad', None, 'bvecs'),
                  self.getImage(self.subjectDir, 'config', None, 'cfg')]
 
         for image in images:
@@ -46,9 +46,9 @@ class Backup(GenericTask):
     def isDirty(self):
 
         images = {'high resolution': self.getImage(self.workingDir, 'anat'), 'diffusion weighted': self.getImage(self.workingDir, 'dwi')}
-        #@TODO vbal bvec may be optionnal
-        #images = {'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', None, 'bval'),
-        #          'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', None, 'bvec'),
+        #@TODO bvals bvecs may be optionnal
+        #images = {'gradient .bvals encoding file': self.getImage(self.workingDir, 'grad', None, 'bvals'),
+        #          'gradient .bvecs encoding file': self.getImage(self.workingDir, 'grad', None, 'bvecs'),
         #          'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b'),
         #          'high resolution': self.getImage(self.workingDir, 'anat'),
         #          'diffusion weighted': self.getImage(self.workingDir, 'dwi')}

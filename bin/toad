@@ -37,7 +37,7 @@ def __parseArguments():
              |-input---\\
              |         |- t1_001.nii
              |         |- dwi_001.nii
-             |         |- dwi_001.b ou (dwi_001.bval et dwi_001.bvec)
+             |         |- dwi_001.b ou (dwi_001.bvals et dwi_001.bvecs)
              |         |-(optionnal) aparc_aseg.nii
              |         |-(optionnal) freesurfer_anat.nii.gz
              |         |-(optionnal) lh_ribbon.nii.gz
