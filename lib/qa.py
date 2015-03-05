@@ -1,6 +1,6 @@
 from string import ascii_uppercase, digits
 from random import choice
-from lib import mriutil
+from lib import util, mriutil
 import shutil
 import os
 

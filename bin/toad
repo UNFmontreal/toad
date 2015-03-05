@@ -75,9 +75,17 @@ def __parseArguments():
         Please report bugs to mathieu.desrosiers@criugm.qc.ca
         Check whether it CROAK like a toad and WALK like a toad. It is not uncommon to find a warty skinned frog that isn\'t a toad.
         """)
+<<<<<<< Updated upstream
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the subjects, wildcard * ? are accepted")
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Specify the location of an alternative the config.cfg file")
+=======
+    parser.add_argument("studyDir", help="The directory where we should find the input stucture")
+    parser.add_argument("-c", "--config",action='append', nargs='?',metavar=('filename'), required=False,
+                            help="Specify the location of an alternative the config.cfg file")
+    parser.add_argument("-u", "--subject", action='append', nargs='?',metavar=('directory'), required=False,
+                            help="Explicitly specify the subject directory to submit. This option may be repeat several time")
+>>>>>>> Stashed changes
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
     parser.add_argument("-t", "--stopBeforeTask", nargs='?',metavar=('task name'), required=False,
