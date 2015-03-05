@@ -20,12 +20,12 @@ class HardiDipy(GenericTask):
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
         #Look first if there is eddy b encoding files produces
-        bValFile = self.getImage(self.dependDir, 'grad', None, 'bval')
-        bVecFile = self.getImage(self.dependDir, 'grad', None, 'bvec')
-        self.__produceHardiMetric(dwi, bValFile, bVecFile, mask)
+        bValsFile = self.getImage(self.dependDir, 'grad', None, 'bvals')
+        bVecsFile = self.getImage(self.dependDir, 'grad', None, 'bvecs')
+        self.__produceHardiMetric(dwi, bValsFile, bVecsFile, mask)
 
 
-    def __produceHardiMetric(self, source, bValFile, bVecFile, mask):
+    def __produceHardiMetric(self, source, bValsFile, bVecsFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
         #target = self.buildName(source, "dipy")
 
@@ -36,7 +36,7 @@ class HardiDipy(GenericTask):
         maskData = maskImage.get_data()
         dwiData = dipy.segment.mask.applymask(dwiData, maskData)
 
-        gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValFile), numpy.loadtxt(bVecFile))
+        gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
         sphere = dipy.data.get_sphere('symmetric724')
 
         response, ratio = dipy.reconst.csdeconv.auto_response(gradientTable, dwiData, roi_radius=10, fa_thr=0.7)
@@ -85,8 +85,8 @@ class HardiDipy(GenericTask):
 
     def meetRequirement(self):
         images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
-                  "gradient value bval encoding file":  self.getImage(self.dependDir, 'grad', None, 'bval'),
-                  "gradient vector bvec encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvec'),
+                  "gradient value bvals encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvals'),
+                  "gradient vector bvecs encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvecs'),
                   'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
         return self.isAllImagesExists(images)
 

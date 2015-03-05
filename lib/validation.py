@@ -12,7 +12,7 @@ class Validation(object):
         Valid structure should contain:
             A High resolution image
             A diffusion tensor image
-            A gradient encoding file, optionnaly in bval, bvec format
+            A gradient encoding file, optionnaly in bvals, bvecs format
             Optionnaly, B0_Anterior-Posterior and/or B0_Posterior-Anterior image
             Optionnal aparc_aseg, freesurfer_anat
             only one T1,dwi, .b per subject
@@ -35,7 +35,7 @@ class Validation(object):
         Must have at least.
             1 high resolution anatomical image (nii or nii.gz)
             1 diffusion weighted image (nii or nii.gz)
-            A corresponding B (.b) encoding or a pair of bvec (.bvec), bval (.bval) encoding file
+            A corresponding B (.b) encoding or a pair of bvecs (.bvecs), bvals (.bvals) encoding file
 
         Returns:
             False if one of those file are missing, True otherwise
@@ -58,9 +58,9 @@ class Validation(object):
                 result = False
 
             if (not util.getImage(self.config, self.workingDir,'grad', None, 'b')) and \
-                    (not util.getImage(self.config, self.workingDir,'grad', None, 'bval') or not
-                    util.getImage(self.config, self.workingDir,'grad', None, 'bvec')):
-                self.logger.warning("No valid .b encoding or (.bval, .bvec) files found in directory: {}".format(self.workingDir))
+                    (not util.getImage(self.config, self.workingDir,'grad', None, 'bvals') or not
+                    util.getImage(self.config, self.workingDir,'grad', None, 'bvecs')):
+                self.logger.warning("No valid .b encoding or (.bvals, .bvecs) files found in directory: {}".format(self.workingDir))
                 result = False
 
         return result
@@ -142,11 +142,11 @@ class Validation(object):
             return False
 
         bEnc = util.getImage(self.config, self.workingDir,'grad', None, 'b')
-        bVal = util.getImage(self.config, self.workingDir,'grad', None, 'bval')
-        bVec = util.getImage(self.config, self.workingDir,'grad', None, 'bvec')
+        bVals = util.getImage(self.config, self.workingDir,'grad', None, 'bvals')
+        bVecs = util.getImage(self.config, self.workingDir,'grad', None, 'bvecs')
 
-        if (not bEnc) and (not bVal or not bVec):
-            self.logger.warning("No valid .b encoding or (.bval, .bvec) files found in directory: {}".format(self.workingDir))
+        if (not bEnc) and (not bVals or not bVecs):
+            self.logger.warning("No valid .b encoding or (.bvals, .bvecs) files found in directory: {}".format(self.workingDir))
             return False
         else:
 
@@ -161,12 +161,12 @@ class Validation(object):
                 self.logger.warning("Encoding file {} is invalid".format(bEnc))
                 return False
 
-            if bVal and not self.__isValidEncoding(nbDirections, '.bval'):
+            if bVals and not self.__isValidEncoding(nbDirections, '.bvals'):
                 self.logger.warning("Encoding file {} is invalid".format(bEnc))
                 return False
 
-            if bVec and not self.__isValidEncoding(nbDirections, '.bvec'):
-                self.logger.warning("Encoding file {} is invalid".format(bVec))
+            if bVecs and not self.__isValidEncoding(nbDirections, '.bvecs'):
+                self.logger.warning("Encoding file {} is invalid".format(bVecs))
                 return False
 
         #Validate optionnal images
@@ -204,7 +204,7 @@ class Validation(object):
 
         Args:
             nbDirection: number of direction into DWI image
-            type: type of encoding file. Valid values are: .b, .bval, .bvec
+            type: type of encoding file. Valid values are: .b, .bvals, .bvecs
 
         Returns:
             a Boolean that represent if the encoding file is valid
@@ -223,7 +223,7 @@ class Validation(object):
         lines = f.readlines()
         f.close()
 
-        if type=='.bval':
+        if type=='.bvals':
             for line in lines:
                 nbElements = len(line.split())
                 if nbElements != nbDirection:
@@ -231,7 +231,7 @@ class Validation(object):
                                         .format(nbDirection, encoding, nbElements))
                     result = False
 
-        elif type=='.bvec':
+        elif type=='.bvecs':
             if len(lines) != 3:
                 self.logger.warning("Expecting 3 vectors in {} file, counting {}".format(encoding, len(lines)))
                 result = False

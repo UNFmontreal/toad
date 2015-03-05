@@ -24,8 +24,8 @@ class Eddy(GenericTask):
         b0AP= self.getImage(self.dependDir, 'b0AP')
         b0PA= self.getImage(self.dependDir, 'b0PA')
         bEnc=  self.getImage(self.dependDir, 'grad',  None, 'b')
-        bVals=  self.getImage(self.dependDir, 'grad',  None, 'bval')
-        bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvec')
+        bVals=  self.getImage(self.dependDir, 'grad',  None, 'bvals')
+        bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvecs')
 
         #extract b0 image from the dwi
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
@@ -81,9 +81,9 @@ class Eddy(GenericTask):
         eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
         if len(eddyParameterFiles)>0:
             bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles.pop(0), self.buildName(outputEddyImage, None, 'b'))
-            #produce the bVal and bVec file accordingly
-            mriutil.bEnc2BVec(bCorrected, self.buildName(outputEddyImage, None, 'bvec'))
-            mriutil.bEnc2BVal(bCorrected, self.buildName(outputEddyImage, None, 'bval'))
+            #produce the bVals and bVecs file accordingly
+            mriutil.bEnc2BVecs(bCorrected, self.buildName(outputEddyImage, None, 'bvecs'))
+            mriutil.bEnc2BVals(bCorrected, self.buildName(outputEddyImage, None, 'bvals'))
 
 
     def __oddImagesWithEvenNumberOfSlices(self, sources):
@@ -263,7 +263,7 @@ class Eddy(GenericTask):
         return target
 
 
-    def __correctionEddy2(self, source, mask, topup, index, acqp, bVecs, bVal):
+    def __correctionEddy2(self, source, mask, topup, index, acqp, bVecs, bVals):
         """Performs eddy correction on a dwi file.
 
         Args:
@@ -283,7 +283,7 @@ class Eddy(GenericTask):
         tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "eddy")
         cmd = "eddy --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} "\
-              .format(source, mask, index, acqp, bVecs, bVal, tmp)
+              .format(source, mask, index, acqp, bVecs, bVals, tmp)
 
         if topup is not None:
             cmd += " --topup={}".format(topup)
@@ -325,7 +325,7 @@ class Eddy(GenericTask):
             matplotlib.pyplot.savefig(pngoutput)
 
 
-    def __plotVectors(self, rawBvec, eddyBvec, outputfile):
+    def __plotVectors(self, rawBvecs, eddyBvecs, target):
         """
 
         """
@@ -333,14 +333,14 @@ class Eddy(GenericTask):
         fig = matplotlib.pyplot.figure()
         ax = mpl_toolkits.mplot3d.Axes3D(fig)
 
-        bvec1 = numpy.loadtxt(rawBvec)
-        bvec0= -bvec1
+        bVec1 = numpy.loadtxt(rawBvecs)
+        bVec0= -bVec1
 
-        graphParam = [(80, 'b', 'o', bvec0), (80, 'r', 'o', bvec1)]
+        graphParam = [(80, 'b', 'o', bVec0), (80, 'r', 'o', bVec1)]
 
-        if eddyBvec:
-            bvec2 = numpy.loadtxt(eddyBvec)
-            graphParam.append((20, 'k', '+', bvec2))
+        if eddyBvecs:
+            bVecs2 = numpy.loadtxt(eddyBvecs)
+            graphParam.append((20, 'k', '+', bVecs2))
 
         for s, c, m, bv in graphParam:
             x = bv[0,1:]
@@ -361,7 +361,7 @@ class Eddy(GenericTask):
             ax.view_init(elev=10., azim=ii)
             matplotlib.pyplot.savefig(gifId+str(ii)+'.png')
             cmd += '-delay 10 ' + gifId + str(ii) + '.png '
-        cmd += outputfile
+        cmd += target
         self.launchCommand(cmd)
         cmd = 'rm ' + gifId + '*'
         self.launchCommand(cmd)
@@ -374,15 +374,15 @@ class Eddy(GenericTask):
     def meetRequirement(self):
 
         images = {'diffusion weighted':self.getImage(self.dependDir, 'dwi'),
-                  'gradient .bval encoding file': self.getImage(self.dependDir, 'grad', None, 'bval'),
-                  'gradient .bvec encoding file': self.getImage(self.dependDir, 'grad', None, 'bvec'),
+                  'gradient .bvals encoding file': self.getImage(self.dependDir, 'grad', None, 'bvals'),
+                  'gradient .bvecs encoding file': self.getImage(self.dependDir, 'grad', None, 'bvecs'),
                   'gradient .b encoding file': self.getImage(self.dependDir, 'grad', None, 'b')}
         return self.isAllImagesExists(images)
 
 
     def isDirty(self):
         images = {'diffusion weighted eddy corrected': self.getImage(self.workingDir, 'dwi', 'eddy'),
-                  'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bval'),
-                  'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvec'),
+                  'gradient .bvals encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvals'),
+                  'gradient .bvecs encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvecs'),
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'b')}
         return self.isSomeImagesMissing(images)

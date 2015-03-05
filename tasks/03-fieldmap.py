@@ -19,13 +19,13 @@ class Fieldmap(GenericTask):
 
         if not self.config.getboolean("eddy", "ignore"):
             dwi = self.getImage(self.eddyDir, "dwi", "eddy")
-            bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+            bVals=  self.getImage(self.eddyDir, 'grad',  None, 'bvals')
         else:
             dwi = self.getImage(self.preparationDir, "dwi")
-            bVal=  self.getImage(self.preparationDir, 'grad',  None, 'bval')
+            bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
 
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
-        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVal))
+        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
         mag = self.getImage(self.dependDir, "mag")
         phase = self.getImage(self.dependDir, "phase")

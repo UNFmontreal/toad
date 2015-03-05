@@ -19,24 +19,24 @@ class Preprocessing(GenericTask):
         bFile= self.getImage(self.preparationDir, 'grad', None, 'b')
         if not bFile:
             bFile= self.getImage(self.eddyDir, 'grad', None, 'b')
-        bVal= self.getImage(self.preparationDir, 'grad', None, 'bval')
-        if not bVal:
-            bVal= self.getImage(self.eddyDir, 'grad', None, 'bval')
-        bVec= self.getImage(self.eddyDir, 'grad', None, 'bvec')
-        if not bVec:
-            bVec= self.getImage(self.preparationDir, 'grad', None, 'bvec')
+        bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
+        if not bVals:
+            bVals= self.getImage(self.eddyDir, 'grad', None, 'bvals')
+        bVecs= self.getImage(self.eddyDir, 'grad', None, 'bvecs')
+        if not bVecs:
+            bVecs= self.getImage(self.preparationDir, 'grad', None, 'bvecs')
 
         bFile = util.symlink(bFile, self.workingDir)
-        bVal = util.symlink(bVal, self.workingDir)
-        bVec = util.symlink(bVec, self.workingDir)
+        bVals = util.symlink(bVals, self.workingDir)
+        bVecs = util.symlink(bVecs, self.workingDir)
 
         dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
-        self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVal))
+        self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
 
         dwi2x2X2 = self.__upsampling(dwi, "2 2 2", self.buildName(dwi, "2x2x2"))
         b02x2x2 = os.path.join(self.workingDir, os.path.basename(dwi2x2X2).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
-        self.info(mriutil.extractFirstB0FromDwi(dwi2x2X2, b02x2x2, bVal))
+        self.info(mriutil.extractFirstB0FromDwi(dwi2x2X2, b02x2x2, bVals))
 
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
         brainAnat  = self.__bet(anat)

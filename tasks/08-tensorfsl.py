@@ -18,11 +18,11 @@ class TensorFsl(GenericTask):
 
         """
         dwi = self.getImage(self.dependDir, 'dwi', '2x2x2')
-        bVal = self.getImage(self.dependDir, 'grad', None, 'bval')
-        bVec = self.getImage(self.dependDir, 'grad', None, 'bvec')
+        bVals = self.getImage(self.dependDir, 'grad', None, 'bvals')
+        bVecs = self.getImage(self.dependDir, 'grad', None, 'bvecs')
         mask = self.getImage(self.maskingDir, 'anat', ['2x2x2', 'extended', 'mask'])
 
-        self.__tensorsFsl(dwi, bVec, bVal, mask)
+        self.__tensorsFsl(dwi, bVecs, bVals, mask)
 
         l1 = self.getImage(self.workingDir, 'dwi', 'fsl_l1')
         l2 = self.getImage(self.workingDir, 'dwi', 'fsl_l2')
@@ -35,19 +35,19 @@ class TensorFsl(GenericTask):
         self.__mean(l2, l3, rd)
 
 
-    def __tensorsFsl(self, source, bVec, bVal, mask=""):
+    def __tensorsFsl(self, source, bVecs, bVals, mask=""):
         """Fits a diffusion tensor model at each voxel
 
         Args:
             source: A diffusion weighted volumes and volume(s) with no diffusion weighting
-            bVec: Text file containing a list of gradient directions applied during diffusion weighted volumes.
-            bVal: Text file containing a list of b values applied during each volume acquisition.
+            bVecs: Text file containing a list of gradient directions applied during diffusion weighted volumes.
+            bVals: Text file containing a list of b values applied during each volume acquisition.
             mask: A binarised volume in diffusion space containing ones inside the brain and zeroes outside the brain.
 
         """
         self.info("Starting dtifit from fsl")
         target = self.buildName(source, None,  '')
-        cmd ="dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVec, bVal)
+        cmd ="dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVecs, bVals)
         if mask:
             cmd += "-m {}".format(mask)
         self.launchCommand(cmd)
@@ -86,8 +86,8 @@ class TensorFsl(GenericTask):
         """
         images = {'diffusion weighted':  self.getImage(self.dependDir, 'dwi', '2x2x2'),
                   'ultimate 2x2x2 mask': self.getImage(self.maskingDir, 'anat', ['2x2x2', 'extended', 'mask']),
-                  '.bval gradient encoding file': self.getImage(self.dependDir, 'grad', None, 'bval'),
-                  '.bvec gradient encoding file': self.getImage(self.dependDir, 'grad', None, 'bvec'),
+                  '.bvals gradient encoding file': self.getImage(self.dependDir, 'grad', None, 'bvals'),
+                  '.bvecs gradient encoding file': self.getImage(self.dependDir, 'grad', None, 'bvecs'),
                 }
 
         return self.isAllImagesExists(images)
