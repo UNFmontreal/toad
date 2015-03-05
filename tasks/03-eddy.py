@@ -388,3 +388,27 @@ class Eddy(GenericTask):
                   'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvec'),
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'b')}
         return self.isSomeImagesMissing(images)
+
+
+    def qaSupplier(self):
+        eddy = self.getImage(self.workingDir, "dwi", 'eddy')
+        eddyGif = self.nifti4dtoGif(eddy)
+        
+        import glob
+        fixs = glob.glob("{}/*_temporary.nii.eddy_parameters".format(self.workingDir))
+        for fix in fixs:
+            eddy_parameters = fix 
+        translation_tg = 'translation.png'
+        rotation_tg = 'rotation.png'
+        self.__plotMvt(eddy_parameters, translation_tg, rotation_tg)
+        
+        rawBvec = self.getImage(self.dependDir, 'grad', None, 'bvec')
+        eddyBvec = self.getImage(self.workingDir, 'grad', 'eddy', 'bvec')
+        bvecs_tg = 'bvecs,gif'
+        self.__plotVectors(self, rawBvec, eddyBvec, bvecs_tg)
+        
+        images = [(eddyGif,'DWI eddy'),
+                  (translation_tg,'Translation correction by eddy'),
+                  (rotation_tg,'Rotation correction by eddy'),
+                  (bvecs_tg,'Gradients vectors on the unitary sphere. Red : raw bvec | Blue : opposite bvec | Black + : movement corrected bvec')]
+        return images
