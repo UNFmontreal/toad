@@ -19,7 +19,7 @@ class TensorMrtrix(GenericTask):
         tensorsMrtrix = self.__produceTensors(dwi, bFile, mask)
 
         print 'tensor=',tensorsMrtrix
-        self.__metricMrtrix(tensorsMrtrix, mask)
+        self.__produceMetrics(tensorsMrtrix, mask)
 
 
     # convert diffusion-weighted images to tensor images.
@@ -36,7 +36,7 @@ class TensorMrtrix(GenericTask):
         return self.rename(tmp, target)
 
 
-    def __metricMrtrix(self, source, mask = None):
+    def __produceMetrics(self, source, mask = None):
         print "source = ", source
         self.info("Launch tensor2metric from mrtrix.\n")
         adc = self.buildName(source, "adc")

@@ -24,7 +24,7 @@ class HardiMrtrix(GenericTask, Logger):
         fodImage = self.__dwi2fod(dwi, outputDwi2Response, maskDwi2fod, bFile)
 
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
-        self.__fod2metric(fodImage, mask)
+        self.__fod2metrics(fodImage, mask)
 
 
     def __dwi2response(self, source, mask, bFile):
@@ -56,7 +56,7 @@ class HardiMrtrix(GenericTask, Logger):
         return target
 
 
-    def __fod2metric(self, source, mask=None):
+    def __fod2metrics(self, source, mask=None):
         self.info("Starting fod2metric creation from mrtrix on {}".format(source))
 
         images = {'gfaImage': self.buildName(source, 'gfa'),
