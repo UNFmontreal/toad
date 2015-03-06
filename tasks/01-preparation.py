@@ -22,13 +22,16 @@ class Preparation(GenericTask):
         if not mriutil.isDataStridesOrientationExpected(dwi, expectedLayout) \
                 and self.getBoolean("force_realign_strides"):
             self.warning("Reorienting stride for image {}".format(dwi))
-            (dwi, bVals, bVecs) = mriutil.stride4DImage(dwi, expectedLayout, "stride", bVecs, bVals)
+            dwiStride = self.buildName(dwi, "stride")
+            bVecsStride= self.buildName(bVecs, "stride")
+            bValsStride= self.buildName(bVals, "stride")
+            (dwi, bVecs ,bVals) = mriutil.stride4DImage(dwi, dwiStride, expectedLayout, bVecs, bVals, bVecsStride, bValsStride)
 
         else:
             util.symlink(dwi, self.workingDir)
 
         #produce missing gradient files
-        (bEnc, bVals, bVecs) = self.__produceEncodingFiles(bEnc, bVals, bVecs, dwi)
+        (bEnc, bVecs, bVals ) = self.__produceEncodingFiles(bEnc, bVecs, bVals, dwi)
 
         images = {'high resolution': self.getImage(self.dependDir, 'anat'),
                     'B0 posterior to anterior': self.getImage(self.dependDir, 'b0PA'),
@@ -45,17 +48,17 @@ class Preparation(GenericTask):
             if value:
                 if not mriutil.isDataStridesOrientationExpected(value, expectedLayout) \
                         and self.getBoolean("force_realign_strides"):
-                    mriutil.stride3DImage(value, expectedLayout, "stride")
+                    mriutil.stride3DImage(value, self.buildName(value, "stride"), expectedLayout)
 
                 else:
                     self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
                     util.symlink(value, self.workingDir)
 
-    def __produceEncodingFiles(self, bEnc, bVals, bVecs, dwi):
+    def __produceEncodingFiles(self, bEnc, bVecs, bVals, dwi):
 
         self.info("Produce .b .bvals and .bvecs gradient file if not existing")
         if not bEnc:
-            mriutil.bValsBVecs2BEnc(bVals, bVecs, self.buildName(dwi, None, "b"))
+            mriutil.bValsBVecs2BEnc(bVecs, bVals, self.buildName(dwi, None, "b"))
         else:
             util.symlink(bEnc, self.workingDir)
 
@@ -70,8 +73,8 @@ class Preparation(GenericTask):
             util.symlink(bVecs, self.workingDir)
 
         return (self.getImage(self.workingDir, 'grad', None, 'b'),
-                self.getImage(self.workingDir, 'grad', None, 'bvals'),
-                self.getImage(self.workingDir, 'grad', None, 'bvecs'))
+                self.getImage(self.workingDir, 'grad', None, 'bvecs'),
+                self.getImage(self.workingDir, 'grad', None, 'bvals'))
 
 
     def meetRequirement(self, result=True):

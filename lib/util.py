@@ -219,6 +219,9 @@ def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
     if config.has_option('extension', extension):
         extension = config.get('extension', extension)
 
+    if extension.find('.') == 0:
+        extension=extension.replace(".", "", 1)
+
     if postfix is None:
         images = glob.glob("{}/{}*.{}".format(dir, config.get('prefix', prefix), extension))
     else:
@@ -293,11 +296,10 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
 
         if extension.find('.') != 0:
             extension = ".{}".format(extension)
-
-    targetName+=extension
+    if extension.strip() !=  ".":
+        targetName+=extension
     if absolute:
         targetName = os.path.join(target, targetName)
-    
     return targetName
 
 

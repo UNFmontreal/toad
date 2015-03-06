@@ -94,7 +94,7 @@ def invertMatrix(source, target):
     return target
 
 
-def stride3DImage(source, layout="1,2,3", outputNamePrefix="stride"):
+def stride3DImage(source, target, layout="1,2,3" ):
     """perform a reorientation of the axes and flip the image into a different layout
 
     Args:
@@ -106,13 +106,12 @@ def stride3DImage(source, layout="1,2,3", outputNamePrefix="stride"):
         the name of the resulting filename
 
     """
-    target = util.buildName(source, outputNamePrefix)
     cmd = "mrconvert {} {} -stride {}".format(source, target, layout)
     launchCommand(cmd)
     return target
 
 
-def stride4DImage(source, layout="1,2,3", outputNamePrefix="stride", bVecs=None, bVals=None):
+def stride4DImage(source,  target, layout="1,2,3", bVecs=None, bVals=None, targetBVecs=None, targetBVals=None):
     """perform a reorientation of the axes and flip the image into a different layout
 
     Args:
@@ -121,17 +120,15 @@ def stride4DImage(source, layout="1,2,3", outputNamePrefix="stride", bVecs=None,
         outputNamePrefix: a prefix to rename target filename
         bVecs:            a vector gradient encoding files to stride
         bVals:            a value gradient encoding files to strides
-
+        targetBVecs:      a output value gradient encoding files to strides
+        targetBVals:      a output vector gradient encoding files to strides
     Returns:
         the name of the resulting filename
 
     """
 
-    target = util.buildName(source, outputNamePrefix)
     cmd = "mrconvert {} {} -stride {},4".format(source, target, layout)
     if (bVecs is not None) and (bVals is not None):
-        targetBVecs= util.buildName(bVecs, outputNamePrefix)
-        targetBVals= util.buildName(bVals, outputNamePrefix)
         cmd +=" -fslgrad {} {} -export_grad_fsl {} {}".format(bVecs, bVals, targetBVecs, targetBVals)
         launchCommand(cmd)
         return (target, targetBVecs, targetBVals)
@@ -306,12 +303,12 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
     return target
 
 
-def bValsBVecs2BEnc(bvalsFilename, bvecsFilename, target):
+def bValsBVecs2BEnc(bvecsFilename, bvalsFilename, target):
     """Create a B encoding gradient file base on bVals and bVecs encoding file
 
     Args:
-        bvalsFilename: a gradient b value encoding file.
         bvecsFilename: a vector value file.
+        bvalsFilename: a gradient b value encoding file.
 
     Returns:
         the resulting b encoding file
@@ -323,13 +320,15 @@ def bValsBVecs2BEnc(bvalsFilename, bvecsFilename, target):
     bVecsLines = v.readlines()
     b.close()
     v.close()
-
+    print bVecsLines
     bVecs = []
-    for bVecs in bVecsLines:
-        bVecs.append(bVecs.strip().split())
+    for bvecs in bVecsLines:
+        bVecs.append(bvecs.strip().split())
 
     f = open(target,'w')
     for index, bVal in enumerate(bVals.pop().strip().split()):
+	print "bvecs=",bVecs
+        print bVal
         f.write("{}\t{}\t{}\t{}\n".format(bVecs[0][index], bVecs[1][index], bVecs[2][index], bVal))
     f.close()
     return target
