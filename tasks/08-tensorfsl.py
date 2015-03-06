@@ -22,7 +22,7 @@ class TensorFsl(GenericTask):
         bVecs = self.getImage(self.dependDir, 'grad', None, 'bvecs')
         mask = self.getImage(self.maskingDir, 'anat', ['2x2x2', 'extended', 'mask'])
 
-        self.__tensorsFsl(dwi, bVecs, bVals, mask)
+        self.__produceTensors(dwi, bVecs, bVals, mask)
 
         l1 = self.getImage(self.workingDir, 'dwi', 'fsl_l1')
         l2 = self.getImage(self.workingDir, 'dwi', 'fsl_l2')
@@ -35,7 +35,7 @@ class TensorFsl(GenericTask):
         self.__mean(l2, l3, rd)
 
 
-    def __tensorsFsl(self, source, bVecs, bVals, mask=""):
+    def __produceTensors(self, source, bVecs, bVals, mask=""):
         """Fits a diffusion tensor model at each voxel
 
         Args:

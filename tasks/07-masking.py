@@ -176,13 +176,14 @@ class Masking(GenericTask):
 
 
     def meetRequirement(self):
-        #@TODO add 2x2x2 mask
         images = {'resampled parcellation':self.getImage(self.dependDir,"aparc_aseg", "resample"),
                     'register parcellation':self.getImage(self.dependDir,"aparc_aseg", "register"),
+                    'parcellation 2x2x2 voxels size': self.getImage(self.dependDir,"aparc_aseg", "2x2x2"),
+                    'anatomical brain extracted 2x2x2 voxels size': self.getImage(self.dependDir,'anat', ['brain', '2x2x2']),
                     'brain extracted, resampled high resolution':self.getImage(self.dependDir,'anat',['brain','resample'])}
 
         return self.isAllImagesExists(images)
-
+    
 
     def isDirty(self, result = False):
         images ={'register anatomically constrained tractography': self.getImage(self.workingDir, "aparc_aseg", ["register", "act"]),
@@ -210,4 +211,3 @@ class Masking(GenericTask):
             result = True
 
         return result
-

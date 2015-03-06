@@ -22,10 +22,10 @@ class HardiDipy(GenericTask):
         #Look first if there is eddy b encoding files produces
         bValsFile = self.getImage(self.dependDir, 'grad', None, 'bvals')
         bVecsFile = self.getImage(self.dependDir, 'grad', None, 'bvecs')
-        self.__produceHardiMetric(dwi, bValsFile, bVecsFile, mask)
+        self.__produceMetrics(dwi, bValsFile, bVecsFile, mask)
 
 
-    def __produceHardiMetric(self, source, bValsFile, bVecsFile, mask):
+    def __produceMetrics(self, source, bValsFile, bVecsFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
         #target = self.buildName(source, "dipy")
 
