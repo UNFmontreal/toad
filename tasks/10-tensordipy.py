@@ -64,14 +64,13 @@ class TensorDipy(GenericTask):
         nibabel.save(nibabel.Nifti1Image(fit.evecs[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v1"))
         nibabel.save(nibabel.Nifti1Image(fit.evecs[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v2"))
         nibabel.save(nibabel.Nifti1Image(fit.evecs[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v3"))
+        nibabel.save(nibabel.Nifti1Image(fit.adc(dipy.data.get_sphere('symmetric724')).astype(numpy.float32),
+                                         dwiImage.get_affine()), self.buildName(target, "ad"))
 
         faColor = numpy.clip(fa, 0, 1)
         rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
         nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(target, "rgb"))
 
-        #produce adc images
-        adc = dipy.reconst.dti.apparent_diffusion_coef(tensorsValuesReordered, dipy.data.get_sphere('symmetric724'))
-        nibabel.save(nibabel.Nifti1Image(adc.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "adc"))
 
         self.info("End tensor and metrics creation from dipy, resulting file is {} ".format(target))
         return target

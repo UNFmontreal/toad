@@ -22,11 +22,7 @@ class Preparation(GenericTask):
         if not mriutil.isDataStridesOrientationExpected(dwi, expectedLayout) \
                 and self.getBoolean("force_realign_strides"):
             self.warning("Reorienting strides for image {}".format(dwi))
-            dwiStride = self.buildName(dwi, "stride")
-            bEncStride = self.buildName(bEnc, "stride")
-            bVecsStride= self.buildName(bVecs, "stride")
-            bValsStride= self.buildName(bVals, "stride")
-            (dwi, bEnc, bVecs ,bVals) = mriutil.stride4DImage(dwi, dwiStride, expectedLayout,bEnc, bVecs, bVals, bEncStride, bVecsStride, bValsStride)
+            self.stride4DImage(dwi, bEnc, bVecs, bVals, expectedLayout)
 
         else:
             util.symlink(dwi, self.workingDir)
@@ -52,6 +48,7 @@ class Preparation(GenericTask):
                     self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
                     util.symlink(value, self.workingDir)
 
+
     def __produceEncodingFiles(self, bEnc, bVecs, bVals, dwi):
 
         self.info("Produce .b .bvals and .bvecs gradient file if not existing")
@@ -73,6 +70,36 @@ class Preparation(GenericTask):
         return (self.getImage(self.workingDir, 'grad', None, 'b'),
                 self.getImage(self.workingDir, 'grad', None, 'bvecs'),
                 self.getImage(self.workingDir, 'grad', None, 'bvals'))
+
+
+    def stride4DImage(self, source, bEncs, bVecs, bVals, layout="1,2,3"):
+        """perform a reorientation of the axes and flip the image into a different layout. stride gredient encoding files
+            as well if provided
+
+        Args:
+            source:           the input image
+            bEncs:            a mrtrix gradient encoding files to stride
+            bVecs:            a vector gradient encoding files to stride
+            bVals:            a value gradient encoding files to strides
+            layout:           comma-separated list that specify the strides.
+
+        Returns:
+            the name of the resulting filename
+        """
+        dwiStride = self.buildName(source, "stride")
+        bEncStride = self.buildName(bEncs, "stride")
+        bVecsStride= self.buildName(bVecs, "stride")
+        bValsStride= self.buildName(bVals, "stride")
+
+        subCommand = "mrconvert {} {} -force -stride {},4".format(source, dwiStride, layout)
+
+        cmd = "{} -grad {} -export_grad {} ".format(subCommand, bEncs, bEncStride)
+        self.launchCommand(cmd)
+
+        cmd = "{} -fslgrad {} {} -export_grad_fsl {} {}".format(subCommand, bVecs, bVals, bVecsStride, bValsStride)
+        self.launchCommand(cmd)
+
+        return dwiStride, bEncStride, bVecsStride, bValsStride
 
 
     def meetRequirement(self, result=True):

@@ -111,54 +111,6 @@ def stride3DImage(source, target, layout="1,2,3" ):
     return target
 
 
-def stride4DImage(source,  target, layout="1,2,3", bVecs=None, bVals=None, targetBVecs=None, targetBVals=None):
-    """perform a reorientation of the axes and flip the image into a different layout
-
-    Args:
-        source:           the input image
-        layout:           comma-separated list that specify the strides.
-        outputNamePrefix: a prefix to rename target filename
-        bVecs:            a vector gradient encoding files to stride
-        bVals:            a value gradient encoding files to strides
-        targetBVecs:      a output value gradient encoding files to strides
-        targetBVals:      a output vector gradient encoding files to strides
-    Returns:
-        the name of the resulting filename
-
-    """
-    cmd = "mrconvert {} {} -force -stride {},4".format(source, target, layout)
-    if (bVecs is not None) and (bVals is not None):
-        cmd +=" -fslgrad {} {} -export_grad_fsl {} {}".format(bVecs, bVals, targetBVecs, targetBVals)
-        launchCommand(cmd)
-        return (target, targetBVecs, targetBVals)
-    else:
-        launchCommand(cmd)
-        return target
-
-
-def stride4DImage(source,  target, layout="1,2,3", bEncs=None, targetBEncs=None):
-    """perform a reorientation of the axes and flip the image into a different layout
-
-    Args:
-        source:           the input image
-        layout:           comma-separated list that specify the strides.
-        outputNamePrefix: a prefix to rename target filename
-        bEncs:            a mrtrix bvalue and  vector gradient encoding files to stride
-        targetBEncs:     a output mrtrixb value and vectors gradient encoding files to strides
-    Returns:
-        the name of the resulting filename
-
-    """
-    cmd = "mrconvert {} {} -force -stride {},4".format(source, target, layout)
-    if bEncs is not None:
-        cmd +=" -grad {} -export_grad {}".format(bEncs, targetBEncs)
-        launchCommand(cmd)
-        return (target, targetBEncs)
-    else:
-        launchCommand(cmd)
-        return target
-
-
 def __getMrinfoFieldValues(text, field, delimiter=""):
     """Utility function that extract valuable array information from mrinfo metadata
     this function is not portale
