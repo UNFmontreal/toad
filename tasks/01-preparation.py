@@ -17,21 +17,19 @@ class Preparation(GenericTask):
         bEnc = self.getImage(self.dependDir, 'grad', None, 'b')
         bVals = self.getImage(self.dependDir, 'grad', None, 'bvals')
         bVecs = self.getImage(self.dependDir, 'grad', None, 'bvecs')
-
+        (bEnc, bVecs, bVals) = self.__produceEncodingFiles(bEnc, bVecs, bVals, dwi)  
         expectedLayout = self.get('stride_orientation')
         if not mriutil.isDataStridesOrientationExpected(dwi, expectedLayout) \
                 and self.getBoolean("force_realign_strides"):
-            self.warning("Reorienting stride for image {}".format(dwi))
+            self.warning("Reorienting strides for image {}".format(dwi))
             dwiStride = self.buildName(dwi, "stride")
+            bEncStride = self.buildName(bEnc, "stride")
             bVecsStride= self.buildName(bVecs, "stride")
             bValsStride= self.buildName(bVals, "stride")
-            (dwi, bVecs ,bVals) = mriutil.stride4DImage(dwi, dwiStride, expectedLayout, bVecs, bVals, bVecsStride, bValsStride)
+            (dwi, bEnc, bVecs ,bVals) = mriutil.stride4DImage(dwi, dwiStride, expectedLayout,bEnc, bVecs, bVals, bEncStride, bVecsStride, bValsStride)
 
         else:
             util.symlink(dwi, self.workingDir)
-
-        #produce missing gradient files
-        (bEnc, bVecs, bVals ) = self.__produceEncodingFiles(bEnc, bVecs, bVals, dwi)
 
         images = {'high resolution': self.getImage(self.dependDir, 'anat'),
                     'B0 posterior to anterior': self.getImage(self.dependDir, 'b0PA'),

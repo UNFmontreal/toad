@@ -391,9 +391,8 @@ class Eddy(GenericTask):
     def qaSupplier(self):
         eddy = self.getImage(self.workingDir, "dwi", 'eddy')
         eddyGif = self.nifti4dtoGif(eddy)
-        
         import glob
-        fixs = glob.glob("{}/*_temporary.nii.eddy_parameters".format(self.workingDir))
+        fixs = glob.glob("{}/*_temporary.nii*.eddy_parameters".format(self.workingDir))
         for fix in fixs:
             eddy_parameters = fix 
         translation_tg = 'translation.png'
@@ -403,7 +402,7 @@ class Eddy(GenericTask):
         rawBvec = self.getImage(self.dependDir, 'grad', None, 'bvec')
         eddyBvec = self.getImage(self.workingDir, 'grad', 'eddy', 'bvec')
         bvecs_tg = 'bvecs.gif'
-        self.__plotVectors(self, rawBvec, eddyBvec, bvecs_tg)
+        self.__plotVectors(rawBvec, eddyBvec, bvecs_tg)
         
         images = [(eddyGif,'DWI eddy'),
                   (translation_tg,'Translation correction by eddy'),
