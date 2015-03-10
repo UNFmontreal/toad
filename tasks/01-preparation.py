@@ -93,7 +93,7 @@ class Preparation(GenericTask):
 
         subCommand = "mrconvert {} {} -force -stride {},4".format(source, dwiStride, layout)
 
-        cmd = "{} -grad {} -export_grad {} ".format(subCommand, bEncs, bEncStride)
+        cmd = "{} -grad {} -export_grad_mrtrix {} ".format(subCommand, bEncs, bEncStride)
         self.launchCommand(cmd)
 
         cmd = "{} -fslgrad {} {} -export_grad_fsl {} {}".format(subCommand, bVecs, bVals, bVecsStride, bValsStride)
