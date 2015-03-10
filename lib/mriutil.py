@@ -1,7 +1,7 @@
 from lib.util import launchCommand
 import util
 import numpy
-import nipy
+import nibabel
 import os
 
 
@@ -24,9 +24,6 @@ def fslmaths(source1, target, operator="bin", source2=None):
         cmd = "fslmaths {} -{} {} {}".format(source1, operator, source2, target)
     print 'cmd=',cmd
     result = util.launchCommand(cmd)
-    #Spm do not support .gz format, so uncompress nifty file
-    print "result =", result
-    #util.gunzip("{}.gz".format(target))
     return result
 
 
@@ -301,8 +298,6 @@ def bValsBVecs2BEnc(bvecsFilename, bvalsFilename, target):
 
     f = open(target,'w')
     for index, bVal in enumerate(bVals.pop().strip().split()):
-	print "bvecs=",bVecs
-        print bVal
         f.write("{}\t{}\t{}\t{}\n".format(bVecs[0][index], bVecs[1][index], bVecs[2][index], bVal))
     f.close()
     return target
@@ -368,26 +363,26 @@ def bEnc2BVals(source, target):
     return target
 
 
-def extractFreesurferStructure(values, source, target):
-    """ Extract given value from an image
+def extractStructure(values, source, target):
+    """ Extract givens values from image
 
     Args:
-        values: A list of values to extract from an input image
+        values: A list of values (integer) to extract from an input image
         source: An mri image
 
     returns:
         a new image that contain areas specified by values
     """
-    image = nipy.io.api.load_image(source)
-    array = numpy.array(image._data)
+    image = nibabel.load(source)
+    data = image.get_data()
     c = []
     for value in values:
-        c.append(numpy.where(array==value))
-    array.fill(0)
+        c.append(numpy.where(data==value))
+
+    data.fill(0)
     for i in range(len(values)):
-        array[c[i]] = 1
-    image._data = array
-    
+        data[c[i]] = 1
+
     if not os.path.exists(target):
-        nipy.io.api.save_image(image, target)
-    return target
+        nibabel.save(nibabel.Nifti1Image(data, image.get_affine()), target)
+        return target

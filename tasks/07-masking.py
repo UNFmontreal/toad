@@ -84,7 +84,7 @@ class Masking(GenericTask):
         self.info("Regions to extract: {}".format(regions))
 
         target = self.buildName(source, [operand, "extract"])
-        structures = mriutil.extractFreesurferStructure(regions, source, target)
+        structures = mriutil.extractStructure(regions, source, target)
         self.__createMask(structures)
 
 

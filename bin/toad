@@ -16,7 +16,7 @@ __license__ = "GPL"
 __version__ = "0.6"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
-__status__ = "Development"
+__status__ = "Beta"
 
 
 def __parseArguments():
@@ -111,8 +111,7 @@ def __manageEnvironnement(logger):
     except ValueError:
         logger.error("Cannot determine your version of python installed")
 
-    #@TODO add nibabel and dipy dependenciesss
-    packages = ['numpy','nipy']
+    packages = ['numpy', 'nibabel', 'dipy']
     for package in packages:
         try:
             imp.find_module(package)

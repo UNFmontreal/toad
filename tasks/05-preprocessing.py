@@ -213,7 +213,7 @@ class Preprocessing(GenericTask):
         #@DEBUG
         self.info("Produce {} image".format(b0Upsampled))
         anatBrain = self.getImage(self.workingDir ,'anat', "brain")
-        anatBrainWhiteMatter = self.getImage(self.workingDir ,'anat',["brain", "wm"])
+        anatBrainWhiteMatter = self.getImage(self.workingDir ,'anat', ["brain", "wm"])
 
         self.pngSlicerImage(b0Upsampled, anatBrain)
         self.pngSlicerImage(b0Upsampled, anatBrainWhiteMatter)
