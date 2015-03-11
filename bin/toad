@@ -52,23 +52,24 @@ def __parseArguments():
 
         Then a subject completed will look like this
         sujN--\\
-              |- 00-backup
-              |- 01-preparation
-              |- 02-parcellation
-              |- 03-eddy
-              |- 03-fieldmap
-              |- 04-denoising
-              |- 05-preprocessing
-              |- 06-registration
-              |- 07-masking
-              |- 08-dtifit
-              |- 09-tensors
-              |- 10-tensorsmetric
-              |- 11-tensorstractography
-              |- 12-hardi
-              |- 13-hardimetric
-              |- 14-harditractography
-              |- 15-qa
+              |- 00-logs
+              |- 00-qa
+              |- 01-backup
+              |- 02-preparation
+              |- 03-parcellation
+              |- 04-eddy
+              |- 04-fieldmap
+              |- 05-denoising
+              |- 06-preprocessing
+              |- 07-registration
+              |- 08-masking
+              |- 09-dtifit
+              |- 10-tensors
+              |- 11-tensorsmetric
+              |- 12-tensorstractography
+              |- 13-hardi
+              |- 14-hardimetric
+              |- 15-harditractography
               |- 16-results
 
 

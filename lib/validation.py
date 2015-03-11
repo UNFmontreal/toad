@@ -26,7 +26,7 @@ class Validation(object):
         self.config = config
         self.logger = logger
         self.workingDir = workingDir
-        self.backupDir = os.path.join(self.workingDir, "00-backup")
+        self.backupDir = os.path.join(self.workingDir, "01-backup")
 
 
     def isAToadSubject(self):
@@ -78,7 +78,7 @@ class Validation(object):
         self.logger.info("Start validation of {} directory".format(self.workingDir))
 
         if os.path.exists(self.backupDir):
-            #@TODO evaluate if 00-backup should be a valid toad structure
+            #@TODO evaluate if 01-backup should be a valid toad structure
             self.logger.info("{} directory exists, assuming validation have already done before".format(self.backupDir))
             return True
 

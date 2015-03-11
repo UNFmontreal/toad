@@ -106,7 +106,7 @@ class Config(object):
         if arguments.subject:
             for directory in [os.path.dirname(arguments.subject),
                            arguments.subject,
-                           os.path.join(arguments.subject, "00-backup")]:
+                           os.path.join(arguments.subject, "01-backup")]:
                 configFile = "{}/config.cfg".format(directory)
                 if os.path.exists(configFile):
                     configFiles.append(configFile)

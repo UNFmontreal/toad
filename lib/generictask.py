@@ -7,6 +7,7 @@ from lib import util
 import subprocess
 import shutil
 import glob
+import sys
 import os
 
 __author__ = 'desmat'
@@ -279,7 +280,15 @@ class GenericTask(Logger, Load, Qa):
             while(attempt < nbSubmission):
                 if self.__cleanupBeforeImplement:
                     self.__cleanup()
-                self.__implement()
+
+		try:
+                    self.__implement()
+                except (KeyboardInterrupt, SystemExit):
+                    self.error("KeyboardInterrupt or SystemExit caught, pipeline will exit")
+		    raise
+		except:
+                    self.warning("Exception have been caught, the error message is:".format(sys.exc_info()[0]))
+
                 if attempt == nbSubmission:
                     self.error("I already execute this task {} time and failed, exiting the pipeline")
                 elif self.isDirty():
