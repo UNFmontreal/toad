@@ -76,7 +76,7 @@ class Qa(object):
         lutImage = os.path.join(self.toadDir, "templates/lookup_tables/",'FreeSurferColorLUT_ItkSnap.txt')
         for axes in ['x', 'y', 'z']:
             tmp = self.buildName(axes,'', 'png')
-            cmd = 'c3d {}  -scale  {} {} -foreach -slice {} 50% -endfor -oli {} {} -type uchar -omc {}'\
+            cmd = 'c3d {}  -scale  {} {} -foreach -flip z -slice {} 50% -endfor -oli {} {} -type uchar -omc {}'\
                 .format(backgroundImage, scale, segmentationImage, axes, lutImage, opacity, tmp)
             self.launchCommand(cmd)
 
