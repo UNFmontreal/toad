@@ -210,7 +210,7 @@ class SubjectManager(Logger, Config):
         """functionnality that return every absolute directory and it subdirectories specified as input command line
             study directory
 
-        Directory that contain a subdirectory with 00-backup name will be automaticaly discard
+        Directory that contain a subdirectory with 01-backup name will be automaticaly discard
         Files are automaticaly discarded
         No further validation is done
 
@@ -230,7 +230,7 @@ class SubjectManager(Logger, Config):
             if os.path.isdir(absoluteDirectory):
                 results.append(absoluteDirectory)
                 directories = glob.glob("{}/*".format(absoluteDirectory))
-                if not find("00-backup", directories):
+                if not find("01-backup", directories):
                     for directory in directories:
                         if os.path.isdir(directory):
                             results.append(directory)

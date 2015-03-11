@@ -223,7 +223,8 @@ def getFirstB0IndexFromDwi(bVals):
         The index of the first b0 found in the file
 
     """
-    for line in open(bVals,'r').readlines():
+    with open(bVals,'r') as f:
+        for line in f.readlines()
             b0s = line.strip().split()
             return b0s.index('0')
     return False
