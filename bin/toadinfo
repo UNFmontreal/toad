@@ -127,7 +127,9 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing):
     if echoSpacing is not None:
         config.set("eddy", "echo_spacing", echoSpacing)
 
-    config.write(open(source,'w'))
+    with open(source, 'w') as w:
+        w.write(config.write())
+
 
 if __name__ == '__main__':
 
