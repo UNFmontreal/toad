@@ -40,38 +40,32 @@ def parseArguments():
 
 
 def __getPhaseEncodingDirection(source):
-    f = open(source, 'r')
-    lines = f.readlines()
-    f.close()
-    for line in lines:
-        if "sSliceArray.asSlice" in line and ".dInPlaneRot" in line:
-            return __returnPhaseEncodingDirection(line)
-        return 1
+    with open(source, 'r') as f:
+        for line in f.readlines():
+            if "sSliceArray.asSlice" in line and ".dInPlaneRot" in line:
+                return __returnPhaseEncodingDirection(line)
+            return 1
 
 
 def __getPatFactor(source):
-    f = open(source, 'r')
-    lines = f.readlines()
-    f.close()
-    for line in lines:
-        if "sPat.lAccelFactPE" in line:
-            try:
-                return float(line.split("=")[-1].strip())
-            except ValueError:
-                return 1
+    with open(source, 'r') as f:
+        for line in f.readlines():
+            if "sPat.lAccelFactPE" in line:
+                try:
+                    return float(line.split("=")[-1].strip())
+                except ValueError:
+                    return 1
     return 1
 
 
 def __getEpiFactor(source):
-    f = open(source, 'r')
-    lines = f.readlines()
-    f.close()
-    for line in lines:
-        if "sKSpace.lPhaseEncodingLines" in line:
-            try:
-                return int(line.split("=")[-1].strip())
-            except ValueError:
-                return 1
+    with open(source, 'r') as f:
+        for line in f.readlines():
+            if "sKSpace.lPhaseEncodingLines" in line:
+                try:
+                    return int(line.split("=")[-1].strip())
+                except ValueError:
+                    return 1
     return 1
 
 

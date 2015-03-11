@@ -22,7 +22,7 @@ def fslmaths(source1, target, operator="bin", source2=None):
         cmd = "fslmaths {} -{} {} ".format(source1, operator, target)
     else:
         cmd = "fslmaths {} -{} {} {}".format(source1, operator, source2, target)
-    print 'cmd=',cmd
+
     result = util.launchCommand(cmd)
     return result
 
@@ -223,9 +223,10 @@ def getFirstB0IndexFromDwi(bVals):
         The index of the first b0 found in the file
 
     """
-    for line in open(bVals,'r').readlines():
-            b0s = line.strip().split()
-            return b0s.index('0')
+    with open(bVals,'r') as f:
+        for line in f.readlines():
+                b0s = line.strip().split()
+                return b0s.index('0')
     return False
 
 
@@ -291,7 +292,6 @@ def bValsBVecs2BEnc(bvecsFilename, bvalsFilename, target):
     bVecsLines = v.readlines()
     b.close()
     v.close()
-    print bVecsLines
     bVecs = []
     for bvecs in bVecsLines:
         bVecs.append(bvecs.strip().split())
@@ -314,18 +314,14 @@ def bEnc2BVecs(source, target):
 
     """
     bvecs = []
-
-    f = open(source, 'r')
-    lines = f.readlines()
-    f.close()
-    for line in lines:
-        tokens = line.split()
-        if len(tokens)==4:
-            bvecs.append(tokens[0:3])
+    with open(source, 'r') as f:
+        for line in f.readlines():
+            tokens = line.split()
+            if len(tokens)==4:
+                bvecs.append(tokens[0:3])
     bvecs = zip(*bvecs)
 
     v = open(target,"w")
-
     for items in bvecs:
         for item in items:
             v.write("{} ".format(item))
@@ -346,16 +342,12 @@ def bEnc2BVals(source, target):
 
     """
     bVals = []
-
-    f = open(source,'r')
-    lines = f.readlines()
-    f.close()
-    for line in lines:
-        tokens = line.split()
-        bVals.append(tokens.pop(3))
+    with open(source, 'r') as f:
+        for line in f.readlines():
+            tokens = line.split()
+            bVals.append(tokens.pop(3))
 
     b = open(target,"w")
-
     for bval in bVals:
         b.write("{} ".format(bval))
     b.close()

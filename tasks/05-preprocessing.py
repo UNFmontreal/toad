@@ -99,7 +99,7 @@ class Preprocessing(GenericTask):
 
         self.info("End brain extraction from fsl")
 
-        cmd = "bet {} {} -f {} -g {} -v ".format(source, target, fractionalIntensity, verticalGradient)
+        cmd = "bet {} {} -f {} -g {} ".format(source, target, fractionalIntensity, verticalGradient)
         if self.getBoolean('reduce_bias'):
             cmd += "-B "
         self.launchCommand(cmd)

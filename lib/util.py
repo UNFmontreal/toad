@@ -113,10 +113,8 @@ def createScript(source, text):
 
     """
     try:
-        f = open(source, 'w')
-        f.write(text)
-        f.close()
-
+        with open(source, 'w') as f:
+            f.write(text)
     except IOError:
         return False
     return True
@@ -345,8 +343,8 @@ def parseTemplate(dict, template):
         the string substitute
 
     """
-    f = open(template, 'r')
-    return Template(f.read()).safe_substitute(dict)
+    with open(template, 'r') as f:
+        return Template(f.read()).safe_substitute(dict)
 
 
 def displayYesNoMessage(msg, question = "Continue? (y or n)"):

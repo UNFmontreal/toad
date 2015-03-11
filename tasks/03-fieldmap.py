@@ -30,7 +30,7 @@ class Fieldmap(GenericTask):
         mag = self.getImage(self.dependDir, "mag")
         phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
-	
+
         freesurfer_anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
 
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
@@ -44,7 +44,7 @@ class Fieldmap(GenericTask):
 
         self.info('Compute the transformation from the anatomical image produce by freesurfer to the magnitude image')
         invertFielmapToAnat = mriutil.invertMatrix(fieldmapToAnat, self.buildName(fieldmapToAnat, 'inverse', 'mat'))
-	
+
         self.info('Resampling the anatomical mask into the phase image space')
         interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
         fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)

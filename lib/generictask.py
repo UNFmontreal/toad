@@ -355,17 +355,17 @@ class GenericTask(Logger, Load, Qa):
         self.info("Launch {} command line...".format(binary))
         self.info("Command line submit: {}".format(cmd))
 
-        out = None
-        err = None
+        #out = None
+        #err = None
 
-        if stdout=='log':
-            out = self.getLog()
-            self.info("Output will be log in {} \n".format(out.name))
-        if stderr=='log':
-            err = self.getLog()
-            self.info("Error will be log in {} \n".format(err.name))
+        #if stdout=='log':
+        #    out = self.getLog()
+        #    self.info("Output will be log in {} \n".format(out.name))
+        #if stderr=='log':
+        #    err = self.getLog()
+        #    self.info("Error will be log in {} \n".format(err.name))
 
-        (output, error)= util.launchCommand(cmd, out, err, timeout, nice)
+        (output, error)= util.launchCommand(cmd, stdout, stderr, timeout, nice)
         if not (output is "" or output is "None" or output is None):
             self.info("Output produce by {}: {} \n".format(binary, output))
 

@@ -236,7 +236,7 @@ class Eddy(GenericTask):
         baseName = os.path.join(self.workingDir, self.get('topup_results_base_name'))
         output = os.path.join(self.workingDir, self.get('topup_results_output'))
 
-        cmd = "topup --imain={} --datain={} --config={} --out={}  --iout={} --verbose"\
+        cmd = "topup --imain={} --datain={} --config={} --out={}  --iout={}"\
               .format(source, acqp, b02b0File, baseName, output)
         self.launchCommand(cmd)
         return [baseName, output]
@@ -255,7 +255,7 @@ class Eddy(GenericTask):
         tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "brain")
 
-        cmd = "bet {} {} -v -m".format(source, tmp)
+        cmd = "bet {} {} -m".format(source, tmp)
         self.launchCommand(cmd)
         self.rename(tmp, target)
 

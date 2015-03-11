@@ -74,11 +74,11 @@ class HardiMrtrix(GenericTask, Logger):
         nufoImage = self.buildName(source, 'nufo')
 
         self.info("Starting fod2fixel creation from mrtrix on {}".format(source))
-        cmd = "fod2fixel {} -peak {} -force -nthreads {}".format(source, fixelTarget, self.getNTreadsMrtrix())
+        cmd = "fod2fixel {} -peak {} -force -nthreads {} -quiet".format(source, fixelTarget, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
 
-        cmd = "fixel2voxel {} count {} -nthreads".format(fixelTarget, tmp,  self.getNTreadsMrtrix())
+        cmd = "fixel2voxel {} count {} -nthreads {} -quiet".format(fixelTarget, tmp,  self.getNTreadsMrtrix())
         self.launchCommand(cmd)
         return self.rename(tmp, nufoImage)
 

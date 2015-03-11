@@ -74,7 +74,7 @@ class TensorFsl(GenericTask):
         fractionalIntensity = 0.4
         verticalGradient = 0
         self.info("End brain extraction from fsl")
-        cmd = "bet {} {} -f {} -g {} -v -m".format(source, target, fractionalIntensity, verticalGradient)
+        cmd = "bet {} {} -f {} -g {} -m".format(source, target, fractionalIntensity, verticalGradient)
         self.launchCommand(cmd)
 
         return target

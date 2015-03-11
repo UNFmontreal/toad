@@ -1,5 +1,5 @@
 import datetime
-import sys
+import sys, os
 
 __author__ = 'desmat'
 
@@ -21,14 +21,20 @@ class Logger(object):
         else:
             self.__logIntoFile = True
             self.filename = "{}/{}.log".format(path, self.getName())
-            self.handle = open(self.filename,'a')
-            self.handle.write("#########################################################################\n")
-            self.handle.write("\n")
-            self.handle.write(" Start logging task {} at {}".format(self.getName(), self.getTimestamp()))
-            self.handle.write("\n")
-            self.handle.write("\n")
-            self.handle.write("#########################################################################\n")
-            self.handle.close()
+            #do a log rotation
+            archiveLogName = "{}.archive".format(self.filename)
+            if os.path.isfile(self.filename):
+                with open(self.filename, 'r') as f:
+                    with open(archiveLogName, 'a') as a:
+                        a.write(f.read())
+
+            with open(self.filename,'w') as f:
+                f.write("#########################################################################\n")
+                f.write("\n")
+                f.write(" Start logging task {} at {}".format(self.getName(), self.getTimestamp()))
+                f.write("\n")
+                f.write("\n")
+                f.write("#########################################################################\n")
 
 
     def getTimestamp(self):
@@ -100,12 +106,11 @@ class Logger(object):
         if level not in ['INFO','WARNING','ERROR']:
             return False
 
-        message = "{}: {}".format(level, message)
-        print message+"\n"
+        message = "{}: {}\n".format(level, message)
+        print message
         if self.__logIntoFile:
-            self.handle = open(self.filename,'a')
-            self.handle.write(message)
-            self.handle.close()
+            with open(self.filename,'a') as f:
+                f.write(message)
 
         if level == 'ERROR':
             sys.exit()
@@ -171,16 +176,6 @@ class Logger(object):
 
         """
         return self.filename
-
-
-    def getLog(self):
-        """Open the log file and return the handle of that log
-
-        Returns:
-            Return the handle of the log file
-
-        """
-        return open(self.filename,'a')
 
 
     def closeLog(self, handle):

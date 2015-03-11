@@ -91,7 +91,7 @@ class Preparation(GenericTask):
         bVecsStride= self.buildName(bVecs, "stride")
         bValsStride= self.buildName(bVals, "stride")
 
-        subCommand = "mrconvert {} {} -force -stride {},4".format(source, dwiStride, layout)
+        subCommand = "mrconvert {} {} -quiet -force -stride {},4".format(source, dwiStride, layout)
 
         cmd = "{} -grad {} -export_grad {} ".format(subCommand, bEncs, bEncStride)
         self.launchCommand(cmd)
