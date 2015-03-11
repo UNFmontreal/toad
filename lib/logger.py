@@ -5,7 +5,6 @@ __author__ = 'desmat'
 
 class Logger(object):
 
-    #@TODO simplify logname name creation
     def __init__(self, path = None):
         """Provide a simple, custom, logging capability for the toad pipeline.
 
@@ -21,13 +20,8 @@ class Logger(object):
         else:
             self.__logIntoFile = True
             self.filename = "{}/{}.log".format(path, self.getName())
-            #do a log rotation
             archiveLogName = "{}.archive".format(self.filename)
-            if os.path.isfile(self.filename):
-                with open(self.filename, 'r') as f:
-                    with open(archiveLogName, 'a') as a:
-                        a.write(f.read())
-
+            self.__rotateLog(self.filename, archiveLogName)
             with open(self.filename,'w') as f:
                 f.write("#########################################################################\n")
                 f.write("\n")
@@ -89,7 +83,7 @@ class Logger(object):
                 self.error("Some mandatory image are missing. Finishing the pipeline now\n\n")
         elif methodName == "implement":
             self.info("Finish task {} at {}.".format(self.getName(), self.getTimestamp()))
-            self.info("-------------------------------------------------------------------------")
+            self.info("-------------------------------------------------------------------------\n")
 
 
     def __log(self, message, level):
@@ -186,3 +180,19 @@ class Logger(object):
 
         """
         handle.close()
+
+    def __rotateLog(source, target):
+        """Archive the contain of a source file into the beginning of a target file
+
+        Args:
+            source: a source file name
+            target: a target file name
+
+        """
+        if os.path.isfile(source):
+            with open(source, 'r') as f:
+                logText = f.read()
+                with open(target, 'r+') as a:
+                    contain = a.read()
+                    a.seek(0, 0)
+                    a.write(logText + contain)
