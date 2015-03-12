@@ -14,15 +14,16 @@ class Preparation(GenericTask):
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi')
-        bEnc = self.getImage(self.dependDir, 'grad', None, 'b')
+        bEncs = self.getImage(self.dependDir, 'grad', None, 'b')
         bVals = self.getImage(self.dependDir, 'grad', None, 'bvals')
         bVecs = self.getImage(self.dependDir, 'grad', None, 'bvecs')
-        (bEnc, bVecs, bVals) = self.__produceEncodingFiles(bEnc, bVecs, bVals, dwi)  
+        (bEncs, bVecs, bVals) = self.__produceEncodingFiles(bEncs, bVecs, bVals, dwi)
         expectedLayout = self.get('stride_orientation')
         if not mriutil.isDataStridesOrientationExpected(dwi, expectedLayout) \
                 and self.getBoolean("force_realign_strides"):
+
             self.warning("Reorienting strides for image {}".format(dwi))
-            self.stride4DImage(dwi, bEnc, bVecs, bVals, expectedLayout)
+            self.stride4DImage(dwi, bEncs, bVecs, bVals, expectedLayout)
 
         else:
             util.symlink(dwi, self.workingDir)
@@ -49,23 +50,22 @@ class Preparation(GenericTask):
                     util.symlink(value, self.workingDir)
 
 
-    def __produceEncodingFiles(self, bEnc, bVecs, bVals, dwi):
+    def __produceEncodingFiles(self, bEncs, bVecs, bVals, dwi):
 
         self.info("Produce .b .bvals and .bvecs gradient file if not existing")
-        if not bEnc:
-            mriutil.bValsBVecs2BEnc(bVecs, bVals, self.buildName(dwi, None, "b"))
+        if not bEncs:
+            bEncs = mriutil.fslToMrtrixEncoding(dwi, bVecs, bVals, self.buildName(dwi, None, "b"))
         else:
-            util.symlink(bEnc, self.workingDir)
+            util.symlink(bEncs, self.workingDir)
 
-        if not bVals:
-            mriutil.bEnc2BVals(bEnc, self.buildName(dwi, None, "bvals"))
-        else:
-            util.symlink(bVals, self.workingDir)
-
-        if not bVecs:
-            mriutil.bEnc2BVecs(bEnc, self.buildName(dwi, None, "bvecs"))
+        if not bVecs or not bVals:
+            (bVecs, bVals) = mriutil.mrtrixToFslEncoding(dwi,
+                                                         bEncs,
+                                                         self.buildName(dwi, None, "bvecs"),
+                                                         self.buildName(dwi, None, "bvals"))
         else:
             util.symlink(bVecs, self.workingDir)
+            util.symlink(bVals, self.workingDir)
 
         return (self.getImage(self.workingDir, 'grad', None, 'b'),
                 self.getImage(self.workingDir, 'grad', None, 'bvecs'),
@@ -87,19 +87,19 @@ class Preparation(GenericTask):
             the name of the resulting filename
         """
         dwiStride = self.buildName(source, "stride")
-        bEncStride = self.buildName(bEncs, "stride")
+        bEncsStride = self.buildName(bEncs, "stride")
         bVecsStride= self.buildName(bVecs, "stride")
         bValsStride= self.buildName(bVals, "stride")
 
         subCommand = "mrconvert {} {} -quiet -force -stride {},4".format(source, dwiStride, layout)
 
-        cmd = "{} -grad {} -export_grad_mrtrix {} ".format(subCommand, bEncs, bEncStride)
+        cmd = "{} -grad {} -export_grad_mrtrix {} ".format(subCommand, bEncs, bEncsStride)
         self.launchCommand(cmd)
 
         cmd = "{} -fslgrad {} {} -export_grad_fsl {} {}".format(subCommand, bVecs, bVals, bVecsStride, bValsStride)
         self.launchCommand(cmd)
 
-        return dwiStride, bEncStride, bVecsStride, bValsStride
+        return dwiStride, bEncsStride, bVecsStride, bValsStride
 
 
     def meetRequirement(self, result=True):

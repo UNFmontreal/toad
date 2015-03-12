@@ -81,9 +81,10 @@ class Eddy(GenericTask):
         eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
         if len(eddyParameterFiles)>0:
             bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles.pop(0), self.buildName(outputEddyImage, None, 'b'))
-            #produce the bVals and bVecs file accordingly
-            mriutil.bEnc2BVecs(bCorrected, self.buildName(outputEddyImage, None, 'bvecs'))
-            mriutil.bEnc2BVals(bCorrected, self.buildName(outputEddyImage, None, 'bvals'))
+            mriutil.mrtrixToFslEncoding(outputEddyImage,
+                                        bCorrected,
+                                        self.buildName(outputEddyImage, None, 'bvecs'),
+                                        self.buildName(outputEddyImage, None, 'bvals'))
 
 
     def __oddImagesWithEvenNumberOfSlices(self, sources):

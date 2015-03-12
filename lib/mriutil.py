@@ -275,84 +275,38 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
     return target
 
 
-def bValsBVecs2BEnc(bvecsFilename, bvalsFilename, target):
+def fslToMrtrixEncoding(dwi, bVecs, bVals, target):
     """Create a B encoding gradient file base on bVals and bVecs encoding file
 
     Args:
-        bvecsFilename: a vector value file.
-        bvalsFilename: a gradient b value encoding file.
-
+        dwi:           the input diffusion weight images
+        bVecs: a vector value file.
+        bVals: a gradient b value encoding file.
+        target: the output file name
     Returns:
         the resulting b encoding file
 
     """
-    b = open(bvalsFilename,"r")
-    v = open(bvecsFilename,"r")
-    bVals = b.readlines()
-    bVecsLines = v.readlines()
-    b.close()
-    v.close()
-    bVecs = []
-    for bvecs in bVecsLines:
-        bVecs.append(bvecs.strip().split())
-
-    f = open(target,'w')
-    for index, bVal in enumerate(bVals.pop().strip().split()):
-        f.write("{}\t{}\t{}\t{}\n".format(bVecs[0][index], bVecs[1][index], bVecs[2][index], bVal))
-    f.close()
+    cmd = "mrinfo {} -fslgrad {} {} -export_grad_mrtrix {} --quiet".format(dwi, bVecs, bVals, target)
+    launchCommand(cmd)
     return target
 
 
-def bEnc2BVecs(source, target):
-    """Create a gradient vector file base on B encoging file
+def mrtrixToFslEncoding(dwi, bEncs, bVecsTarget, bValsTarget):
+    """Create a B encoding gradient file base on bVals and bVecs encoding file
 
     Args:
-        source: a b gradient encoding file.
-
+        dwi:           the input diffusion weight images
+        bEncs: a mrtrix encoding gradient direction file.
+        bVecsTarget: a output vector file name.
+        bValsTarget: a output value file name.
     Returns:
-        the resulting b vector encoding file
+        a tuple containing the vector output name and the value output name
 
     """
-    bvecs = []
-    with open(source, 'r') as f:
-        for line in f.readlines():
-            tokens = line.split()
-            if len(tokens)==4:
-                bvecs.append(tokens[0:3])
-    bvecs = zip(*bvecs)
-
-    v = open(target,"w")
-    for items in bvecs:
-        for item in items:
-            v.write("{} ".format(item))
-        v.write("\n")
-    v.close()
-
-    return target
-
-
-def bEnc2BVals(source, target):
-    """Create a gradient b value file base on B encoging file
-
-    Args:
-        source: a b gradient encoding file.
-
-    Returns:
-        the resulting b value encoding file
-
-    """
-    bVals = []
-    with open(source, 'r') as f:
-        for line in f.readlines():
-            tokens = line.split()
-            bVals.append(tokens.pop(3))
-
-    b = open(target,"w")
-    for bval in bVals:
-        b.write("{} ".format(bval))
-    b.close()
-
-    return target
+    cmd = "mrinfo {} -grad {} -export_grad_mrtrix {} {} --quiet".format(dwi, bEncs, bVecsTarget, bValsTarget)
+    launchCommand(cmd)
+    return bVecsTarget,bValsTarget
 
 
 def extractStructure(values, source, target):
