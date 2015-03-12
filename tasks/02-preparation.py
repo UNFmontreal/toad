@@ -8,7 +8,7 @@ class Preparation(GenericTask):
 
 
     def __init__(self, subject):
-       GenericTask.__init__(self, subject, 'backup')
+       GenericTask.__init__(self, subject, 'backup', 'qa')
 
 
     def implement(self):
@@ -141,6 +141,6 @@ class Preparation(GenericTask):
         images = [(anatPng, 'High resolution anatomical image'),
                        (dwiGif, 'Diffusion image')]
         return images
-
+	
 
 

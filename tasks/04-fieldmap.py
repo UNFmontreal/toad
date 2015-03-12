@@ -265,6 +265,7 @@ class Fieldmap(GenericTask):
         result = self.isAllImagesExists(images)
         return result
 
+
     def isDirty(self):
         """Validate if this tasks need to be submit during the execution
 

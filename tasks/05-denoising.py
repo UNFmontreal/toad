@@ -11,7 +11,7 @@ class Denoising(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'fieldmap')
+        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'fieldmap', 'qa')
 
 
     def implement(self):

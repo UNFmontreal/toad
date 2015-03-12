@@ -17,9 +17,6 @@ import os
 
 class Qa(object):
 
-#    def __init__(self):
-#        pass
-
     def idGenerator(self, size=6, chars=ascii_uppercase + digits):
         """Generate random strings
 
@@ -191,20 +188,18 @@ class Qa(object):
         Args:
            imagesArray : array of tupple [(imageLink, legend), ...]
         """
-        #@TODO Implement qaDir into subject
-        qaDir = os.path.join(self.subjectDir, '15-qa')
-        imgDir = os.path.join(qaDir, 'img')
 
+        imagesDir = os.path.join(self.qaDir, 'img')
         tablesCode = ''
         for imageLink, legend in imagesArray:
             #@TODO Take into account multiple run of QA
-            shutil.copyfile(imageLink, os.path.join(imgDir, imageLink))
+            shutil.copyfile(imageLink, os.path.join(imagesDir, imageLink))
             tags = {'imageLink':imageLink,'legend':legend}
             tablesCode += self.parseTemplate(tags, os.path.join(self.toadDir, 'templates/files/qa.table.tpl'))
 
         htmlCode = self.parseTemplate({'parseHtmlTables':tablesCode}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
 
-        htmlFile = os.path.join(qaDir,'{}.html'.format(self.getName()))
+        htmlFile = os.path.join(self.qaDir,'{}.html'.format(self.getName()))
         util.createScript(htmlFile, htmlCode)
 
         """

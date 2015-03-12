@@ -8,7 +8,7 @@ __author__ = 'desmat'
 class Parcellation(GenericTask):
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preparation')
+        GenericTask.__init__(self, subject, 'preparation', 'qa')
         self.id = self.get('id')
         self.setCleanupBeforeImplement(False)
 

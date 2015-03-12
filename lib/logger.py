@@ -181,7 +181,7 @@ class Logger(object):
         """
         handle.close()
 
-    def __rotateLog(source, target):
+    def __rotateLog(self, source, target):
         """Archive the contain of a source file into the beginning of a target file
 
         Args:
@@ -192,7 +192,11 @@ class Logger(object):
         if os.path.isfile(source):
             with open(source, 'r') as f:
                 logText = f.read()
-                with open(target, 'r+') as a:
-                    contain = a.read()
-                    a.seek(0, 0)
-                    a.write(logText + contain)
+                if os.path.isfile(target):
+                    with open(target, 'r+') as a:
+                        contain = a.read()
+                        a.seek(0, 0)
+                        a.write(logText+contain)
+                else:
+                    with open(target, 'w') as w:
+                        w.write(logText)

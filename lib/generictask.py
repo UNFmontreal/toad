@@ -52,7 +52,6 @@ class GenericTask(Logger, Load, Qa):
                 if i == 0:
                     self.dependDir = dir
 
-
     def getOrder(self):
         """return the order of execution of this subclasses
 
