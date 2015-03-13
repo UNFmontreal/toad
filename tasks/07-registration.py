@@ -31,23 +31,23 @@ class Registration(GenericTask):
 
         self.__applyResampleFsl(anatBrain, b0, b0ToAnatMatrixInverse, self.buildName(anatBrain, "resample"))
         self.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix)
-        self.__applyResampleFsl(aparcAsegFile, b0, b0ToAnatMatrixInverse, self.buildName(aparcAsegFile, "resample"))
+        self.__applyResampleFsl(aparcAsegFile, b0, b0ToAnatMatrixInverse, self.buildName(aparcAsegFile, "resample"), True)
 
 
         b02x2x2ToAnatMatrix = self.__computeResample(b02x2x2, anat)
         b02x2x2ToAnatMatrixInverse = mriutil.invertMatrix(b02x2x2ToAnatMatrix, self.buildName(b02x2x2ToAnatMatrix, 'inverse', 'mat'))
-        self.__applyResampleFsl(aparcAsegFile, b02x2x2, b02x2x2ToAnatMatrixInverse, self.buildName(aparcAsegFile, "2x2x2"))
+        self.__applyResampleFsl(aparcAsegFile, b02x2x2, b02x2x2ToAnatMatrixInverse, self.buildName(aparcAsegFile, "2x2x2"), True)
         self.__applyResampleFsl(anatBrain, b02x2x2, b02x2x2ToAnatMatrixInverse, self.buildName(anatBrain, "2x2x2"))
 
 
         brodmannRegister = self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
-        self.__applyResampleFsl(brodmann, b0, b0ToAnatMatrixInverse, self.buildName(brodmann, "resample"))
+        self.__applyResampleFsl(brodmann, b0, b0ToAnatMatrixInverse, self.buildName(brodmann, "resample"), True)
 
         lhRibbonRegister = self.__applyRegistrationMrtrix(lhRibbon, mrtrixMatrix)
         rhRibbonRegister = self.__applyRegistrationMrtrix(rhRibbon, mrtrixMatrix)
 
-        self.__applyResampleFsl(lhRibbon, b0, b0ToAnatMatrixInverse, self.buildName(lhRibbon, "resample"))
-        self.__applyResampleFsl(rhRibbon, b0, b0ToAnatMatrixInverse, self.buildName(rhRibbon, "resample"))
+        self.__applyResampleFsl(lhRibbon, b0, b0ToAnatMatrixInverse, self.buildName(lhRibbon, "resample"),True)
+        self.__applyResampleFsl(rhRibbon, b0, b0ToAnatMatrixInverse, self.buildName(rhRibbon, "resample"),True)
 
         brodmannLRegister =  self.buildName(brodmannRegister, "left_hemisphere")
         brodmannRRegister =  self.buildName(brodmannRegister, "right_hemisphere")
@@ -78,16 +78,23 @@ class Registration(GenericTask):
         return matrix
 
 
-    def __applyResampleFsl(self, source, reference, matrix, target):
+    def __applyResampleFsl(self, source, reference, matrix, target, nearest = False):
         """Register an image with symmetric normalization and mutual information metric
 
+        Args:
+            source:
+            reference: use this image as reference
+            matrix:
+            target: the output file name
+            nearest: A boolean, process nearest neighbour interpolation
+
         Returns:
-            return a file containing the resulting transformation
+            return a file containing the resulting image transform
         """
         self.info("Starting registration from fsl")
-        #name = os.path.basename(source).replace(".nii","")
-        #target = self.buildName(name, "resample")
-        cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {}".format(source, reference, matrix, target)
+        cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {} ".format(source, reference, matrix, target)
+        if nearest:
+            cmd += "-interp nearestneighbour"
         self.launchCommand(cmd)
         return target
 
