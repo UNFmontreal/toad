@@ -49,7 +49,6 @@ class Preparation(GenericTask):
                     self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
                     util.symlink(value, self.workingDir)
 
-
     def __produceEncodingFiles(self, bEncs, bVecs, bVals, dwi):
 
         self.info("Produce .b .bvals and .bvecs gradient file if not existing")

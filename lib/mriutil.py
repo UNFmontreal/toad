@@ -288,6 +288,7 @@ def fslToMrtrixEncoding(dwi, bVecs, bVals, target):
 
     """
     cmd = "mrinfo {} -fslgrad {} {} -export_grad_mrtrix {} --quiet".format(dwi, bVecs, bVals, target)
+    print cmd
     launchCommand(cmd)
     return target
 
@@ -304,7 +305,8 @@ def mrtrixToFslEncoding(dwi, bEncs, bVecsTarget, bValsTarget):
         a tuple containing the vector output name and the value output name
 
     """
-    cmd = "mrinfo {} -grad {} -export_grad_mrtrix {} {} --quiet".format(dwi, bEncs, bVecsTarget, bValsTarget)
+    cmd = "mrinfo {} -grad {} -export_grad_fsl {} {} --quiet".format(dwi, bEncs, bVecsTarget, bValsTarget)
+    print cmd
     launchCommand(cmd)
     return bVecsTarget,bValsTarget
 

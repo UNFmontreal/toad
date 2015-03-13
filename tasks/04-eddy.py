@@ -388,7 +388,7 @@ class Eddy(GenericTask):
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'b')}
         return self.isSomeImagesMissing(images)
 
-
+    """
     def qaSupplier(self):
         eddy = self.getImage(self.workingDir, "dwi", 'eddy')
         eddyGif = self.nifti4dtoGif(eddy)
@@ -410,3 +410,4 @@ class Eddy(GenericTask):
                   (rotation_tg,'Rotation correction by eddy'),
                   (bvecs_tg,'Gradients vectors on the unitary sphere. Red : raw bvec | Blue : opposite bvec | Black + : movement corrected bvec')]
         return images
+    """

@@ -15,7 +15,6 @@ class Denoising(GenericTask):
 
 
     def implement(self):
-
         if self.get("algorithm").lower() in "none":
             self.info("Skipping denoising process")
         else:

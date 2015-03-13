@@ -399,7 +399,7 @@ class GenericTask(Logger, Load, Qa):
         tags={ 'script': scriptName, 'workingDir': self.workingDir}
         cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/matlab.tpl"))
         self.info("Launching matlab command: {}".format(cmd))
-        self.launchCommand(cmd, 'log')
+        self.launchCommand(cmd)
 
 
     def getImage(self, dir, prefix, postfix=None, ext="nii.gz"):

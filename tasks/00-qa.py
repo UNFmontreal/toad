@@ -32,5 +32,7 @@ class QA(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        files = {'QA index.html': 'index.html', 'toad logo': 'img/logo.png'}
+        files = {'QA index.html': os.path.join(self.workingDir ,'index.html')}
         return self.isSomeImagesMissing(files)
+
+
