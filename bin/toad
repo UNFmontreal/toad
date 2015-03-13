@@ -112,7 +112,7 @@ def __manageEnvironnement(logger):
     except ValueError:
         logger.error("Cannot determine your version of python installed")
 
-    packages = ['numpy', 'nibabel', 'dipy']
+    packages = ['numpy', 'nibabel', 'dipy', 'matplotlib']
     for package in packages:
         try:
             imp.find_module(package)
