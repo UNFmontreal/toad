@@ -1,7 +1,7 @@
 from lib.util import launchCommand
 import util
 import numpy
-import nipy
+import nibabel
 import os
 
 
@@ -22,26 +22,23 @@ def fslmaths(source1, target, operator="bin", source2=None):
         cmd = "fslmaths {} -{} {} ".format(source1, operator, target)
     else:
         cmd = "fslmaths {} -{} {} {}".format(source1, operator, source2, target)
-    print 'cmd=',cmd
+
     result = util.launchCommand(cmd)
-    #Spm do not support .gz format, so uncompress nifty file
-    print "result =", result
-    #util.gunzip("{}.gz".format(target))
     return result
 
 
-def extractFirstB0FromDwi(source, target, bval, nthreads = "1"):
+def extractFirstB0FromDwi(source, target, bVals, nthreads = "1"):
     """Perform an extraction of the first b0 image found into a DWI image
 
     Args:
         source: The input image
         target: The resulting output name
-        bval:   A gradient encoding B0 values file name
+        bvals:   A gradient encoding B0 values file name
 
     Returns:
          A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
     """
-    return extractSubVolume(source, target, "3", getFirstB0IndexFromDwi(bval), nthreads)
+    return extractSubVolume(source, target, "3", getFirstB0IndexFromDwi(bVals), nthreads)
 
 
 def extractSubVolume(source, target, extractAtAxis, extractAtCoordinate, nthreads = "1"):
@@ -94,24 +91,20 @@ def invertMatrix(source, target):
     return target
 
 
-def strideImage(source, layout, target):
-    """perform a reorientation of the axes and flip the image
+def stride3DImage(source, target, layout="1,2,3" ):
+    """perform a reorientation of the axes and flip the image into a different layout
 
     Args:
-        source: the input image
-        layout: comma-separated list that specify the strides.
-        target: the name of the resulting filename
+        source:           the input image
+        layout:           comma-separated list that specify the strides.
+        outputNamePrefix: a prefix to rename target filename
 
     Returns:
         the name of the resulting filename
 
     """
-    if len(getMriDimensions(source)) == 3:
-        cmd = "mrconvert {} {} -stride {}"
-    else:
-        cmd = "mrconvert {} {} -stride {},4"
-    print cmd.format(source, target, layout)
-    launchCommand(cmd.format(source, target, layout))
+    cmd = "mrconvert {} {} -stride {}".format(source, target, layout)
+    launchCommand(cmd)
     return target
 
 
@@ -220,19 +213,20 @@ def isDataStridesOrientationExpected(source, layouts):
     return False
 
 
-def getFirstB0IndexFromDwi(bval):
+def getFirstB0IndexFromDwi(bVals):
     """Return the index of the first B0 value found into B0 Value encoding file.
 
     Args:
-        bval:  A B value encoging file
+        bVals:  A B value encoging file
 
     Returns:
         The index of the first b0 found in the file
 
     """
-    for line in open(bval,'r').readlines():
-            b0s = line.strip().split()
-            return b0s.index('0')
+    with open(bVals,'r') as f:
+        for line in f.readlines():
+                b0s = line.strip().split()
+                return b0s.index('0')
     return False
 
 
@@ -281,282 +275,62 @@ def applyGradientCorrection(bFilename, eddyFilename, target):
     return target
 
 
-def bValBVec2BEnc(bvalFilename, bvecFilename, target):
-    """Create a B encoding gradient file base on Bval and Bvec encoding file
+def fslToMrtrixEncoding(dwi, bVecs, bVals, target):
+    """Create a B encoding gradient file base on bVals and bVecs encoding file
 
     Args:
-        bvalFilename: a gradient b value encoding file.
-        bvalFilename: a vector value file.
-
+        dwi:           the input diffusion weight images
+        bVecs: a vector value file.
+        bVals: a gradient b value encoding file.
+        target: the output file name
     Returns:
         the resulting b encoding file
 
     """
-    b = open(bvalFilename,"r")
-    v = open(bvecFilename,"r")
-    bvals = b.readlines()
-    bVecsLines = v.readlines()
-    b.close()
-    v.close()
-
-    bVecs = []
-    for bVec in bVecsLines:
-        bVecs.append(bVec.strip().split())
-
-    f = open(target,'w')
-    for index, bval in enumerate(bvals.pop().strip().split()):
-        f.write("{}\t{}\t{}\t{}\n".format(bVecs[0][index], bVecs[1][index], bVecs[2][index],bval))
-    f.close()
+    cmd = "mrinfo {} -fslgrad {} {} -export_grad_mrtrix {} --quiet".format(dwi, bVecs, bVals, target)
+    print cmd
+    launchCommand(cmd)
     return target
 
 
-def bEnc2BVec(source, target):
-    """Create a gradient vector file base on B encoging file
+def mrtrixToFslEncoding(dwi, bEncs, bVecsTarget, bValsTarget):
+    """Create a B encoding gradient file base on bVals and bVecs encoding file
 
     Args:
-        source: a b gradient encoding file.
-
+        dwi:           the input diffusion weight images
+        bEncs: a mrtrix encoding gradient direction file.
+        bVecsTarget: a output vector file name.
+        bValsTarget: a output value file name.
     Returns:
-        the resulting b vector encoding file
+        a tuple containing the vector output name and the value output name
 
     """
-    bvecs = []
-
-    f = open(source, 'r')
-    lines = f.readlines()
-    f.close()
-    for line in lines:
-        tokens = line.split()
-        if len(tokens)==4:
-            bvecs.append(tokens[0:3])
-    bvecs = zip(*bvecs)
-
-    v = open(target,"w")
-
-    for items in bvecs:
-        for item in items:
-            v.write("{} ".format(item))
-        v.write("\n")
-    v.close()
-
-    return target
+    cmd = "mrinfo {} -grad {} -export_grad_fsl {} {} --quiet".format(dwi, bEncs, bVecsTarget, bValsTarget)
+    print cmd
+    launchCommand(cmd)
+    return bVecsTarget,bValsTarget
 
 
-def bEnc2BVal(source, target):
-    """Create a gradient b value file base on B encoging file
+def extractStructure(values, source, target):
+    """ Extract givens values from image
 
     Args:
-        source: a b gradient encoding file.
-
-    Returns:
-        the resulting b value encoding file
-
-    """
-    bvals = []
-
-    f = open(source,'r')
-    lines = f.readlines()
-    f.close()
-    for line in lines:
-        tokens = line.split()
-        bvals.append(tokens.pop(3))
-
-    b = open(target,"w")
-
-    for bval in bvals:
-        b.write("{} ".format(bval))
-    b.close()
-
-    return target
-
-def strideEncodingFile(source, originalStrides, expectedStrides, target):
-    """
-        Change strides from an encoding file to a new layout
-    Args:
-        source: An Vector encoding file with .b or .bvec  extension
-        originalStrides: a 3 values comma separated string representing the initial layout into the dwi image
-        expectedStrides: a 3 values comma separated string representing the layout of the target file
-        target: the output filename
-
-    Return:
-        the output filename
-
-    """
-
-    def __changeSignBEnc(lines):
-        """Closures function that changes signs of the gradient encoding vector in respect of the expected layout
-           originalLayout and expectedLayout are inherit from strideEncodingFile environment
-
-        Args:
-            lines: A 4 columns gradient orientation array
-
-        Returns:
-            A 4 columns gradient orientation array
-
-        """
-        results = []
-        signChanges = __isSignChange()
-        for line in lines:
-            tokens = line.split()
-            for i in [0, 1, 2]:
-                if signChanges[i]:
-                    if tokens[i][0] == "-":
-                        tokens[i] = tokens[i].replace("-",'')
-                    else:
-                        tokens[i] = "-{}".format(tokens[i])
-            results.append(tokens)
-        return results
-
-    #this function is apply before the list is permute
-    def __changeSignBVec(lines):
-        """Closures function that changes signs of the gradient encoding vector in respect of the expected layout
-           originalLayout and expectedLayout are inherit from strideEncodingFile environment
-
-        Args:
-            lines: A 3 rows gradient orientation array
-
-        Returns:
-            A 3 rows gradient orientation array
-
-        """
-        results = []
-        signChanges = __isSignChange()
-        for i in [0, 1, 2]:
-            vector = []
-            for element in lines[i].split():
-                if signChanges[i]:
-                    if element[0] == "-":
-                        element = element.replace("-", '')
-                    else:
-                        element = "-{}".format(element)
-                vector.append(element)
-            results.append(vector)
-        return results
-
-    def __findSignOfElementInList(element, list):
-        """Closures function that return the sign (positive or negative) of the element into a list that have the same value
-         as the element given as entry
-        Args:
-            element: The value of the element to find into the list
-            list: A list of string elements that represent positive or negative integer
-
-        Returns:
-            the sign "+" if the element in the list is greater or equal to zero, "-" otherwise
-
-        """
-        for item in list:
-            if element.replace("-","") in item:
-                if "-" in item:
-                    return "-"
-                else:
-                    return "+"
-        return False
-
-
-    def __isSignChange():
-        """Closures function that return if a sign change is request for each stride (direction)
-           originalLayout and expectedLayout are inherit from strideEncodingFile environment
-
-        Args:
-            originalLayout: A 3 elements list representing the actual stride of the dwi image
-            expectedLayout: A 3 elements list representing the expected final layout
-        Returns:
-            A 3 Booleans array that indicate if a sign change need to be apply at each position
-
-        """
-        signs = [False, False, False]
-        for index in [0,1,2]:
-            if __findSignOfElementInList(originalLayout[index], originalLayout) \
-                    !=__findSignOfElementInList(originalLayout[index], expectedLayout):
-                signs[index] = True
-        return signs
-
-
-    def __permuteColumnBEnc(lines):
-        """Closures function that permute column from original layout to  the expect layout
-           originalLayout and expectedLayout are inherit from strideEncodingFile environment
-
-        Args:
-            lines: a b encoding (4 columns) list of elements
-
-        Returns:
-            a list of elements permute
-        """
-        results = []
-        for line in lines:
-            tmp = [line[originalIndexes['1']], line[originalIndexes['2']], line[originalIndexes['3']], line[3]]
-            results.append([tmp[expectedIndexes['1']], tmp[expectedIndexes['2']],tmp[expectedIndexes['3']], line[3]])
-        return results
-
-
-    def __permuteColumnBVec(lines):
-        """Closures function that permute column from original layout to  the expect layout
-           originalLayout and expectedLayout are inherit from strideEncodingFile environment
-
-        Args:
-            lines: a b vector encoding (3 rows) list of elements
-
-        Returns:
-            a list of elements permute
-        """
-        tmp = [lines[originalIndexes['1']], lines[originalIndexes['2']],lines[originalIndexes['3']]]
-        return [tmp[expectedIndexes['1']], tmp[expectedIndexes['2']],tmp[expectedIndexes['3']]]
-
-    originalLayout = originalStrides.split(",")
-    expectedLayout = expectedStrides.split(",")
-
-    originalIndexes = {originalLayout[0].replace('-', ''):0,
-                       originalLayout[1].replace('-', ''):1,
-                       originalLayout[2].replace('-', ''):2}
-
-    expectedIndexes = {expectedLayout[0].replace('-', ''):0,
-                       expectedLayout[1].replace('-', ''):1,
-                       expectedLayout[2].replace('-', ''):2}
-
-
-    f = open(source,'r')
-    lines = f.readlines()
-    f.close()
-
-    b = open(target, "w")
-    if len(lines[0].split()) == 4:
-        lines = __changeSignBEnc(lines)
-        lines = __permuteColumnBEnc(lines)
-        for line in lines:
-                b.write("{}\t{}\t{}\t{}\n".format(line[0], line[1], line[2], line[3]))
-
-    elif len(lines) == 3:
-        lines = __changeSignBVec(lines)
-        lines = __permuteColumnBVec(lines)
-        for items in lines:
-            for item in items:
-                b.write("{} ".format(item))
-            b.write("\n")
-
-    b.close()
-    return target
-
-
-def extractFreesurferStructure(values, source, target):
-    """ Extract given value from an image
-
-    Args:
-        values: A list of values to extract from an input image
+        values: A list of values (integer) to extract from an input image
         source: An mri image
 
     returns:
         a new image that contain areas specified by values
     """
-    image = nipy.io.api.load_image(source)
-    array = numpy.array(image._data)
+    image = nibabel.load(source)
+    data = image.get_data()
     c = []
     for value in values:
-        c.append(numpy.where(array==value))
-    array.fill(0)
+        c.append(numpy.where(data==value))
+
+    data.fill(0)
     for i in range(len(values)):
-        array[c[i]] = 1
-    image._data = array
-    
+        data[c[i]] = 1
+
     if not os.path.exists(target):
-        nipy.io.api.save_image(image, target)
-    return target
+        nibabel.save(nibabel.Nifti1Image(data, image.get_affine()), target)
+        return target

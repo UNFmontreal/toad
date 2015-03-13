@@ -11,11 +11,10 @@ class Denoising(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'fieldmap')
+        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'fieldmap', 'qa')
 
 
     def implement(self):
-
         if self.get("algorithm").lower() in "none":
             self.info("Skipping denoising process")
         else:
@@ -23,10 +22,10 @@ class Denoising(GenericTask):
             target = self.buildName(dwi, "denoise")
             if self.get("algorithm") == "nlmeans":
                 if not self.config.getboolean("eddy", "ignore"):
-                    bVal=  self.getImage(self.eddyDir, 'grad',  None, 'bval')
+                    bVals=  self.getImage(self.eddyDir, 'grad',  None, 'bvals')
                 else:
-                    bVal=  self.getImage(self.preparationDir, 'grad',  None, 'bval')
-                b0Index = mriutil.getFirstB0IndexFromDwi(bVal)
+                    bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
+                b0Index = mriutil.getFirstB0IndexFromDwi(bVals)
 
                 try:
                     threshold = int(self.get("nlmeans_mask_threshold"))
@@ -46,7 +45,7 @@ class Denoising(GenericTask):
                 dwiUncompress = self.uncompressImage(dwi)
 
                 tmp = self.buildName(dwiUncompress, "tmp", 'nii')
-                scriptName = self.__createLpcaScript(dwiUncompress, tmp)
+                scriptName = self.__createMatlabScript(dwiUncompress, tmp)
                 self.__launchMatlabExecution(scriptName)
 
                 self.info("compressing {} image".format(tmp))
@@ -67,7 +66,7 @@ class Denoising(GenericTask):
             return self.getImage(self.preparationDir, "dwi")
 
 
-    def __createLpcaScript(self, source, target):
+    def __createMatlabScript(self, source, target):
 
         scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
         self.info("Creating denoising script {}".format(scriptName))
@@ -96,13 +95,6 @@ class Denoising(GenericTask):
         return self.get("algorithm").lower() in "none"
 
 
-    def qaSupplier(self):
-        denoise = self.getImage(self.workingDir, "dwi", 'denoise')
-        denoiseGif = self.nifti4dtoGif(denoise)
-        imagesArray = [(denoiseGif,'Denoised diffusion image')]
-        return imagesArray
-
-
     def meetRequirement(self, result = True):
         if self.isSomeImagesMissing({'fieldmap': self.getImage(self.fieldmapDir, "dwi", 'unwarp')}) and \
                 self.isSomeImagesMissing({'eddy corrected': self.getImage(self.dependDir, "dwi", 'eddy')}) and \
@@ -115,3 +107,9 @@ class Denoising(GenericTask):
     def isDirty(self, result = False):
         dict = {'denoised': self.getImage(self.workingDir, "dwi", 'denoise')}
         return self.isSomeImagesMissing(dict)
+
+    def qaSupplier(self):
+        denoise = self.getImage(self.workingDir, "dwi", 'denoise')
+        denoiseGif = self.nifti4dtoGif(denoise)
+        images = [(denoiseGif,'Denoised diffusion image')]
+        return images

@@ -24,8 +24,8 @@ class Eddy(GenericTask):
         b0AP= self.getImage(self.dependDir, 'b0AP')
         b0PA= self.getImage(self.dependDir, 'b0PA')
         bEnc=  self.getImage(self.dependDir, 'grad',  None, 'b')
-        bVals=  self.getImage(self.dependDir, 'grad',  None, 'bval')
-        bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvec')
+        bVals=  self.getImage(self.dependDir, 'grad',  None, 'bvals')
+        bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvecs')
 
         #extract b0 image from the dwi
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
@@ -50,8 +50,14 @@ class Eddy(GenericTask):
         else:
 
             #concatenate B0 image together
-            b0Image = self.__concatenateB0(b0PA, b0AP,
-                            os.path.join(self.workingDir, self.get('b0s_filename')))
+
+            if self.get("phase_enc_dir") == "0":
+                b0Image = self.__concatenateB0(b0PA, b0AP,
+                                os.path.join(self.workingDir, self.get('b0s_filename')))
+
+            elif self.get("phase_enc_dir") == "1":
+                 b0Image = self.__concatenateB0(b0AP, b0PA,
+                                os.path.join(self.workingDir, self.get('b0s_filename')))
 
             #create the acquisition parameter file
             acqpTopup = self.__createAcquisitionParameterFile('topup')
@@ -75,12 +81,13 @@ class Eddy(GenericTask):
         eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
         if len(eddyParameterFiles)>0:
             bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles.pop(0), self.buildName(outputEddyImage, None, 'b'))
-            #produce the bVal and bVec file accordingly
-            mriutil.bEnc2BVec(bCorrected, self.buildName(outputEddyImage, None, 'bvec'))
-            mriutil.bEnc2BVal(bCorrected, self.buildName(outputEddyImage, None, 'bval'))
+            mriutil.mrtrixToFslEncoding(outputEddyImage,
+                                        bCorrected,
+                                        self.buildName(outputEddyImage, None, 'bvecs'),
+                                        self.buildName(outputEddyImage, None, 'bvals'))
 
 
-    def  __oddImagesWithEvenNumberOfSlices(self, sources):
+    def __oddImagesWithEvenNumberOfSlices(self, sources):
         """return a list of images that will count a odd number of slices in z direction
 
             If an even number of slices is found, the upper volume will be remove
@@ -165,20 +172,12 @@ class Eddy(GenericTask):
 
         if type=='topup':
             parameter='acqp_topup'
-            text = "0 -1 0 {}\n0 1 0 {}\n".format(factor, factor)
+            text = "0 1 0 {}\n0 -1 0 {}\n".format(factor, factor)
 
         elif type=='eddy':
             parameter='acqp_eddy'
-            if phaseEncDir==0:    #P>>A
-                    text = "0 1 0 {}\n".format(factor)
-            elif phaseEncDir==1:  #A>>P
-                    text = "0 -1 0 {}\n".format(factor)
-            elif phaseEncDir==2:  #R>>L
-                    text = "1 0 0 {}\n".format(factor)
-            elif phaseEncDir==3:  #L>>R
-                    text = "-1 0 0 {}\n".format(factor)
-            else:
-                self.error("Cannot determine the phase encoding direction, got value of: {}".format(phaseEncDir))
+            text = "0 1 0 {}\n".format(factor)
+
         else:
             self.error("Type must be of value: topup or eddy")
             return False
@@ -238,7 +237,7 @@ class Eddy(GenericTask):
         baseName = os.path.join(self.workingDir, self.get('topup_results_base_name'))
         output = os.path.join(self.workingDir, self.get('topup_results_output'))
 
-        cmd = "topup --imain={} --datain={} --config={} --out={}  --iout={} --verbose"\
+        cmd = "topup --imain={} --datain={} --config={} --out={}  --iout={}"\
               .format(source, acqp, b02b0File, baseName, output)
         self.launchCommand(cmd)
         return [baseName, output]
@@ -257,7 +256,7 @@ class Eddy(GenericTask):
         tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "brain")
 
-        cmd = "bet {} {} -v -m".format(source, tmp)
+        cmd = "bet {} {} -m".format(source, tmp)
         self.launchCommand(cmd)
         self.rename(tmp, target)
 
@@ -265,7 +264,7 @@ class Eddy(GenericTask):
         return target
 
 
-    def __correctionEddy2(self, source, mask, topup, index, acqp, bVecs, bVal):
+    def __correctionEddy2(self, source, mask, topup, index, acqp, bVecs, bVals):
         """Performs eddy correction on a dwi file.
 
         Args:
@@ -285,7 +284,7 @@ class Eddy(GenericTask):
         tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "eddy")
         cmd = "eddy --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} "\
-              .format(source, mask, index, acqp, bVecs, bVal, tmp)
+              .format(source, mask, index, acqp, bVecs, bVals, tmp)
 
         if topup is not None:
             cmd += " --topup={}".format(topup)
@@ -327,7 +326,7 @@ class Eddy(GenericTask):
             matplotlib.pyplot.savefig(pngoutput)
 
 
-    def __plotVectors(self, rawBvec, eddyBvec, outputfile):
+    def __plotVectors(self, rawBvecs, eddyBvecs, target):
         """
 
         """
@@ -335,14 +334,14 @@ class Eddy(GenericTask):
         fig = matplotlib.pyplot.figure()
         ax = mpl_toolkits.mplot3d.Axes3D(fig)
 
-        bvec1 = numpy.loadtxt(rawBvec)
-        bvec0= -bvec1
+        bVec1 = numpy.loadtxt(rawBvecs)
+        bVec0= -bVec1
 
-        graphParam = [(80, 'b', 'o', bvec0), (80, 'r', 'o', bvec1)]
+        graphParam = [(80, 'b', 'o', bVec0), (80, 'r', 'o', bVec1)]
 
-        if eddyBvec:
-            bvec2 = numpy.loadtxt(eddyBvec)
-            graphParam.append((20, 'k', '+', bvec2))
+        if eddyBvecs:
+            bVecs2 = numpy.loadtxt(eddyBvecs)
+            graphParam.append((20, 'k', '+', bVecs2))
 
         for s, c, m, bv in graphParam:
             x = bv[0,1:]
@@ -363,7 +362,7 @@ class Eddy(GenericTask):
             ax.view_init(elev=10., azim=ii)
             matplotlib.pyplot.savefig(gifId+str(ii)+'.png')
             cmd += '-delay 10 ' + gifId + str(ii) + '.png '
-        cmd += outputfile
+        cmd += target
         self.launchCommand(cmd)
         cmd = 'rm ' + gifId + '*'
         self.launchCommand(cmd)
@@ -376,26 +375,25 @@ class Eddy(GenericTask):
     def meetRequirement(self):
 
         images = {'diffusion weighted':self.getImage(self.dependDir, 'dwi'),
-                  'gradient .bval encoding file': self.getImage(self.dependDir, 'grad', None, 'bval'),
-                  'gradient .bvec encoding file': self.getImage(self.dependDir, 'grad', None, 'bvec'),
+                  'gradient .bvals encoding file': self.getImage(self.dependDir, 'grad', None, 'bvals'),
+                  'gradient .bvecs encoding file': self.getImage(self.dependDir, 'grad', None, 'bvecs'),
                   'gradient .b encoding file': self.getImage(self.dependDir, 'grad', None, 'b')}
         return self.isAllImagesExists(images)
 
 
     def isDirty(self):
         images = {'diffusion weighted eddy corrected': self.getImage(self.workingDir, 'dwi', 'eddy'),
-                  'gradient .bval encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bval'),
-                  'gradient .bvec encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvec'),
+                  'gradient .bvals encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvals'),
+                  'gradient .bvecs encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvecs'),
                   'gradient .b encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'b')}
         return self.isSomeImagesMissing(images)
 
-
+    """
     def qaSupplier(self):
         eddy = self.getImage(self.workingDir, "dwi", 'eddy')
         eddyGif = self.nifti4dtoGif(eddy)
-        
         import glob
-        fixs = glob.glob("{}/*_temporary.nii.eddy_parameters".format(self.workingDir))
+        fixs = glob.glob("{}/*_temporary.nii*.eddy_parameters".format(self.workingDir))
         for fix in fixs:
             eddy_parameters = fix 
         translation_tg = 'translation.png'
@@ -405,10 +403,11 @@ class Eddy(GenericTask):
         rawBvec = self.getImage(self.dependDir, 'grad', None, 'bvec')
         eddyBvec = self.getImage(self.workingDir, 'grad', 'eddy', 'bvec')
         bvecs_tg = 'bvecs.gif'
-        self.__plotVectors(self, rawBvec, eddyBvec, bvecs_tg)
+        self.__plotVectors(rawBvec, eddyBvec, bvecs_tg)
         
         images = [(eddyGif,'DWI eddy'),
                   (translation_tg,'Translation correction by eddy'),
                   (rotation_tg,'Rotation correction by eddy'),
                   (bvecs_tg,'Gradients vectors on the unitary sphere. Red : raw bvec | Blue : opposite bvec | Black + : movement corrected bvec')]
         return images
+    """

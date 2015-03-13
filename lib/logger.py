@@ -1,11 +1,10 @@
 import datetime
-import sys
+import sys, os
 
 __author__ = 'desmat'
 
 class Logger(object):
 
-    #@TODO simplify logname name creation
     def __init__(self, path = None):
         """Provide a simple, custom, logging capability for the toad pipeline.
 
@@ -21,14 +20,15 @@ class Logger(object):
         else:
             self.__logIntoFile = True
             self.filename = "{}/{}.log".format(path, self.getName())
-            self.handle = open(self.filename,'a')
-            self.handle.write("#########################################################################\n")
-            self.handle.write("\n")
-            self.handle.write(" Start logging task {} at {}".format(self.getName(), self.getTimestamp()))
-            self.handle.write("\n")
-            self.handle.write("\n")
-            self.handle.write("#########################################################################\n")
-            self.handle.close()
+            archiveLogName = "{}.archive".format(self.filename)
+            self.__rotateLog(self.filename, archiveLogName)
+            with open(self.filename,'w') as f:
+                f.write("#########################################################################\n")
+                f.write("\n")
+                f.write(" Start logging task {} at {}".format(self.getName(), self.getTimestamp()))
+                f.write("\n")
+                f.write("\n")
+                f.write("#########################################################################\n")
 
 
     def getTimestamp(self):
@@ -83,7 +83,7 @@ class Logger(object):
                 self.error("Some mandatory image are missing. Finishing the pipeline now\n\n")
         elif methodName == "implement":
             self.info("Finish task {} at {}.".format(self.getName(), self.getTimestamp()))
-            self.info("-------------------------------------------------------------------------")
+            self.info("-------------------------------------------------------------------------\n")
 
 
     def __log(self, message, level):
@@ -100,12 +100,11 @@ class Logger(object):
         if level not in ['INFO','WARNING','ERROR']:
             return False
 
-        message = "{}: {}".format(level, message)
-        print message+"\n"
+        message = "{}: {}\n".format(level, message)
+        print message
         if self.__logIntoFile:
-            self.handle = open(self.filename,'a')
-            self.handle.write(message)
-            self.handle.close()
+            with open(self.filename,'a') as f:
+                f.write(message)
 
         if level == 'ERROR':
             sys.exit()
@@ -173,16 +172,6 @@ class Logger(object):
         return self.filename
 
 
-    def getLog(self):
-        """Open the log file and return the handle of that log
-
-        Returns:
-            Return the handle of the log file
-
-        """
-        return open(self.filename,'a')
-
-
     def closeLog(self, handle):
         """Close the handle of the file
 
@@ -191,3 +180,23 @@ class Logger(object):
 
         """
         handle.close()
+
+    def __rotateLog(self, source, target):
+        """Archive the contain of a source file into the beginning of a target file
+
+        Args:
+            source: a source file name
+            target: a target file name
+
+        """
+        if os.path.isfile(source):
+            with open(source, 'r') as f:
+                logText = f.read()
+                if os.path.isfile(target):
+                    with open(target, 'r+') as a:
+                        contain = a.read()
+                        a.seek(0, 0)
+                        a.write(logText+contain)
+                else:
+                    with open(target, 'w') as w:
+                        w.write(logText)

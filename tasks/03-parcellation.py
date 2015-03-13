@@ -8,7 +8,7 @@ __author__ = 'desmat'
 class Parcellation(GenericTask):
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preparation')
+        GenericTask.__init__(self, subject, 'preparation', 'qa')
         self.id = self.get('id')
         self.setCleanupBeforeImplement(False)
 
@@ -141,9 +141,9 @@ class Parcellation(GenericTask):
 
         """
         self.info("convert {} image to {} ".format(source, target))
-        cmd = "mrconvert {} {} -stride {} -force"\
+        cmd = "mrconvert {} {} -stride {} -force -quiet"\
             .format(source, target, self.config.get('preparation', 'stride_orientation'))
-        self.launchCommand(cmd, 'log', 'log')
+        self.launchCommand(cmd)
         return target
 
 
@@ -206,8 +206,8 @@ class Parcellation(GenericTask):
         aparcAsegPng = self.c3dSegmentation(anatFreesurfer, aparcAseg, '2', '0.5')
         brodmannPng = self.c3dSegmentation(anatFreesurfer, brodmann, '2', '0.5')
 
-        imagesArray = [(anatFreesurferPng,'High resolution anatomical image of freesurfer'),
+        images = [(anatFreesurferPng,'High resolution anatomical image of freesurfer'),
                        (aparcAsegPng,'aparcaseg segmentaion from freesurfer'),
                        (brodmannPng,'Brodmann segmentation from freesurfer')]
 
-        return imagesArray
+        return images

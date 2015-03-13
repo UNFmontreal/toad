@@ -7,6 +7,7 @@ from lib import util
 import subprocess
 import shutil
 import glob
+import sys
 import os
 
 __author__ = 'desmat'
@@ -50,7 +51,6 @@ class GenericTask(Logger, Load, Qa):
                 self.__dependenciesDirNames["{}Dir".format(arg)] = dir
                 if i == 0:
                     self.dependDir = dir
-
 
     def getOrder(self):
         """return the order of execution of this subclasses
@@ -120,9 +120,9 @@ class GenericTask(Logger, Load, Qa):
         util.symlink(self.getLogFileName(), self.workingDir)
         self.implement()
         self.info("Create and supply images to the qa report ")
-        imagesArray = self.qaSupplier()
-        if imagesArray is not None:
-            self.createQaReport(imagesArray)	
+        images = self.qaSupplier()
+        if images is not None:
+            self.createQaReport(images)
         os.chdir(currentDir)
 
 
@@ -279,7 +279,15 @@ class GenericTask(Logger, Load, Qa):
             while(attempt < nbSubmission):
                 if self.__cleanupBeforeImplement:
                     self.__cleanup()
-                self.__implement()
+
+		try:
+                    self.__implement()
+                except (KeyboardInterrupt, SystemExit):
+                    self.error("KeyboardInterrupt or SystemExit caught, pipeline will exit")
+		    raise
+		except:
+                    self.warning("Exception have been caught, the error message is:".format(sys.exc_info()[0]))
+
                 if attempt == nbSubmission:
                     self.error("I already execute this task {} time and failed, exiting the pipeline")
                 elif self.isDirty():
@@ -355,17 +363,17 @@ class GenericTask(Logger, Load, Qa):
         self.info("Launch {} command line...".format(binary))
         self.info("Command line submit: {}".format(cmd))
 
-        out = None
-        err = None
+        #out = None
+        #err = None
 
-        if stdout=='log':
-            out = self.getLog()
-            self.info("Output will be log in {} \n".format(out.name))
-        if stderr=='log':
-            err = self.getLog()
-            self.info("Error will be log in {} \n".format(err.name))
+        #if stdout=='log':
+        #    out = self.getLog()
+        #    self.info("Output will be log in {} \n".format(out.name))
+        #if stderr=='log':
+        #    err = self.getLog()
+        #    self.info("Error will be log in {} \n".format(err.name))
 
-        (output, error)= util.launchCommand(cmd, out, err, timeout, nice)
+        (output, error)= util.launchCommand(cmd, stdout, stderr, timeout, nice)
         if not (output is "" or output is "None" or output is None):
             self.info("Output produce by {}: {} \n".format(binary, output))
 
@@ -391,7 +399,7 @@ class GenericTask(Logger, Load, Qa):
         tags={ 'script': scriptName, 'workingDir': self.workingDir}
         cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/matlab.tpl"))
         self.info("Launching matlab command: {}".format(cmd))
-        self.launchCommand(cmd, 'log')
+        self.launchCommand(cmd)
 
 
     def getImage(self, dir, prefix, postfix=None, ext="nii.gz"):
@@ -526,27 +534,4 @@ class GenericTask(Logger, Load, Qa):
         """
 
         return util.parseTemplate(dict, template)
-
-
-    def createQaReport(self, imagesArray):
-        """create html report for a task with qaSupplier implemented
-
-        Args:
-           imagesArray : array of tupple [(imageLink, legend), ...]
-        """
-        #@TODO Implement qaDir into subject
-        qaDir = os.path.join(self.subjectDir, '15-qa')
-        imgDir = os.path.join(qaDir, 'img')
-        
-        tablesCode = ''
-        for imageLink, legend in imagesArray:
-            #@TODO Take into account multiple run of QA
-            shutil.copyfile(imageLink, os.path.join(imgDir, imageLink))
-            tags = {'imageLink':imageLink,'legend':legend}
-            tablesCode += self.parseTemplate(tags, os.path.join(self.toadDir, 'templates/files/qa.table.tpl'))
-        
-        htmlCode = self.parseTemplate({'parseHtmlTables':tablesCode}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl')) 
-        
-        htmlFile = os.path.join(qaDir,'{}.html'.format(self.getName()))
-        util.createScript(htmlFile, htmlCode)
 

@@ -113,10 +113,8 @@ def createScript(source, text):
 
     """
     try:
-        f = open(source, 'w')
-        f.write(text)
-        f.close()
-
+        with open(source, 'w') as f:
+            f.write(text)
     except IOError:
         return False
     return True
@@ -198,7 +196,7 @@ def arrayOfString(source):
     return __arrayOf(source, 'String')
 
 
-def getImage(config, dir, prefix, postfix=None, ext="nii.gz"):
+def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
     """A simple utility function that return an mri image given certain criteria
 
     Args:
@@ -206,17 +204,24 @@ def getImage(config, dir, prefix, postfix=None, ext="nii.gz"):
         dir:     the directory where looking for the image
         prefix:  an expression that the filename should start with
         postfix: an expression that the filename should end with (excluding the extension)
-        ext:     name of the extension of the filename. defaults: nii.gz
+        extension:     name of the extension of the filename. defaults: nii.gz
 
     Returns:
         the absolute filename if found, False otherwise
 
     """
 
-    if ext.find('.') == 0:
-        ext=ext.replace(".","",1)
+    if extension.find('.') == 0:
+        extension=extension.replace(".", "", 1)
+
+    if config.has_option('extension', extension):
+        extension = config.get('extension', extension)
+
+    if extension.find('.') == 0:
+        extension=extension.replace(".", "", 1)
+
     if postfix is None:
-        images = glob.glob("{}/{}*.{}".format(dir, config.get('prefix', prefix), ext))
+        images = glob.glob("{}/{}*.{}".format(dir, config.get('prefix', prefix), extension))
     else:
         pfixs = ""
         if isinstance(postfix, str):
@@ -230,7 +235,7 @@ def getImage(config, dir, prefix, postfix=None, ext="nii.gz"):
                     pfixs = pfixs + config.get('postfix', element)
                 else:
                     pfixs = pfixs + "_{}".format(element)
-        criterias = "{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, ext)
+        criterias = "{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, extension)
         images = glob.glob(criterias)
 
     if len(images) > 0:
@@ -238,7 +243,7 @@ def getImage(config, dir, prefix, postfix=None, ext="nii.gz"):
     return False
 
 
-def buildName(config, target, source, postfix=None, ext=None, absolute=True):
+def buildName(config, target, source, postfix=None, extension=None, absolute=True):
     """A simple utility function that return a file name that contain the postfix and the current working directory
 
     The path of the filename contain the current directory
@@ -249,7 +254,7 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
         target: The path of the resulting target filename
         source: The input file name, a config prefix or simply a string
         postfix: An option item specified in config at the postfix section
-        ext: the Extension of the new target
+        extension: the Extension of the new target
         absolute: a boolean if the full path must be absolute
 
     Returns:
@@ -258,7 +263,7 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
 
     parts = []
     if config.has_option('prefix', source):
-        targetName = config.get('prefix',source)
+        targetName = config.get('prefix', source)
     else:
         parts = os.path.basename(source).split(os.extsep)
         targetName = parts.pop(0)
@@ -276,20 +281,23 @@ def buildName(config, target, source, postfix=None, ext=None, absolute=True):
             else:
                 targetName += "_{}".format(postfix)
 
-    extension = ""
-    for part in parts:
-        extension += ".{}".format(part)
-    if ext is not None:
-        if len(ext)>0 and ext[0] != ".":
-            extension = ".{}".format(ext)
-        else:
-            extension = ext    
+    if extension is None:
+        extension = ""
+        for part in parts:
+            extension += ".{}".format(part)
+    else:
+        if extension.find('.') == 0:
+            extension=extension.replace(".", "", 1)
 
-    targetName+=extension
-    
+        if config.has_option('extension', extension):
+            extension = config.get('extension', extension)
+
+        if extension.find('.') != 0:
+            extension = ".{}".format(extension)
+    if extension.strip() !=  ".":
+        targetName+=extension
     if absolute:
         targetName = os.path.join(target, targetName)
-    
     return targetName
 
 
@@ -335,8 +343,8 @@ def parseTemplate(dict, template):
         the string substitute
 
     """
-    f = open(template, 'r')
-    return Template(f.read()).safe_substitute(dict)
+    with open(template, 'r') as f:
+        return Template(f.read()).safe_substitute(dict)
 
 
 def displayYesNoMessage(msg, question = "Continue? (y or n)"):

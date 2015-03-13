@@ -14,6 +14,8 @@ class HardiMrtrix(GenericTask, Logger):
 
     def implement(self):
 
+        #@TODO produce "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
+
         dwi = self.getImage(self.dependDir,'dwi', 'upsample')
         bFile = self.getImage(self.dependDir, 'grad', None, 'b')
 
@@ -24,7 +26,7 @@ class HardiMrtrix(GenericTask, Logger):
         fodImage = self.__dwi2fod(dwi, outputDwi2Response, maskDwi2fod, bFile)
 
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
-        self.__fod2metric(fodImage, mask)
+        self.__fod2metrics(fodImage, mask)
 
 
     def __dwi2response(self, source, mask, bFile):
@@ -56,25 +58,29 @@ class HardiMrtrix(GenericTask, Logger):
         return target
 
 
-    def __fod2metric(self, source, mask=None):
-        self.info("Starting fod2metric creation from mrtrix on {}".format(source))
+    def __fod2metrics(self, source, mask=None):
+        """Produce fixel and nufo image from an fod
 
-        images = {'gfaImage': self.buildName(source, 'gfa'),
-        'gfaTmp':self.buildName(source, "tmp"),
-        'nufoImage':self.buildName(source, 'nufo'),
-        'nufoTmp':self.buildName(source,"tmp1"),
-        'fixel_peakImage':self.buildName(source,"fixel_peak", 'msf'),
-        'fixel_peakTmp':self.buildName(source, "tmp2" ,'msf')}
+        Args:
+            source: the source image
 
-        cmd = "fod2metric {} -gfa {} -count {} -fixel_peak {} -nthreads {} -force -quiet"\
-            .format(source, images['gfaTmp'], images['nufoTmp'], images['fixel_peakTmp'], self.getNTreadsMrtrix())
-        if mask is not None:
-            cmd += " -mask {} ".format(mask)
+        Return:
+            the nufo image
 
+        """
+
+        tmp = self.buildName(source, "tmp")
+        fixelTarget = self.buildName(source,"fixel_peak", 'msf')
+        nufoImage = self.buildName(source, 'nufo')
+
+        self.info("Starting fod2fixel creation from mrtrix on {}".format(source))
+        cmd = "fod2fixel {} -peak {} -force -nthreads {} -quiet".format(source, fixelTarget, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
-        for prefix in ["gfa", "nufo", "fixel_peak"]:
-            self.info("renaming {} to {}".format(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)]))
-            self.rename(images["{}Tmp".format(prefix)], images["{}Image".format(prefix)])
+
+
+        cmd = "fixel2voxel {} count {} -nthreads {} -quiet".format(fixelTarget, tmp,  self.getNTreadsMrtrix())
+        self.launchCommand(cmd)
+        return self.rename(tmp, nufoImage)
 
 
     def meetRequirement(self):
@@ -90,7 +96,6 @@ class HardiMrtrix(GenericTask, Logger):
 
         images = {"response function estimation text file": self.getImage(self.workingDir, 'dwi', None, 'txt'),
                   "fibre orientation distribution estimation": self.getImage(self.workingDir, 'dwi', 'fod'),
-                  "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
                   'nufo': self.getImage(self.workingDir,'dwi','nufo'),
                   'fixel peak image': self.getImage(self.workingDir,'dwi', 'fixel_peak', 'msf')}
 

@@ -16,7 +16,7 @@ __license__ = "GPL"
 __version__ = "0.6"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
-__status__ = "Development"
+__status__ = "Beta"
 
 
 def __parseArguments():
@@ -32,13 +32,12 @@ def __parseArguments():
         for furthers informations""",
                                 epilog= """\n
 
-        studyDir must have the following structure
-        studyDir-\\
-             |-config.cfg
-             |-suj001--\\
+        An input must have the following structure
+
+             |-input---\\
              |         |- t1_001.nii
              |         |- dwi_001.nii
-             |         |- dwi_001.b ou (dwi_001.bval et dwi_001.bvec)
+             |         |- dwi_001.b ou (dwi_001.bvals et dwi_001.bvecs)
              |         |-(optionnal) aparc_aseg.nii
              |         |-(optionnal) freesurfer_anat.nii.gz
              |         |-(optionnal) lh_ribbon.nii.gz
@@ -49,56 +48,37 @@ def __parseArguments():
              |         |-(optionnal) mag_001.nii
              |         |-(optionnal) phase_001.nii
              |         |-(optionnal) config.cfg
-             |
-             |-suj002--\\
-             |         |- t1_002.nii
-             |         |- dwi_002.nii
-             |         |- dwi_002.b ou (dwi_002.bval et dwi_002.bvec)
-             |         |-(optionnal) aparc_aseg.nii
-             |         |-(optionnal) freesurfer_anat.nii.gz
-             |         |-(optionnal) lh_ribbon.nii.gz
-             |         |-(optionnal) rh_ribbon.nii.gz
-             |         |-(optionnal) brodmann.nii.gz
-             |         |-(optionnal) b0ap_001.nii
-             |         |-(optionnal) b0pa_001.nii
-             |         |-(optionnal) mag_001.nii
-             |         |-(optionnal) phase_001.nii
-             |         |-(optionnal) config.cfg
-             |
-             |-sujN
 
 
-        Then a structure like this should be created
-
+        Then a subject completed will look like this
         sujN--\\
-              |- 00-backup
-              |- 01-preparation
-              |- 02-parcellation
-              |- 03-eddy
-              |- 03-fieldmap
-              |- 04-denoising
-              |- 05-preprocessing
-              |- 06-registration
-              |- 07-masking
-              |- 08-dtifit
-              |- 09-tensors
-              |- 10-tensorsmetric
-              |- 11-tensorstractography
-              |- 12-hardi
-              |- 13-hardimetric
-              |- 14-harditractography
-              |- 15-qa
+              |- 00-logs
+              |- 00-qa
+              |- 01-backup
+              |- 02-preparation
+              |- 03-parcellation
+              |- 04-eddy
+              |- 04-fieldmap
+              |- 05-denoising
+              |- 06-preprocessing
+              |- 07-registration
+              |- 08-masking
+              |- 09-dtifit
+              |- 10-tensors
+              |- 11-tensorsmetric
+              |- 12-tensorstractography
+              |- 13-hardi
+              |- 14-hardimetric
+              |- 15-harditractography
               |- 16-results
 
 
         Please report bugs to mathieu.desrosiers@criugm.qc.ca
         Check whether it CROAK like a toad and WALK like a toad. It is not uncommon to find a warty skinned frog that isn\'t a toad.
         """)
-    parser.add_argument("studyDir", help="The directory where we should find the input stucture")
+    parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the subjects, wildcard * ? are accepted")
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Specify the location of an alternative the config.cfg file")
-    parser.add_argument("-u", "--subject",action='append', nargs='?',metavar=('directory'), required=False,
-                            help="Explicitly specify the subject directory to submit. This option may be repeat several time")
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
     parser.add_argument("-t", "--stopBeforeTask", nargs='?',metavar=('task name'), required=False,
@@ -114,14 +94,17 @@ def __parseArguments():
                         "(This parameter is dangerous and may crash the server or create deadlocks.)"
                         ), action="store_true")
     args = parser.parse_args()
+    args.subject = None
     return args
 
 
 def __manageEnvironnement(logger):
     """Set and verify environments variables and lib importations for prior utilisation
 
-    """
+    Args:
+        logger: the logger
 
+    """
     try:
         version = float(sys.version[0:3])
         if version < 2.7:
@@ -129,8 +112,7 @@ def __manageEnvironnement(logger):
     except ValueError:
         logger.error("Cannot determine your version of python installed")
 
-    #@TODO add nibabel and dipy dependencies
-    packages = ['numpy','nipy']
+    packages = ['numpy', 'nibabel', 'dipy']
     for package in packages:
         try:
             imp.find_module(package)
@@ -186,9 +168,12 @@ def __manageEnvironnement(logger):
             logger.error("Please set the environment variable FSLDIR and source fslconf/fsl.sh file")
             sys.exit()
 
-        mrtrix = util.which("tckgen")
+        mrtrix = util.which("transformcalc")
         if mrtrix is None:
-            logger.error("Mrtrix3 not found. Please install the package or set the environment variable $PATH correctly")
+            if util.which("tckgen") is None:
+                logger.error("Mrtrix3 not found. Please install the package or set the environment variable $PATH correctly")
+            else:
+                logger.error("Your version of Mrtrix3 is too old, transformcalc could not be found. Please install the package again. ")
         else:
             os.environ["MRTRIX_PYTHON_SCRIPTS"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))),"scripts")
 
@@ -206,7 +191,6 @@ def __manageEnvironnement(logger):
         logger.error("ImageMagick not found. Please install the package or set the environment variable $PATH correctly")
 
 
-
 if __name__ == '__main__':
 
     #create a logger
@@ -221,15 +205,6 @@ if __name__ == '__main__':
     #define toad directory
     realPath = os.path.realpath(__file__)
     arguments.toadDir = os.path.dirname(realPath).replace("bin", "")
-
-    #study directory must exist prior to start the pipeline
-    if not os.path.exists(arguments.studyDir):
-        logger.error("Error, directory {} do not exist".format(arguments.studyDir))
-        sys.exit()
-
-    #always works in absolute path
-    if not os.path.isabs(arguments.studyDir):
-        arguments.studyDir = os.path.abspath(arguments.studyDir)
 
     #Launch the manager
     result = subjectmanager.SubjectManager(arguments).run()

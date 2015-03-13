@@ -21,7 +21,6 @@ class SubjectManager(Logger, Config):
         """
         self.arguments = arguments
         self.config = Config(self.arguments).getConfig()
-        self.studyDir = self.config.get('arguments', 'studyDir')
         Logger.__init__(self)
 
 
@@ -33,33 +32,6 @@ class SubjectManager(Logger, Config):
          """
 
         return self.__class__.__name__.lower()
-
-
-    def __createSubjects(self):
-        """Return a list of directories who qualified for the pipeline
-
-        Look into each subdirectory if they look like a toad structure. If yes, the subdirectory is consider
-        a subject and is register into a list
-
-        Returns:
-            subjects: a list of directory containing qualified subjects
-
-        """
-        subjects = []
-
-        self.info("Directory {} have been specified by the user.".format(self.studyDir))
-        self.info("Looking for valid subjects.")
-
-        if self.arguments.subject:
-            for dir in self.arguments.subject:
-                if Validation(dir, self.getLogger(), self.__copyConfig(dir)).isAToadSubject():
-                    subjects.append(Subject(self.__copyConfig(dir)))
-        else:
-            directories = glob.glob("{}/*".format(self.studyDir))
-            for directory in directories:
-                if Validation(directory, self.getLogger(), self.__copyConfig(directory)).isAToadSubject():
-                    subjects.append(Subject(self.__copyConfig(directory)))
-        return subjects
 
 
     def __validateSubjects(self, subjects):
@@ -208,21 +180,15 @@ class SubjectManager(Logger, Config):
             subject:  a subject
 
         """
-
-        cmd = "echo {0}/bin/toad -u {1} -l {2} -p | qsub -notify -V -N {3} -o {4} -e {4} -q {5}".format(self.config.get('arguments', 'toad_dir'),
-              subject.getDir(), self.studyDir, subject.getName(), subject.getLogDir(), self.config.get('general', 'sge_queue'))
+        cmd = "echo {0}/bin/toad {1} -l -p | qsub -notify -V -N {2} -o {3} -e {3} -q {4}".format(self.config.get('arguments', 'toad_dir'),
+              subject.getDir(), subject.getName(), subject.getLogDir(),subject.getConfig().get('general', 'sge_queue'))
         self.info("Command launch: {}".format(cmd))
         import subprocess
         process = subprocess.Popen(cmd, stdout=None, stderr=None, shell=True)
         process.wait()
-        #(stdout, stderr) = util.launchCommand(cmd)
-        #self.info("Output produce: {}\n".format(stdout))
-        #if stderr is not '':
-        #    self.info("Error produce: {}\n".format(stderr))
-        #self.info("------------------------\n")
 
 
-    def __copyConfig(self, dir):
+    def __copyConfig(self, directory):
         """Create a deep copy of the configuration structure
 
         ConfigParser is not meant to be copied and do not provide a deepcopy functionality.
@@ -230,24 +196,73 @@ class SubjectManager(Logger, Config):
         of the ConfigParser. So we need to implement our own deepcopy function.
 
         Args:
-            dir:  the absolute path of the subject directory
+            directory:  the absolute path of the subject directory
 
         Returns:
             A new copy of the configuration structure
         """
         arguments = copy.deepcopy(self.arguments)
-        arguments.subject = os.path.abspath(dir)
+        arguments.subject = directory
         return Config(arguments).getConfig()
+
+
+    def __expandDirectories(self):
+        """functionnality that return every absolute directory and it subdirectories specified as input command line
+            study directory
+
+        Directory that contain a subdirectory with 01-backup name will be automaticaly discard
+        Files are automaticaly discarded
+        No further validation is done
+
+        Returns
+            A list unique absolute directory
+
+        """
+        def find(pattern, list):
+            for item in list:
+                if pattern in item:
+                    return True
+            return False
+
+        results = []
+        for argument in self.arguments.inputs:
+            absoluteDirectory = os.path.abspath(argument)
+            if os.path.isdir(absoluteDirectory):
+                results.append(absoluteDirectory)
+                directories = glob.glob("{}/*".format(absoluteDirectory))
+                if not find("01-backup", directories):
+                    for directory in directories:
+                        if os.path.isdir(directory):
+                            results.append(directory)
+
+        return list(set(results))
+
+    def __subjectsFactory(self, directories):
+        """Return a list of directories who qualified for the pipeline
+
+        Args:
+            directories: a list of directory to validate
+
+        Returns:
+            subjects: a list of directory containing qualified subjects
+
+        """
+        subjects=[]
+        for directory in directories:
+            if Validation(directory, self.getLogger(), self.__copyConfig(directory)).isAToadSubject():
+                self.info("{} seem\'s a valid toad subject entry".format(directory))
+                subjects.append(Subject(self.__copyConfig(directory)))
+        return subjects
 
 
     def run(self):
         """Launch the pipeline
         """
 
-        #determine which directories are qualified subject for the pipeline
-        subjects = self.__createSubjects()
+        #create the subjects
+        subjects = self.__subjectsFactory(self.__expandDirectories())
 
-        #look for each subjects integrity
+        #Validate each subjects integrity
         subjects = self.__validateSubjects(subjects)
 
         #determine if subject that are locks
