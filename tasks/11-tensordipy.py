@@ -1,6 +1,12 @@
-from lib.generictask import GenericTask
-import dipy.core.gradients, dipy.reconst.dti, dipy.segment.mask, dipy.reconst.dti
-import numpy, nibabel
+import dipy.core.gradients
+import dipy.reconst.dti
+import dipy.segment.mask
+import dipy.reconst.dti
+import numpy
+import nibabel
+
+from core.generictask import GenericTask
+from lib.images import Images
 
 __author__ = 'desmat'
 
@@ -8,21 +14,6 @@ class TensorDipy(GenericTask):
 
 
     def __init__(self, subject):
-        """A preset format, used as a starting point for developing a toad task
-
-        Simply copy and rename this file:  cp xxxxx.template yourtaskname.py into the tasks folder.
-            XX is simply a 2 digit number that represent the order the tasks will be executed.
-            yourtaskname is any name at your convenience. the name must be lowercase
-        Change the class name Template for Yourtaskname. Note the first letter of the name should be capitalized
-
-        A directory called XX-yourtaskname will be create into the subject dir. A local variable self.workingDir will
-        be initialize to that directory
-
-        Args:
-            subject: a Subject instance inherit by the subjectmanager.
-
-        """
-
         GenericTask.__init__(self, subject, 'preprocessing', 'masking')
 
 
@@ -69,28 +60,27 @@ class TensorDipy(GenericTask):
         rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
         nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(target, "rgb"))
 
-
         self.info("End tensor and metrics creation from dipy, resulting file is {} ".format(target))
         return target
 
 
     def meetRequirement(self):
-        images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
-                  "gradient value bvals encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvals'),
-                  "gradient vector bvecs encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvecs'),
-                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
-        return self.isAllImagesExists(images)
+        images = Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
+                  (self.getImage(self.dependDir, 'grad', None, 'bvals'), "gradient value bvals encoding file"),
+                  (self.getImage(self.dependDir, 'grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
+                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'))
+        return images.isAllImagesExists()
 
 
     def isDirty(self):
-        images ={"dipy tensor": self.getImage(self.workingDir, "dwi", "tensor"),
-                    "selected eigenvector 1" : self.getImage(self.workingDir, 'dwi', 'v1'),
-                    "selected eigenvector 2" : self.getImage(self.workingDir, 'dwi', 'v2'),
-                    "selected eigenvector 3" : self.getImage(self.workingDir, 'dwi', 'v3'),
-                    "fractional anisotropy" : self.getImage(self.workingDir, 'dwi', 'fa'),
-                    "mean diffusivity MD" : self.getImage(self.workingDir, 'dwi', 'md'),
-                    "selected eigenvalue(s) AD" : self.getImage(self.workingDir, 'dwi', 'ad'),
-                    "selected eigenvalue(s) RD" : self.getImage(self.workingDir, 'dwi', 'rd')}
-                    #"apparent diffusion coefficient" : self.getImage(self.workingDir, 'dwi', 'adc')}
-        return self.isSomeImagesMissing(images)
+        images = Images((self.getImage(self.workingDir, "dwi", "tensor"), "dipy tensor"),
+                     (self.getImage(self.workingDir, 'dwi', 'v1'), "selected eigenvector 1"),
+                     (self.getImage(self.workingDir, 'dwi', 'v2'), "selected eigenvector 2"),
+                     (self.getImage(self.workingDir, 'dwi', 'v3'), "selected eigenvector 3"),
+                     (self.getImage(self.workingDir, 'dwi', 'fa'), "fractional anisotropy"),
+                     (self.getImage(self.workingDir, 'dwi', 'md'), "mean diffusivity MD"),
+                     (self.getImage(self.workingDir, 'dwi', 'ad'), "selected eigenvalue(s) AD"),
+                     (self.getImage(self.workingDir, 'dwi', 'rd'), "selected eigenvalue(s) RD"))
+                 #"apparent diffusion coefficient" : self.getImage(self.workingDir, 'dwi', 'adc')}
+        return images.isSomeImagesMissing()
 

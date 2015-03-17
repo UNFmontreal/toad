@@ -1,10 +1,14 @@
-from lib.generictask import GenericTask
-from lib import mriutil
+import math
+import os
+
 import scipy.ndimage
 import nibabel
 import numpy
-import math
-import os
+
+from core.generictask import GenericTask
+from lib.images import Images
+from lib import mriutil
+
 
 __author__ = 'desmat'
 
@@ -43,7 +47,8 @@ class Fieldmap(GenericTask):
         fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, freesurfer_anat)
 
         self.info('Compute the transformation from the anatomical image produce by freesurfer to the magnitude image')
-        invertFielmapToAnat = mriutil.invertMatrix(fieldmapToAnat, self.buildName(fieldmapToAnat, 'inverse', 'mat'))
+        invertFielmapToAnat =  self.buildName(fieldmapToAnat, 'inverse', 'mat')
+        self.info(mriutil.invertMatrix(fieldmapToAnat, invertFielmapToAnat))
 
         self.info('Resampling the anatomical mask into the phase image space')
         interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
@@ -59,7 +64,8 @@ class Fieldmap(GenericTask):
         matrixName = self.get("epiTo_b0fm")
         self.__coregisterEpiLossyMap(b0, warped, matrixName, lossy)
 
-        invertMatrixName = mriutil.invertMatrix(matrixName, self.buildName(matrixName, 'inverse', 'mat'))
+        invertMatrixName = self.buildName(matrixName, 'inverse', 'mat')
+        self.info(mriutil.invertMatrix(matrixName, invertMatrixName))
         magnitudeIntoDwiSpace = self.__interpolateFieldmapInEpiSpace(warped, b0, invertMatrixName)
         magnitudeIntoDwiSpaceMask = self.__mask(magnitudeIntoDwiSpace)
         interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
@@ -239,8 +245,12 @@ class Fieldmap(GenericTask):
 
 
     def isIgnore(self):
-        return not (self.isAllImagesExists({'magnitude':self.getImage(self.dependDir, 'mag'), 'phase':self.getImage(self.dependDir, 'phase')}) or
-            self.isAllImagesExists({'magnitude':self.getImage(self.subjectDir, 'mag'), 'phase':self.getImage(self.subjectDir, 'phase')}))
+        #@TODO implement that
+
+        return not (self.isAllImagesExists([(self.getImage(self.dependDir, 'mag'), 'magnitude'),
+                                            (self.getImage(self.dependDir, 'phase'),  'phase')]) or
+                    self.isAllImagesExists([(self.getImage(self.subjectDir, 'mag'), 'magnitude'),
+                                            (self.getImage(self.subjectDir, 'phase'), 'phase')]))
 
 
     def meetRequirement(self, result=True):
@@ -249,20 +259,18 @@ class Fieldmap(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
-        if self.isSomeImagesMissing({'eddy corrected': self.getImage(self.dependDir, "dwi", 'eddy')}):
-            dwi = self.getImage(self.preparationDir, "dwi")
-            if self.isSomeImagesMissing({'diffusion weighted': dwi}):
-                result = False
-            else:
-                self.info("Will take {} image instead".format(dwi))
 
-        images = {"freesurfer anatomical":self.getImage(self.parcellationDir, 'anat', 'freesurfer'),
-                  "parcellation":self.getImage(self.parcellationDir, 'aparc_aseg'),
-                  "high resolution":self.getImage(self.dependDir, 'anat'),
-                  "magnitude":self.getImage(self.dependDir, 'mag'),
-                  "phase":self.getImage(self.dependDir, 'phase')}
+        images = Images((self.getImage(self.dependDir, "dwi", 'eddy'), 'eddy corrected'))
+        if images.isSomeImagesMissing():
+            images = Images((self.getImage(self.preparationDir, "dwi"), 'diffusion weighed'))
 
-        result = self.isAllImagesExists(images)
+        images.extend(Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), "freesurfer anatomical"),
+                              (self.getImage(self.parcellationDir, 'aparc_aseg'), "parcellation"),
+                              (self.getImage(self.dependDir, 'anat'), "high resolution"),
+                              (self.getImage(self.dependDir, 'mag'), "magnitude"),
+                              (self.getImage(self.dependDir, 'phase'), "phase")))
+
+        result = images.isAllImagesExists()
         return result
 
 
@@ -272,5 +280,5 @@ class Fieldmap(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        dict = {'unwarped': self.getImage(self.workingDir, "dwi", 'unwarp')}
-        return self.isSomeImagesMissing(dict)
+        images = Images((self.getImage(self.workingDir, "dwi", 'unwarp'), 'unwarped'))
+        return images.isSomeImagesMissing()

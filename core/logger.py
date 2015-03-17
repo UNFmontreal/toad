@@ -1,5 +1,6 @@
 import datetime
-import sys, os
+import sys
+import os
 
 __author__ = 'desmat'
 
@@ -100,12 +101,16 @@ class Logger(object):
         if level not in ['INFO','WARNING','ERROR']:
             return False
 
-        message = "{}: {}\n".format(level, message)
+        if isinstance(message, tuple) and len(message) == 3:
+            message = self.__commandFormatter(message)
+
+        else:
+            message = "{}: {}\n".format(level, message)
+
         print message
         if self.__logIntoFile:
             with open(self.filename,'a') as f:
                 f.write(message)
-
         if level == 'ERROR':
             sys.exit()
 
@@ -200,3 +205,27 @@ class Logger(object):
                 else:
                     with open(target, 'w') as w:
                         w.write(logText)
+
+
+    def __commandFormatter(self, (cmd, output, error)):
+        """Format a 3 elements tuples representing the command execute, the standards output and the standard error
+        message into a convenient string
+
+        Args:
+            message: A 3 elements tuples
+
+        Returns:
+            A string
+        """
+        binary = cmd.split(" ")[0]
+        message = "Launch {} command line...".format(binary)
+        message +="Command line submit: {}".format(cmd)
+
+        if not (output is "" or output is "None" or output is None):
+            message +="Output produce by {}: {} \n".format(binary, output)
+
+        if not (error is '' or error is "None" or error is None):
+             message +="Error produce by {}: {}\n".format(binary, error)
+        self.info("------------------------\n")
+        return message
+

@@ -1,4 +1,4 @@
-from lib.generictask import GenericTask
+from core.generictask import GenericTask
 
 __author__ = 'desmat'
 

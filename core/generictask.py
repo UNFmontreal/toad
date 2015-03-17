@@ -1,14 +1,17 @@
-from lib.logger import Logger
-from lib.load import Load
-from lib.qa import Qa
 from datetime import timedelta
 from datetime import datetime
-from lib import util
 import subprocess
 import shutil
 import glob
 import sys
 import os
+
+from logger import Logger
+from load import Load
+from lib.images import Images
+from lib.qa import Qa
+from lib import util
+
 
 __author__ = 'desmat'
 
@@ -121,7 +124,7 @@ class GenericTask(Logger, Load, Qa):
         self.implement()
         self.info("Create and supply images to the qa report ")
         images = self.qaSupplier()
-        if images is not None:
+        if not images.isEmpty():
             self.createQaReport(images)
         os.chdir(currentDir)
 
@@ -363,17 +366,7 @@ class GenericTask(Logger, Load, Qa):
         self.info("Launch {} command line...".format(binary))
         self.info("Command line submit: {}".format(cmd))
 
-        #out = None
-        #err = None
-
-        #if stdout=='log':
-        #    out = self.getLog()
-        #    self.info("Output will be log in {} \n".format(out.name))
-        #if stderr=='log':
-        #    err = self.getLog()
-        #    self.info("Error will be log in {} \n".format(err.name))
-
-        (output, error)= util.launchCommand(cmd, stdout, stderr, timeout, nice)
+        (executedCmd, output, error)= util.launchCommand(cmd, stdout, stderr, timeout, nice)
         if not (output is "" or output is "None" or output is None):
             self.info("Output produce by {}: {} \n".format(binary, output))
 
@@ -480,45 +473,50 @@ class GenericTask(Logger, Load, Qa):
             return False
 
 
-    def isSomeImagesMissing(self, dict):
-        """Iterate over a dictionary of getImage to see if all image exists
+    def isSomeImagesMissing(self, structure):
+        """Iterate over a structure to see if all image exists
 
         This function is an helper for isDirty and meetRequirement method
         The key represent a description of the image, the value is a call to getImage.
 
         Args:
-            dict: key: contain a description of the image
-                  value: contain  getImage call
-
+            structure: a list of tuples or a tuple.
+                    The tuples should have 2 elements: first element should be an image, second a description
         Returns:
             True if some image do not exists, False otherwise
         """
+
+
         result = False
-        for key, value in dict.iteritems():
-            if not value:
-                self.info("No {} image found".format(key))
+        if isinstance(structure, tuple):
+            structs = [structure]
+        else:
+            structs = structure
+        for image, description in structs:
+            if not image:
+                self.info("No {} image found".format(description))
                 result = True
             else:
-                if not os.path.exists(value):
-                    self.info("No {} image found".format(key))
+                if not os.path.exists(image):
+                    self.info("No {} image found".format(description))
                     result = True
         return result
 
 
-    def isAllImagesExists(self, dict):
+    def isAllImagesExists(self, structure):
         """Iterate over a dictionary of getImage to see if all image exists
 
         This function is an helper for isDirty and meetRequirement method
         The key represent a description of the image, the value is a call to getImage.
 
         Args:
-            dict: key: contain a description of the image
-                  value: contain  getImage call
+            structure: a list of tuples.
+                    The tuples should have 2 elements: first element should be an image, second a description
 
         Returns:
-            True if all images in the dictionary exists, False otherwise
+            True if all images in the structure exists, False otherwise
         """
-        return not self.isSomeImagesMissing(dict)
+        return not self.isSomeImagesMissing(structure)
 
 
     def parseTemplate(self, dict, template):

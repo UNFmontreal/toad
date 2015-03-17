@@ -4,7 +4,6 @@ import datetime
 import signal
 import time
 import glob
-import sys
 import os
 
 __author__ = 'mathieu'
@@ -76,7 +75,7 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=N
 
 
     Returns
-        return a 2 elements tuples representing the standards output and the standard error message
+        return a 3 elements tuples representing the command line launch, the standards output and the standard error message
 
     Raises
         OSError:      the function trying to execute a non-existent file.
@@ -98,7 +97,7 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=N
                 os.waitpid(-1, os.WNOHANG)
                 return None, "Error, a timeout for this process occurred"
 
-    return process.communicate()
+    return cmd, process.communicate()
 
 
 def createScript(source, text):
@@ -312,8 +311,13 @@ def getFileWithParents(source, levels=1):
 
 
 def which(source):
-    """
+    """locate a program file in the user's path
 
+    Args:
+        source: the name of the program
+
+    Returns:
+         The path for the executable that would be run if that command is actually been invoked.
     """
     def isExecutable(sourcePath):
         return os.path.isfile(sourcePath) and os.access(sourcePath, os.X_OK)

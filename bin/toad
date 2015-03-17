@@ -6,8 +6,13 @@ import imp
 import sys
 import os
 
+from core import subjectmanager
+from core import logger
+
+
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from lib import subjectmanager, logger, util
+from lib import util
 
 __author__ = "Mathieu Desrosiers, Arnaud Bore and Christophe Bedetti"
 __copyright__ = "Copyright 2014, The Toad Project"
@@ -181,7 +186,7 @@ def __manageEnvironnement(logger):
             logger.error("Matlab not found. Please install matlab or set the environment variable $PATH correctly")
         else:
             cmd = "matlab -nodisplay -nodesktop -nojvm -nosplash -r \"if exist('spm')~=2,fprintf('SPM_NOT_FOUND');end;quit\""
-            (output,error) = util.launchCommand(cmd)
+            (executedCmd, output, error) = util.launchCommand(cmd)
             if "SPM_NOT_FOUND" in output:
                 logger.error("Spm package not found, Please install spm or set the pathdef variable correctly")
 

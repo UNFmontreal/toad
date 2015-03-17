@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from lib.generictask import GenericTask
+from core.generictask import GenericTask
+from lib.images import Images
 
 __author__ = 'desmat'
 
@@ -37,7 +38,6 @@ class TensorMrtrix(GenericTask):
 
 
     def __produceMetrics(self, source, mask = None):
-        print "source = ", source
         self.info("Launch tensor2metric from mrtrix.\n")
         adc = self.buildName(source, "adc")
         fa = self.buildName(source, "fa")
@@ -68,19 +68,19 @@ class TensorMrtrix(GenericTask):
         self.launchCommand(cmd)
 
     def meetRequirement(self):
-        images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
-                  "gradient encoding b file":  self.getImage(self.dependDir, 'grad', None, 'b'),
-                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
-        return self.isAllImagesExists(images)
+        images = Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
+                  (self.getImage(self.dependDir, 'grad', None, 'b'), "gradient encoding b file"),
+                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'))
+        return images.isAllImagesExists()
 
 
     def isDirty(self):
 
-        images ={"mrtrix tensor": self.getImage(self.workingDir, "dwi", "tensor"),
-                    "mean apparent diffusion coefficient (ADC)" : self.getImage(self.workingDir, 'dwi', 'adc'),
-                    "selected eigenvector(s)" : self.getImage(self.workingDir, 'dwi', 'vector'),
-                    "fractional anisotropy" : self.getImage(self.workingDir, 'dwi', 'fa'),
-                    "selected eigenvalue(s) AD" : self.getImage(self.workingDir, 'dwi', 'ad'),
-                    "selected eigenvalue(s) RD" : self.getImage(self.workingDir, 'dwi', 'rd'),
-                    "mean diffusivity" : self.getImage(self.workingDir, 'dwi', 'md')}
-        return self.isSomeImagesMissing(images)
+        images = Images((self.getImage(self.workingDir, "dwi", "tensor"), "mrtrix tensor"),
+                     (self.getImage(self.workingDir, 'dwi', 'adc'), "mean apparent diffusion coefficient (ADC)"),
+                     (self.getImage(self.workingDir, 'dwi', 'vector'), "selected eigenvector(s)"),
+                     (self.getImage(self.workingDir, 'dwi', 'fa'), "fractional anisotropy"),
+                     (self.getImage(self.workingDir, 'dwi', 'ad'), "selected eigenvalue(s) AD" ),
+                     (self.getImage(self.workingDir, 'dwi', 'rd'), "selected eigenvalue(s) RD"),
+                     (self.getImage(self.workingDir, 'dwi', 'md'), "mean diffusivity"))
+        return images.isSomeImagesMissing()
