@@ -109,16 +109,16 @@ class Masking(GenericTask):
         os.chdir(temp_dir)
 
         # Initial conversion from FreeSurfer parcellation to five principal tissue types
-        self.launchCommand('labelconfig ' + source + ' ' + config_path + ' ' + os.path.join(temp_dir, 'indices.mif') + ' -lut_freesurfer ' + freesurfer_lut)
+        self.launchCommand('labelconfig -quiet ' + source + ' ' + config_path + ' ' + os.path.join(temp_dir, 'indices.mif') + ' -lut_freesurfer ' + freesurfer_lut)
 
         # Convert into the 5TT format for ACT
-        self.launchCommand('mrcalc indices.mif 1 -eq cgm.mif')
-        self.launchCommand('mrcalc indices.mif 2 -eq sgm.mif')
-        self.launchCommand('mrcalc indices.mif 3 -eq  wm.mif')
-        self.launchCommand('mrcalc indices.mif 4 -eq csf.mif')
-        self.launchCommand('mrcalc indices.mif 5 -eq path.mif')
+        self.launchCommand('mrcalc indices.mif 1 -eq cgm.mif -quiet')
+        self.launchCommand('mrcalc indices.mif 2 -eq sgm.mif -quiet')
+        self.launchCommand('mrcalc indices.mif 3 -eq wm.mif -quiet')
+        self.launchCommand('mrcalc indices.mif 4 -eq csf.mif -quiet')
+        self.launchCommand('mrcalc indices.mif 5 -eq path.mif -quiet')
         result_path = 'result.nii.gz'
-        self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32')
+        self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif -quiet - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32 -quiet')
 
 
         # Move back to original directory

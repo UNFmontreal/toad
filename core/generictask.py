@@ -283,12 +283,12 @@ class GenericTask(Logger, Load, Qa):
                 if self.__cleanupBeforeImplement:
                     self.__cleanup()
 
-		try:
+                try:
                     self.__implement()
                 except (KeyboardInterrupt, SystemExit):
                     self.error("KeyboardInterrupt or SystemExit caught, pipeline will exit")
-		    raise
-		except:
+                    raise
+                except:
                     self.warning("Exception have been caught, the error message is:".format(sys.exc_info()[0]))
 
                 if attempt == nbSubmission:
@@ -471,52 +471,6 @@ class GenericTask(Logger, Load, Qa):
         else:
             self.warning("unable to find {} image".format(source))
             return False
-
-
-    def isSomeImagesMissing(self, structure):
-        """Iterate over a structure to see if all image exists
-
-        This function is an helper for isDirty and meetRequirement method
-        The key represent a description of the image, the value is a call to getImage.
-
-        Args:
-            structure: a list of tuples or a tuple.
-                    The tuples should have 2 elements: first element should be an image, second a description
-        Returns:
-            True if some image do not exists, False otherwise
-        """
-
-
-        result = False
-        if isinstance(structure, tuple):
-            structs = [structure]
-        else:
-            structs = structure
-        for image, description in structs:
-            if not image:
-                self.info("No {} image found".format(description))
-                result = True
-            else:
-                if not os.path.exists(image):
-                    self.info("No {} image found".format(description))
-                    result = True
-        return result
-
-
-    def isAllImagesExists(self, structure):
-        """Iterate over a dictionary of getImage to see if all image exists
-
-        This function is an helper for isDirty and meetRequirement method
-        The key represent a description of the image, the value is a call to getImage.
-
-        Args:
-            structure: a list of tuples.
-                    The tuples should have 2 elements: first element should be an image, second a description
-
-        Returns:
-            True if all images in the structure exists, False otherwise
-        """
-        return not self.isSomeImagesMissing(structure)
 
 
     def parseTemplate(self, dict, template):
