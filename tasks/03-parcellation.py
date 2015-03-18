@@ -1,6 +1,9 @@
-from lib.generictask import GenericTask
-from lib import util
 import os
+
+from core.generictask import GenericTask
+from lib.images import Images
+from lib import util
+
 
 __author__ = 'desmat'
 
@@ -182,18 +185,18 @@ class Parcellation(GenericTask):
 
     def meetRequirement(self):
 
-        images = {'high resolution': self.getImage(self.dependDir, 'anat')}
-        return self.isAllImagesExists(images)
+        images = Images((self.getImage(self.dependDir, 'anat'), 'high resolution'))
+        return images.isAllImagesExists()
 
 
     def isDirty(self):
 
-        images = {'parcellation': self.getImage(self.workingDir, 'aparc_aseg'),
-                    'anatomical': self.getImage(self.workingDir, 'anat', 'freesurfer'),
-                    'rh_ribbon':self.getImage(self.workingDir, 'rh_ribbon'),
-                    'lh_ribbon':self.getImage(self.workingDir, 'lh_ribbon'),
-                    'brodmann':self.getImage(self.workingDir, 'brodmann')}
-        return self.isSomeImagesMissing(images)
+        images = Images((self.getImage(self.workingDir, 'aparc_aseg'), 'parcellation'),
+                  (self.getImage(self.workingDir, 'anat', 'freesurfer'), 'anatomical'),
+                  (self.getImage(self.workingDir, 'rh_ribbon'), 'rh_ribbon'),
+                  (self.getImage(self.workingDir, 'lh_ribbon'), 'lh_ribbon'),
+                  (self.getImage(self.workingDir, 'brodmann'), 'brodmann'))
+        return images.isSomeImagesMissing()
 
 
     def qaSupplier(self):
@@ -206,8 +209,6 @@ class Parcellation(GenericTask):
         aparcAsegPng = self.c3dSegmentation(anatFreesurfer, aparcAseg, '2', '0.5')
         brodmannPng = self.c3dSegmentation(anatFreesurfer, brodmann, '2', '0.5')
 
-        images = [(anatFreesurferPng,'High resolution anatomical image of freesurfer'),
+        return Images((anatFreesurferPng,'High resolution anatomical image of freesurfer'),
                        (aparcAsegPng,'aparcaseg segmentaion from freesurfer'),
-                       (brodmannPng,'Brodmann segmentation from freesurfer')]
-
-        return images
+                       (brodmannPng,'Brodmann segmentation from freesurfer'))

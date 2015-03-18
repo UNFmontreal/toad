@@ -1,7 +1,9 @@
-from lib.generictask import GenericTask
-from lib import util, mriutil
 import glob
 import os
+
+from core.generictask import GenericTask
+from lib import util, mriutil
+from lib.images import Images
 
 __author__ = 'desmat'
 
@@ -130,9 +132,9 @@ class Preprocessing(GenericTask):
         scriptName = self.__createSegmentationScript(source, options)
         self.launchMatlabCommand(scriptName)
         fileBasename = self.buildName(source, None, "", False)
-        dict = {'c1':'gw','c2':'wm','c3':'csf',
-                'wc1':'wgw','wc2':'wwm','wc3':'wcsf',
-                'mwc1':'mwgw','mwc2':'mwwm','mwc3':'mwcsf'}
+        dict = {'c1':'gw', 'c2':'wm', 'c3':'csf',
+                'wc1':'wgw', 'wc2':'wwm', 'wc3':'wcsf',
+                'mwc1':'mwgw', 'mwc2':'mwwm', 'mwc3':'mwcsf'}
 
         for key, value in dict.items():
             for resultFile in glob.glob("{}/{}{}*.nii".format(self.workingDir,key ,fileBasename)):
@@ -180,36 +182,33 @@ class Preprocessing(GenericTask):
 
 
     def meetRequirement(self, result=True):
-        #@TODO add gradient files validation and correct this function
-        if self.isSomeImagesMissing({'denoised': self.getImage(self.dependDir, "dwi", 'denoise')}):
-            dwi = self.getImage(self.eddyDir, "dwi", 'eddy')
-            if self.isSomeImagesMissing({'eddy corrected': dwi}):
-                dwi = self.getImage(self.preparationDir, "dwi")
-                if self.isSomeImagesMissing({'diffusion weighted': dwi}):
-                    result=False
-                else:
-                    self.info("Will take {} image instead".format(dwi))
 
-        images = {'freesurfer high resolution': self.getImage(self.parcellationDir, 'anat', 'freesurfer')}
-        result = self.isAllImagesExists(images)
+        #@TODO add gradient files validation and correct this function
+        images = Images((self.getImage(self.dependDir, "dwi", 'denoise'), 'denoised'),
+                       (self.getImage(self.eddyDir, "dwi", 'eddy'), 'eddy corrected'),
+                       (self.getImage(self.preparationDir, "dwi"), 'diffusion weighted'))
+        if images.isNoImagesExists():
+            self.warning("No proper dwi image found as requirement")
+            result = False
+
+        images = Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), 'freesurfer high resolution'))
+        result = images.isAllImagesExists()
         return result
 
 
-    def isDirty(self, result = False):
-
-        images = {'upsampled diffusion weighted': self.getImage(self.workingDir, 'dwi', "upsample"),
-                    '2x2x2 diffusion weighted': self.getImage(self.workingDir, 'dwi', "2x2x2"),
-                    'upsampled b0': self.getImage(self.workingDir, 'b0', "upsample"),
-                    '2x2x2 b0': self.getImage(self.workingDir, 'b0', "2x2x2"),
-                    'high resolution brain extracted': self.getImage(self.workingDir, 'anat', "brain"),
-                    'high resolution white matter brain extracted': self.getImage(self.workingDir, 'anat', ["brain", "wm"])}
-        return self.isSomeImagesMissing(images)
+    def isDirty(self):
+        images = Images((self.getImage(self.workingDir, 'dwi', "upsample"), 'upsampled diffusion weighted'),
+                  (self.getImage(self.workingDir, 'dwi', "2x2x2"), '2x2x2 diffusion weighted'),
+                  (self.getImage(self.workingDir, 'b0', "upsample"), 'upsampled b0'),
+                  (self.getImage(self.workingDir, 'b0', "2x2x2"), '2x2x2 b0'),
+                  (self.getImage(self.workingDir, 'anat', "brain"), 'high resolution brain extracted'),
+                  (self.getImage(self.workingDir, 'anat', ["brain", "wm"]), 'high resolution white matter brain extracted'))
+        return images.isSomeImagesMissing()
 
 
     def qaSupplier(self):
 
         b0Upsampled = self.getImage(self.workingDir, 'b0', "upsample")
-
         #@DEBUG
         self.info("Produce {} image".format(b0Upsampled))
         anatBrain = self.getImage(self.workingDir ,'anat', "brain")

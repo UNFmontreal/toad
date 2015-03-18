@@ -1,12 +1,14 @@
+import glob
+import copy
+import os
+
 from tasksmanager import TasksManager
 from validation import Validation
 from subject import Subject
 from logger import Logger
 from config import Config
-import util
-import glob
-import copy
-import os
+from lib import util
+
 
 __author__ = 'desmat'
 

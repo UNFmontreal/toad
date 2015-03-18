@@ -1,7 +1,10 @@
-from lib.generictask import GenericTask
 import shutil
 import glob
 import os
+
+from core.generictask import GenericTask
+from lib.images import Images
+
 
 __author__ = 'desmat'
 
@@ -16,26 +19,26 @@ class Backup(GenericTask):
 
     def implement(self):
         self.info("Build directories structure for subject: {}".format(os.path.basename(self.workingDir)))
+        #@TODO add description to that struct
+        images = Images((self.getImage(self.subjectDir, 'anat'), ""),
+                       (self.getImage(self.subjectDir, 'dwi'), ""),
+                       (self.getImage(self.subjectDir, 'mag',), ""),
+                       (self.getImage(self.subjectDir, 'phase'), ""),
+                       (self.getImage(self.subjectDir, 'aparc_aseg'), ""),
+                       (self.getImage(self.subjectDir, 'anat', 'freesurfer'), ""),
+                       (self.getImage(self.subjectDir, 'lh_ribbon'), ""),
+                       (self.getImage(self.subjectDir, 'rh_ribbon'), ""),
+                       (self.getImage(self.subjectDir, 'brodmann'), ""),
+                       (self.getImage(self.subjectDir, 'b0AP'), ""),
+                       (self.getImage(self.subjectDir, 'b0PA'), ""),
+                       (self.getImage(self.subjectDir, 'grad', None, 'b'), ""),
+                       (self.getImage(self.subjectDir, 'grad', None, 'bvals'), ""),
+                       (self.getImage(self.subjectDir, 'grad', None, 'bvecs'), ""),
+                       (self.getImage(self.subjectDir, 'config', None, 'cfg'), ""))
 
-        images =[self.getImage(self.subjectDir, 'anat'),
-                 self.getImage(self.subjectDir, 'dwi'),
-                 self.getImage(self.subjectDir, 'mag',),
-                 self.getImage(self.subjectDir, 'phase'),
-                 self.getImage(self.subjectDir, 'aparc_aseg'),
-                 self.getImage(self.subjectDir, 'anat', 'freesurfer'),
-                 self.getImage(self.subjectDir, 'lh_ribbon'),
-                 self.getImage(self.subjectDir, 'rh_ribbon'),
-                 self.getImage(self.subjectDir, 'brodmann'),
-                 self.getImage(self.subjectDir, 'b0AP'),
-                 self.getImage(self.subjectDir, 'b0PA'),
-                 self.getImage(self.subjectDir, 'grad', None, 'b'),
-                 self.getImage(self.subjectDir, 'grad', None, 'bvals'),
-                 self.getImage(self.subjectDir, 'grad', None, 'bvecs'),
-                 self.getImage(self.subjectDir, 'config', None, 'cfg')]
-
-        for image in images:
+        for image, description in images.getData():
             if image:
-                self.info("Moving file {} to {} directory".format(image, self.workingDir))
+                self.info("Found {} image: moving it to {} directory".format(description, image, self.workingDir))
                 shutil.move(image, self.workingDir)
 
 
@@ -44,15 +47,13 @@ class Backup(GenericTask):
 
 
     def isDirty(self):
-
-        images = {'high resolution': self.getImage(self.workingDir, 'anat'), 'diffusion weighted': self.getImage(self.workingDir, 'dwi')}
+        return Images((self.getImage(self.workingDir, 'dwi'),'high resolution')).isSomeImagesMissing()
         #@TODO bvals bvecs may be optionnal
         #images = {'gradient .bvals encoding file': self.getImage(self.workingDir, 'grad', None, 'bvals'),
         #          'gradient .bvecs encoding file': self.getImage(self.workingDir, 'grad', None, 'bvecs'),
         #          'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b'),
         #          'high resolution': self.getImage(self.workingDir, 'anat'),
         #          'diffusion weighted': self.getImage(self.workingDir, 'dwi')}
-        return self.isSomeImagesMissing(images)
 
 
     def cleanup(self):

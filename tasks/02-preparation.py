@@ -1,4 +1,5 @@
-from lib.generictask import GenericTask
+from core.generictask import GenericTask
+from lib.images import Images
 from lib import util, mriutil
 
 __author__ = 'desmat'
@@ -8,7 +9,7 @@ class Preparation(GenericTask):
 
 
     def __init__(self, subject):
-       GenericTask.__init__(self, subject, 'backup', 'qa')
+        GenericTask.__init__(self, subject, 'backup', 'qa')
 
 
     def implement(self):
@@ -23,55 +24,55 @@ class Preparation(GenericTask):
                 and self.getBoolean("force_realign_strides"):
 
             self.warning("Reorienting strides for image {}".format(dwi))
-            self.stride4DImage(dwi, bEncs, bVecs, bVals, expectedLayout)
+            self.__stride4DImage(dwi, bEncs, bVecs, bVals, expectedLayout)
 
         else:
-            util.symlink(dwi, self.workingDir)
+            self.info("Linking {} to {}".format(dwi, util.symlink(dwi, self.workingDir)))
 
-        images = {'high resolution': self.getImage(self.dependDir, 'anat'),
-                    'B0 posterior to anterior': self.getImage(self.dependDir, 'b0PA'),
-                    'B0 anterior to posterior': self.getImage(self.dependDir, 'b0AP'),
-                    'MR magnitude ': self.getImage(self.dependDir, 'mag'),
-                    'MR phase ': self.getImage(self.dependDir, 'phase'),
-                    'parcellation': self.getImage(self.dependDir,'aparc_aseg'),
-                    'freesurfer anatomical': self.getImage(self.dependDir, 'anat', 'freesurfer'),
-                    'left hemisphere ribbon': self.getImage(self.dependDir, 'lh_ribbon'),
-                    'right hemisphere ribbon': self.getImage(self.dependDir, 'rh_ribbon'),
-                    'brodmann': self.getImage(self.dependDir, 'brodmann')}
+        images = Images((self.getImage(self.dependDir, 'anat'),'high resolution'),
+                    (self.getImage(self.dependDir, 'b0PA'),'B0 posterior to anterior'),
+                    (self.getImage(self.dependDir, 'b0AP'),'B0 anterior to posterior'),
+                    (self.getImage(self.dependDir, 'mag'),'MR magnitude'),
+                    (self.getImage(self.dependDir, 'phase'),'MR phase '),
+                    (self.getImage(self.dependDir,'aparc_aseg'),'parcellation'),
+                    (self.getImage(self.dependDir, 'anat', 'freesurfer'),'freesurfer anatomical'),
+                    (self.getImage(self.dependDir, 'lh_ribbon'),'left hemisphere ribbon'),
+                    (self.getImage(self.dependDir, 'rh_ribbon'),'right hemisphere ribbon'),
+                    (self.getImage(self.dependDir, 'brodmann'),'brodmann'))
 
-        for key, value in images.iteritems():
-            if value:
-                if not mriutil.isDataStridesOrientationExpected(value, expectedLayout) \
+        for image, description in images.getData():
+            if image:
+                if not mriutil.isDataStridesOrientationExpected(image, expectedLayout) \
                         and self.getBoolean("force_realign_strides"):
-                    mriutil.stride3DImage(value, self.buildName(value, "stride"), expectedLayout)
-
+                    self.info(mriutil.stride3DImage(image, self.buildName(image, "stride"), expectedLayout))
                 else:
-                    self.info("Found {} image, linking file {} to {}".format(key, value, self.workingDir))
-                    util.symlink(value, self.workingDir)
+                    self.info("Found {} image, linking {} to {}".format(description, image, util.symlink(image, self.workingDir)))
+
 
     def __produceEncodingFiles(self, bEncs, bVecs, bVals, dwi):
 
         self.info("Produce .b .bvals and .bvecs gradient file if not existing")
         if not bEncs:
-            bEncs = mriutil.fslToMrtrixEncoding(dwi, bVecs, bVals, self.buildName(dwi, None, "b"))
+            bEncs = self.buildName(dwi, None, "b")
+            self.info(mriutil.fslToMrtrixEncoding(dwi, bVecs, bVals, bEncs))
         else:
-            util.symlink(bEncs, self.workingDir)
+            self.info("Linking {} to {}".format(bEncs, util.symlink(bEncs, self.workingDir)))
 
         if not bVecs or not bVals:
-            (bVecs, bVals) = mriutil.mrtrixToFslEncoding(dwi,
-                                                         bEncs,
-                                                         self.buildName(dwi, None, "bvecs"),
-                                                         self.buildName(dwi, None, "bvals"))
+            self.info(mriutil.mrtrixToFslEncoding(dwi,
+                                                    bEncs,
+                                                    self.buildName(dwi, None, "bvecs"),
+                                                    self.buildName(dwi, None, "bvals")))
         else:
-            util.symlink(bVecs, self.workingDir)
-            util.symlink(bVals, self.workingDir)
+            self.info("Linking {} to {}".format(bVecs, util.symlink(bVecs, self.workingDir)))
+            self.info("Linking {} to {}".format(bVals, util.symlink(bVals, self.workingDir)))
 
         return (self.getImage(self.workingDir, 'grad', None, 'b'),
                 self.getImage(self.workingDir, 'grad', None, 'bvecs'),
                 self.getImage(self.workingDir, 'grad', None, 'bvals'))
 
 
-    def stride4DImage(self, source, bEncs, bVecs, bVals, layout="1,2,3"):
+    def __stride4DImage(self, source, bEncs, bVecs, bVals, layout="1,2,3"):
         """perform a reorientation of the axes and flip the image into a different layout. stride gredient encoding files
             as well if provided
 
@@ -103,9 +104,10 @@ class Preparation(GenericTask):
 
     def meetRequirement(self, result=True):
 
-        images = {'high resolution':self.getImage(self.dependDir, 'anat'),
-                  'diffusion weighted':self.getImage(self.dependDir, 'dwi')}
-        if self.isSomeImagesMissing(images):
+        images = Images((self.getImage(self.dependDir, 'anat'), 'high resolution'),
+                  (self.getImage(self.dependDir, 'dwi'), 'diffusion weighted'))
+
+        if images.isSomeImagesMissing():
             result = False
 
         if not (self.getImage(self.dependDir, 'grad', None, 'b') or
@@ -119,13 +121,12 @@ class Preparation(GenericTask):
 
     def isDirty(self):
 
-        images = {'gradient .bvals encoding file': self.getImage(self.workingDir, 'grad', None, 'bvals'),
-                  'gradient .bvecs encoding file': self.getImage(self.workingDir, 'grad', None, 'bvecs'),
-                  'gradient .b encoding file': self.getImage(self.workingDir, 'grad', None, 'b'),
-                  'high resolution': self.getImage(self.workingDir, 'anat'),
-                  'diffusion weighted': self.getImage(self.workingDir, 'dwi')}
-
-        return self.isSomeImagesMissing(images)
+        images = Images((self.getImage(self.workingDir, 'grad', None, 'bvals'), 'gradient .bvals encoding file'),
+                      (self.getImage(self.workingDir, 'grad', None, 'bvecs'), 'gradient .bvecs encoding file'),
+                      (self.getImage(self.workingDir, 'grad', None, 'b'), 'gradient .b encoding file'),
+                      (self.getImage(self.workingDir, 'anat'), 'high resolution'),
+                      (self.getImage(self.workingDir, 'dwi'), 'diffusion weighted'))
+        return images.isSomeImagesMissing()
 
 
     def qaSupplier(self):
@@ -137,9 +138,7 @@ class Preparation(GenericTask):
         anatPng = self.pngSlicerImage(anat)
         dwiGif = self.nifti4dtoGif(dwi)
         
-        images = [(anatPng, 'High resolution anatomical image'),
-                       (dwiGif, 'Diffusion image')]
-        return images
-	
+        return Images((anatPng, 'High resolution anatomical image'),
+                       (dwiGif, 'Diffusion image'))
 
 
