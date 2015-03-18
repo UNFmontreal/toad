@@ -96,8 +96,9 @@ def launchCommand(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=N
                 os.kill(process.pid, signal.SIGKILL)
                 os.waitpid(-1, os.WNOHANG)
                 return None, "Error, a timeout for this process occurred"
-
-    return cmd, process.communicate()
+    output = list(process.communicate())
+    output.insert(0,cmd)
+    return tuple(output)
 
 
 def createScript(source, text):

@@ -108,6 +108,7 @@ class GenericTask(Logger, Load, Qa):
         -A task should create and move into is own working space
 
         """
+
         if not os.path.exists(self.workingDir):
             self.info("Creating {} directory".format(self.workingDir))
             os.mkdir(self.workingDir)
@@ -117,8 +118,6 @@ class GenericTask(Logger, Load, Qa):
                 self.config.get("arguments","stop_before_task") == self.__moduleName.lower()):
                 self.quit("Reach {} which is the value set by stop_before_task. Stopping the pipeline now"
                              .format(self.config.get("arguments", "stop_before_task")))
-
-        currentDir = os.getcwd()
         os.chdir(self.workingDir)
         util.symlink(self.getLogFileName(), self.workingDir)
         self.implement()
@@ -126,7 +125,8 @@ class GenericTask(Logger, Load, Qa):
         images = self.qaSupplier()
         if not images.isEmpty():
             self.createQaReport(images)
-        os.chdir(currentDir)
+
+        os.chdir(self.subjectDir)
 
 
     def implement(self):
@@ -160,13 +160,6 @@ class GenericTask(Logger, Load, Qa):
 
         """
         self.logHeader("meetRequirement")
-
-        #@TODO clarify this situation
-        #for key, value in self.__dependenciesDirNames.iteritems():
-
-        #    #make sure that this directory is not optionnal
-        #    if not os.path.exists(value):
-        #        self.error("Mandatory directory {} not found".format(value))
         result = self.meetRequirement()
         self.logFooter("meetRequirement", result)
         return result
@@ -284,7 +277,9 @@ class GenericTask(Logger, Load, Qa):
                     self.__cleanup()
 
 		try:
+                    print "before implement=", self.getName()
                     self.__implement()
+		    print "after implement"
                 except (KeyboardInterrupt, SystemExit):
                     self.error("KeyboardInterrupt or SystemExit caught, pipeline will exit")
 		    raise
