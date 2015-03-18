@@ -47,7 +47,6 @@ class Backup(GenericTask):
 
 
     def isDirty(self):
-
         return Images((self.getImage(self.workingDir, 'dwi'),'high resolution')).isSomeImagesMissing()
         #@TODO bvals bvecs may be optionnal
         #images = {'gradient .bvals encoding file': self.getImage(self.workingDir, 'grad', None, 'bvals'),

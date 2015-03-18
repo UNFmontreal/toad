@@ -6,12 +6,8 @@ import imp
 import sys
 import os
 
-from core import subjectmanager
-from core import logger
-
-
-
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+from core import subjectmanager, logger
 from lib import util
 
 __author__ = "Mathieu Desrosiers, Arnaud Bore and Christophe Bedetti"

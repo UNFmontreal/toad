@@ -3,22 +3,19 @@ import os
 class Images(object):
 
     def __init__(self, *args):
-        self.__count = 0
         self.__images = []
         for arg in args:
             if isinstance(arg, tuple) and len(arg) == 2:
                 self.__images.append(arg)
-        self.__count=len(self.__images)
+
+    def __repr__(self):
+        string = ""
+        for image, description in self.__images:
+            string += "\"{}\"--> {}\n".format(description, image)
+        return string
 
     def __iter__(self):
-        return self
-
-    def next(self):
-        if self.__current > self.__count:
-            raise StopIteration
-        else:
-            self.__current += 1
-            return self.__current - 1
+        return iter(self.__images)
 
     def isEmpty(self):
         return len(self.__images) == 0
@@ -26,40 +23,17 @@ class Images(object):
     def getData(self):
         return self.__images
 
-    """
-    class Counter:
-        def __init__(self, low, high):
-            self.current = low
-            self.high = high
-
-        def __iter__(self):
-            return self
-
-        def next(self): # Python 3: def __next__(self)
-            if self.current > self.high:
-                raise StopIteration
-            else:
-                self.current += 1
-                return self.current - 1
-
-    for c in Counter(3, 8):
-        print c
-
-    """
-
-
+    def size(self):
+        return len(self.__images)
 
     def append(self, tupleItem):
         self.__images.append(tupleItem)
-        self.__count += 1
 
     def extend(self, images):
-        self.__images.append(images)
-        self.__count += len(images)
+        self.__images.extend(images)
 
     def insert(self, index, tupleItem):
         self.__images.insert(index, tupleItem)
-        self.__count += 1
 
 
     def isSomeImagesMissing(self):
@@ -113,10 +87,6 @@ class Images(object):
 
 
 """
-
-list.insert(i, x)
-Insert an item at a given position. The first argument is the index of the element before which to insert, so a.insert(0, x) inserts at the front of the list, and a.insert(len(a), x) is equivalent to a.append(x).
-
 list.remove(x)
 Remove the first item from the list whose value is x. It is an error if there is no such item.
 
