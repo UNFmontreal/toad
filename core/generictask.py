@@ -1,14 +1,17 @@
-from lib.logger import Logger
-from lib.load import Load
-from lib.qa import Qa
 from datetime import timedelta
 from datetime import datetime
-from lib import util
 import subprocess
 import shutil
 import glob
 import sys
 import os
+
+from logger import Logger
+from load import Load
+from lib.images import Images
+from lib.qa import Qa
+from lib import util
+
 
 __author__ = 'desmat'
 
@@ -105,6 +108,7 @@ class GenericTask(Logger, Load, Qa):
         -A task should create and move into is own working space
 
         """
+        self.info("Launching implementation of {} task".format(self.getName()))
         if not os.path.exists(self.workingDir):
             self.info("Creating {} directory".format(self.workingDir))
             os.mkdir(self.workingDir)
@@ -112,18 +116,17 @@ class GenericTask(Logger, Load, Qa):
         if self.config.has_option("arguments", "stop_before_task"):
             if (self.config.get("arguments","stop_before_task") == self.__name or
                 self.config.get("arguments","stop_before_task") == self.__moduleName.lower()):
-                self.quit("Reach {} which is the value set by stop_before_task. Stopping the pipeline now"
+                self.quit("Reach {} which is the value set by stop_before_task. Stopping the pipeline as user request"
                              .format(self.config.get("arguments", "stop_before_task")))
-
-        currentDir = os.getcwd()
         os.chdir(self.workingDir)
         util.symlink(self.getLogFileName(), self.workingDir)
         self.implement()
         self.info("Create and supply images to the qa report ")
         images = self.qaSupplier()
-        if images is not None:
+        if not images.isEmpty():
             self.createQaReport(images)
-        os.chdir(currentDir)
+
+        os.chdir(self.subjectDir)
 
 
     def implement(self):
@@ -157,13 +160,6 @@ class GenericTask(Logger, Load, Qa):
 
         """
         self.logHeader("meetRequirement")
-
-        #@TODO clarify this situation
-        #for key, value in self.__dependenciesDirNames.iteritems():
-
-        #    #make sure that this directory is not optionnal
-        #    if not os.path.exists(value):
-        #        self.error("Mandatory directory {} not found".format(value))
         result = self.meetRequirement()
         self.logFooter("meetRequirement", result)
         return result
@@ -280,12 +276,12 @@ class GenericTask(Logger, Load, Qa):
                 if self.__cleanupBeforeImplement:
                     self.__cleanup()
 
-		try:
+                try:
                     self.__implement()
                 except (KeyboardInterrupt, SystemExit):
                     self.error("KeyboardInterrupt or SystemExit caught, pipeline will exit")
-		    raise
-		except:
+                    raise
+                except:
                     self.warning("Exception have been caught, the error message is:".format(sys.exc_info()[0]))
 
                 if attempt == nbSubmission:
@@ -363,17 +359,7 @@ class GenericTask(Logger, Load, Qa):
         self.info("Launch {} command line...".format(binary))
         self.info("Command line submit: {}".format(cmd))
 
-        #out = None
-        #err = None
-
-        #if stdout=='log':
-        #    out = self.getLog()
-        #    self.info("Output will be log in {} \n".format(out.name))
-        #if stderr=='log':
-        #    err = self.getLog()
-        #    self.info("Error will be log in {} \n".format(err.name))
-
-        (output, error)= util.launchCommand(cmd, stdout, stderr, timeout, nice)
+        (executedCmd, output, error)= util.launchCommand(cmd, stdout, stderr, timeout, nice)
         if not (output is "" or output is "None" or output is None):
             self.info("Output produce by {}: {} \n".format(binary, output))
 
@@ -399,7 +385,7 @@ class GenericTask(Logger, Load, Qa):
         tags={ 'script': scriptName, 'workingDir': self.workingDir}
         cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/matlab.tpl"))
         self.info("Launching matlab command: {}".format(cmd))
-        self.launchCommand(cmd, 'log')
+        self.launchCommand(cmd)
 
 
     def getImage(self, dir, prefix, postfix=None, ext="nii.gz"):
@@ -478,47 +464,6 @@ class GenericTask(Logger, Load, Qa):
         else:
             self.warning("unable to find {} image".format(source))
             return False
-
-
-    def isSomeImagesMissing(self, dict):
-        """Iterate over a dictionary of getImage to see if all image exists
-
-        This function is an helper for isDirty and meetRequirement method
-        The key represent a description of the image, the value is a call to getImage.
-
-        Args:
-            dict: key: contain a description of the image
-                  value: contain  getImage call
-
-        Returns:
-            True if some image do not exists, False otherwise
-        """
-        result = False
-        for key, value in dict.iteritems():
-            if not value:
-                self.info("No {} image found".format(key))
-                result = True
-            else:
-                if not os.path.exists(value):
-                    self.info("No {} image found".format(key))
-                    result = True
-        return result
-
-
-    def isAllImagesExists(self, dict):
-        """Iterate over a dictionary of getImage to see if all image exists
-
-        This function is an helper for isDirty and meetRequirement method
-        The key represent a description of the image, the value is a call to getImage.
-
-        Args:
-            dict: key: contain a description of the image
-                  value: contain  getImage call
-
-        Returns:
-            True if all images in the dictionary exists, False otherwise
-        """
-        return not self.isSomeImagesMissing(dict)
 
 
     def parseTemplate(self, dict, template):

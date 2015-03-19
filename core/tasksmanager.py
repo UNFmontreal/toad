@@ -4,8 +4,6 @@ import inspect
 import glob
 import os
 
-import sys
-
 class TasksManager(object):
 
 

@@ -1,9 +1,11 @@
-from lib.generictask import GenericTask
 import dipy
 import dipy.direction
 import dipy.reconst.csdeconv
 import nibabel
 import numpy
+
+from core.generictask import GenericTask
+from lib.images import Images
 
 __author__ = 'desmat'
 
@@ -84,15 +86,15 @@ class HardiDipy(GenericTask):
 
 
     def meetRequirement(self):
-        images = {"upsampled diffusion":self.getImage(self.dependDir, 'dwi', 'upsample'),
-                  "gradient value bvals encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvals'),
-                  "gradient vector bvecs encoding file":  self.getImage(self.dependDir, 'grad', None, 'bvecs'),
-                  'ultimate extended mask':  self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
-        return self.isAllImagesExists(images)
+        images = Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
+                  (self.getImage(self.dependDir, 'grad', None, 'bvals'), "gradient value bvals encoding file"),
+                  (self.getImage(self.dependDir, 'grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
+                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'))
+        return images.isAllImagesExists()
 
 
     def isDirty(self):
-        images = {"csd": self.getImage(self.workingDir, 'dwi', 'csd'),
-                  "generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi', 'gfa'),
-                  'nufo': self.getImage(self.workingDir,'dwi', 'nufo')}
-        return self.isSomeImagesMissing(images)
+        images = Images((self.getImage(self.workingDir, 'dwi', 'csd'), "csd"),
+                  (self.getImage(self.workingDir,'dwi', 'gfa'), "generalised Fractional Anisotropy"),
+                  (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'))
+        return images.isSomeImagesMissing()

@@ -1,9 +1,13 @@
-from lib.generictask import GenericTask
-from lib import util, mriutil
+import os
+
 import dipy.denoise.nlmeans
 import numpy
 import nibabel
-import os
+
+from core.generictask import GenericTask
+from lib.images import Images
+from lib import util, mriutil
+
 
 __author__ = 'desmat'
 
@@ -15,7 +19,6 @@ class Denoising(GenericTask):
 
 
     def implement(self):
-
         if self.get("algorithm").lower() in "none":
             self.info("Skipping denoising process")
         else:
@@ -71,7 +74,8 @@ class Denoising(GenericTask):
 
         scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
         self.info("Creating denoising script {}".format(scriptName))
-        tags={ 'source': source, 'target':target,
+        tags={ 'source': source,
+               'target': target,
                'workingDir': self.workingDir,
                'beta': self.get('beta'),
                'rician': self.get('rician'),
@@ -97,20 +101,22 @@ class Denoising(GenericTask):
 
 
     def meetRequirement(self, result = True):
-        if self.isSomeImagesMissing({'fieldmap': self.getImage(self.fieldmapDir, "dwi", 'unwarp')}) and \
-                self.isSomeImagesMissing({'eddy corrected': self.getImage(self.dependDir, "dwi", 'eddy')}) and \
-                self.isSomeImagesMissing({'diffusion weighted': self.getImage(self.preparationDir, "dwi")}):
+        images = Images((self.getImage(self.fieldmapDir, "dwi", 'unwarp'), 'fieldmap'),
+                       (self.getImage(self.dependDir, "dwi", 'eddy'), 'eddy corrected'),
+                       (self.getImage(self.preparationDir, "dwi"), 'diffusion weighted'))
+        if images.isNoImagesExists():
             result = False
             self.warning("No suitable dwi image found for denoising task")
         return result
 
 
-    def isDirty(self, result = False):
-        dict = {'denoised': self.getImage(self.workingDir, "dwi", 'denoise')}
-        return self.isSomeImagesMissing(dict)
+    def isDirty(self):
+        image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'))
+        return image.isSomeImagesMissing()
+
 
     def qaSupplier(self):
         denoise = self.getImage(self.workingDir, "dwi", 'denoise')
         denoiseGif = self.nifti4dtoGif(denoise)
-        images = [(denoiseGif,'Denoised diffusion image')]
+        images = Images((denoiseGif,'Denoised diffusion image'))
         return images

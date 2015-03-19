@@ -1,6 +1,8 @@
-from lib.generictask import GenericTask
 import os
 import shutil
+
+from core.generictask import GenericTask
+from lib.images import Images
 from lib import util
 
 
@@ -32,5 +34,6 @@ class QA(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        files = {'QA index.html': 'index.html', 'toad logo': 'img/logo.png'}
-        return self.isSomeImagesMissing(files)
+        return Images((os.path.join(self.workingDir, 'index.html'), 'QA index.html')).isSomeImagesMissing()
+
+

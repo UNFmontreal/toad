@@ -1,9 +1,12 @@
-from lib.generictask import GenericTask
-from lib import util, mriutil
 import tempfile
 import shutil
 import sys
 import os
+
+from core.generictask import GenericTask
+from lib.images import Images
+from lib import util, mriutil
+
 
 __author__ = 'desmat'
 
@@ -24,7 +27,8 @@ class Masking(GenericTask):
         extended = self.buildName('anat', ['resample', 'extended'])
         self.info("Add {} and {} images together in order to create the ultimate image"
                   .format(anatBrainResample, aparcAsegResample))
-        mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAsegResample)
+
+        self.info(mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAsegResample))
         self.__createMask(extended)
         self.__createMask(aparcAsegResample)
 
@@ -35,7 +39,7 @@ class Masking(GenericTask):
         extended2x2x2 = self.buildName('anat', ['2x2x2', 'extended'])
         self.info("Add {} and {} images together in order to create the ultimate image"
                   .format(anatBrain2x2x2Resample, aparcAseg2x2x2Resample))
-        mriutil.fslmaths(anatBrain2x2x2Resample, extended2x2x2, 'add', aparcAseg2x2x2Resample)
+        self.info(mriutil.fslmaths(anatBrain2x2x2Resample, extended2x2x2, 'add', aparcAseg2x2x2Resample))
         self.__createMask(extended2x2x2)
 
 
@@ -105,16 +109,16 @@ class Masking(GenericTask):
         os.chdir(temp_dir)
 
         # Initial conversion from FreeSurfer parcellation to five principal tissue types
-        self.launchCommand('labelconfig ' + source + ' ' + config_path + ' ' + os.path.join(temp_dir, 'indices.mif') + ' -lut_freesurfer ' + freesurfer_lut)
+        self.launchCommand('labelconfig -quiet ' + source + ' ' + config_path + ' ' + os.path.join(temp_dir, 'indices.mif') + ' -lut_freesurfer ' + freesurfer_lut)
 
         # Convert into the 5TT format for ACT
-        self.launchCommand('mrcalc indices.mif 1 -eq cgm.mif')
-        self.launchCommand('mrcalc indices.mif 2 -eq sgm.mif')
-        self.launchCommand('mrcalc indices.mif 3 -eq  wm.mif')
-        self.launchCommand('mrcalc indices.mif 4 -eq csf.mif')
-        self.launchCommand('mrcalc indices.mif 5 -eq path.mif')
+        self.launchCommand('mrcalc indices.mif 1 -eq cgm.mif -quiet')
+        self.launchCommand('mrcalc indices.mif 2 -eq sgm.mif -quiet')
+        self.launchCommand('mrcalc indices.mif 3 -eq wm.mif -quiet')
+        self.launchCommand('mrcalc indices.mif 4 -eq csf.mif -quiet')
+        self.launchCommand('mrcalc indices.mif 5 -eq path.mif -quiet')
         result_path = 'result.nii.gz'
-        self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32')
+        self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif -quiet - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32 -quiet')
 
 
         # Move back to original directory
@@ -172,42 +176,37 @@ class Masking(GenericTask):
 
     def __createMask(self, source):
         self.info("Create mask from {} images".format(source))
-        mriutil.fslmaths(source, self.buildName(source, 'mask'), 'bin')
+        self.info(mriutil.fslmaths(source, self.buildName(source, 'mask'), 'bin'))
 
 
     def meetRequirement(self):
-        images = {'resampled parcellation':self.getImage(self.dependDir,"aparc_aseg", "resample"),
-                    'register parcellation':self.getImage(self.dependDir,"aparc_aseg", "register"),
-                    'parcellation 2x2x2 voxels size': self.getImage(self.dependDir,"aparc_aseg", "2x2x2"),
-                    'anatomical brain extracted 2x2x2 voxels size': self.getImage(self.dependDir,'anat', ['brain', '2x2x2']),
-                    'brain extracted, resampled high resolution':self.getImage(self.dependDir,'anat',['brain','resample'])}
-
-        return self.isAllImagesExists(images)
+        images = Images((self.getImage(self.dependDir,"aparc_aseg", "resample"), 'resampled parcellation'),
+                    (self.getImage(self.dependDir,"aparc_aseg", "register"), 'register parcellation'),
+                    (self.getImage(self.dependDir,"aparc_aseg", "2x2x2"), 'parcellation 2x2x2 voxels size'),
+                    (self.getImage(self.dependDir,'anat', ['brain', '2x2x2']), 'anatomical brain extracted 2x2x2 voxels size'),
+                    (self.getImage(self.dependDir,'anat',['brain','resample']),  'brain extracted, resampled high resolution'))
+        return images.isAllImagesExists()
     
 
-    def isDirty(self, result = False):
-        images ={'register anatomically constrained tractography': self.getImage(self.workingDir, "aparc_aseg", ["register", "act"]),
-                    'aparc_aseg mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]),
-                    'ultimate extended mask': self.getImage(self.workingDir, 'anat',['resample', 'extended', 'mask']),
-                    'ultimate 2x2x2 extended mask': self.getImage(self.workingDir, 'anat',['2x2x2', 'extended', 'mask']),
-                    'seeding streamlines 5tt2gmwmi': self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"),
-                    'freesurfer color look up table': os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'),
-                    'resample white segmented act mask': self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"])
-        }
+    def isDirty(self):
+        images = Images((self.getImage(self.workingDir, "aparc_aseg", ["register", "act"]), 'register anatomically constrained tractography'),
+                     (self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]), 'aparc_aseg mask'),
+                     (self.getImage(self.workingDir, 'anat',['resample', 'extended', 'mask']), 'ultimate extended mask'),
+                     (self.getImage(self.workingDir, 'anat',['2x2x2', 'extended', 'mask']), 'ultimate 2x2x2 extended mask'),
+                     (self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
+                     (os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
+                     (self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"]), 'resample white segmented act mask'))
 
         if self.config.get('masking', "start_seeds").strip() != "":
-            images['high resolution, start, brain extracted mask'] = self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask'])
-            images['high resolution, start, brain extracted'] = self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract'])
+            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask']), 'high resolution, start, brain extracted mask'))
+            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract']), 'high resolution, start, brain extracted'))
 
         if self.config.get('masking', "stop_seeds").strip() != "":
-            images['high resolution, stop, brain extracted mask'] = self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract', 'mask'])
-            images['high resolution, stop, brain extracted'] = self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract'])
+            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract', 'mask']), 'high resolution, stop, brain extracted mask'))
+            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract']), 'high resolution, stop, brain extracted'))
 
         if self.config.get('masking', "exclude_seeds").strip() != "":
-            images['high resolution, excluded, brain extracted, mask'] = self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract', 'mask'])
-            images['high resolution, excluded, brain extracted']= self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract'])
+            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract', 'mask']), 'high resolution, excluded, brain extracted, mask'))
+            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract']), 'high resolution, excluded, brain extracted'))
 
-        if self.isSomeImagesMissing(images):
-            result = True
-
-        return result
+        return images.isSomeImagesMissing()

@@ -1,10 +1,14 @@
-from lib.generictask import GenericTask
-from lib import util, mriutil
-import numpy
 import glob
 import os
 
-import matplotlib, mpl_toolkits
+import numpy
+import matplotlib
+import mpl_toolkits
+
+from core.generictask import GenericTask
+from lib.images import Images
+from lib import util, mriutil
+
 matplotlib.use('Agg')
 
 
@@ -80,11 +84,12 @@ class Eddy(GenericTask):
         #@TODO remove the glob and use getimage
         eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
         if len(eddyParameterFiles)>0:
+            self.info("Apply eddy movement correction to gradient encodings directions")
             bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles.pop(0), self.buildName(outputEddyImage, None, 'b'))
-            mriutil.mrtrixToFslEncoding(outputEddyImage,
+            self.info(mriutil.mrtrixToFslEncoding(outputEddyImage,
                                         bCorrected,
                                         self.buildName(outputEddyImage, None, 'bvecs'),
-                                        self.buildName(outputEddyImage, None, 'bvals'))
+                                        self.buildName(outputEddyImage, None, 'bvals')))
 
 
     def __oddImagesWithEvenNumberOfSlices(self, sources):
@@ -103,24 +108,23 @@ class Eddy(GenericTask):
             if source:
                 zDims = int(mriutil.getMriDimensions(source)[2])
                 if zDims%2 == 1:
-                    sources[i]= self.__extractZVolumes(source, "0:{}".format(zDims-2))
+                    sources[i]= self.__extractZSlices(source, "0:{}".format(zDims-2))
         return sources
 
 
-    def __extractZVolumes(self, source, volumes):
-        """Extract a volume along the Z axes
+    def __extractZSlices(self, source, slices):
+        """Extract slices along the Z axes from an image
 
         Args:
             source: The input image
-            volumes:  The volume number
+            slices:  A list of slices, starting at 0
 
         Returns:
              The name of the resulting image
         """
-
         tmp =  self.buildName(source, "tmp")
         target = self.buildName(source, "subset")
-        cmd = "mrconvert {} {} -coord +2 {} -nthreads {} -quiet".format(source, tmp, volumes, self.getNTreadsMrtrix())
+        cmd = "mrconvert {} {} -coord +2 {} -nthreads {} -quiet".format(source, tmp, slices, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
         return self.rename(tmp, target)
 
@@ -246,7 +250,7 @@ class Eddy(GenericTask):
     def __fslmathsTmean(self, source):
 
         target = source.replace(".nii", "_tmean.nii")
-        mriutil.fslmaths(source, target, 'Tmean')
+        self.info(mriutil.fslmaths(source, target, 'Tmean'))
         return target
 
 
@@ -374,21 +378,22 @@ class Eddy(GenericTask):
 
     def meetRequirement(self):
 
-        images = {'diffusion weighted':self.getImage(self.dependDir, 'dwi'),
-                  'gradient .bvals encoding file': self.getImage(self.dependDir, 'grad', None, 'bvals'),
-                  'gradient .bvecs encoding file': self.getImage(self.dependDir, 'grad', None, 'bvecs'),
-                  'gradient .b encoding file': self.getImage(self.dependDir, 'grad', None, 'b')}
-        return self.isAllImagesExists(images)
+        images = Images((self.getImage(self.dependDir, 'dwi'), 'diffusion weighted'),
+                  (self.getImage(self.dependDir, 'grad', None, 'bvals'), 'gradient .bvals encoding file'),
+                  (self.getImage(self.dependDir, 'grad', None, 'bvecs'), 'gradient .bvecs encoding file'),
+                  (self.getImage(self.dependDir, 'grad', None, 'b'), 'gradient .b encoding file'))
+        return images.isAllImagesExists()
 
 
     def isDirty(self):
-        images = {'diffusion weighted eddy corrected': self.getImage(self.workingDir, 'dwi', 'eddy'),
-                  'gradient .bvals encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvals'),
-                  'gradient .bvecs encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'bvecs'),
-                  'gradient .b encoding file': self.getImage(self.workingDir, 'grad', 'eddy', 'b')}
-        return self.isSomeImagesMissing(images)
+        images = Images((self.getImage(self.workingDir, 'dwi', 'eddy'), 'diffusion weighted eddy corrected'),
+                  (self.getImage(self.workingDir, 'grad', 'eddy', 'bvals'), 'gradient .bvals encoding file'),
+                  (self.getImage(self.workingDir, 'grad', 'eddy', 'bvecs'), 'gradient .bvecs encoding file'),
+                  (self.getImage(self.workingDir, 'grad', 'eddy', 'b'), 'gradient .b encoding file'))
+        return images.isSomeImagesMissing()
 
 
+    """
     def qaSupplier(self):
         eddy = self.getImage(self.workingDir, "dwi", 'eddy')
         eddyGif = self.nifti4dtoGif(eddy)
@@ -410,3 +415,4 @@ class Eddy(GenericTask):
                   (rotation_tg,'Rotation correction by eddy'),
                   (bvecs_tg,'Gradients vectors on the unitary sphere. Red : raw bvec | Blue : opposite bvec | Black + : movement corrected bvec')]
         return images
+    """

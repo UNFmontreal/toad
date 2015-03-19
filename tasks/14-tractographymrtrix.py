@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-from lib.generictask import GenericTask
+from core.generictask import GenericTask
+from lib.images import Images
+import matplotlib.pylab as plt
+import numpy
 
 __author__ = 'desmat'
 
@@ -149,25 +152,70 @@ class TractographyMrtrix(GenericTask):
 
         return self.rename(tmp, target)
 
+    def __plotConnectome(self, source):
+        """ Create a connectome plot to provide into the qa repport
+
+        Args:
+            source: an input source file
+
+        Return:
+            A png image of the plot
+
+        """
+        #plt.title(title)   @TODO discuss with christophe if we need to add title
+        target = self.buildName(source, "", "png")
+        matrixData = numpy.loadtxt(source)
+        figure = plt.figure(figsize=(16, 12), dpi=160, facecolor='w', edgecolor='k')
+        figure.clf()
+        ax = figure.add_subplot(111)
+        image = ax.imshow(matrixData, interpolation="nearest")
+        colorBar = plt.colorbar(image)
+        plt.setp(colorBar.ax.get_yticklabels(), visible=True)
+        brodmannLabels = [index for index in range(48)]
+        plt.xticks(numpy.arange(1,49), brodmannLabels, rotation='vertical', fontsize=10)
+        plt.yticks(numpy.arange(1,49), brodmannLabels, fontsize=10)
+        plt.subplots_adjust(bottom=0.1, left=0.1, right=1)
+        plt.xlabel('Brodmann area')
+        plt.grid()
+        figure.savefig(target)
+        return target
+
 
     def meetRequirement(self):
 
-        images = {'upsampled diffusion weighted':self.getImage(self.dependDir,'dwi','upsample'),
-                    '.b gradient encoding file': self.getImage(self.dependDir, 'grad', None, 'b'),
-                    'resampled anatomically constrained tractography':self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"]),
-                    'seeding streamlines 5tt2gmwmi' :self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi"),
-                    'resampled brodmann area':self.getImage(self.registrationDir, "brodmann", "resample"),
-                    'ultimate extended mask': self.getImage(self.maskingDir, 'anat',['resample', 'extended','mask'])}
+        images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'upsampled diffusion weighted'),
+                  (self.getImage(self.dependDir, 'grad', None, 'b'), '.b gradient encoding file'),
+                  (self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"]), 'resampled anatomically constrained tractography'),
+                  (self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
+                  (self.getImage(self.registrationDir, "brodmann", "resample"), 'resampled brodmann area'),
+                  (self.getImage(self.maskingDir, 'anat',['resample', 'extended','mask']), 'ultimate extended mask'))
 
-        return self.isAllImagesExists(images)
+        return images.isAllImagesExists()
 
 
     def isDirty(self, result = False):
 
-        images = {"deterministic connectome matrix from a streamlines": self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'tck'),
-                  "deterministic connectome matrix from a streamlines csv ": self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'csv'),
-                  "probabilistic connectome matrix from a streamlines": self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'tck'),
-                  "probabilistic connectome matrix from a streamlines csv ": self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'csv'),
-                  "tckgen streamlines tractography": self.getImage(self.workingDir, 'dwi', 'tckgen', 'tck'),
-                  'tcksift': self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck')}
-        return self.isSomeImagesMissing(images)
+        images = Images((self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'tck'), "deterministic connectome matrix from a streamlines"),
+                  (self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'csv'), "deterministic connectome matrix from a streamlines csv"),
+                  (self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'tck'), "probabilistic connectome matrix from a streamlines"),
+                  (self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'csv'), "probabilistic connectome matrix from a streamlines csv"),
+                  (self.getImage(self.workingDir, 'dwi', 'tckgen', 'tck'), "tckgen streamlines tractography"),
+                  (self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck'), 'tcksift'))
+        return images.isSomeImagesMissing()
+
+
+    def qaSupplier(self):
+
+        tckgenDet = self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'csv')
+        tckgenProb = self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'csv')
+        fodProb = self.getImage(self.workingDir, 'dwi', ['fod','tckgen_prob'], 'csv')
+
+        tckgenDetPlot = self.__plotConnectome(tckgenDet)
+        tckgenProbPlot = self.__plotConnectome(tckgenProb)
+        fodProbPlot = self.__plotConnectome(fodProb)
+
+        images = Images((tckgenDetPlot, 'Connectome matrix from a deterministic streamlines'),
+                       (tckgenProbPlot,'Connectome matrix from a probabilistic streamlines'),
+                       (fodProbPlot, 'Connectome matrix from a fod probabilistic streamlines'))
+        print images
+        return images

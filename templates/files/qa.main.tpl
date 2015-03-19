@@ -33,6 +33,7 @@
                     <li><a id="eddy" href="eddy.html">eddy</a></li>
                     <li><a id="denoising" href="denoising.html">denoising</a></li>
                     <li><a id="preprocessing" href="preprocessing.html">preprocessing</a></li>
+                    <li><a id="tractographymrtrix" href="tractographymrtrix.html">tractography avec mrtrix</a></li>
                 </ul>
             </nav>
         </header>

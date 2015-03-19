@@ -182,16 +182,17 @@ class Qa(object):
         return self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/qa.table.tpl"))
 
 
-    def createQaReport(self, imagesArray):
+    def createQaReport(self, images):
         """create html report for a task with qaSupplier implemented
 
         Args:
-           imagesArray : array of tupple [(imageLink, legend), ...]
+           images : an Images object
         """
 
         imagesDir = os.path.join(self.qaDir, 'img')
         tablesCode = ''
-        for imageLink, legend in imagesArray:
+        print "createQaReport images =", images
+        for imageLink, legend in images:
             #@TODO Take into account multiple run of QA
             shutil.copyfile(imageLink, os.path.join(imagesDir, imageLink))
             tags = {'imageLink':imageLink,'legend':legend}

@@ -1,7 +1,6 @@
-from lib.util import launchCommand
-import util
 import numpy
 import nibabel
+import util
 import os
 
 
@@ -23,8 +22,7 @@ def fslmaths(source1, target, operator="bin", source2=None):
     else:
         cmd = "fslmaths {} -{} {} {}".format(source1, operator, source2, target)
 
-    result = util.launchCommand(cmd)
-    return result
+    return util.launchCommand(cmd)
 
 
 def extractFirstB0FromDwi(source, target, bVals, nthreads = "1"):
@@ -71,7 +69,7 @@ def mrinfo(source):
     """
 
     cmd = "mrinfo {}".format(source)
-    (stdout, stderr) = util.launchCommand(cmd)
+    (executedCmd, stdout, stderr) = util.launchCommand(cmd)
     return stdout.splitlines()
 
 
@@ -87,8 +85,7 @@ def invertMatrix(source, target):
 
     """
     cmd = "convert_xfm -inverse {} -omat {}".format(source, target)
-    (stdout, stderr) = util.launchCommand(cmd)
-    return target
+    return util.launchCommand(cmd)
 
 
 def stride3DImage(source, target, layout="1,2,3" ):
@@ -100,12 +97,10 @@ def stride3DImage(source, target, layout="1,2,3" ):
         outputNamePrefix: a prefix to rename target filename
 
     Returns:
-        the name of the resulting filename
-
+        A 3 elements tuples representing the command line launch, the standards output and the standard error message
     """
     cmd = "mrconvert {} {} -stride {}".format(source, target, layout)
-    launchCommand(cmd)
-    return target
+    return util.launchCommand(cmd)
 
 
 def __getMrinfoFieldValues(text, field, delimiter=""):
@@ -284,12 +279,11 @@ def fslToMrtrixEncoding(dwi, bVecs, bVals, target):
         bVals: a gradient b value encoding file.
         target: the output file name
     Returns:
-        the resulting b encoding file
+        A 3 elements tuples representing the command line launch, the standards output and the standard error message
 
     """
     cmd = "mrinfo {} -fslgrad {} {} -export_grad_mrtrix {} --quiet".format(dwi, bVecs, bVals, target)
-    launchCommand(cmd)
-    return target
+    return util.launchCommand(cmd)
 
 
 def mrtrixToFslEncoding(dwi, bEncs, bVecsTarget, bValsTarget):
@@ -301,12 +295,11 @@ def mrtrixToFslEncoding(dwi, bEncs, bVecsTarget, bValsTarget):
         bVecsTarget: a output vector file name.
         bValsTarget: a output value file name.
     Returns:
-        a tuple containing the vector output name and the value output name
+        A 3 elements tuples representing the command line launch, the standards output and the standard error message
 
     """
-    cmd = "mrinfo {} -grad {} -export_grad_mrtrix {} {} --quiet".format(dwi, bEncs, bVecsTarget, bValsTarget)
-    launchCommand(cmd)
-    return bVecsTarget,bValsTarget
+    cmd = "mrinfo {} -grad {} -export_grad_fsl {} {} --quiet".format(dwi, bEncs, bVecsTarget, bValsTarget)
+    return util.launchCommand(cmd)
 
 
 def extractStructure(values, source, target):

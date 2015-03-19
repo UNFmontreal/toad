@@ -1,11 +1,11 @@
-from lib.generictask import GenericTask
-from lib.logger import Logger
-from lib import util
 import os
+
+from core.generictask import GenericTask
+from lib.images import Images
 
 __author__ = 'desmat'
 
-class HardiMrtrix(GenericTask, Logger):
+class HardiMrtrix(GenericTask):
 
 
     def __init__(self, subject):
@@ -15,7 +15,6 @@ class HardiMrtrix(GenericTask, Logger):
     def implement(self):
 
         #@TODO produce "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
-
         dwi = self.getImage(self.dependDir,'dwi', 'upsample')
         bFile = self.getImage(self.dependDir, 'grad', None, 'b')
 
@@ -85,18 +84,18 @@ class HardiMrtrix(GenericTask, Logger):
 
     def meetRequirement(self):
 
-        images = {'diffusion weighted': self.getImage(self.dependDir,'dwi','upsample'),
-                  "gradient encoding b file":  self.getImage(self.dependDir, 'grad', None, 'b'),
-                  'white matter segmented mask': self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask']),
-                  'ultimate extended mask': self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])}
-        return self.isAllImagesExists(images)
+        images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
+                  (self.getImage(self.dependDir, 'grad', None, 'b'), "gradient encoding b file"),
+                  (self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask']), 'white matter segmented mask'),
+                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'))
+        return images.isAllImagesExists()
 
 
-    def isDirty(self, result = False):
+    def isDirty(self):
 
-        images = {"response function estimation text file": self.getImage(self.workingDir, 'dwi', None, 'txt'),
-                  "fibre orientation distribution estimation": self.getImage(self.workingDir, 'dwi', 'fod'),
-                  'nufo': self.getImage(self.workingDir,'dwi','nufo'),
-                  'fixel peak image': self.getImage(self.workingDir,'dwi', 'fixel_peak', 'msf')}
+        images = Images((self.getImage(self.workingDir, 'dwi', None, 'txt'), "response function estimation text file"),
+                  (self.getImage(self.workingDir, 'dwi', 'fod'), "fibre orientation distribution estimation"),
+                  (self.getImage(self.workingDir,'dwi','nufo'), 'nufo'),
+                  (self.getImage(self.workingDir,'dwi', 'fixel_peak', 'msf'), 'fixel peak image'))
 
-        return self.isSomeImagesMissing(images)
+        return images.isSomeImagesMissing()
