@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from core.generictask import GenericTask
 from lib.images import Images
+import matplotlib.pylab as plt
+import numpy
 
 __author__ = 'desmat'
 
@@ -150,6 +152,34 @@ class TractographyMrtrix(GenericTask):
 
         return self.rename(tmp, target)
 
+    def __plotConnectome(self, source):
+        """ Create a connectome plot to provide into the qa repport
+
+        Args:
+            source: an input source file
+
+        Return:
+            A png image of the plot
+
+        """
+        #plt.title(title)   @TODO discuss with christophe if we need to add title
+        target = self.buildName(source, "", "png")
+        matrixData = numpy.loadtxt(source)
+        figure = plt.figure(figsize=(16, 12), dpi=160, facecolor='w', edgecolor='k')
+        figure.clf()
+        ax = figure.add_subplot(111)
+        image = ax.imshow(matrixData, interpolation="nearest")
+        colorBar = plt.colorbar(image)
+        plt.setp(colorBar.ax.get_yticklabels(), visible=False)
+        brodmannLabels = [index for index in range(48)]
+        plt.xticks(numpy.arange(0,48), brodmannLabels, rotation='vertical', fontsize=10)
+        plt.yticks(numpy.arange(0,48), brodmannLabels, fontsize=10)
+        plt.subplots_adjust(bottom=0.1, left=0.1, right=1)
+        plt.xlabel('Brodmann area')
+        plt.grid()
+        figure.savefig(target)
+        return target
+
 
     def meetRequirement(self):
 
@@ -172,3 +202,18 @@ class TractographyMrtrix(GenericTask):
                   (self.getImage(self.workingDir, 'dwi', 'tckgen', 'tck'), "tckgen streamlines tractography"),
                   (self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck'), 'tcksift'))
         return images.isSomeImagesMissing()
+
+
+    def qaSupplier(self):
+
+        tckgenDet = self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'csv')
+        tckgenProb = self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'csv')
+        fodProb = self.getImage(self.workingDir, 'dwi', ['fod','tckgen_prob'], 'csv')
+
+        tckgenDetPlot = self.__plotConnectome(tckgenDet)
+        tckgenProbPlot = self.__plotConnectome(tckgenProb)
+        fodProbPlot = self.__plotConnectome(fodProb)
+
+        return Images((tckgenDetPlot, 'Connectome matrix from a deterministic streamlines'),
+                       (tckgenProbPlot,'Connectome matrix from a probabilistic streamlines'),
+                       (fodProbPlot, 'Connectome matrix from a fod probabilistic streamlines'))
