@@ -114,6 +114,7 @@ class Denoising(GenericTask):
         image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'))
         return image.isSomeImagesMissing()
 
+
     def qaSupplier(self):
         denoise = self.getImage(self.workingDir, "dwi", 'denoise')
         denoiseGif = self.nifti4dtoGif(denoise)

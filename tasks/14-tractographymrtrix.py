@@ -170,10 +170,10 @@ class TractographyMrtrix(GenericTask):
         ax = figure.add_subplot(111)
         image = ax.imshow(matrixData, interpolation="nearest")
         colorBar = plt.colorbar(image)
-        plt.setp(colorBar.ax.get_yticklabels(), visible=False)
+        plt.setp(colorBar.ax.get_yticklabels(), visible=True)
         brodmannLabels = [index for index in range(48)]
-        plt.xticks(numpy.arange(0,48), brodmannLabels, rotation='vertical', fontsize=10)
-        plt.yticks(numpy.arange(0,48), brodmannLabels, fontsize=10)
+        plt.xticks(numpy.arange(1,49), brodmannLabels, rotation='vertical', fontsize=10)
+        plt.yticks(numpy.arange(1,49), brodmannLabels, fontsize=10)
         plt.subplots_adjust(bottom=0.1, left=0.1, right=1)
         plt.xlabel('Brodmann area')
         plt.grid()
@@ -214,6 +214,8 @@ class TractographyMrtrix(GenericTask):
         tckgenProbPlot = self.__plotConnectome(tckgenProb)
         fodProbPlot = self.__plotConnectome(fodProb)
 
-        return Images((tckgenDetPlot, 'Connectome matrix from a deterministic streamlines'),
+        images = Images((tckgenDetPlot, 'Connectome matrix from a deterministic streamlines'),
                        (tckgenProbPlot,'Connectome matrix from a probabilistic streamlines'),
                        (fodProbPlot, 'Connectome matrix from a fod probabilistic streamlines'))
+        print images
+        return images
