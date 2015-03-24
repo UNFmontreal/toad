@@ -325,3 +325,66 @@ def extractStructure(values, source, target):
     if not os.path.exists(target):
         nibabel.save(nibabel.Nifti1Image(data, image.get_affine()), target)
         return target
+
+
+def plotConnectome(source, target,  lutFile=None, title=None, label=None, skiprows=0, usecols=None, useGrid=False):
+    """ Create a imshow plot
+
+    Args:
+        source: an input source file
+
+    Return:
+        A png image of the plot
+
+    """
+    #ADD figsize
+
+    def __getLabels(locations, lutFile):
+        """ This need to be implemented
+
+        """
+        if lutFile is None:
+            return locations
+
+        with open(lutFile, 'r') as f:
+            dict ={}
+            luts = f.readlines()
+            for lut in luts:
+                index = int(lut.split()[0])
+                label = lut.split()[7]
+
+                dict[index] = label.strip().strip("\"")
+        values =[]
+        for index in locations:
+            values.append(dict[index])
+        return values
+
+
+
+    import matplotlib.pylab as plt
+    data = numpy.loadtxt(source, skiprows=skiprows, usecols=usecols)
+    #figure = plt.figure(figsize=(16, 12), dpi=160, facecolor='w', edgecolor='k')
+    figure = plt.figure()
+    figure.clf()
+    ax = figure.add_subplot(111)
+    image = ax.imshow(data, interpolation="nearest")
+
+    colorBar = plt.colorbar(image)
+    plt.setp(colorBar.ax.get_yticklabels(), visible=True)
+
+    xLocations = [index for index in range(data.shape[1])]
+    xLabels = __getLabels(xLocations, lutFile)
+    yLocations = [index for index in range(data.shape[0])]
+    yLabels = __getLabels(yLocations, lutFile)
+
+    plt.xticks(xLocations, xLabels, rotation='vertical', fontsize=8)
+    plt.yticks(yLocations, yLabels, fontsize=8)
+    #plt.subplots_adjust(bottom=0.1, left=0.1, right=1)
+
+    if title is not None:
+        plt.title(title)
+    if label is not None:
+        plt.xlabel(label)
+    plt.grid(useGrid)
+    figure.savefig(target)
+    return target

@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import argparse, sys, os
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+from lib.mriutil import plotConnectome
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright 2014, The Toad Project"
+__credits__ = ["Mathieu Desrosiers"]
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Mathieu Desrosiers"
+__email__ = "mathieu.desrosiers@criugm.qc.ca"
+__status__ = "Development"
+
+
+def parseArguments():
+    """Prepare and parse user friendly command line arguments for sys.argv.
+
+
+    Returns:
+        a args stucture containing command lines arguments
+    """
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description ="""
+         Basic tool to create plot
+         """)
+
+    parser.add_argument('source', help="Specify a csv file")
+    parser.add_argument('target', help="Specify an output filename")
+    parser.add_argument("-l", "--lut", help="Specify a lut file for labeling axis")
+    parser.add_argument("-t", "--title", required=False, help="Specify a title")
+    parser.add_argument("-b", "--label", required=False, help="Specify a label in x axis")
+    parser.add_argument("-s", "--skiprows", type=int, help="Start reading csv file at a specific column")
+    parser.add_argument("-g", "--grid", help="Draw grid line", action="store_true")
+    parser.add_argument("-u", "--usecols", nargs='+', type=int, required=False,
+                            help="Which columns to read into the csv file,"
+                                 "ex. usecols = 1,4,5 will extract the 2nd, 5th and 6th columns.")
+
+    args = parser.parse_args()
+
+    return args
+
+if __name__ == '__main__':
+
+    #@TODO implment lut file
+    title = None
+    lut = None
+    label = None
+    skiprows = 0
+    usecols = None
+    grid = False
+
+    #parse arguments provide in command line
+    arguments = parseArguments()
+    if arguments.title:
+        title = arguments.title
+    if arguments.lut:
+        lut = arguments.lut
+    if arguments.label:
+        label = arguments.label
+    if arguments.skiprows:
+        skiprows = arguments.skiprows
+    if arguments.usecols:
+        usecols = arguments.usecols
+    if arguments.grid:
+        grid = arguments.grid
+
+    print arguments
+    plotConnectome(arguments.source, arguments.target, lut, title, label, skiprows, usecols, grid)
