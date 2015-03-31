@@ -113,7 +113,7 @@ def __manageEnvironnement(logger):
     except ValueError:
         logger.error("Cannot determine your version of python installed")
 
-    packages = ['numpy', 'nibabel', 'dipy', 'matplotlib']
+    packages = ['numpy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
     for package in packages:
         try:
             imp.find_module(package)
@@ -149,9 +149,9 @@ def __manageEnvironnement(logger):
 
         if hostname == 'stark':
             if "LD_LIBRARY_PATH" in os.environ:
-                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib:"+os.environ["LD_LIBRARY_PATH"]
+                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib:/usr/local/vtk/lib:"+os.environ["LD_LIBRARY_PATH"]
             else:
-                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib"
+                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib:/usr/local/vtk/lib:"
 
         os.environ["MRTRIX_PYTHON_SCRIPTS"] = "/usr/local/mrtrix3/scripts"
 

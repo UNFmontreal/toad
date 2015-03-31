@@ -18,6 +18,10 @@ class TractographyMrtrix(GenericTask):
         act = self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"])
         seed_gmwmi = self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi")
         brodmann = self.getImage(self.registrationDir, "brodmann", "resample")
+        anatBrainResample = self.getImage(self.registrationDir,'anat', ['brain', 'resample'])
+
+        mask253 = self.getImage(self.maskingDir, 'aparc_aseg',['253','mask'])
+        mask1024= self.getImage(self.maskingDir, 'aparc_aseg',['1024','mask'])
 
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
 
@@ -25,18 +29,48 @@ class TractographyMrtrix(GenericTask):
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
 
         tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tckgen_det', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Det')
+        tckDetRoi = self.__tckedit(tckDet, [mask253,mask1024 ], self.buildName(tckDet, 'roi','tck'))
+        tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, anatBrainResample , self.buildName(dwi, tckDetRoi, 'trk'))
+        mriutil.createPng(tckDetRoiTrk, anatBrainResample, mask253)
+
         tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tckgen_prob', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Prob')
+        tckDetProb = self.__tckedit(tckProb, [mask253,mask1024 ], self.buildName(tckProb, 'roi','tck'))
+        tckDetProbTrk = mriutil.tck2trk(tckDetProb, anatBrainResample , self.buildName(dwi, tckDetProb, 'trk'))
+        mriutil.createPng(tckDetProbTrk, anatBrainResample, mask253)
 
         self.__tck2connectome(tckDet, brodmann, self.buildName(dwi, 'tckgen_det', 'csv'))
         self.__tck2connectome(tckProb, brodmann, self.buildName(dwi, 'tckgen_prob', 'csv'))
-
 
         #HARDI part
         dwi2fod =  self.getImage(self.hardimrtrixDir,'dwi','fod')
 
         tckgen = self.__tckgenHardi(dwi2fod, act)
+        tckgenRoi = self.__tckedit(tckgen, [mask253, mask1024], self.buildName(tckgen, 'roi','tck'))
+        tckgenRoiTrk = mriutil.tck2trk(tckgenRoi, anatBrainResample , self.buildName(dwi, tckgenRoi, 'trk'))
+        mriutil.createPng(tckgenRoiTrk, anatBrainResample, mask253)
+
+
         self.__tck2connectome(tckgen, brodmann, self.buildName(dwi2fod, 'tckgen_prob', 'csv'))
-        self.__tcksift(tckgen, dwi2fod)
+        tcksift = self.__tcksift(tckgen, dwi2fod)
+        tcksiftRoi = self.__tckedit(tcksift, [mask253, mask1024], self.buildName(tcksift, 'roi','tck'))
+        tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, anatBrainResample , self.buildName(dwi, tcksiftRoi, 'trk'))
+        tcksiftRoiTrk = mriutil.createPng(tckgenRoiTrk, anatBrainResample, mask253)
+
+
+    def __tckedit(self, source, include, target, downsample= "2"):
+
+        self.info("Starting tckedit creation from mrtrix on {}".format(source))
+        cmd = "tckedit {} {} -downsample {} -quiet ".format(source, target, downsample)
+        tmp = self.buildName(source, "tmp", "tck")
+
+        if isinstance(include, basestring):
+            cmd += "-include {}".format(include)
+        else:
+            for element in include:
+                cmd += "-include {}".format(element)
+        self.launchCommand(cmd)
+        return self.rename(tmp, target)
+
 
 
     def __tckgenTensor(self, source, target, mask = None, act = None , seed_gmwmi = None, bFile = None, algorithm = "iFOD2"):
@@ -160,6 +194,9 @@ class TractographyMrtrix(GenericTask):
                   (self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"]), 'resampled anatomically constrained tractography'),
                   (self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
                   (self.getImage(self.registrationDir, "brodmann", "resample"), 'resampled brodmann area'),
+                  (self.getImage(self.maskingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
+                  (self.getImage(self.maskingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
+                  (self.getImage(self.registrationDir,'anat', ['brain', 'resample']), 'anatomical brain resampled'),
                   (self.getImage(self.maskingDir, 'anat',['resample', 'extended','mask']), 'ultimate extended mask'))
 
         return images.isAllImagesExists()
@@ -185,6 +222,8 @@ class TractographyMrtrix(GenericTask):
         tckgenDetPlot = mriutil.plotConnectome(tckgenDet, self.buildName(tckgenDet, None, "png"))
         tckgenProbPlot = mriutil.plotConnectome(tckgenProb, self.buildName(tckgenProb, None, "png"))
         fodProbPlot = mriutil.plotConnectome(fodProb, self.buildName(fodProb, None, "png"))
+
+
 
         images = Images((tckgenDetPlot, 'Connectome matrix from a deterministic streamlines'),
                        (tckgenProbPlot,'Connectome matrix from a probabilistic streamlines'),

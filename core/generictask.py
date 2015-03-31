@@ -368,14 +368,17 @@ class GenericTask(Logger, Load, Qa):
         self.info("------------------------\n")
 
 
-    def launchMatlabCommand(self, source):
+    def launchMatlabCommand(self, source, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=None, nice=0):
         """Execute a Matlab script in a new process
 
         The script must contains all paths and program that are necessary to run the script
 
         Args:
             source: A matlab script to execute in the current working directory
-
+            stdout: this attribute is a file object that provides output from the child process
+            stderr: this attribute is a file object that provides error from the child process
+            timeout: Number of seconds before a process is consider inactive, usefull against deadlock
+            nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
         Returns
             return a 3 elements tuples representing the command execute, the standards output and the standard error message
 
@@ -385,8 +388,7 @@ class GenericTask(Logger, Load, Qa):
         tags={ 'script': scriptName, 'workingDir': self.workingDir}
         cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/matlab.tpl"))
         self.info("Launching matlab command: {}".format(cmd))
-        self.launchCommand(cmd)
-
+        self.launchCommand(self, cmd, stdout, stderr, timeout, nice)
 
     def getImage(self, dir, prefix, postfix=None, ext="nii.gz"):
         """A simple utility function that return an mri image given certain criteria

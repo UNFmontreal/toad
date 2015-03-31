@@ -3,7 +3,6 @@ import nibabel
 import util
 import os
 
-
 def fslmaths(source1, target, operator="bin", source2=None):
     """Perform a mathematical operations using a second image or a numeric value
 
@@ -72,6 +71,9 @@ def mrinfo(source):
     (executedCmd, stdout, stderr) = util.launchCommand(cmd)
     return stdout.splitlines()
 
+def mrcalc(source, value, target):
+    cmd = "mrcalc {} {} -eq {} -quiet".format(source, value, target)
+    return util.launchCommand(cmd)
 
 def invertMatrix(source, target):
     """ invert a transformation matrices
@@ -360,7 +362,6 @@ def plotConnectome(source, target,  lutFile=None, title=None, label=None, skipro
         return values
 
 
-
     import matplotlib.pylab as plt
     data = numpy.loadtxt(source, skiprows=skiprows, usecols=usecols)
     #figure = plt.figure(figsize=(16, 12), dpi=160, facecolor='w', edgecolor='k')
@@ -387,4 +388,181 @@ def plotConnectome(source, target,  lutFile=None, title=None, label=None, skipro
         plt.xlabel(label)
     plt.grid(useGrid)
     figure.savefig(target)
+    return target
+
+
+def transform_to_affine(streams, header, affine):
+    from dipy.tracking.utils import move_streamlines
+    rotation, scale = numpy.linalg.qr(affine)
+    streams = move_streamlines(streams, rotation)
+    scale[0:3,0:3] = numpy.dot(scale[0:3,0:3], numpy.diag(1./header['voxel_size']))
+    scale[0:3,3] = abs(scale[0:3,3])
+    streams = move_streamlines(streams, scale)
+    return streams
+
+
+def read_mrtrix_tracks(in_file, as_generator=True):
+    header = read_mrtrix_header(in_file)
+    streamlines = read_mrtrix_streamlines(in_file, header, as_generator)
+    return header, streamlines
+
+
+def read_mrtrix_header(in_file):
+    fileobj = open(in_file,'r')
+    header = {}
+    for line in fileobj:
+        if line == 'END\n':
+            break
+        elif ': ' in line:
+            line = line.replace('\n','')
+            line = line.replace("'","")
+            key  = line.split(': ')[0]
+            value = line.split(': ')[1]
+            header[key] = value
+    fileobj.close()
+    header['count'] = int(header['count'].replace('\n',''))
+    header['offset'] = int(header['file'].replace('.',''))
+    return header
+
+
+def read_mrtrix_streamlines(in_file, header, as_generator=True):
+    offset = header['offset']
+    stream_count = header['count']
+    fileobj = open(in_file,'r')
+    fileobj.seek(offset)
+    endianness = nibabel.volumeutils.native_code
+    f4dt = numpy.dtype(endianness + 'f4')
+    pt_cols = 3
+    bytesize = pt_cols*4
+    def points_per_track(offset):
+        track_points = []
+        all_str = fileobj.read()
+        num_triplets = len(all_str)/bytesize
+        pts = numpy.ndarray(shape=(num_triplets,pt_cols), dtype='f4',buffer=all_str)
+        nonfinite_list = numpy.where(numpy.isfinite(pts[:,2]) == False)
+        nonfinite_list = list(nonfinite_list[0])[0:-1]
+        for idx, value in enumerate(nonfinite_list):
+            if idx == 0:
+                track_points.append(nonfinite_list[idx])
+            else:
+                track_points.append(nonfinite_list[idx]-nonfinite_list[idx-1]-1)
+        return track_points, nonfinite_list
+
+    def track_gen(track_points):
+        n_streams = 0
+        while True:
+            try:
+                n_pts = track_points[n_streams]
+            except IndexError:
+                break
+            pts_str = fileobj.read(n_pts * bytesize)
+            nan_str = fileobj.read(bytesize)
+            if len(pts_str) < (n_pts * bytesize):
+                if not n_streams == stream_count:
+                    raise StandardError
+                break
+            pts = numpy.ndarray(
+                shape = (n_pts, pt_cols),
+                dtype = f4dt,
+                buffer = pts_str)
+            nan_pt = numpy.ndarray(
+                shape = (1, pt_cols),
+                dtype = f4dt,
+                buffer = nan_str)
+            if numpy.isfinite(nan_pt[0][0]):
+                raise ValueError
+                break
+            xyz = pts[:,:3]
+            yield xyz
+            n_streams += 1
+            if n_streams == stream_count:
+                raise StopIteration
+
+    track_points, nonfinite_list = points_per_track(offset)
+    fileobj.seek(offset)
+    streamlines = track_gen(track_points)
+    if not as_generator:
+        streamlines = list(streamlines)
+    return streamlines
+
+
+def get_data_dims(volume):
+    if isinstance(volume, list):
+        volume = volume[0]
+    nii = nibabel.load(volume)
+    hdr = nii.get_header()
+    datadims = hdr.get_data_shape()
+    return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
+
+
+def get_vox_dims(volume):
+    if isinstance(volume, list):
+        volume = volume[0]
+    nii = nibabel.load(volume)
+    hdr = nii.get_header()
+    voxdims = hdr.get_zooms()
+    return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
+
+
+def tck2trk(source, anatomical ,target):
+    """ Converts MRtrix (.tck) tract files into TrackVis (.trk) format using functions from dipy
+
+    Args:
+
+        source: an mrtrix tractography file
+        anatomical: a high resolution image
+        target: an output Trackvis format image
+
+    """
+    dx, dy, dz = get_data_dims(anatomical)
+    vx, vy, vz = get_vox_dims(anatomical)
+    image_file = nibabel.load(anatomical)
+    affine = image_file.get_affine()
+
+    header, streamlines = read_mrtrix_tracks(source, as_generator=True)
+    trk_header = nibabel.trackvis.empty_header()
+    trk_header['dim'] = [dx,dy,dz]
+    trk_header['voxel_size'] = [vx,vy,vz]
+    trk_header['n_count'] = header['count']
+
+    axcode = nibabel.orientations.aff2axcodes(affine)
+    trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
+    trk_header['vox_to_ras'] = affine
+    transformed_streamlines = transform_to_affine(streamlines, trk_header, affine)
+    trk_tracks = ((ii, None, None) for ii in transformed_streamlines)
+    nibabel.trackvis.write(target, trk_tracks, trk_header)
+
+def createPng(source, anatomical, roi):
+    import vtk
+    import matplotlib
+    matplotlib.use('Agg')
+    from dipy.viz.colormap import line_colors
+    from dipy.viz import fvtk
+
+    target = source.replace(".trk",".png")
+    roiImage= nibabel.load(roi)
+    anatomicalImage = nibabel.load(anatomical)
+
+    sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
+    sourceActor = fvtk.streamtube(sourceImage, line_colors(sourceImage))
+    roiActor = fvtk.contour(roiImage.get_data(), levels=[1], colors=[(1., 1., 0.)], opacities=[1.])
+    anatomicalActor = fvtk.slicer(anatomicalImage.get_data(), voxsz=(1.0, 1.0, 1.0), plane_i=None, plane_j=None, plane_k=[65], outline=False)
+
+    sourceActor.RotateX(-70)
+    sourceActor.RotateY(2.5)
+    sourceActor.RotateZ(185)
+
+    roiActor.RotateX(-70)
+    roiActor.RotateY(2.5)
+    roiActor.RotateZ(185)
+
+    anatomicalActor.RotateX(-70)
+    anatomicalActor.RotateY(2.5)
+    anatomicalActor.RotateZ(185)
+
+    ren = fvtk.ren()
+    fvtk.add(ren, sourceActor)
+    fvtk.add(ren, roiActor)
+    fvtk.add(ren, anatomicalActor)
+    fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1, verbose=True, cam_pos=(90.03, 118.33, 700.59))
     return target
