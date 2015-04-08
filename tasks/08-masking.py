@@ -33,8 +33,8 @@ class Masking(GenericTask):
         self.__createMask(aparcAsegResample)
 
         #create a area 253 mask and a 1014 mask
-        mriutil.mrcalc(anatBrainResample,'253', self.buildName('aparc_aseg',['253','mask']))
-        mriutil.mrcalc(anatBrainResample,'1024', self.buildName('aparc_aseg',['1024','mask']))
+        self.info(mriutil.mrcalc(aparcAsegResample, '253', self.buildName('aparc_aseg', ['253','mask'], 'nii.gz')))
+        self.info(mriutil.mrcalc(aparcAsegResample, '1024', self.buildName('aparc_aseg', ['1024','mask'],'nii.gz')))
 
         aparcAseg2x2x2Resample = self.getImage(self.dependDir,"aparc_aseg", "2x2x2")
         anatBrain2x2x2Resample = self.getImage(self.dependDir,'anat', ['brain', '2x2x2'])
