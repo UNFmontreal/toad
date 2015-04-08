@@ -60,7 +60,7 @@ class TractographyMrtrix(GenericTask):
     def __tckedit(self, source, include, target, downsample= "2"):
 
         self.info("Starting tckedit creation from mrtrix on {}".format(source))
-        cmd = "tckedit {} {} -downsample {} -quiet ".format(source, target, downsample)
+        cmd = "tckedit {} {} -downsample {} -nthreads {} -quiet ".format(source, target, downsample, self.getNTreadsMrtrix())
         tmp = self.buildName(source, "tmp", "tck")
 
         if isinstance(include, basestring):
@@ -222,6 +222,7 @@ class TractographyMrtrix(GenericTask):
         tckgenDetPlot = mriutil.plotConnectome(tckgenDet, self.buildName(tckgenDet, None, "png"))
         tckgenProbPlot = mriutil.plotConnectome(tckgenProb, self.buildName(tckgenProb, None, "png"))
         fodProbPlot = mriutil.plotConnectome(fodProb, self.buildName(fodProb, None, "png"))
+
 
 
 

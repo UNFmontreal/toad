@@ -532,10 +532,9 @@ def tck2trk(source, anatomical ,target):
     trk_tracks = ((ii, None, None) for ii in transformed_streamlines)
     nibabel.trackvis.write(target, trk_tracks, trk_header)
 
+
 def createPng(source, anatomical, roi):
     import vtk
-    import matplotlib
-    matplotlib.use('Agg')
     from dipy.viz.colormap import line_colors
     from dipy.viz import fvtk
 
