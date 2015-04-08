@@ -75,6 +75,7 @@ def mrcalc(source, value, target):
     cmd = "mrcalc {} {} -eq {} -quiet".format(source, value, target)
     return util.launchCommand(cmd)
 
+
 def invertMatrix(source, target):
     """ invert a transformation matrices
 
@@ -531,9 +532,9 @@ def tck2trk(source, anatomical ,target):
     transformed_streamlines = transform_to_affine(streamlines, trk_header, affine)
     trk_tracks = ((ii, None, None) for ii in transformed_streamlines)
     nibabel.trackvis.write(target, trk_tracks, trk_header)
+    return target
 
-
-def createPng(source, anatomical, roi):
+def createVtkPng(source, anatomical, roi):
     import vtk
     from dipy.viz.colormap import line_colors
     from dipy.viz import fvtk

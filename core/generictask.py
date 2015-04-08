@@ -1,6 +1,7 @@
 from datetime import timedelta
 from datetime import datetime
 import subprocess
+import traceback
 import shutil
 import glob
 import sys
@@ -123,7 +124,7 @@ class GenericTask(Logger, Load, Qa):
         self.implement()
         self.info("Create and supply images to the qa report ")
         images = self.qaSupplier()
-        if not images.isEmpty():
+        if not (images == None) or (not images.isEmpty()):
             self.createQaReport(images)
 
         os.chdir(self.subjectDir)
@@ -255,6 +256,7 @@ class GenericTask(Logger, Load, Qa):
         """
         if os.path.exists(self.workingDir) and os.path.isdir(self.workingDir):
             self.info("Cleaning up \"deleting\" {} directory".format(self.workingDir))
+            os.chdir(self.subjectDir)
             shutil.rmtree(self.workingDir)
 
 
@@ -281,9 +283,11 @@ class GenericTask(Logger, Load, Qa):
                 except (KeyboardInterrupt, SystemExit):
                     self.error("KeyboardInterrupt or SystemExit caught, pipeline will exit")
                     raise
-                except:
-                    self.warning("Exception have been caught, the error message is:".format(sys.exc_info()[0]))
-
+                except Exception, exception:
+                    print "exception=",exception
+                    print "traceBack = ", traceback.format_exc()
+                    self.warning("Exception have been caught, the error message is:".format(exception))
+                    self.warning("Traceback is: ".format(traceback.format_exc()))
                 if attempt == nbSubmission:
                     self.error("I already execute this task {} time and failed, exiting the pipeline")
                 elif self.isDirty():
