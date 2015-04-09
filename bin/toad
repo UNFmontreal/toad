@@ -54,7 +54,6 @@ def __parseArguments():
         Then a subject completed will look like this
         sujN--\\
               |- 00-logs
-              |- 00-qa
               |- 01-backup
               |- 02-preparation
               |- 03-parcellation
@@ -71,7 +70,8 @@ def __parseArguments():
               |- 13-hardi
               |- 14-hardimetric
               |- 15-harditractography
-              |- 16-results
+              |- 16-qa
+              |- 17-results
 
 
         Please report bugs to mathieu.desrosiers@criugm.qc.ca

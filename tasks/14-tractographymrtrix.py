@@ -223,7 +223,6 @@ class TractographyMrtrix(GenericTask):
 
     def qaSupplier(self):
 
-<<<<<<< HEAD
         tckgenDet = self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'csv')
         tckgenProb = self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'csv')
         fodProb = self.getImage(self.workingDir, 'dwi', ['fod', 'tckgen_prob'], 'csv')
@@ -239,7 +238,6 @@ class TractographyMrtrix(GenericTask):
                        (tckgenProbPlot,'Connectome matrix from a probabilistic streamlines'),
                        (fodProbPlot, 'Connectome matrix from a fod probabilistic streamlines'))
 
-=======
 	tensorDetPng = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'roi'], 'png')
         tensorDetPlot = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome'], 'png')
 	tensorProbPng = self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'roi'], 'png')
@@ -257,6 +255,5 @@ class TractographyMrtrix(GenericTask):
                        (hardiProbPlot, 'Connectome matrix from a probabilistic hardi streamlines'),
                        (tcksiftPlot, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
                        (tcksiftPlot, 'tcksift'))
->>>>>>> 44bf47dd026d644cc76f003c5782fcd8ec527963
         print images
         return images

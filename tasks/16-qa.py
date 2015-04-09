@@ -24,15 +24,17 @@ class QA(GenericTask):
 
         html = ""
         taskManager = TasksManager(self.__subject)
-        for task in taskManager.getTasks():
+        for task in taskManager.getQaTasks():
             name = task.getName()
-            html +="<li><a id=\"{0}\" href=\"{0}.html\">{0}</a></li>".format(name)
-            with open("{}.html".format(name)) as f:
-                f.write("Not done yet")
+            htmlTaskFileName = "{}.html".format(name)
+            if not os.path.exists(htmlTaskFileName):
+                html +="\n<li><a id=\"{0}\" href=\"{0}.html\">{0}</a></li>".format(name)
+                with open(htmlTaskFileName, 'w') as f:
+                    f.write("Not done yet")
 
         htmlCode = self.parseTemplate({'parseHtmlTables':'', 'menuHtml':html}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
         util.createScript('index.html', htmlCode)
-        print html
+
 
     def meetRequirement(self, result=True):
         """
