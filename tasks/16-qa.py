@@ -36,7 +36,9 @@ class QA(GenericTask):
             if not os.path.exists(htmlTaskFileName):
                 htmlCode = self.parseTemplate({'parseHtmlTables':message, 'menuHtml':menuHtml}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
                 util.createScript(htmlTaskFileName, htmlCode)
-            
+        
+        htmlCode = self.parseTemplate({'menuHtml':menuHtml}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
+        util.createScript('qa.main.tpl', htmlCode)
 
         htmlCode = self.parseTemplate({'parseHtmlTables':'', 'menuHtml':menuHtml}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
         util.createScript('index.html', htmlCode)

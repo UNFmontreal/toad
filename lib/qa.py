@@ -1,6 +1,8 @@
 from lib import util, mriutil
 from string import ascii_uppercase, digits
 from random import choice
+import os
+import shutil
 import functools
 import numpy
 import nibabel
@@ -12,34 +14,27 @@ import mpl_toolkits.mplot3d
 
 class Qa(object):
 
-    def slicerPng(self, backgroundImage, optionalOverlay=None, target=None, vmax=None, isBackgroundArray=False):
+    def slicerPng(self, source, target, optionalOverlay=None, vmax=None, isData=False):
         """Utility method to slice a 3d image
         Args:
-            backgroundImage : background image
-            optionalOverlay : optional overlay: put the edges of the image on top of the background
+            source : background image
             target : output in png format
+            optionalOverlay : optional overlay: put the edges of the image on top of the background
             vmax : to fixe the colorbar max, if None clicerPng take the max of the background
-            loadBackgroundImage : 
         """
-        #if (target is None) and (optionalOverlay is None):
-        #    target = self.buildName(backgroundImage, None, 'png')
-        #elif (target is None) and (optionalOverlay is not None):
-        #    target = self.buildName(optionalOverlay, None, 'png')
-    
-        if isBackgroundArray:
-            imageData = backgroundImage
+        if isData:
+            imageData = source
         else:
-            image = nibabel.load(backgroundImage)
+            image = nibabel.load(source)
             imageData = image.get_data()
 
-    
         if vmax == None:
             vmax=numpy.max(imageData)
     
-        width, fig_dims = __configFigure(imageData)
+        width, fig_dims = self.__configFigure(imageData)
         fig = matplotlib.pyplot.figure(figsize=fig_dims)
     
-        slices = __image3d2slices(imageData, width)
+        slices = self.__image3d2slices(imageData, width)
         imageImshow = functools.partial(matplotlib.pyplot.imshow, \
                                         vmin=0, \
                                         vmax=vmax, \
@@ -48,7 +43,7 @@ class Qa(object):
         if optionalOverlay != None:
             overlay = nibabel.load(optionalOverlay)
             overlayData = overlay.get_data()
-            overlaySlices = __image3d2slices(overlayData, width)
+            overlaySlices = self.__image3d2slices(overlayData, width)
             overlayImshow = functools.partial(matplotlib.pyplot.contour, \
                                               [0], \
                                               colors='r')
@@ -66,8 +61,6 @@ class Qa(object):
         matplotlib.pyplot.close()
         matplotlib.rcdefaults()
     
-        return target
-
 
     def c3dSegmentation(self, backgroundImage, segmentationImage, scale, opacity, target=None):
         """Utility method to use c3d from ITKSnap package
@@ -100,7 +93,7 @@ class Qa(object):
 
 
 
-    def slicerGif(self, source, target=None, gifSpeed=30):
+    def slicerGif(self, source, target, gifSpeed=30):
         """Create a animated gif from a 4d NIfTI
         if target is None, the output filename will be base on source name
         Args:
@@ -108,24 +101,19 @@ class Qa(object):
             target: outputfile gif name
             gifSpeed: delay between images (tens of ms), default=30
         """
-        if target is None:
-            target = self.buildName(source, '', 'gif')
+        gifId = self.__idGenerator()
     
-        gifId = __idGenerator()
-    
-        # Spliting 4D image
         image = nibabel.load(source)
         imageData = image.get_data()
-        imageAffine = image.get_affine()
         vmax = numpy.max(imageData[:,:,:,1:]) * .8
     
         imageList = []
         for num in range(imageData.shape[-1]):
             output = gifId + '{0:04}.png'.format(num)
-            slicerPng(imageData[:,:,:,num], target=output, vmax=vmax, isBackgroundArray=True)
+            self.slicerPng(imageData[:,:,:,num], output, vmax=vmax, isData=True)
             imageList.append(output)
         
-        __imageList2Gif(imageList, target, gifSpeed)
+        self.__imageList2Gif(imageList, target, gifSpeed)
         #Cleaning temp files
         cmd = 'rm {}*.png'.format(gifId)
         self.launchCommand(cmd)
@@ -303,23 +291,24 @@ class Qa(object):
         return self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/qa.table.tpl"))
         
         
-    def createQaReport(self, structure):
+    def createQaReport(self, images):
         """create html report for a task with qaSupplier implemented
-        
         Args:
-            imagesArray : array of tupple [(imageLink, legend), ...]
+           images : an Images object
         """
-        
+
         imagesDir = os.path.join(self.qaDir, 'img')
         tablesCode = ''
-        for imageLink, legend in structure.getData():
+        print "createQaReport images =", images
+        for imageLink, legend in images:
             #@TODO Take into account multiple run of QA
-            shutil.copyfile(imageLink, os.path.join(imagesDir, imageLink))
-            tags = {'imageLink':imageLink,'legend':legend}
+            path, filename =  os.path.split(imageLink)
+            shutil.copyfile(imageLink, os.path.join(imagesDir, filename))
+            tags = {'imageLink':os.path.join('img', filename),'legend':legend}
             tablesCode += self.parseTemplate(tags, os.path.join(self.toadDir, 'templates/files/qa.table.tpl'))
-        
-        htmlCode = self.parseTemplate({'parseHtmlTables':tablesCode}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
-        
+
+        htmlCode = self.parseTemplate({'parseHtmlTables':tablesCode}, os.path.join(self.qaDir, 'qa.main.tpl'))
+
         htmlFile = os.path.join(self.qaDir,'{}.html'.format(self.getName()))
         util.createScript(htmlFile, htmlCode)
 
