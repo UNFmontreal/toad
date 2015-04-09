@@ -28,11 +28,7 @@
             </div>
             <nav>
                 <ul>
-                    <li><a id="preparation" href="preparation.html">preparation</a></li>
-                    <li><a id="parcellation" href="parcellation.html">parcellation</a></li>
-                    <li><a id="eddy" href="eddy.html">eddy</a></li>
-                    <li><a id="denoising" href="denoising.html">denoising</a></li>
-                    <li><a id="preprocessing" href="preprocessing.html">preprocessing</a></li>
+                    $menuHtml
                 </ul>
             </nav>
         </header>

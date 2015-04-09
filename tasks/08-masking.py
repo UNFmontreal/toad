@@ -32,6 +32,9 @@ class Masking(GenericTask):
         self.__createMask(extended)
         self.__createMask(aparcAsegResample)
 
+        #create a area 253 mask and a 1014 mask
+        self.info(mriutil.mrcalc(aparcAsegResample, '253', self.buildName('aparc_aseg', ['253','mask'], 'nii.gz')))
+        self.info(mriutil.mrcalc(aparcAsegResample, '1024', self.buildName('aparc_aseg', ['1024','mask'],'nii.gz')))
 
         aparcAseg2x2x2Resample = self.getImage(self.dependDir,"aparc_aseg", "2x2x2")
         anatBrain2x2x2Resample = self.getImage(self.dependDir,'anat', ['brain', '2x2x2'])
@@ -112,11 +115,12 @@ class Masking(GenericTask):
         self.launchCommand('labelconfig -quiet ' + source + ' ' + config_path + ' ' + os.path.join(temp_dir, 'indices.mif') + ' -lut_freesurfer ' + freesurfer_lut)
 
         # Convert into the 5TT format for ACT
-        self.launchCommand('mrcalc indices.mif 1 -eq cgm.mif -quiet')
-        self.launchCommand('mrcalc indices.mif 2 -eq sgm.mif -quiet')
-        self.launchCommand('mrcalc indices.mif 3 -eq wm.mif -quiet')
-        self.launchCommand('mrcalc indices.mif 4 -eq csf.mif -quiet')
-        self.launchCommand('mrcalc indices.mif 5 -eq path.mif -quiet')
+        mriutil.mrcalc('indices.mif','1','cgm.mif')
+        mriutil.mrcalc('indices.mif','2','sgm.mif')
+        mriutil.mrcalc('indices.mif','3','wm.mif')
+        mriutil.mrcalc('indices.mif','4','csf.mif')
+        mriutil.mrcalc('indices.mif','5','path.mif')
+
         result_path = 'result.nii.gz'
         self.launchCommand('mrcat cgm.mif sgm.mif wm.mif csf.mif path.mif -quiet - -axis 3' + ' | mrconvert - ' + result_path + ' -datatype float32 -quiet')
 
@@ -195,6 +199,8 @@ class Masking(GenericTask):
                      (self.getImage(self.workingDir, 'anat',['2x2x2', 'extended', 'mask']), 'ultimate 2x2x2 extended mask'),
                      (self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
                      (os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
+                     (self.getImage(self.workingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
+                     (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
                      (self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"]), 'resample white segmented act mask'))
 
         if self.config.get('masking', "start_seeds").strip() != "":

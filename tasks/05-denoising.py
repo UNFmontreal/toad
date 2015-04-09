@@ -93,7 +93,7 @@ class Denoising(GenericTask):
     def __launchMatlabExecution(self, pyscript):
 
         self.info("Launch DWIDenoisingLPCA from matlab.")
-        self.launchMatlabCommand(pyscript)
+        self.launchMatlabCommand(pyscript, None, None, 10800)
 
 
     def isIgnore(self):
@@ -113,6 +113,7 @@ class Denoising(GenericTask):
     def isDirty(self):
         image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'))
         return image.isSomeImagesMissing()
+
 
     def qaSupplier(self):
         denoise = self.getImage(self.workingDir, "dwi", 'denoise')

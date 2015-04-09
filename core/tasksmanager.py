@@ -6,7 +6,6 @@ import os
 
 class TasksManager(object):
 
-
     def __init__(self, subject):
         self.__subject = subject
         self.__tasks = self.__initialize()
@@ -29,6 +28,19 @@ class TasksManager(object):
         """
         return self.__tasks
 
+    def getQaTasks(self):
+        """get the list of all available task who implement the methods qaSupplier
+
+        the task list is not sort so there is no guaranty that dependencies is respected
+
+        Returns
+            a list of all available task instance who implement the methods qaSupplier
+        """
+        tasks = []
+        for task in self.__tasks:
+            if "qaSupplier" in dir(task):
+                tasks.append(task)
+        return tasks
 
     def getRunnableTasks(self):
         """Return a list of task with ignored task remove.

@@ -54,6 +54,7 @@ class Fieldmap(GenericTask):
         interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
         fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
 
+        self.info('Generate a lossy magnitude file with signal loss and distortion')
         lossy = self.__simulateLossyMap(fieldmap, interpolateMask)
 
         magnitudeMask = self.__computeMap(mag, interpolateMask, 'brain')
@@ -61,16 +62,20 @@ class Fieldmap(GenericTask):
 
         warped = self.__computeForwardDistorsion(fieldmap, lossyMagnitude, interpolateMask)
 
+        self.info('Coregister the simulated lossy fieldmap with the EPI')
         matrixName = self.get("epiTo_b0fm")
         self.__coregisterEpiLossyMap(b0, warped, matrixName, lossy)
 
+        self.info('Reslice magnitude and fieldmap in the EPI space')
         invertMatrixName = self.buildName(matrixName, 'inverse', 'mat')
         self.info(mriutil.invertMatrix(matrixName, invertMatrixName))
         magnitudeIntoDwiSpace = self.__interpolateFieldmapInEpiSpace(warped, b0, invertMatrixName)
         magnitudeIntoDwiSpaceMask = self.__mask(magnitudeIntoDwiSpace)
         interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
+        self.info('Create the shift map')
         saveshift = self.__performDistortionCorrection(b0, interpolateFieldmap, magnitudeIntoDwiSpaceMask)
 
+        self.info('Perform distortion correction of EPI data')
         self.__performDistortionCorrectionToDWI(dwi, magnitudeIntoDwiSpaceMask, saveshift)
 
 
@@ -121,7 +126,9 @@ class Fieldmap(GenericTask):
 
 
     def __rescaleFieldMap(self, source):
-
+        """
+        Rescale the fieldmap to get Rad/sec
+        """
         target = self.buildName(source, 'rescale')
         try:
             deltaTE = float(self.__getMagnitudeEchoTimeDifferences())
@@ -135,6 +142,9 @@ class Fieldmap(GenericTask):
 
 
     def __createSegmentationMask(self, source):
+        """
+        Compute mask from freesurfer segmentation : aseg then morphological operations
+        """
         target = self.buildName(source, 'mask')
         nii = nibabel.load(source)
         op = ((numpy.mgrid[:5,:5,:5]-2.0)**2).sum(0)<=4
@@ -146,7 +156,9 @@ class Fieldmap(GenericTask):
 
 
     def __coregisterFieldmapToAnat(self, source, reference):
-
+        """
+        Coregister Fieldmap to T1, to get the mask in Fieldmap space
+        """
         target = self.buildName(source, "flirt")
         cmd = "flirt -in {} -ref {} -out {} -omat {} -cost {} -searchcost {} -dof {} "\
             .format(source, reference , target,
@@ -157,7 +169,9 @@ class Fieldmap(GenericTask):
 
 
     def __interpolateAnatMaskToFieldmap(self, source, mag, inverseMatrix,  mask):
-
+        """
+        Interpolate the T1 mask in Fieldmap for better preprocessing and distortion correction
+        """
         target = self.buildName(source, "mask")
         outputMatrix =self.buildName(source, "mask", "mat")
         cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} "\
@@ -171,7 +185,9 @@ class Fieldmap(GenericTask):
 
 
     def __computeFieldmap(self, source, mask):
-
+        """
+        Preprocess the fieldmap : scaling, masking, smoothing
+        """
         target = self.buildName(source, 'fieldmap')
         cmd = "fugue --asym={} --loadfmap={} --savefmap={} --mask={} --smooth3={}"\
             .format(self.__getMagnitudeEchoTimeDifferences(), source, target,  mask, self.get("smooth3"))
@@ -181,7 +197,9 @@ class Fieldmap(GenericTask):
 
 
     def __simulateLossyMap(self, source, mask):
-
+        """
+        Compute the sigloss map from the fieldmap
+        """
         target = self.buildName(source, 'sigloss')
         cmd = "sigloss --te={} -i {} -m {} -s {}".format(self.__getDwiEchoTime(), source, mask, target)
         self.launchCommand(cmd)
@@ -197,7 +215,9 @@ class Fieldmap(GenericTask):
 
 
     def __computeForwardDistorsion(self, source, lossyImage, mask):
-
+        """
+        Apply expected distortion to magnitude to improve flirt registration
+        """
         target = self.buildName(source, 'warp')
         cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(),source, lossyImage,  mask, self.__getUnwarpDirection(), target )
         self.launchCommand(cmd)
@@ -205,7 +225,9 @@ class Fieldmap(GenericTask):
 
 
     def __coregisterEpiLossyMap(self, source, reference, matrix, weighted ):
-
+        """
+        Perform coregistration of EPI onto the simulated lossy distorted fieldmap magnitude
+        """
         target = self.buildName(source, 'flirt')
         cmd = "flirt -in {} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference, matrix, self.get("dof"), weighted)
         self.launchCommand(cmd)
@@ -213,6 +235,9 @@ class Fieldmap(GenericTask):
 
 
     def __interpolateFieldmapInEpiSpace(self, source, reference, initMatrix):
+        """
+        Interpolate fieldmap in EPI space using flirt
+        """
         target = self.buildName(source, 'flirt')
         cmd = "flirt -in {} -ref {} -out {} -applyxfm -init {}".format(source, reference, target, initMatrix)
         self.launchCommand(cmd)
@@ -227,6 +252,9 @@ class Fieldmap(GenericTask):
 
 
     def __performDistortionCorrection(self, source, fieldmap, mask):
+        """
+        Compute the shiftmap and unwarp the B0 image
+        """
         unwarp = self.buildName(source, 'unwarp')
         target = self.buildName(source, 'vsm')
         cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} "\
@@ -236,7 +264,9 @@ class Fieldmap(GenericTask):
 
 
     def __performDistortionCorrectionToDWI(self, source, mask, shift):
-
+        """
+        Unwarp the whole DWI data
+        """
         target = self.buildName(source, 'unwarp')
         cmd= "fugue --in={} --mask={} --loadshift={}  --unwarpdir={} --unwarp={}  "\
             .format(source, mask, shift, self.__getUnwarpDirection(), target)
