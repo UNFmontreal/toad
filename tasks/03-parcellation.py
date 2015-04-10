@@ -36,6 +36,11 @@ class Parcellation(GenericTask):
 
         if self.getBoolean('cleanup'):
             self.__cleanup()
+        
+        #QA
+        workingDirAnat = self.getImage(self.workingDir, 'anat', 'freesurfer')
+        anatPng = self.buildName(workingDirAnat, None, 'png')
+        self.slicerPng(workingDirAnat, anatPng)
 
 
     def __submitReconAllIfNeeded(self, anatomical):
@@ -205,7 +210,7 @@ class Parcellation(GenericTask):
         aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
         brodmann = self.getImage(self.workingDir, 'brodmann')
         
-        anatFreesurferPng = self.pngSlicerImage(anatFreesurfer)
+        anatFreesurferPng = self.getImage(self.workingDir, 'anat', 'freesurfer', ext='png')
         aparcAsegPng = self.c3dSegmentation(anatFreesurfer, aparcAseg, '2', '0.5')
         brodmannPng = self.c3dSegmentation(anatFreesurfer, brodmann, '2', '0.5')
 
