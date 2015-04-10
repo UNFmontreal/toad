@@ -122,7 +122,7 @@ class Qa(object):
              
 
 
-    def plotMovement(self, parametersFile, target):
+    def plotMovement(self, parametersFile, targetTranslations, targetRotations):
         """
         """
         parameters = numpy.loadtxt(parametersFile)
@@ -132,8 +132,8 @@ class Qa(object):
         rotations = parameters[1:Vsize,3:6]
         rotations = rotations / numpy.pi * 180
     
-        plotdata = [(translations,'translation (mm)','qa/translations.png'),
-                    (rotations,'rotation (degree)','qa/rotations.png')
+        plotdata = [(translations,'translation (mm)',targetTranslations),
+                    (rotations,'rotation (degree)',targetRotations)
                     ]
     
         for data, ylabel, pngoutput in plotdata:
@@ -154,7 +154,7 @@ class Qa(object):
     def plotvectors(self, bvecsFile, target):
         """
         """
-        gifId = __idGenerator()
+        gifId = self.__idGenerator()
         fig = matplotlib.pyplot.figure(figsize=(4,4))
         ax = mpl_toolkits.mplot3d.Axes3D(fig)
         matplotlib.pyplot.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.001)
@@ -186,7 +186,7 @@ class Qa(object):
         matplotlib.pyplot.close()
         matplotlib.rcdefaults()
     
-        __imageList2Gif(imageList, target, 10)
+        self.__imageList2Gif(imageList, target, 10)
     
         #Cleaning temp files
         cmd = 'rm {}*.png'.format(gifId)
