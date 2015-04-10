@@ -30,8 +30,8 @@ class Preparation(GenericTask):
             self.info("Linking {} to {}".format(dwi, util.symlink(dwi, self.workingDir)))
 
         images = Images((self.getImage(self.dependDir, 'anat'),'high resolution'),
-                    (self.getImage(self.dependDir, 'b0PA'),'B0 posterior to anterior'),
-                    (self.getImage(self.dependDir, 'b0AP'),'B0 anterior to posterior'),
+                    (self.getImage(self.dependDir, 'b0_pa'),'B0 posterior to anterior'),
+                    (self.getImage(self.dependDir, 'b0_ap'),'B0 anterior to posterior'),
                     (self.getImage(self.dependDir, 'mag'),'MR magnitude'),
                     (self.getImage(self.dependDir, 'phase'),'MR phase '),
                     (self.getImage(self.dependDir,'aparc_aseg'),'parcellation'),

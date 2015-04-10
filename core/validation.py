@@ -180,8 +180,8 @@ class Validation(object):
                   'left hemisphere ribbon': util.getImage(self.config, self.workingDir, 'lh_ribbon'),
                   'right hemisphere ribbon': util.getImage(self.config, self.workingDir, 'rh_ribbon'),
                   'brodmann': util.getImage(self.config, self.workingDir, 'brodmann'),
-                  "posterior to anterior b0 ": util.getImage(self.config, self.workingDir, 'b0PA'),
-                  "anterior to posterior b0": util.getImage(self.config, self.workingDir, 'b0AP')}
+                  "posterior to anterior b0 ": util.getImage(self.config, self.workingDir, 'b0_ap'),
+                  "anterior to posterior b0": util.getImage(self.config, self.workingDir, 'b0_pa')}
 
         for key, value in images.iteritems():
             if value:
