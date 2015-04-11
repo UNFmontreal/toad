@@ -117,8 +117,8 @@ def __chooseFolder(folders, question):
 
 if __name__ == '__main__':
 
-    #@TODO add custom prefix name into config.cfg file
-
+    #@TODO add custom prefix capability name into config.cfg file
+    #@TODO none unf options, reshuffle dicom
     #parse arguments provide in command line
     arguments = __parseArguments()
 
@@ -136,8 +136,6 @@ if __name__ == '__main__':
         subjectName = answer
 
     #destination folder
-
-
 
     #  Get the list of subjects folderss
     mriDirs = __listMriDirectories(rootDir)
@@ -168,7 +166,7 @@ if __name__ == '__main__':
                     print cmd
                     util.launchCommand(cmd)
         else:
-            cmd = "mrconvert {0} {1}.nii.gz -stride {2}".format(map[sequence][1], name, "1,2,3")
+            cmd = "mrconvert {0} {1}.nii.gz -stride {2}".format(map[sequence][1].replace(" ","\ "), name, "1,2,3")
             print cmd
             util.launchCommand(cmd)
 
