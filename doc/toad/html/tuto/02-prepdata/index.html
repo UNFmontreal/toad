@@ -9,11 +9,11 @@
         <link rel="canonical" href="http://www.unf-montral.ca/tuto/02-prepdata/index.html">
         <link rel="shortcut icon" href="../../img/favicon.ico">
 
-        <title>02-Préparation des données - TOAD</title>
+	<title>02-Préparation des données - TOAD</title>
 
         <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../../css/font-awesome-4.0.3.css" rel="stylesheet">
-        <link href="../../css/prettify-1.0.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
         <link href="../../css/base.css" rel="stylesheet">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -21,6 +21,8 @@
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
             <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
+
+        
     </head>
 
     <body>
@@ -46,6 +48,12 @@
         <div class="navbar-collapse collapse">
             <!-- Main navigation -->
             <ul class="nav navbar-nav">
+            
+            
+                <li >
+                    <a href="../../index.html">Home</a>
+                </li>
+            
             
             
                 <li class="dropdown active">
@@ -78,63 +86,67 @@
                     <ul class="dropdown-menu">
                     
                         <li >
-                            <a href="../../tasks/01-Preparation/index.html">01-Preparation</a>
+                            <a href="../../tasks/01-Backup/index.html">01-Backup</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/02-Parcellation/index.html">02-Parcellation</a>
+                            <a href="../../tasks/02-Preparation/index.html">02-Preparation</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/03-Unwarping/index.html">03-Unwarping</a>
+                            <a href="../../tasks/03-Parcellation/index.html">03-Parcellation</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/04-Denoising/index.html">04-Denoising</a>
+                            <a href="../../tasks/04-Eddy/index.html">04-Eddy</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/05-Preprocessing/index.html">05-Preprocessing</a>
+                            <a href="../../tasks/04-Fieldmap/index.html">04-Fieldmap</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/06-Registration/index.html">06-Registration</a>
+                            <a href="../../tasks/05-Denoising/index.html">05-Denoising</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/07-Masking/index.html">07-Masking</a>
+                            <a href="../../tasks/06-Preprocessing/index.html">06-Preprocessing</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/08-Dtifit/index.html">08-Dtifit</a>
+                            <a href="../../tasks/07-Registration/index.html">07-Registration</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/09-Tensors/index.html">09-Tensors</a>
+                            <a href="../../tasks/08-Masking/index.html">08-Masking</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/10-Tensorsmetric/index.html">10-Tensorsmetric</a>
+                            <a href="../../tasks/09-Tensorfsl/index.html">09-Tensorfsl</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/11-Tensorstractography/index.html">11-Tensorstractography</a>
+                            <a href="../../tasks/10-Tensormrtrix/index.html">10-Tensormrtrix</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/12-Hardi/index.html">12-Hardi</a>
+                            <a href="../../tasks/11-Tensordipy/index.html">11-Tensordipy</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/13-Hardimetric/index.html">13-Hardimetric</a>
+                            <a href="../../tasks/12-Hardimrtrix/index.html">12-Hardimrtrix</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/14-Harditractography/index.html">14-Harditractography</a>
+                            <a href="../../tasks/13-Hardidipy/index.html">13-Hardidipy</a>
                         </li>
                     
                         <li >
-                            <a href="../../tasks/15-Qa/index.html">15-Qa</a>
+                            <a href="../../tasks/14-Tractographymrtrix/index.html">14-Tractographymrtrix</a>
+                        </li>
+                    
+                        <li >
+                            <a href="../../tasks/15-Tractographydipy/index.html">15-Tractographydipy</a>
                         </li>
                     
                     </ul>
@@ -179,9 +191,11 @@
                 </li>
                 
                 <li>
-                    <a href="http://github/unf/toad">
+                    <a href="https://github.com/UNFmontreal/toad">
                         
-                        Github
+                            <i class="fa fa-github"></i>
+                        
+                        GitHub
                     </a>
                 </li>
                 
@@ -198,9 +212,7 @@
         
             <li><a href="#type-de-donnees-et-format-des-fichiers">Type de données et format des fichiers</a></li>
         
-            <li><a href="#organisation-des-dossiers">Organisation des dossiers</a></li>
-        
-            <li><a href="#nomemclature-des-fichiers">Nomemclature des fichiers</a></li>
+            <li><a href="#preparation-des-donnees_1">Préparation des données</a></li>
         
     
     </ul>
@@ -213,55 +225,123 @@
 <h3 id="type-de-donnees">Type de données</h3>
 <p>Les analyses de diffusion nécessitent la présence d’au moins trois types de données par participant :</p>
 <ol>
-<li><strong>données anatomiques</strong> (T1, type MPRAGE) : création des masques anatomiques</li>
-<li><strong>données de diffusion</strong> (DTI) </li>
+<li><strong>données anatomiques</strong> (T1, type MPRAGE) : création des masques anatomiques, coregistration</li>
+<li><strong>données de diffusion</strong> (DWI) : faisceaux de matière blanche (extraction des fibres)</li>
 <li><strong>données d’encodage :</strong> spécification relatives aux données de diffusion</li>
 </ol>
 <p>D’autres données peuvent servir à TOAD pour le traitement des données :</p>
 <ul>
-<li><strong>inhomogénéité du champ :</strong> fichiers antérieur-postérieur et postérieur-antérieur</li>
-<li><strong>...</strong></li>
+<li><strong>...</strong> (Eddy Correction) : fichiers des gradients antérieur-postérieur ou postérieur-antérieur</li>
+<li><strong>inhomogénéité du champ</strong> (fieldmap) : ... [FIXME]</li>
 </ul>
 <h3 id="format-des-fichiers">Format des fichiers</h3>
 <p>Pour des raisons de simplicité, TOAD accepte seulement quelques formats :</p>
 <ul>
 <li>neuroimagerie : <strong>format nifti</strong> (.nii) </li>
-<li>encodage :  format <strong>MRTRIX (.b)</strong> ou séparé <strong>(.val et .vec)</strong>.</li>
+<li>encodage :  format regroupé <strong>MRTRIX (.b)</strong> ou séparé en valeurs et vecteurs <strong>(.val et .vec)</strong>.</li>
 </ul>
-<p>TOAD a besoin que les données soient organisées d’une certaine manière afin de d’extraire les différents types d’images (anatomitiques, diffusions, etc.) pour les analyses.
-De même, s‘il y a plusieurs participants à analyser, il faut également respecter une certaine organisation tel que présenté ci-dessous.</p>
-<h2 id="organisation-des-dossiers">Organisation des dossiers</h2>
-<p>TOAD s’appuie sur une nomemclature régulière pour trouver les fichiers à utiliser dans les analyses.
-Pour ce faire, vous devez regrouper toutes les données dans un seul dossier (i.e. le projet) et ensuite chacune des images des participants dans un dossier différent. </p>
-<pre><code>- PROJET
-|- SUJ1
-    |- anat.nii
-    |- dti.nii
-    |- enco.b
-|- SUJ2
-|- SUJ3
-|- ...
-</code></pre>
-<h2 id="nomemclature-des-fichiers">Nomemclature des fichiers</h2>
-<p>TOAD doit identifier quels fichiers correspondent à quels types d’images. 
-Pour ce faire, TOAD se base sur des racines des noms des fichiers qui doivent être communes pour chaque type de fichiers.
-Ainsi, toutes les images anatomiques devront commencer par une même racine comme "MPRAGE","ANAT", "T1", etc.
-De même, toutes les images de diffusions devront commencer par une même racine comme "DTI",  toutes les fichers d’encodage comme "ENCO", etc.</p>
-<p>Par défaut, TOAD considère les noms suivants :</p>
+<h2 id="preparation-des-donnees_1">Préparation des données</h2>
+<h3 id="conversion-des-fichiers">Conversion des fichiers</h3>
+<p>TOAD propose un logiciel de conversion des données dénommé <code>unf2toad</code>. 
+Non seulement <code>unf2toad</code> va pouvoir convertir les données brutes d’un participant (.dicom ou .tar.gz issu de l’UNF) ou d’un groupe de participants, mais le logiciel va aussi appliqué une nomemclature commune aux différents types de fichier.
+Cette <a href="#nomenclature">nomnmclature</a> peut être personnalisée, <code>unf2toad</code> va alors créer le fichier de configuration nécessaire au lancement de TOAD. 
+Cette nomencalture commune est nécessaire pour que TOAD puisse identifier correctement les fichiers à utiliser. </p>
+<h3 id="lancer-la-conversion">Lancer la conversion</h3>
+<p>Pour lancer la conversion des données, il suffit de suivre la procédure suivante :</p>
+<ol>
+<li>
+<p>se connecter à un des serveurs de l’UNF (stark ou magma)</p>
+<p><code>shell
+ssh -Y usersname@stark.criugm.ca</code></p>
+</li>
+<li>
+<p>naviguer jusqu’au dossier contenant les données à convertir (dossier contenant le ou les sessions UNF <code>*.tar.gz</code> ou les dossiers des sujets) </p>
+<p><code>shell
+cd /grpname/username/projectname</code></p>
+</li>
+<li>
+<p>lancer la commander <code>unf2toad .</code> où le point indique d’utiliser le dossier courrant pour la conversion. Vous pouvez remplacer ce point par le chemin vers le ou les dossiers à convertir</p>
+<p><code>shell
+unf2toad .</code></p>
+</li>
+<li>
+<p>répondre aux différentes questions posées par le logiciel. </p>
+</li>
+</ol>
+<h3 id="donnees-deja-converties">Données déjà converties</h3>
+<p>Si vous disposez de données déjà converties au format nifti ainsi que des fichiers d’encodage, vous pouvez utiliser TOAD sans passer la conversion au préalable.
+Nous vous recommandons de regrouper les données de la façon suivante :</p>
 <ul>
-<li>Anatomique :</li>
-<li>Diffusion :</li>
-<li>Encodage :</li>
+<li>un dossier parent contenant tous les dossiers participants</li>
+<li>chaque dossier participant contenant tous les fichiers de neuroimagerie (*.nii, *.b) </li>
 </ul>
-<p>Cependant, vous pouvez facilement préciser à TOAD quels nomenclatures suivrent en créant/modifant le fichier de configuration.</p>
-</div>
+<pre><code class="shell">    PROJET  
+    |- Subject1  
+        |- anat_subject1_.nii  
+        |- dwi_subject1_.nii  
+        |- b0_subject1_.b  
+    |- Subject2  
+    |- Subject3  
+    |- ...  
+</code></pre>
+
+<p><strong><em>Attention :</em></strong> <em>dans ce cas de figure, il est de votre responsabilité de vous assurer les données ont été correctement converties et que le fichier d’encodage respecte bien les normes habituelles (strikes...). 
+Afin d’éviter tout problème, si vous disposez encore des données brutes, nous recommandons fortement de reconvertir les données avec le logiciel <code>unf2toad</code>.</em></p>
+<h3 id="nomenclature-des-fichiers"><a name="nomenclature"></a> Nomenclature des fichiers</h3>
+<p>TOAD doit identifier quels fichiers correspondent à quels types d’images. 
+Pour ce faire, TOAD se base sur des préfixes des noms des fichiers qui doivent être communs pour chaque type de fichiers.
+Ainsi, toutes les images anatomiques devront commencer par un même préfixe, par défaut TOAD cherchera des fichiers commençant par <code>anat</code>.
+Pour les images de diffusions, TOAD cherchera des fichiers commençant par <code>dwi</code> et pour l’encodage à <code>b0</code>. 
+Lorsque les données antérieur/postérieur ou postérieur/antérieur sont disponibles, TOAD cherchera comme préfixe <code>b0_ap</code> et <code>b0_pa</code>.</p>
+<p>Ainsi, les fichiers pour un participant dont le code est PSY01 seront :</p>
+<pre><code class="shell">PSY01
+|- anat_PSY01.nii
+|- dwi_PSY01.nii
+|- b0_PSY01.nii
+|- b0_ap_PSY01.nii
+</code></pre>
+
+<p>Vous êtes libres cependant d’utiliser n’importe quelle nomenclature du moment qu’elle soit indiquée dans le fichier de configuration <code>config.cfg</code>. 
+Cette nomenclature devra être constante à travers les sujets à moins de spécifier un nouveau fichier de configuration au sein du dossier du participant en question.</p>
+<p><br/>
+<strong>Tableau 1 :</strong> synthèse des préfixes par défaut utilisé par TOAD</p>
+<table>
+<thead>
+<tr>
+<th>Type de fichier</th>
+<th>Préfixe par défaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anatomique</strong> (T1)</td>
+<td>anat_</td>
+</tr>
+<tr>
+<td><strong>Diffusion</strong> (DWI)</td>
+<td>dwi_</td>
+</tr>
+<tr>
+<td><strong>Carte de B0</strong></td>
+<td>b0_</td>
+</tr>
+<tr>
+<td><strong>Carte de BO antérieur-postérieur</strong></td>
+<td>b0_ap_</td>
+</tr>
+<tr>
+<td><strong>Carte de B0 postérieur-antérieur</strong></td>
+<td>b0_pa_</td>
+</tr>
+</tbody>
+</table></div>
         </div>
 
         
 
-        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <script src="../../js/jquery-1.10.2.min.js"></script>
         <script src="../../js/bootstrap-3.0.3.min.js"></script>
-        <script src="../../js/prettify-1.0.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script>
         <script src="../../js/base.js"></script>
     </body>
 </html>
