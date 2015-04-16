@@ -22,6 +22,7 @@ __status__ = "Development"
 
 
 class Session(object):
+
     def __init__(self):
         self.name = None
         self.sequence = None
@@ -124,11 +125,13 @@ class Unftoad(object):
                 names.append(session.name)
         return names
 
+
     def __getSession(self, name, sequence):
         for session in self.__sessions:
             if session.name == name and session.sequence == sequence:
                 return session
         return None
+
 
     def __parseArguments(self):
         """Prepare and parse user friendly command line arguments for sys.argv.
@@ -142,7 +145,6 @@ class Unftoad(object):
 
              """)
         parser.add_argument("sources", nargs='+', help="A list or a single UNF mri session")
-        #parser.add_argument("subjectName",  nargs='?', help="Specify a subject name")
         parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                                 help="Specify the location of an alternative the config.cfg as input. Default: etc/config.cfg")
         parser.add_argument("-n","--noConfig", help="Do not produce the config.cfg file into the root folder", action="store_true")
@@ -257,6 +259,7 @@ class Unftoad(object):
         if numberOfDicoms == 0:
             print "\nNo dicom image found\n"
             sys.exit()
+
 
     def __chooseValue(self, aList, question):
         structure = []
