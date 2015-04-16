@@ -1,26 +1,35 @@
 site_name: TOAD
 theme: flatly
+site_url: http://www.unf-montral.ca/
+repo_url: https://github.com/UNFmontreal/toad
+site_description: documentation of toad, diffusion analyses toolkit 
+docs_dir: src
+site_dir: html
+use_directory_urls: false
 pages:
 - [index.md, Home]
-- [tuto/01-prerequis.md, Tutoriel, 01-Pré-requis]
-- [tuto/02-prepdata.md, Tutoriel, 02-Préparation des données]
-- [tuto/03-toadtuto.md, Tutoriel, 03-TOAD]
-- [tuto/04-visualisation.md, Tutoriel, 04-Visualisation]
+- [tutorial/01-prerequis.md, Tutoriel, 01-Pré-requis]
+- [tutorial/02-prepdata.md, Tutoriel, 02-Préparation des données]
+- [tutorial/03-toadtuto.md, Tutoriel, 03-TOAD]
+- [tutorial/04-visualisation.md, Tutoriel, 04-Visualisation]
+- [tasks/01-Backup.md, Tâches, 01-Backup]
+- [tasks/02-Preparation.md, Tâches, 02-Preparation]
+- [tasks/03-Parcellation.md, Tâches, 03-Parcellation]
+- [tasks/04-Eddy.md, Tâches, 04-Eddy]
+- [tasks/04-Fieldmap.md, Tâches, 04-Fieldmap]
+- [tasks/05-Denoising.md, Tâches, 05-Denoising]
+- [tasks/06-Preprocessing.md, Tâches, 06-Preprocessing]
+- [tasks/07-Registration.md, Tâches, 07-Registration]
+- [tasks/08-Masking.md, Tâches, 08-Masking]
+- [tasks/09-Tensorfsl.md, Tâches, 09-Tensorfsl]
+- [tasks/10-Tensormrtrix.md, Tâches, 10-Tensormrtrix]
+- [tasks/11-Tensordipy.md, Tâches, 11-Tensordipy]
+- [tasks/12-Hardimrtrix.md, Tâches, 12-Hardimrtrix]
+- [tasks/13-Hardidipy.md, Tâches, 13-Hardidipy]
+- [tasks/14-Tractographymrtrix.md, Tâches, 14-Tractographymrtrix]
+- [tasks/15-Tractographydipy.md, Tâches, 15-Tractographydipy]
 - [qa/01-QA_T1.md, QA, 01-Anatomy]
 - [qa/02-QA_DWI.md, QA, 02-Diffusion]
 - [qa/03-QA_XX.md, QA, 03-Registration]
-- [tasks/01-Preparation.md, Tâches, 01-Preparation]
-- [tasks/02-Unwarping.md, Tâches, 02-Unwarping]
-- [tasks/03-Denoising.md, Tâches, 03-Denoising]
-- [tasks/04-Preprocessing.md, Tâches, 04-Preprocessing]
-- [tasks/05-Parcellation.md, Tâches, 05-Parcellation]
-- [tasks/06-Registration.md, Tâches, 06-Registration]
-- [tasks/07-Masking.md, Tâches, 07-Masking]
-- [tasks/08-Dtifit.md, Tâches, 08-Dtifit]
-- [tasks/09-Tensors.md, Tâches, 09-Tensors]
-- [tasks/10-Tensorsmetric.md, Tâches, 10-Tensorsmetric]
-- [tasks/11-Tensorstractography.md, Tâches, 11-Tensorstractography]
-- [tasks/12-Hardi.md, Tâches, 12-Hardi]
-- [tasks/13-Hardimetric.md, Tâches, 13-Hardimetric]
-- [tasks/14-Harditractography.md, Tâches, 14-Harditractography]
-- [tasks/15-Qa.md, Tâches, 15-Qa]
+
+
