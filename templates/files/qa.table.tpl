@@ -1,11 +1,5 @@
-        <p>
             <table>
-                <tr>
-                    <td>$title</td>
-                </tr>
-                <tr>
-                    <td>$image</td>
-                </tr>
-$legend
+            <tr><td><img src="$imageLink"/></td></tr>
+            <tr><td>$legend</td></tr>
             </table>
-        </p>
+
