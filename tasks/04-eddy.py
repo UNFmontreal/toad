@@ -25,8 +25,8 @@ class Eddy(GenericTask):
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi')
-        b0AP= self.getImage(self.dependDir, 'b0AP')
-        b0PA= self.getImage(self.dependDir, 'b0PA')
+        b0AP= self.getImage(self.dependDir, 'b0_ap')
+        b0PA= self.getImage(self.dependDir, 'b0_pa')
         bEnc=  self.getImage(self.dependDir, 'grad',  None, 'b')
         bVals=  self.getImage(self.dependDir, 'grad',  None, 'bvals')
         bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvecs')
