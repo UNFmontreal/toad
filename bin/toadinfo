@@ -35,6 +35,7 @@ def parseArguments():
 
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Write output into a config.cfg file or create a new one if it doesn't exist")
+    parser.add_argument("-f","--fieldmap", help="Add a section for fieldmap into the config file", action="store_true")
     args = parser.parse_args()
     return args
 
@@ -100,19 +101,20 @@ def __getEchoSpacing(source, epiFactor, patFactor = 1):
     try:
         bpppe = header.csa_header['tags']['BandwidthPerPixelPhaseEncode']['items'][0]
         echoSpacing = 1/(epiFactor*bpppe)*1000 *patFactor
+        echoTime = header.get('EchoTime')
 
     except AttributeError:
         print "Cannot read csa header from ", source
         return (None,None)
 
-    except IndexError:
         print "Some field(s) cannot be found in the header"
+    except IndexError:
         return (None,None)
 
-    return echoSpacing
+    return echoSpacing, echoTime
 
 
-def writeConfig(source, phaseEncDir, epiFactor, echoSpacing):
+def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
     config = ConfigParser.ConfigParser()
     if os.path.exists(source):
         config.read(source)
@@ -127,6 +129,10 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing):
     if echoSpacing is not None:
         config.set("eddy", "echo_spacing", echoSpacing)
 
+    if echoTime is not None:
+        if not config.has_section("fieldmap"):
+            config.add_section("fieldmap")
+            config.set("fieldmap", "echo_time_dwi", echoTime)
     with open(source, 'w') as w:
        config.write(w)
 
@@ -141,11 +147,12 @@ if __name__ == '__main__':
     phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
     patFactor = __getPatFactor(arguments.dcmFile)
     epiFactor = __getEpiFactor(arguments.dcmFile)
-    echoSpacing = __getEchoSpacing(arguments.dcmFile, epiFactor, patFactor)
+    echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, epiFactor, patFactor)
 
-    if arguments.config:
+    if arguments.config and arguments.fieldmap:
+        writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)
+    elif arguments.config and not arguments.fieldmap:
         writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing)
-
     if phaseEncDir is not None:
         if phaseEncDir==0:
             print "\tPhase encoding: {}, P>>A".format(phaseEncDir)
@@ -163,3 +170,6 @@ if __name__ == '__main__':
 
     if echoSpacing is not None:
         print "\tEchoSpacing: ", echoSpacing, " ms"
+
+    if echoTime is not None and arguments.fieldmap:
+        print "\tEchoTime: ", echoTime, " ms"

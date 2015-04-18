@@ -44,7 +44,7 @@ def parseArguments():
 
 if __name__ == '__main__':
 
-    #@TODO implment lut file
+    #@TODO implement lut file
     title = None
     lut = None
     label = None

@@ -39,7 +39,7 @@ Pour lancer la conversion des données, il suffit de suivre la procédure suivan
 
 1. se connecter à un des serveurs de l’UNF (stark ou magma)
 
-    ```# ssh -Y usersname@stark.criugm.ca
+    ```# ssh -Y usersname@stark.criugm.qc.ca
     ```
 
 2. naviguer jusqu’au dossier contenant les données à convertir (dossier contenant le ou les sessions UNF `*.tar.gz` ou les dossiers des sujets) 

@@ -356,23 +356,28 @@ def parseTemplate(dict, template):
         return Template(f.read()).safe_substitute(dict)
 
 
-def displayYesNoMessage(msg, question = "Continue? (y or n)"):
+def displayYesNoMessage(msg, question = "Continue? (y or n)", default = None):
     """Utility function that display a convenient message, ask a question, and record the answer
 
     this function will loop until character y or n is press
     Args:
        msg: A message to display before prompt
        question: A yes no question. the answer must be y or n
-
+       default: Return a value by defaults if user do not enter any input value = ("yes","no")
     Returns:
        A boolean True if the user press y, False otherwise
     """
     print msg
     while True:
         choice = raw_input(question)
-        if choice.lower() == 'y':
+        if choice.strip() == "" and default is not None:
+            if default == 'yes':
+                return True
+            else:
+                return False
+        if choice.lower().strip() == 'y':
             return True
-        elif choice.lower() == 'n':
+        elif choice.lower().strip() == 'n':
             return False
 
 
