@@ -223,16 +223,13 @@ class TractographyMrtrix(GenericTask):
 
     def qaSupplier(self):
 
-        tckgenDet = self.getImage(self.workingDir, 'dwi', 'tckgen_det', 'csv')
-        tckgenProb = self.getImage(self.workingDir, 'dwi', 'tckgen_prob', 'csv')
-        fodProb = self.getImage(self.workingDir, 'dwi', ['fod', 'tckgen_prob'], 'csv')
+        tckgenDet = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome' ], 'csv')
+        tckgenProb = self.getImage(self.workingDir, 'dwi', ['tensor_prob','connectome'], 'csv')
+        fodProb = self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome'], 'csv')
 
         tckgenDetPlot = mriutil.plotConnectome(tckgenDet, self.buildName(tckgenDet, None, "png"))
         tckgenProbPlot = mriutil.plotConnectome(tckgenProb, self.buildName(tckgenProb, None, "png"))
         fodProbPlot = mriutil.plotConnectome(fodProb, self.buildName(fodProb, None, "png"))
-
-
-
 
         images = Images((tckgenDetPlot, 'Connectome matrix from a deterministic streamlines'),
                        (tckgenProbPlot,'Connectome matrix from a probabilistic streamlines'),

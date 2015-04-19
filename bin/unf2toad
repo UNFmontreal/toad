@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import ConfigParser
-from aetypes import Boolean
 import tempfile
 import argparse
 import tarfile
