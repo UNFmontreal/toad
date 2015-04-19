@@ -132,7 +132,8 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
     if echoTime is not None:
         if not config.has_section("fieldmap"):
             config.add_section("fieldmap")
-            config.set("fieldmap", "echo_time_dwi", echoTime)
+        config.set("fieldmap", "echo_time_dwi", echoTime)
+
     with open(source, 'w') as w:
        config.write(w)
 
