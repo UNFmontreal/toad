@@ -50,11 +50,12 @@ class Preparation(GenericTask):
 
         #QA
         workingDirAnat = self.getImage(self.workingDir, 'anat')
-        anatPng = self.buildName(workingDirAnat, None, 'png')
-        self.slicerPng(workingDirAnat, anatPng)
-
         workingDirDwi = self.getImage(self.workingDir, 'dwi')
+
+        anatPng = self.buildName(workingDirAnat, None, 'png')
         dwiGif = self.buildName(workingDirDwi, None, 'gif')
+
+        self.slicerPng(workingDirAnat, anatPng)
         self.slicerGif(workingDirDwi, dwiGif)
 
 

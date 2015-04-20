@@ -39,8 +39,17 @@ class Parcellation(GenericTask):
         
         #QA
         workingDirAnat = self.getImage(self.workingDir, 'anat', 'freesurfer')
+        aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
+        brodmann = self.getImage(self.workingDir, 'brodmann')
+        
         anatPng = self.buildName(workingDirAnat, None, 'png')
+        aparcAsegPng = self.buildName(aparcAseg, None, 'png')
+        brodmannPng = self.buildName(brodmann, None, 'png')
+
         self.slicerPng(workingDirAnat, anatPng)
+        self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg)
+        self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann)
+
 
 
     def __submitReconAllIfNeeded(self, anatomical):
@@ -205,14 +214,10 @@ class Parcellation(GenericTask):
 
 
     def qaSupplier(self):
-
-        anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
-        aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
-        brodmann = self.getImage(self.workingDir, 'brodmann')
         
         anatFreesurferPng = self.getImage(self.workingDir, 'anat', 'freesurfer', ext='png')
-        aparcAsegPng = self.c3dSegmentation(anatFreesurfer, aparcAseg, '2', '0.5')
-        brodmannPng = self.c3dSegmentation(anatFreesurfer, brodmann, '2', '0.5')
+        aparcAsegPng = self.getImage(self.workingDir, 'aparc_aseg', ext='png')
+        brodmannPng = self.getImage(self.workingDir, 'brodmann', ext='png')
 
         return Images((anatFreesurferPng,'High resolution anatomical image of freesurfer'),
                        (aparcAsegPng,'aparcaseg segmentaion from freesurfer'),

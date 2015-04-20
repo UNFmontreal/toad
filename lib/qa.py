@@ -14,13 +14,13 @@ import mpl_toolkits.mplot3d
 
 class Qa(object):
 
-    def slicerPng(self, source, target, optionalOverlay=None, vmax=None, isData=False):
+    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, isData=False):
         """Utility method to slice a 3d image
         Args:
             source : background image
             target : output in png format
             optionalOverlay : optional overlay: put the edges of the image on top of the background
-            vmax : to fixe the colorbar max, if None clicerPng take the max of the background
+            vmax : to fix the colorbar max, if None slicerPng take the max of the background
         """
         if isData:
             imageData = source
@@ -40,20 +40,33 @@ class Qa(object):
                                         vmax=vmax, \
                                         cmap=matplotlib.pyplot.cm.gray)
     
-        if optionalOverlay != None:
-            overlay = nibabel.load(optionalOverlay)
-            overlayData = overlay.get_data()
-            overlaySlices = self.__image3d2slices(overlayData, width)
-            overlayImshow = functools.partial(matplotlib.pyplot.contour, \
-                                              [0], \
-                                              colors='r')
-    
+        if maskOverlay != None:
+            mask = nibabel.load(maskOverlay)
+            maskData = mask.get_data()
+            maskSlices = self.__image3d2slices(maskData, width)
+
+        if segOverlay != None:
+            seg = nibabel.load(segOverlay)
+            segData = seg.get_data()
+            segSlices = self.__image3d2slices(segData, width)
+            segSlices = [numpy.ma.masked_where(segSlices[dim] == 0, segSlices[dim]) for dim in range(3)]
+            lutFiles = os.path.join(self.toadDir, "templates/lookup_tables/",'FreeSurferColorLUT_ItkSnap.txt')
+            lutData = numpy.loadtxt(lutFiles, usecols=(0,1,2,3))
+            lutCmap = matplotlib.colors.ListedColormap(lutData[:,1:]/256)
+            norm = matplotlib.colors.BoundaryNorm(lutData[:,0], lutCmap.N)
+            segImshow = functools.partial(matplotlib.pyplot.imshow, \
+                                          alpha=0.6, \
+                                          norm=norm, \
+                                          cmap=lutCmap)
+ 
         #show_slices
         for dim in range(3):
             ax = matplotlib.pyplot.subplot(3, 1, dim+1)
             imageImshow(numpy.rot90(slices[dim]))
-            if optionalOverlay != None:
-                matplotlib.pyplot.contour(numpy.rot90(overlaySlices[dim]), [0], colors='r')
+            if maskOverlay != None:
+                matplotlib.pyplot.contour(numpy.rot90(maskSlices[dim]), [0], colors='r')
+            if segOverlay != None:
+                segImshow(numpy.rot90(segSlices[dim]))
             ax.set_axis_off()
     
         matplotlib.pyplot.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.001)
@@ -93,9 +106,8 @@ class Qa(object):
 
 
 
-    def slicerGif(self, source, target, gifSpeed=30):
+    def slicerGif(self, source, target, gifSpeed=30, vmax=100):
         """Create a animated gif from a 4d NIfTI
-        if target is None, the output filename will be base on source name
         Args:
             source: 4D NIfTI image
             target: outputfile gif name
@@ -105,7 +117,6 @@ class Qa(object):
     
         image = nibabel.load(source)
         imageData = image.get_data()
-        vmax = numpy.max(imageData[:,:,:,1:]) * .8
     
         imageList = []
         for num in range(imageData.shape[-1]):
