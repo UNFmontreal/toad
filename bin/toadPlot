@@ -3,7 +3,7 @@
 import argparse, sys, os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from lib.mriutil import plotConnectome
+from lib import arguments, mriutil
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright 2014, The Toad Project"
@@ -22,7 +22,7 @@ def parseArguments():
     Returns:
         a args stucture containing command lines arguments
     """
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+    parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description ="""
          Basic tool to create plot
          """)
@@ -68,4 +68,4 @@ if __name__ == '__main__':
         grid = arguments.grid
 
     print arguments
-    plotConnectome(arguments.source, arguments.target, lut, title, label, skiprows, usecols, grid)
+    mriutil.plotConnectome(arguments.source, arguments.target, lut, title, label, skiprows, usecols, grid)

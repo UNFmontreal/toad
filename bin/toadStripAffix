@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import argparse
+import sys
 import os
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+from lib import arguments
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright 2014, The Toad Project"
@@ -20,7 +24,7 @@ def parseArguments():
     Returns:
         a args stucture containing command lines arguments
     """
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+    parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description ="""
         Delete an expression from a list of filename.
         This tool is usefull for tbss analysis where filenames are sensitive.\n
@@ -33,7 +37,7 @@ def parseArguments():
     parser.add_argument('prefix', help="Specify an abbreviation")
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the files, wildcard * ? are accepted")
     parser.add_argument("-e", "--execute", help="Proceed to the operation", action="store_true")
-    args = parser.parse_args('-h'.split())
+    args = parser.parse_args()
 
     return args
 
