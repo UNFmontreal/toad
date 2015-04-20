@@ -16,13 +16,14 @@ __author__ = "Guillaume Vallet, Mathieu Desrosiers"
 __copyright__ = "Copyright 2015, The Toad Project"
 __credits__ = ["Guillaume Vallet", "Mathieu Desrosiers"]
 __license__ = "GPL"
-__version__ = "0.0"
+__version__ = "1.0"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Development"
 
 
 class Session(object):
+
     def __init__(self):
         self.name = None
         self.dirty = None
@@ -50,13 +51,13 @@ class Sequence(object):
                 and (self.session, self.sequence,  self.path) == (other.session, other.sequence, self.path))
 
 
-
 class Unftoad(object):
 
-    __prefixsOrder = OrderedDict([('anat', "Anatomical (T1--MPRAGE)"),
+    __initialPrefixs = OrderedDict([('anat', "Anatomical (T1--MPRAGE)"),
                                     ('dwi', "Diffusion weighted image (DWI - DTI)"),
                                     ('b0_ap', "B0 AP (anterior -> posterior)"),
                                     ('b0_pa', "B0 PA (posterior -> anterior)")])
+
     __fieldmap = OrderedDict([('mag', "Magnitude fieldmap"),
                                ('phase', "Phase fieldmap")])
 
@@ -68,21 +69,18 @@ class Unftoad(object):
         self.__sessions = OrderedDict()
         self.__sequences = OrderedDict()
 
-
+    #@TODO none unf options, reshuffle dicom
+    #@TODO a user may choose is strides values
     def run(self):
-        #@TODO none unf options, reshuffle dicom
-        #@TODO a user may choose is strides values
-        #@TODO manage illegal entry
+
         self.__arguments = self.__parseArguments()
+        self.__extractPrefixsFromConfig()
         rootDirectories = self.__extractRootsDirectory(self.__arguments.sources)
         self.__initializeStructures(rootDirectories)
 
-        #look if fieldmap support is needed
-        if self.__arguments.fieldmap:
-            self.__prefixsOrder.update(self.__fieldmap)
-        self.__extractPrefixsFromConfig()
 
         while len(self.__sessions) > 0:
+
             if len(self.__sessions) == 1:
                 index = 0
             else:
@@ -104,24 +102,21 @@ class Unftoad(object):
                 os.makedirs(targetDir)
 
             configFile = "{}/config.cfg".format(targetDir)
-            sequences = self.__filterSequencesForASession(session)
-            sequencesToConvert={}
-            for (index, value) in self.__prefixsOrder.iteritems():
-                choice = self.__chooseOption(sequences, "Please select the {} image\n".format(value))
-                if choice != -1:
-                    sequencesToConvert[index] = sequences.items()[choice][1]
 
-            if len(sequencesToConvert) > 0:
+            sequences = self.__getSequencesBySession(session)
+            selectedSequences = self.__getSelectedSequences(sequences)
 
-                isPrefixHaveBeenChange = self.__isUserDefinedCustomPrefixs(sequencesToConvert)
+            if len(selectedSequences) > 0:
+
+                isPrefixHaveBeenChange = self.__isUserDefinedCustomPrefixs(selectedSequences)
                 if isPrefixHaveBeenChange:
-                    prefixs = self.__defineCustumPrefixs()
+                    prefixs = self.__defineCustomPrefixs()
                     if not self.__arguments.noConfig:
                         self.__setPrefixInConfigFiles(prefixs, configFile)
                 else:
                     prefixs = self.__prefixs
 
-                for prefix, sequence in sequencesToConvert.iteritems():
+                for prefix, sequence in selectedSequences.iteritems():
                     if prefix == 'dwi':
                         self.__convertDwi(sequence, subjectName, prefixs[prefix], targetDir, configFile)
                     elif prefix == 'mag':
@@ -141,10 +136,8 @@ class Unftoad(object):
             if archive is not None:
                 shutil.rmtree(directory)
 
-
     def __parseArguments(self):
         """Prepare and parse user friendly command line arguments for sys.argv.
-
 
         Returns:
             a args stucture containing command lines arguments
@@ -168,7 +161,10 @@ class Unftoad(object):
 
 
     def __extractRootsDirectory(self, sources):
-        """
+        """ define directories who qualify for dicom extraction
+
+        Args
+            source: a list of  source directory as specified in command line
 
         Returns
             A list of tuples. Each tuple have 2 elements
@@ -198,6 +194,10 @@ class Unftoad(object):
 
     def __initializeStructures(self, directories):
         """Initialize session end sequences structures
+
+        Args:
+            directories: A list of tuples. first element is the session directory, second element is the source
+                            archive name if the session is inside an archive, None otherwise
 
         """
         numberOfDicoms = 0
@@ -231,7 +231,7 @@ class Unftoad(object):
         self.__sessions =  sessions
 
 
-    def __filterSequencesForASession(self, session):
+    def __getSequencesBySession(self, session):
 
         sequences = OrderedDict()
         for index, value in self.__sequences.iteritems():
@@ -240,20 +240,29 @@ class Unftoad(object):
         return sequences
 
 
+    def __getSelectedSequences(self, sequences):
+        selectedSequences={}
+        for (index, value) in self.__initialPrefixs.iteritems():
+            choice = self.__chooseOption(sequences, "Please select the {} image\n".format(value))
+            if choice != -1:
+                selectedSequences[index] = sequences.items()[choice][1]
+        return selectedSequences
+
+
     def __isUserDefinedCustomPrefixs(self, sequences):
         self.__printQuestion("Whould you like to change default prefix at the beginning of the filename? Actual are ...\n\n")
         message = ""
         for index, value in self.__prefixs.iteritems():
             if sequences.has_key(index):
-                        message+= "\t{} will be prefix: {} \n".format(self.__prefixsOrder[index], value)
+                        message+= "\t{} will be prefix: {} \n".format(self.__initialPrefixs[index], value)
         return util.displayYesNoMessage(message, "Change prefix (y or n)? Default n :", "no")
 
 
-    def __defineCustumPrefixs(self):
+    def __defineCustomPrefixs(self):
         prefixs = OrderedDict()
         for index, value in self.__prefixs.iteritems():
             self.__printQuestion()
-            message = "Enter new prefix for {} image. Default {} :".format(self.__prefixsOrder[index], value)
+            message = "Enter new prefix for {} image. Default {} :".format(self.__initialPrefixs[index], value)
             input = raw_input(message)
             if input.strip(" ") != "":
                 prefixs[index]="{}_".format(input)
@@ -261,6 +270,11 @@ class Unftoad(object):
 
 
     def __extractPrefixsFromConfig(self):
+
+        #look if fieldmap support is needed
+        if self.__arguments.fieldmap:
+            self.__initialPrefixs.update(self.__fieldmap)
+
         config = ConfigParser.ConfigParser()
         configFiles = []
         configFiles.append(os.path.dirname(os.path.realpath(__file__)).replace("bin", "etc/config.cfg"))
@@ -270,7 +284,7 @@ class Unftoad(object):
 
         for configFile in configFiles:
             config.read(configFile)
-        for (prefix, value) in self.__prefixsOrder.iteritems():
+        for (prefix, value) in self.__initialPrefixs.iteritems():
             self.__prefixs[prefix] = config.get('prefix', prefix)
 
 
