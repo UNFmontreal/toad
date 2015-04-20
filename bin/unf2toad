@@ -73,6 +73,10 @@ class Unftoad(object):
     #@TODO a user may choose is strides values
     def run(self):
 
+        if (util.which("toadinfo") and util.which("mrconvert")) is None:
+            print "toadinfo and/or mrconvert not found. Have you source unf-toad-config.sh file?"
+            sys.exit()
+
         self.__arguments = self.__parseArguments()
         self.__extractPrefixsFromConfig()
         rootDirectories = self.__extractRootsDirectory(self.__arguments.sources)
@@ -110,7 +114,7 @@ class Unftoad(object):
 
                 isPrefixHaveBeenChange = self.__isUserDefinedCustomPrefixs(selectedSequences)
                 if isPrefixHaveBeenChange:
-                    prefixs = self.__defineCustomPrefixs()
+                    prefixs = self.__defineCustomPrefixs(selectedSequences)
                     if not self.__arguments.noConfig:
                         self.__setPrefixInConfigFiles(prefixs, configFile)
                 else:
@@ -156,7 +160,7 @@ class Unftoad(object):
         parser.add_argument("-d", "--dirName", nargs='?', metavar=('dirname'), required=False,
                             help="Specify the name of the destination directory. Default: toad_data")
 
-        args = parser.parse_args()
+        args = parser.parse_args('-h'.split())
         return args
 
 
@@ -205,6 +209,7 @@ class Unftoad(object):
             dicoms = glob.glob("{}/*/*.dcm".format(rootDirectory))
             numberOfDicoms += len(dicoms)
             dicoms.extend(glob.glob("{}/*/*/*.dcm".format(rootDirectory)))
+            dicoms = sorted(dicoms)
             for dicom in dicoms:
                 sequence = Sequence()
                 sequence.session = os.path.basename(rootDirectory)
@@ -258,14 +263,15 @@ class Unftoad(object):
         return util.displayYesNoMessage(message, "Change prefix (y or n)? Default n :", "no")
 
 
-    def __defineCustomPrefixs(self):
+    def __defineCustomPrefixs(self, sequences):
         prefixs = OrderedDict()
         for index, value in self.__prefixs.iteritems():
-            self.__printQuestion()
-            message = "Enter new prefix for {} image. Default {} :".format(self.__initialPrefixs[index], value)
-            input = raw_input(message)
-            if input.strip(" ") != "":
-                prefixs[index]="{}_".format(input)
+            if sequences.has_key(index):
+                self.__printQuestion()
+                message = "Enter new prefix for {} image. Default {} :".format(self.__initialPrefixs[index], value)
+                input = raw_input(message)
+                if input.strip(" ") != "":
+                    prefixs[index]="{}_".format(input)
         return prefixs
 
 
@@ -331,15 +337,16 @@ class Unftoad(object):
             config.write(f)
 
 
-    def __setMagnitudeFieldmapInConfigFiles(self, configFile, echo1, echo2):
+    def __setMagnitudeFieldmapInConfigFiles(self, source, echo1, echo2):
         config = ConfigParser.ConfigParser()
-        config.read(configFile)
+        if os.path.exists(source):
+            config.read(source)
         if not config.has_section("fieldmap"):
             config.add_section('fieldmap')
         config.set('fieldmap', "echo_time_mag1", echo1)
         config.set('fieldmap', "echo_time_mag2", echo2)
-        with open(configFile,'wb') as f:
-            config.write(f)
+        with open(source,'w') as w:
+            config.write(w)
 
 
     def __printQuestion(self, question=None):

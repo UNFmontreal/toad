@@ -33,7 +33,7 @@ def parseArguments():
     parser.add_argument('prefix', help="Specify an abbreviation")
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the files, wildcard * ? are accepted")
     parser.add_argument("-e", "--execute", help="Proceed to the operation", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args('-h'.split())
 
     return args
 

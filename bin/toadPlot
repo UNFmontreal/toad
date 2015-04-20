@@ -38,7 +38,7 @@ def parseArguments():
                             help="Which columns to read into the csv file,"
                                  "ex. usecols = 1,4,5 will extract the 2nd, 5th and 6th columns.")
 
-    args = parser.parse_args()
+    args = parser.parse_args('-h'.split())
 
     return args
 

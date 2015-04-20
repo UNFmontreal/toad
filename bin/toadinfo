@@ -36,7 +36,7 @@ def parseArguments():
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Write output into a config.cfg file or create a new one if it doesn't exist")
     parser.add_argument("-f","--fieldmap", help="Add a section for fieldmap into the config file", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args('-h'.split())
     return args
 
 
