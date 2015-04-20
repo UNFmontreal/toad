@@ -8,7 +8,10 @@ from nibabel.nicom import dicomwrappers
 import ConfigParser
 import argparse
 import math
+import sys
 import os
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+from lib import arguments
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright 2014, The Toad Project"
@@ -27,7 +30,7 @@ def parseArguments():
     Returns:
         a args stucture containing command lines arguments
     """
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+    parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description ="""\n
 
          """)
@@ -36,7 +39,7 @@ def parseArguments():
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Write output into a config.cfg file or create a new one if it doesn't exist")
     parser.add_argument("-f","--fieldmap", help="Add a section for fieldmap into the config file", action="store_true")
-    args = parser.parse_args('-h'.split())
+    args = parser.parse_args()
     return args
 
 

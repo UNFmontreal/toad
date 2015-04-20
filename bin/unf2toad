@@ -8,8 +8,9 @@ import shutil
 import glob
 import sys
 import os
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from lib import util
+from lib import util, arguments
 from collections import OrderedDict
 
 __author__ = "Guillaume Vallet, Mathieu Desrosiers"
@@ -140,13 +141,14 @@ class Unftoad(object):
             if archive is not None:
                 shutil.rmtree(directory)
 
+
     def __parseArguments(self):
         """Prepare and parse user friendly command line arguments for sys.argv.
 
         Returns:
             a args stucture containing command lines arguments
         """
-        parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+        parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                          description ="""\n
 
              """)
@@ -159,8 +161,7 @@ class Unftoad(object):
 
         parser.add_argument("-d", "--dirName", nargs='?', metavar=('dirname'), required=False,
                             help="Specify the name of the destination directory. Default: toad_data")
-
-        args = parser.parse_args('-h'.split())
+        args = parser.parse_args()
         return args
 
 
