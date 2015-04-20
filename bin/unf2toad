@@ -205,6 +205,7 @@ class Unftoad(object):
             dicoms = glob.glob("{}/*/*.dcm".format(rootDirectory))
             numberOfDicoms += len(dicoms)
             dicoms.extend(glob.glob("{}/*/*/*.dcm".format(rootDirectory)))
+            dicoms = sorted(dicoms)
             for dicom in dicoms:
                 sequence = Sequence()
                 sequence.session = os.path.basename(rootDirectory)
@@ -331,15 +332,16 @@ class Unftoad(object):
             config.write(f)
 
 
-    def __setMagnitudeFieldmapInConfigFiles(self, configFile, echo1, echo2):
+    def __setMagnitudeFieldmapInConfigFiles(self, source, echo1, echo2):
         config = ConfigParser.ConfigParser()
-        config.read(configFile)
+        if os.path.exists(source):
+            config.read(source)
         if not config.has_section("fieldmap"):
             config.add_section('fieldmap')
         config.set('fieldmap', "echo_time_mag1", echo1)
         config.set('fieldmap', "echo_time_mag2", echo2)
-        with open(configFile,'wb') as f:
-            config.write(f)
+        with open(source,'w') as w:
+            config.write(w)
 
 
     def __printQuestion(self, question=None):
