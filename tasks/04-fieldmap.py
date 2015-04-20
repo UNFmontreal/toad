@@ -10,7 +10,7 @@ from lib.images import Images
 from lib import mriutil
 
 
-__author__ = 'desmat'
+__author__ = 'desmat, Basile Pinsard'
 
 class Fieldmap(GenericTask):
 

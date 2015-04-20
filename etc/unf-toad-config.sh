@@ -9,7 +9,7 @@ export KMP_AFFINITY=none
 #Freesurfer configuration
 export FREESURFER_HOME=/usr/local/freesurfer
 export FSFAST_HOME=$FREESURFER_HOME/fsfast
-export LD_LIBRARY_PATH= $LD_LIBRARY_PATH:/usr/local/freesurfer/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/freesurfer/lib
 export PERL5LIB=/usr/local/freesurfer/mni/lib/perl5/5.8.5:$PERL5LIB
 
 # FSL Configuration
