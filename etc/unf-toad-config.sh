@@ -3,6 +3,9 @@
 #credits by Mathieu Desrosiers
 # to be sourced by toad users, typically in .bash_profile or equivalent
 
+#define TOAD directory
+TOADDIR=$( cd "$( dirname "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" )" && pwd )
+
 #disable KMP_AFFINITY
 export KMP_AFFINITY=none
 
@@ -19,4 +22,4 @@ PATH=${FSLDIR}/bin:${PATH}:/usr/local/ants/build/bin
 . ${FSLDIR}/etc/fslconf/fsl.sh
 export FSLDIR PATH
 
-export PATH=$PATH:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:/usr/local/mrtrix3/scripts:/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:/usr/local/freesurfer/tktools:/usr/local/c3d/bin:/usr/local/itksnap/bin:/usr/local/fibernavigator/bin
+export PATH=$PATH:$TOADDIR/bin:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:/usr/local/mrtrix3/scripts:/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:/usr/local/freesurfer/tktools:/usr/local/c3d/bin:/usr/local/itksnap/bin:/usr/local/fibernavigator/bin
