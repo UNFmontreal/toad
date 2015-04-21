@@ -11,7 +11,7 @@ class Registration(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'parcellation')
+        GenericTask.__init__(self, subject, 'preprocessing', 'parcellation', 'qa')
 
 
     def implement(self):
@@ -60,6 +60,19 @@ class Registration(GenericTask):
 
         self.__multiply(brodmannRegister, lhRibbonRegister, brodmannLRegister)
         self.__multiply(brodmannRegister, rhRibbonRegister, brodmannRRegister)
+
+        #QA
+        b0BrainMask = self.getImage(self.workingDir, 'anat', ['brain', 'resample'])
+        aparcAseg = self.getImage(self.workingDir, 'aparc_aseg', 'resample')
+        brodmann = self.getImage(self.workingDir, 'brodmann', 'resample')
+
+        b0BrainMaskPng = self.buildName(b0, 'brain', 'png')
+        aparcAsegPng = self.buildName(aparcAseg, None, 'png')
+        brodmannPng = self.buildName(brodmann, None, 'png')
+
+        self.slicerPng(b0, b0BrainMaskPng, maskOverlay=b0BrainMask)
+        self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg)
+        self.slicerPng(b0, brodmannPng, segOverlay=brodmann)
 
 
     def __multiply(self, source, ribbon, target):
@@ -141,3 +154,15 @@ class Registration(GenericTask):
                   (self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere'),
                   (self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere'))
         return images.isSomeImagesMissing()
+
+
+    def qaSupplier(self):
+
+        b0BrainMaskPng = self.getImage(self.workingDir, 'b0', 'brain', ext='png')
+        aparcAsegPng = self.getImage(self.workingDir, 'aparc_aseg', ext='png')
+        brodmannPng = self.getImage(self.workingDir, 'brodmann', ext='png')
+
+        return Images((b0BrainMaskPng, 'Brain mask on upsampled b0'),
+                      (aparcAsegPng, 'aparcaseg segmentaion on upsampled b0'),
+                      (brodmannPng, 'Brodmann segmentaion on upsampled b0'),
+                     )
