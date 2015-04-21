@@ -133,6 +133,36 @@ class Qa(object):
              
 
 
+    def slicerGifCompare(self, source1, source2, target, gifSpeed=100, vmax=100):
+        """Create a animated gif from a 4d NIfTI
+        Args:
+            source: 4D NIfTI image
+            target: outputfile gif name
+            gifSpeed: delay between images (tens of ms), default=30
+        """
+        gifId = self.__idGenerator()
+
+        image1 = nibabel.load(source1)
+        imageData1 = image1.get_data()
+
+        image2 = nibabel.load(source2)
+        imageData2 = image2.get_data()
+
+        imageList = []
+        for num, image in enumerate([imageData1, imageData2]):
+            output = gifId + '{0:04}.png'.format(num)
+            self.slicerPng(image[:,:,:,2], output, vmax=vmax, isData=True)
+            imageList.append(output)
+
+        self.__imageList2Gif(imageList, target, gifSpeed)
+        #Cleaning temp files
+        cmd = 'rm {}*.png'.format(gifId)
+        self.launchCommand(cmd)
+
+        return target
+
+
+
     def plotMovement(self, parametersFile, targetTranslations, targetRotations):
         """
         """
@@ -162,7 +192,7 @@ class Qa(object):
         matplotlib.rcdefaults()
 
 
-    def plotvectors(self, bvecsFile, target):
+    def plotvectors(self, bvecsFile, bvecsCorrected, target):
         """
         """
         gifId = self.__idGenerator()
@@ -174,7 +204,11 @@ class Qa(object):
         bvecsOpp= -bvecs
     
         graphParam = [(80, 'b', 'o', bvecsOpp), (80, 'r', 'o', bvecs)]
-    
+        
+        if bvecsCorrected:
+            bvecsCorr = numpy.loadtxt(bvecsCorrected)
+            graphParam.append((20, 'k', '+', bvecsCorr))
+
         for s, c, m, bvec in graphParam:
             x = bvec[0,1:]
             y = bvec[1,1:]

@@ -17,7 +17,7 @@ class Parcellation(GenericTask):
 
 
     def implement(self):
-
+ 
         anat = self.getImage(self.dependDir, 'anat')
         images = {'aparc_aseg': self.getImage(self.dependDir, 'aparc_aseg'),
                     'freesurfer_anat': self.getImage(self.dependDir, 'anat', 'freesurfer'),
