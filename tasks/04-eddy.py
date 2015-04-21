@@ -348,9 +348,10 @@ class Eddy(GenericTask):
         rotationsPng = self.getImage(self.workingDir, 'dwi', 'rotations', ext='png')
         bvecsGif = self.getImage(self.workingDir, 'dwi', 'vectors', ext='gif')
 
-        images = [(eddyGif,'DWI eddy corrected'),
-                  (compareGif, 'Before and after eddy corrections'),
-                  (translationsPng,'Translation correction by eddy'),
-                  (rotationsPng,'Rotation correction by eddy'),
-                  (bvecsGif,'Gradients vectors on the unitary sphere. Red : raw bvec | Blue : opposite bvec | Black + : movement corrected bvec')]
+        images = Images((eddyGif,'DWI eddy corrected'),
+                        (compareGif, 'Before and after eddy corrections'),
+                        (translationsPng,'Translation correction by eddy'),
+                        (rotationsPng,'Rotation correction by eddy'),
+                        (bvecsGif,'Gradients vectors on the unitary sphere. Red : raw bvec | Blue : opposite bvec | Black + : movement corrected bvec'),
+                       )
         return images
