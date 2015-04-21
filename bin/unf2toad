@@ -27,10 +27,16 @@ class Session(object):
 
     def __init__(self):
         self.name = None
-        self.dirty = None
+        self.comparator = None
+        self.isConvert = None
+
+    def __init__(self, name, comparator, isConvert):
+        self.name = name
+        self.comparator = comparator
+        self.isConvert = isConvert
 
     def __repr__(self):
-        return "name = {}, dirty = {}".format(self.name, self.dirty)
+        return "name = {}, isConvert = {}".format(self.name, self.isConvert)
 
     def __eq__(self, other):
         return (isinstance(other, type(self))
@@ -49,7 +55,7 @@ class Sequence(object):
 
     def __eq__(self, other):
         return (isinstance(other, type(self))
-                and (self.session, self.sequence,  self.path) == (other.session, other.sequence, self.path))
+                and (self.session, self.sequence, self.path) == (other.session, other.sequence, self.path))
 
 
 class Unftoad(object):
@@ -66,8 +72,15 @@ class Unftoad(object):
     def __init__(self):
 
         self.__arguments = None
+        self.__sequencePatterns = OrderedDict([('anat', ["MPRAGE"]),
+                                    ('dwi', ["DWI", "DTI", "ep2d_diff"]),
+                                    ('b0_ap', ["_AP"]),
+                                    ('b0_pa', ["_PA"]),
+                                    ('mag', ["gre_field_map"]),
+                                    ('phase', ["gre_field_map"] )])
+
+        self.__sessions = []
         self.__prefixs = OrderedDict()
-        self.__sessions = OrderedDict()
         self.__sequences = OrderedDict()
 
     #@TODO none unf options, reshuffle dicom
@@ -86,52 +99,58 @@ class Unftoad(object):
 
         while len(self.__sessions) > 0:
 
-            if len(self.__sessions) == 1:
-                index = 0
-            else:
-                index = self.__chooseOption(self.__sessions, "Please choose a session to convert")
-                if index == -1:
-                    break
-
-            session = self.__sessions.items()[index]
-            self.__markSessionAsSelected(session)
-
-            self.__printQuestion()
-            answer = raw_input("Please enter a subject name? Defaults {} :".format(session[0]))
-            subjectName = answer if answer.strip(" ") != "" else session[0]
-
             outputDir = self.__arguments.dirName if self.__arguments.dirName else "toad_data"
-            targetDir = os.path.join(os.getcwd(), outputDir, subjectName)
 
-            if not os.path.exists(targetDir):
-                os.makedirs(targetDir)
+            selectedSession = self.__sessions[0] if len(self.__sessions) == 1 \
+                else self.__chooseFromSessions("Please choose a session to convert")
 
-            configFile = "{}/config.cfg".format(targetDir)
-
-            sequences = self.__getSequencesBySession(session)
+            sequences = self.__getSequencesBySession(selectedSession)
             selectedSequences = self.__getSelectedSequences(sequences)
 
             if len(selectedSequences) > 0:
-
                 isPrefixHaveBeenChange = self.__isUserDefinedCustomPrefixs(selectedSequences)
                 if isPrefixHaveBeenChange:
                     prefixs = self.__defineCustomPrefixs(selectedSequences)
-                    if not self.__arguments.noConfig:
-                        self.__setPrefixInConfigFiles(prefixs, configFile)
                 else:
                     prefixs = self.__prefixs
 
-                for prefix, sequence in selectedSequences.iteritems():
-                    if prefix == 'dwi':
-                        self.__convertDwi(sequence, subjectName, prefixs[prefix], targetDir, configFile)
-                    elif prefix == 'mag':
-                        self.__convertMagnitude(sequence,
-                                                subjectName,
-                                                prefixs[prefix],
-                                                targetDir,
-                                                configFile)
-                    else:
-                        self.__convert(index, sequence, subjectName, prefixs[prefix], targetDir)
+                comparableSessions = self.__getComparableSessions(selectedSession)
+
+                if len(comparableSessions) > 1:
+                    message = "Warning: thoses subjects seem\'s to share exactly the same layout?:\n\n    {} "\
+                        .format(",\n    ".join([session.name for session in comparableSessions]))
+                    self.__printQuestion()
+                    if not util.displayYesNoMessage(message, "\nConvert them all at the same time (y or n)? Default y :", "yes"):
+                        comparableSessions=[selectedSession]
+
+                subjectNames = []
+                for session in comparableSessions:
+                    self.__printQuestion()
+                    answer = raw_input("Please enter a subject name for {0}? Defaults {0} :".format(session.name))
+                    subjectNames.append(answer if answer.strip(" ") != "" else session.name)
+
+                for index, session in enumerate(comparableSessions):
+                    name = subjectNames[index]
+                    targetDir = os.path.join(os.getcwd(), outputDir, name)
+                    if not os.path.exists(targetDir):
+                        os.makedirs(targetDir)
+                    
+                    configFile = "{}/config.cfg".format(targetDir)
+                    if not self.__arguments.noConfig:
+                        self.__setPrefixInConfigFiles(prefixs, configFile)
+
+                    for prefix, sequence in selectedSequences.iteritems():
+                        if prefix == 'dwi':
+                            self.__convertDwi(sequence, name, prefixs[prefix], targetDir, configFile)
+                        elif prefix == 'mag':
+                            self.__convertMagnitude(sequence,
+                                                    name,
+                                                    prefixs[prefix],
+                                                    targetDir,
+                                                    configFile)
+                        else:
+                            self.__convert(prefix, sequence, name, prefixs[prefix], targetDir)
+                    self.__markSessionAsSelected(session)
 
             if len(self.__sessions) == 1:
                 break
@@ -211,6 +230,7 @@ class Unftoad(object):
             numberOfDicoms += len(dicoms)
             dicoms.extend(glob.glob("{}/*/*/*.dcm".format(rootDirectory)))
             dicoms = sorted(dicoms)
+            sequences = []
             for dicom in dicoms:
                 sequence = Sequence()
                 sequence.session = os.path.basename(rootDirectory)
@@ -219,39 +239,37 @@ class Unftoad(object):
                 if path[0] == "/":
                     path = path[1:]
                 sequence.sequence = path.split("/")[0]
+
                 if not self.__sequences.has_key((sequence.session, sequence.sequence)):
                     self.__sequences[(sequence.session, sequence.sequence)]= sequence
+                    sequences.append(sequence)
+            self.__sessions.append(Session(sequence.session,
+                                           "".join([sequence.sequence for sequence in sequences ]),
+                                           False))
 
-        for index, sequence in self.__sequences.iteritems():
-            if not self.__sessions.has_key(sequence.session):
-                self.__sessions[sequence.session] = False
-
-
-    def __markSessionAsSelected(self, session):
-        sessions= OrderedDict()
-        for name, value in self.__sessions.iteritems():
-            if session[0] == name:
-                sessions[name] = True
-            else:
-                sessions[name] = value
-        self.__sessions =  sessions
+    def __markSessionAsSelected(self, aSession):
+        sessions= []
+        for session in self.__sessions:
+            if session == aSession:
+                session.isConvert = True
+            sessions.append(session)
+        self.__sessions = sessions
 
 
     def __getSequencesBySession(self, session):
-
         sequences = OrderedDict()
         for index, value in self.__sequences.iteritems():
-            if session[0] == index[0]:
+            if session.name == index[0]:
                 sequences[index] = value
         return sequences
 
 
     def __getSelectedSequences(self, sequences):
         selectedSequences={}
-        for (index, value) in self.__initialPrefixs.iteritems():
-            choice = self.__chooseOption(sequences, "Please select the {} image\n".format(value))
-            if choice != -1:
-                selectedSequences[index] = sequences.items()[choice][1]
+        for (prefix, value) in self.__initialPrefixs.iteritems():
+            sequence = self.__chooseFromSequences(sequences, prefix, "Please select the {} image\n".format(value))
+            if sequence:
+                selectedSequences[prefix] = sequence
         return selectedSequences
 
 
@@ -271,7 +289,7 @@ class Unftoad(object):
                 self.__printQuestion()
                 message = "Enter new prefix for {} image. Default {} :".format(self.__initialPrefixs[index], value)
                 input = raw_input(message)
-                if input.strip(" ") != "":
+                if input.strip(" ") != "" and not input.strip(" ").endswith('_'):
                     prefixs[index]="{}_".format(input)
         return prefixs
 
@@ -295,28 +313,69 @@ class Unftoad(object):
             self.__prefixs[prefix] = config.get('prefix', prefix)
 
 
-
-    def __chooseOption(self, dictionnary, question):
+    def __chooseFromSessions(self, question):
         while True:
             self.__printQuestion(question)
             print(" 0.  None or exit")
-            for name, value in dictionnary.iteritems():
-                if type(value) == bool:
-                    if value:
-                        print("{:2d}.  {} *".format(dictionnary.keys().index(name)+1, name))
-                    else:
-                        print("{:2d}.  {}".format(dictionnary.keys().index(name)+1, name))
+            for index, session in enumerate(self.__sessions):
+                if session.isConvert:
+                    print("{:2d}.  {} *".format(index+1, session.name))
                 else:
-                    print("{:2d}.  {}".format(dictionnary.keys().index(name)+1, name[1]))
+                    print("{:2d}.  {}".format(index+1, session.name))
 
-            choice = raw_input("Enter your choice [0-"+str(len(dictionnary))+"]: Default None [0] :")
+            choice = raw_input("Enter your choice [0-"+str(len(self.__sessions))+"]: Default None [0] :")
             if choice.strip(" ") == "":
                 choice = 0
-            if int(choice) == 0 or 0 <= int(choice)-1 <= len(dictionnary)-1:
-               break
+            if int(choice) == 0 or 0 <= int(choice)-1 <= len(self.__sessions)-1:
+                break
             else:
                 print("Invalid choice, please enter a valid number")
-        return int(choice)-1
+        if int(choice) != 0:
+            return self.__sessions[int(choice)-1]
+        else:
+            sys.exit()
+
+
+    def __isPatternFound(self, arrayOfPattern, value):
+        for pattern in arrayOfPattern:
+            if pattern in value:
+                return True
+        return False
+
+
+    def __chooseFromSequences(self, sequences, prefix, question):
+
+        defaults = ("None", "0")
+        while True:
+            self.__printQuestion(question)
+            print(" 0.   None")
+            for index, sequence in sequences.iteritems():
+                tokens = " "
+                if self.__isPatternFound(self.__sequencePatterns[prefix], sequence.sequence):
+                    defaults = (sequence.sequence, sequences.keys().index(index)+1)
+                    tokens = "X"
+                print "{:2d}.{}  {}".format(sequences.keys().index(index)+1,
+                                               tokens,
+                                               sequence.sequence)
+
+            message = "Enter your choice [0-{}]: Default ({}) [{}] :".format(str(len(sequences)), defaults[0], defaults[1])
+            choice = raw_input(message)
+            if choice.strip(" ") == "":
+                choice = defaults[1]
+            try:
+                if int(choice) == 0 or 0 <= int(choice)-1 <= len(sequences)-1:
+                    break
+            except ValueError:
+                    pass
+        return sequences.items()[int(choice) -1][1] if int(choice) != 0 else False
+
+
+    def __getComparableSessions(self, aSession):
+        comparables = []
+        for session in self.__sessions:
+            if session.comparator == aSession.comparator:
+                comparables.append(session)
+        return comparables
 
 
     def __setDwiParametersInConfigFiles(self, configFile, dicomImage):
@@ -402,8 +461,8 @@ class Unftoad(object):
                 if not self.__arguments.noConfig:
                     self.__setMagnitudeFieldmapInConfigFiles(configFile, echo1, echo2)
 
-        except ValueError:
-            source = echo1
+        except IndexError:
+            return
 
         filename = "{}/{}{}".format(target, prefix, subjectName)
         cmd = "mrconvert {0} {1}.nii.gz -force ".format(source, filename)
