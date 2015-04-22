@@ -15,10 +15,11 @@ class TensorFsl(GenericTask):
         """Placeholder for the business logic implementation
 
         """
-        dwi = self.getImage(self.dependDir, 'dwi', '2x2x2')
+
+        dwi = self.getImage(self.dependDir,'dwi','upsample')
         bVals = self.getImage(self.dependDir, 'grad', None, 'bvals')
         bVecs = self.getImage(self.dependDir, 'grad', None, 'bvecs')
-        mask = self.getImage(self.maskingDir, 'anat', ['2x2x2', 'extended', 'mask'])
+        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
         self.__produceTensors(dwi, bVecs, bVals, mask)
 
@@ -82,8 +83,8 @@ class TensorFsl(GenericTask):
         """Validate if all requirements have been met prior to launch the task
 
         """
-        images = Images((self.getImage(self.dependDir, 'dwi', '2x2x2'), 'diffusion weighted'),
-                  (self.getImage(self.maskingDir, 'anat', ['2x2x2', 'extended', 'mask']), 'ultimate 2x2x2 mask'),
+        images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
+                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate mask'),
                   (self.getImage(self.dependDir, 'grad', None, 'bvals'), '.bvals gradient encoding file'),
                   (self.getImage(self.dependDir, 'grad', None, 'bvecs'), '.bvecs gradient encoding file'))
 
