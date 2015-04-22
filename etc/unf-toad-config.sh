@@ -23,3 +23,14 @@ PATH=${FSLDIR}/bin:${PATH}:/usr/local/ants/build/bin
 export FSLDIR PATH
 
 export PATH=$TOADDIR/bin:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:/usr/local/mrtrix3/scripts:/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:/usr/local/freesurfer/tktools:/usr/local/c3d/bin:/usr/local/itksnap/bin:/usr/local/fibernavigator/bin:$PATH
+
+case "$HOSTNAME" in
+  stark)
+    ;;
+  magma)
+    export PATH=/usr/local/python-toad/bin:$PATH
+    ;;
+  *)
+    echo "Warning, unsupported server: $HOSTNAME"
+    ;;
+esac
