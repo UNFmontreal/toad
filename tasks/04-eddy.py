@@ -81,11 +81,10 @@ class Eddy(GenericTask):
         outputEddyImage = self.__correctionEddy2(dwi,
                                     mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
 
-        #@TODO remove the glob and use getimage
-        eddyParameterFiles = glob.glob("{}/*.eddy_parameters".format(self.workingDir))
-        if len(eddyParameterFiles)>0:
+        eddyParameterFiles = self.getImage(self.workingDir, 'dwi', None, 'eddy_parameters')
+        if eddyParameterFiles:
             self.info("Apply eddy movement correction to gradient encodings directions")
-            bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles.pop(0), self.buildName(outputEddyImage, None, 'b'))
+            bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles, self.buildName(outputEddyImage, None, 'b'))
             self.info(mriutil.mrtrixToFslEncoding(outputEddyImage,
                                         bCorrected,
                                         self.buildName(outputEddyImage, None, 'bvecs'),
