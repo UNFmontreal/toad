@@ -44,6 +44,17 @@ class Preprocessing(GenericTask):
         util.gzip(brainAnatUncompress)
         util.gzip(whiteMatterAnat)
 
+        #QA
+        anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
+        anatBrainMask = self.getImage(self.workingDir, 'anat', ['brain', 'mask'])
+        anatWmMask = self.getImage(self.workingDir, 'anat', ['brain', 'wm'])
+
+        anatBrainMaskPng = self.buildName(anatBrainMask, None, 'png')
+        anatWmMaskPng = self.buildName(anatWmMask, None, 'png')
+
+        self.slicerPng(anat, anatBrainMaskPng, maskOverlay=anatBrainMask)
+        self.slicerPng(anat, anatWmMaskPng, maskOverlay=anatWmMask)
+
 
     def __linkDwiImage(self):
 
@@ -202,11 +213,9 @@ class Preprocessing(GenericTask):
 
     def qaSupplier(self):
 
-        b0Upsampled = self.getImage(self.workingDir, 'b0', "upsample")
-        #@DEBUG
-        self.info("Produce {} image".format(b0Upsampled))
-        anatBrain = self.getImage(self.workingDir ,'anat', "brain")
-        anatBrainWhiteMatter = self.getImage(self.workingDir ,'anat', ["brain", "wm"])
+        anatBrainMaskPng = self.getImage(self.workingDir, 'anat', ['brain', 'mask'], ext='png')
+        anatWmMaskPng = self.getImage(self.workingDir, 'anat', ['brain', 'wm'], ext='png')
 
-        self.pngSlicerImage(b0Upsampled, anatBrain)
-        self.pngSlicerImage(b0Upsampled, anatBrainWhiteMatter)
+        return Images((anatBrainMaskPng, 'Brain mask on high resolution anatomical image of freesurfer'),
+                     (anatWmMaskPng, 'White matter mask on high resolution anatomical image of freesurfer'),
+                    )
