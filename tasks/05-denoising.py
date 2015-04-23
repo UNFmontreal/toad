@@ -60,6 +60,15 @@ class Denoising(GenericTask):
                     self.info("Removing redundant image {}".format(dwiUncompress))
                     os.remove(dwiUncompress)
 
+            #QA
+            workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
+
+            dwiCompareGif = self.buildName(workingDirDwi, 'compare', 'gif')
+            dwiGif = self.buildName(workingDirDwi, None, 'gif')
+
+            self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif)
+            self.slicerGif(workingDirDwi, dwiGif)
+
 
     def __getDwiImage(self):
         if self.getImage(self.fieldmapDir, "dwi", 'unwarp'):
@@ -116,7 +125,9 @@ class Denoising(GenericTask):
 
 
     def qaSupplier(self):
-        denoise = self.getImage(self.workingDir, "dwi", 'denoise')
-        denoiseGif = self.nifti4dtoGif(denoise)
-        images = Images((denoiseGif,'Denoised diffusion image'))
-        return images
+        denoiseGif = self.getImage(self.workingDir, 'dwi', 'denoise', ext='gif')
+        compareGif = self.getImage(self.workingDir, 'dwi', 'compare', ext='gif')
+
+        return Images((denoiseGif,'Denoised diffusion image'),
+                      (compareGif,'Before and after denoising'),
+                     )
