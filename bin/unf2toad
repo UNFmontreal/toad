@@ -179,7 +179,7 @@ class Unftoad(object):
 
         """
         if (util.which("toadinfo") and util.which("mrconvert")) is None:
-            print "toadinfo and/or mrconvert not found. Have you source unf-toad-config.sh file?"
+            print "toadinfo and/or mrconvert not found. Have you source unf-toad-config.sh?"
             sys.exit()
 
     def __parseArguments(self):

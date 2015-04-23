@@ -2,7 +2,7 @@ import os
 
 from core.generictask import GenericTask
 from lib.images import Images
-from lib import util
+from lib import util, mriutil
 
 
 __author__ = 'desmat'
@@ -19,91 +19,79 @@ class Parcellation(GenericTask):
     def implement(self):
 
         anat = self.getImage(self.dependDir, 'anat')
-        images = {'aparc_aseg': self.getImage(self.dependDir, 'aparc_aseg'),
-                    'freesurfer_anat': self.getImage(self.dependDir, 'anat', 'freesurfer'),
-                    'rh_ribbon': self.getImage(self.dependDir, 'rh_ribbon'),
-                    'lh_ribbon': self.getImage(self.dependDir, 'lh_ribbon'),
-                    'brodmann': self.getImage(self.dependDir, 'brodmann')}
 
-        unlinkedImages = self.__linkExistingImage(images)
-        if len(unlinkedImages) > 0:
-            self.__submitReconAllIfNeeded(anat)
+        #look if a freesurfer tree is already available
+        if not  self.__findAndLinkFreesurferStructure():
+            self.__submitReconAll(anat)
 
-        if unlinkedImages.has_key('brodmann'):
-            self.__createBrodmannImage()
-            del(unlinkedImages['brodmann'])
-            self.__convertFeesurferImageIntoNifti(unlinkedImages, anat)
+        self.__convertFeesurferImageIntoNifti(anat)
+        self.__createBrodmannImage()
 
         if self.getBoolean('cleanup'):
             self.__cleanup()
-        
-        #QA
-        workingDirAnat = self.getImage(self.workingDir, 'anat', 'freesurfer')
-        anatPng = self.buildName(workingDirAnat, None, 'png')
-        self.slicerPng(workingDirAnat, anatPng)
 
 
-    def __submitReconAllIfNeeded(self, anatomical):
-        for image in ["T1.mgz", "aparc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz", "talairach.m3z"]:
-            if not self.__findImageInDirectory(image):
-                treeName = "freesurfer_{}".format(self.getTimestamp().replace(" ","_"))
-                if os.path.isdir(self.id):
-                    self.info("renaming existing freesurfer tree {} to {}".format(self.id, treeName))
-                    os.rename(self.id, treeName)
-                self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
-                os.environ["SUBJECTS_DIR"] = self.workingDir
-                self.__reconAll(anatomical)
-                break
+    def __findAndLinkFreesurferStructure(self):
+        """Look if a freesurfer structure already exists in the backup.
 
-
-    def __linkExistingImage(self, images):
-        """
-            Create symbolic link for each existing input images into the current working directory.
-
-        Args:
-            images: A list of image
+        freesurfer structure will be link and id will be update
 
         Returns:
-            A list of invalid images
-
+            Return the linked directory name if a freesurfer structure is found, False otherwise
         """
-        unlinkedImages = {}
-        #look for existing map store into preparation and link it so they are not created
-        for key, value in images.iteritems():
-            if value:
-                self.info("Found {} area image, create link from {} to {}".format(key, value, self.workingDir))
-                util.symlink(value, self.workingDir)
-            else:
-                unlinkedImages[key] = value
-        return unlinkedImages
+        for directory in [directory for directory in os.listdir(".") if os.path.isdir(self.dependDir)]:
+            if mriutil.isAfreesurferStructure(directory):
+                self.info("{} seem\'s a valid freesurfer structure: moving it to {} directory".format(directory, self.workingDir))
+                self.id = directory
+                mriutil.symlink(os.path.join(directory), self.id)
+                return True
+        return False
 
 
-    def __convertFeesurferImageIntoNifti(self, images, anatomicalName):
+    def __submitReconAll(self, anatomical):
+        """Submit recon-all on the anatomical image
+        Args:
+            anatomical: the high resolution image
+        """
+        treeName = "freesurfer_{}".format(self.getTimestamp().replace(" ","_"))
+
+        #backup already existing tree
+        if os.path.isdir(self.id):
+            self.info("renaming existing freesurfer tree {} to {}".format(self.id, treeName))
+            os.rename(self.id, treeName)
+
+        self.info("Starting parcellation with freesurfer")
+        self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
+        os.environ["SUBJECTS_DIR"] = self.workingDir
+        cmd = "recon-all -{} -i {} -subjid {} -sd {} -openmp {}"\
+            .format(self.get('directive'), anatomical, self.id, self.workingDir, self.getNTreads())
+        self.info("Log could be found at {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
+        self.launchCommand(cmd, None, None, 86400)
+
+
+    def __convertFeesurferImageIntoNifti(self, anatomicalName):
 
         """
             Convert a List of mgz fresurfer into nifti compress format
 
         Args:
-            images: A list of mgz image
             anatomicalName: The subject anatomical image is need to identify the proper T1
 
-        Returns:
-            A list of invalid images
-
         """
-        #@TODO see if we could substitute anatomivalName
-        natives = {  'freesurfer_anat': [self.buildName(anatomicalName, 'freesurfer'), "T1.mgz"],
-                     'aparc_aseg': [self.get('aparc_aseg'), "aparc+aseg.mgz"],
-                     'rh_ribbon': [self.get('rh_ribbon'), "rh.ribbon.mgz"],
-                     'lh_ribbon': [self.get('lh_ribbon'), "lh.ribbon.mgz"]}
+        for (target, source) in [(self.buildName(anatomicalName, 'freesurfer'), "T1.mgz"),
+                                    (self.get('aparc_aseg'), "aparc+aseg.mgz"),
+                                    (self.get('rh_ribbon'), "rh.ribbon.mgz"),
+                                    (self.get('lh_ribbon'), "lh.ribbon.mgz")]:
 
-        for key, value in images.iteritems():
-            self.__convertAndRestride(self.__findImageInDirectory(natives[key][1]), natives[key][0])
+            self.__convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)), target)
 
 
-    def __createBrodmannImage(self):
+    def __createBrodmannImage(self, freesurferDirectory):
         """
             Create a brodmann area map
+
+        Args:
+            freesurferDirectory: the directory where to find freesurfer structure
 
         Returns:
             A brodmann area images
@@ -125,21 +113,6 @@ class Parcellation(GenericTask):
         return self.__convertAndRestride(target, target)
 
 
-    def __reconAll(self, source):
-        """Performs all, or any part of, the FreeSurfer cortical reconstruction
-
-        Args:
-            source: The input source file
-
-        """
-        self.info("Starting parcellation with freesurfer")
-
-        cmd = "recon-all -{} -i {} -subjid {} -sd {} -openmp {}"\
-            .format(self.get('directive'), source, self.id, self.workingDir, self.getNTreads())
-        self.info("Log could be found at {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
-        self.launchCommand(cmd, None, None, 86400)
-
-
     def __convertAndRestride(self, source, target):
         """Utility for converting between different file formats
 
@@ -155,17 +128,17 @@ class Parcellation(GenericTask):
         return target
 
 
-    def __findImageInDirectory(self, image):
+    def __findImageInDirectory(self, image, freesurferDirectory):
         """Utility method that look if a input image could be found in a directory and his subdirectory
 
         Args:
             image: an input image name
-
+            freesurferDirectory: the location of the freesurfer structure
         Returns:
             the file name if found, False otherwise
 
         """
-        for root, dirs, files in os.walk(os.path.join(self.workingDir, self.id)):
+        for root, dirs, files in os.walk(freesurferDirectory):
             if image in files:
                 return os.path.join(root, image)
         return False
@@ -217,3 +190,29 @@ class Parcellation(GenericTask):
         return Images((anatFreesurferPng,'High resolution anatomical image of freesurfer'),
                        (aparcAsegPng,'aparcaseg segmentaion from freesurfer'),
                        (brodmannPng,'Brodmann segmentation from freesurfer'))
+
+
+
+
+
+
+    def __linkExistingImage(self, images):
+        """
+            Create symbolic link for each existing input images into the current working directory.
+
+        Args:
+            images: A list of image
+
+        Returns:
+            A list of invalid images
+
+        """
+        unlinkedImages = {}
+        #look for existing map store into preparation and link it so they are not created
+        for key, value in images.iteritems():
+            if value:
+                self.info("Found {} area image, create link from {} to {}".format(key, value, self.workingDir))
+                util.symlink(value, self.workingDir)
+            else:
+                unlinkedImages[key] = value
+        return unlinkedImages
