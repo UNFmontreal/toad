@@ -14,7 +14,7 @@ class TensorDipy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'masking')
+        GenericTask.__init__(self, subject, 'preprocessing', 'masking', 'qa', 'preparation', 'registration')
 
 
     def implement(self):
@@ -24,7 +24,23 @@ class TensorDipy(GenericTask):
         bVecsFile = self.getImage(self.dependDir, 'grad', None, 'bvecs')
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
-        self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
+        target, fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
+
+        #QA
+        maskCc = self.__computeCcMask(dwi, mask, fit)
+        b0 = self.getImage(self.dependDir, 'b0','upsample')
+        brain = self.getImage(self.registrationDir, 'anat', ['brain', 'resample'])
+        dwiRaw = self.getImage(self.preparationDir, 'dwi')
+ 
+        maskCcPng = self.buildName(maskCc, None, 'png')
+        dwiSnrPng = self.buildName(dwi, 'snr', 'png')
+        dwiHistPng = self.buildName(dwi, 'hist', 'png')
+        dwiRawSnrPng = self.buildName(dwiRaw, 'snr', 'png')
+        dwiRawHistPng = self.buildName(dwiRaw, 'hist', 'png')
+
+        self.slicerPng(b0, maskCcPng, maskOverlay=maskCc)
+        self.noiseAnalysis(dwi, brain, maskCc, dwiSnrPng, dwiHistPng)#, targetMaskNoise='maskNoise.png')
+        #self.noise(dwiRaw, maskCC, dwiRawSnrPng, dwiRawHistPng)
 
 
     def __produceTensors(self, source, bValsFile, bVecsFile, mask):
@@ -61,7 +77,37 @@ class TensorDipy(GenericTask):
         nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(target, "rgb"))
 
         self.info("End tensor and metrics creation from dipy, resulting file is {} ".format(target))
+        return target, fit
+
+
+    def __computeCcMask(self, source, mask, fit):
+        """
+        """
+        dwiImage = nibabel.load(source)
+        dwiData = dwiImage.get_data()
+
+        maskImage = nibabel.load(mask)
+        maskData = maskImage.get_data()
+
+        CC_box = numpy.zeros_like(dwiData[..., 0])
+        mins, maxs = dipy.segment.mask.bounding_box(maskData)
+        mins = numpy.array(mins)
+        maxs = numpy.array(maxs)
+        diff = (maxs - mins) // 4
+        bounds_min = mins + diff
+        bounds_max = maxs - diff
+        CC_box[bounds_min[0]:bounds_max[0],
+               bounds_min[1]:bounds_max[1],
+               bounds_min[2]:bounds_max[2]] = 1
+        threshold = (0.6, 1, 0, 0.1, 0, 0.1)
+        mask_cc_part, cfa = dipy.segment.mask.segment_from_cfa(fit, CC_box, threshold, return_cfa=True)
+
+        target = self.buildName(source, 'maskccpart')
+
+        nibabel.save(nibabel.Nifti1Image(mask_cc_part.astype(numpy.int), dwiImage.get_affine()), target)
+
         return target
+
 
 
     def meetRequirement(self):
@@ -84,3 +130,19 @@ class TensorDipy(GenericTask):
                  #"apparent diffusion coefficient" : self.getImage(self.workingDir, 'dwi', 'adc')}
         return images.isSomeImagesMissing()
 
+    def qaSupplier(self):
+
+        maskCcPng = self.getImage(self.workingDir, 'dwi', 'maskccpart', ext='png')
+        dwiSnrPng = self.getImage(self.workingDir, 'dwi', 'snr', ext='png')
+        dwiHistPng = self.getImage(self.workingDir, 'dwi', 'hist', ext='png')
+        #dwiRawSnrPng = self.getImage(self.workingDir, 'dwi', 'snr', ext='png')
+        #dwiRawHistPng = self.getImage(self.workingDir, 'dwi', 'hist', ext='png')
+
+        images =  Images((maskCcPng, 'Corpus callosum mask to compute SNR'),
+                         (dwiSnrPng, 'SNR'),
+                         (dwiHistPng, 'Noise Histogramme'),
+                         #('maskNoise.png', 'Noise Mask')
+                         #(dwiRawSnrPng, 'SNR from dwi of preparationDir'),
+                         #(dwiRawHistPng, 'Noise Histogramme from dwi of preparationDir'),
+                        )
+        return images

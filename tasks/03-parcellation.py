@@ -17,7 +17,7 @@ class Parcellation(GenericTask):
 
 
     def implement(self):
-
+ 
         anat = self.getImage(self.dependDir, 'anat')
 
         #look if a freesurfer tree is already available
@@ -173,14 +173,10 @@ class Parcellation(GenericTask):
 
     """
     def qaSupplier(self):
-
-        anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
-        aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
-        brodmann = self.getImage(self.workingDir, 'brodmann')
         
         anatFreesurferPng = self.getImage(self.workingDir, 'anat', 'freesurfer', ext='png')
-        aparcAsegPng = self.c3dSegmentation(anatFreesurfer, aparcAseg, '2', '0.5')
-        brodmannPng = self.c3dSegmentation(anatFreesurfer, brodmann, '2', '0.5')
+        aparcAsegPng = self.getImage(self.workingDir, 'aparc_aseg', ext='png')
+        brodmannPng = self.getImage(self.workingDir, 'brodmann', ext='png')
 
         return Images((anatFreesurferPng,'High resolution anatomical image of freesurfer'),
                        (aparcAsegPng,'aparcaseg segmentaion from freesurfer'),
