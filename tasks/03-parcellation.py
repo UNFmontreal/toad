@@ -30,6 +30,20 @@ class Parcellation(GenericTask):
         if self.getBoolean('cleanup'):
             self.__cleanup()
 
+        #QA
+        workingDirAnat = self.getImage(self.workingDir, 'anat', 'freesurfer')
+        aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
+        brodmann = self.getImage(self.workingDir, 'brodmann')
+ 
+        anatPng = self.buildName(workingDirAnat, None, 'png')
+        aparcAsegPng = self.buildName(aparcAseg, None, 'png')
+        brodmannPng = self.buildName(brodmann, None, 'png')
+
+        self.slicerPng(workingDirAnat, anatPng)
+        self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg)
+        self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann)
+
+
     def __findAndLinkFreesurferStructure(self):
         """Look if a freesurfer structure already exists in the backup.
 
@@ -171,7 +185,7 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'brodmann'), 'brodmann'))
         return images.isSomeImagesMissing()
 
-    """
+
     def qaSupplier(self):
         
         anatFreesurferPng = self.getImage(self.workingDir, 'anat', 'freesurfer', ext='png')
@@ -182,7 +196,6 @@ class Parcellation(GenericTask):
                        (aparcAsegPng,'aparcaseg segmentaion from freesurfer'),
                        (brodmannPng,'Brodmann segmentation from freesurfer'))
 
-    """
 
     def __linkExistingImage(self, images):
         """
