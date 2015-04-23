@@ -36,16 +36,6 @@ class Masking(GenericTask):
         self.info(mriutil.mrcalc(aparcAsegResample, '253', self.buildName('aparc_aseg', ['253','mask'], 'nii.gz')))
         self.info(mriutil.mrcalc(aparcAsegResample, '1024', self.buildName('aparc_aseg', ['1024','mask'],'nii.gz')))
 
-        aparcAseg2x2x2Resample = self.getImage(self.dependDir,"aparc_aseg", "2x2x2")
-        anatBrain2x2x2Resample = self.getImage(self.dependDir,'anat', ['brain', '2x2x2'])
-
-        extended2x2x2 = self.buildName('anat', ['2x2x2', 'extended'])
-        self.info("Add {} and {} images together in order to create the ultimate image"
-                  .format(anatBrain2x2x2Resample, aparcAseg2x2x2Resample))
-        self.info(mriutil.fslmaths(anatBrain2x2x2Resample, extended2x2x2, 'add', aparcAseg2x2x2Resample))
-        self.__createMask(extended2x2x2)
-
-
         #produce optionnal mask
         if self.get("start_seeds").strip():
             self.__createRegionMaskFromAparcAseg(aparcAsegResample, 'start')
@@ -186,8 +176,6 @@ class Masking(GenericTask):
     def meetRequirement(self):
         images = Images((self.getImage(self.dependDir,"aparc_aseg", "resample"), 'resampled parcellation'),
                     (self.getImage(self.dependDir,"aparc_aseg", "register"), 'register parcellation'),
-                    (self.getImage(self.dependDir,"aparc_aseg", "2x2x2"), 'parcellation 2x2x2 voxels size'),
-                    (self.getImage(self.dependDir,'anat', ['brain', '2x2x2']), 'anatomical brain extracted 2x2x2 voxels size'),
                     (self.getImage(self.dependDir,'anat',['brain','resample']),  'brain extracted, resampled high resolution'))
         return images.isAllImagesExists()
     
@@ -196,7 +184,6 @@ class Masking(GenericTask):
         images = Images((self.getImage(self.workingDir, "aparc_aseg", ["register", "act"]), 'register anatomically constrained tractography'),
                      (self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]), 'aparc_aseg mask'),
                      (self.getImage(self.workingDir, 'anat',['resample', 'extended', 'mask']), 'ultimate extended mask'),
-                     (self.getImage(self.workingDir, 'anat',['2x2x2', 'extended', 'mask']), 'ultimate 2x2x2 extended mask'),
                      (self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
                      (os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
                      (self.getImage(self.workingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),

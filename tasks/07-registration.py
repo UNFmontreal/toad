@@ -17,7 +17,6 @@ class Registration(GenericTask):
     def implement(self):
 
         b0 = self.getImage(self.dependDir, 'b0','upsample')
-        b02x2x2 = self.getImage(self.dependDir, 'b0','2x2x2')
 
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
         anatBrain = self.getImage(self.preprocessingDir ,'anat', 'brain')
@@ -36,15 +35,6 @@ class Registration(GenericTask):
         self.__applyResampleFsl(anatBrain, b0, b0ToAnatMatrixInverse, self.buildName(anatBrain, "resample"))
         self.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix)
         self.__applyResampleFsl(aparcAsegFile, b0, b0ToAnatMatrixInverse, self.buildName(aparcAsegFile, "resample"), True)
-
-
-        b02x2x2ToAnatMatrix = self.__computeResample(b02x2x2, anat)
-        b02x2x2ToAnatMatrixInverse = self.buildName(b02x2x2ToAnatMatrix, 'inverse', 'mat')
-        self.info(mriutil.invertMatrix(b02x2x2ToAnatMatrix, b02x2x2ToAnatMatrixInverse))
-
-        self.__applyResampleFsl(aparcAsegFile, b02x2x2, b02x2x2ToAnatMatrixInverse, self.buildName(aparcAsegFile, "2x2x2"), True)
-        self.__applyResampleFsl(anatBrain, b02x2x2, b02x2x2ToAnatMatrixInverse, self.buildName(anatBrain, "2x2x2"))
-
 
         brodmannRegister = self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
         self.__applyResampleFsl(brodmann, b0, b0ToAnatMatrixInverse, self.buildName(brodmann, "resample"), True)
@@ -123,7 +113,6 @@ class Registration(GenericTask):
         images = Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), 'high resolution'),
                           (self.getImage(self.dependDir, 'anat', 'brain'), 'freesurfer anatomical brain extracted'),
                           (self.getImage(self.dependDir, 'b0', 'upsample'), 'b0 upsampled'),
-                          (self.getImage(self.dependDir, 'b0','2x2x2'), 'b0 2x2x2'),
                           (self.getImage(self.parcellationDir, 'aparc_aseg'), 'parcellation'),
                           (self.getImage(self.parcellationDir, 'rh_ribbon'), 'right hemisphere ribbon'),
                           (self.getImage(self.parcellationDir, 'lh_ribbon'), 'left hemisphere ribbon'),
@@ -134,8 +123,6 @@ class Registration(GenericTask):
     def isDirty(self):
         images = Images((self.getImage(self.workingDir,'anat', ['brain', 'resample']), 'anatomical brain resampled'),
                   (self.getImage(self.workingDir,'anat','resample'), 'anatomical resampled'),
-                  (self.getImage(self.workingDir,'anat', ['brain', '2x2x2']), 'anatomical 2x2x2 brain for dtifit'),
-                  (self.getImage(self.workingDir,'aparc_aseg', '2x2x2'), 'parcellation 2x2x2 for dtifit'),
                   (self.getImage(self.workingDir,'aparc_aseg', 'resample'), 'parcellation resample'),
                   (self.getImage(self.workingDir,'aparc_aseg', 'register'), 'parcellation register'),
                   (self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere'),
