@@ -1,12 +1,15 @@
 from string import Template
+import argparse
 import subprocess
 import datetime
 import signal
 import time
 import glob
+import sys
 import os
 
 __author__ = 'mathieu'
+
 
 def symlink(source, target):
     """link a file into the target directory. the link name is the same as the file

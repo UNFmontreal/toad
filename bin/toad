@@ -8,7 +8,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from core import subjectmanager, logger
-from lib import util
+from lib import util, arguments
 
 __author__ = "Mathieu Desrosiers, Arnaud Bore and Christophe Bedetti"
 __copyright__ = "Copyright 2014, The Toad Project"
@@ -26,7 +26,7 @@ def __parseArguments():
     Returns:
         a args structure containing command lines arguments
     """
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+    parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description ="""\n
         Pipeline that realize your dream,
         Please consult the documentation at http://unf-montreal.ca/donotexistsyet

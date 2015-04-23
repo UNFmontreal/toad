@@ -22,4 +22,4 @@ PATH=${FSLDIR}/bin:${PATH}:/usr/local/ants/build/bin
 . ${FSLDIR}/etc/fslconf/fsl.sh
 export FSLDIR PATH
 
-export PATH=$PATH:$TOADDIR/bin:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:/usr/local/mrtrix3/scripts:/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:/usr/local/freesurfer/tktools:/usr/local/c3d/bin:/usr/local/itksnap/bin:/usr/local/fibernavigator/bin
+export PATH=$TOADDIR/bin:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:/usr/local/mrtrix3/scripts:/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:/usr/local/freesurfer/tktools:/usr/local/c3d/bin:/usr/local/itksnap/bin:/usr/local/fibernavigator/bin:$PATH
