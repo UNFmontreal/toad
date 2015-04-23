@@ -10,6 +10,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot
 import mpl_toolkits.mplot3d
+import scipy.ndimage.morphology
 
 
 class Qa(object):
@@ -238,92 +239,79 @@ class Qa(object):
         self.launchCommand(cmd)
     
         return target
-    
 
 
-    def noise(self, source, tensors):
+
+    def noiseAnalysis(self, source, brain, maskCc, targetSnr, targetHist, targetMaskNoise=None):
         """
         """
-        dwi = nibabel.load(source)
-        mask = nibabel.load('Diffusion_mask.nii.gz')
-        tensorfit = nibabel.load('tensorsDipy.nii.gz')
-    
-        dwiData = dwi.get_data()
-        maskData = mask.get_data()
-        tensorfit = tensorfit.get_data()
-    
-        #from dipy.segment.mask import median_otsu
-        #b0_mask, mask = median_otsu(dwiData)
-    
-        import dipy.core.gradients
-        import dipy.reconst.dti
-        bValsFile = 'Diffusion.bvals'
-        bVecsFile = 'Diffusion.bvecs'
-        gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
-        model = dipy.reconst.dti.TensorModel(gradientTable)
-        fit = model.fit(dwiData, mask=maskData)
-    
-        from dipy.segment.mask import segment_from_cfa
-        from dipy.segment.mask import bounding_box
-    
-    
-        CC_box = numpy.zeros_like(dwiData[..., 0])
-        mins, maxs = bounding_box(maskData)
-        mins = numpy.array(mins)
-        maxs = numpy.array(maxs)
-        diff = (maxs - mins) // 4
-        bounds_min = mins + diff
-        bounds_max = maxs - diff
-        CC_box[bounds_min[0]:bounds_max[0],
-               bounds_min[1]:bounds_max[1],
-               bounds_min[2]:bounds_max[2]] = 1
-        threshold = (0.6, 1, 0, 0.1, 0, 0.1)
-        #mask_cc_part, cfa = segment_from_cfa(fit, CC_box, threshold, return_cfa=True)
-        mask_cc_part = segment_from_cfa(fit, CC_box, threshold)
-        #cfa_img = nib.Nifti1Image((cfa*255).astype(np.uint8), affine)
-        #mask_cc_part_img = nib.Nifti1Image(mask_cc_part.astype(np.uint8), affine)
-        #nib.save(mask_cc_part_img, 'mask_CC_part.nii.gz')
-    
-        slicerPng(dwiData[:,:,:,0], optionalOverlay=mask_cc_part, target='qa/maskcc.png', isBackgroundArray=True)
-    
-        mean_signal = numpy.mean(dwiData[mask_cc_part], axis=0)
-    
-        from scipy.ndimage.morphology import binary_dilation
-        mask_noise = binary_dilation(maskData, iterations=10)
-        mask_noise[..., :mask_noise.shape[-1]//2] = 1
-        mask_noise = ~mask_noise
+        dwiImage = nibabel.load(source)
+        brainImage = nibabel.load(brain)
+        maskCcImage = nibabel.load(maskCc)
+
+        dwiData = dwiImage.get_data()
+        brainData = brainImage.get_data()
+        maskCcData = maskCcImage.get_data()
+
+        brainData[brainData>0] = 1
+        maskNoise = scipy.ndimage.morphology.binary_dilation(brainData, iterations=10)
+        maskNoise[..., :maskNoise.shape[-1]//2] = 1
+        maskNoise = ~maskNoise
         #mask_noise_img = nib.Nifti1Image(mask_noise.astype(np.uint8), affine)
         #nibabel.save(mask_noise_img, 'mask_noise.nii.gz')
-        slicerPng(mask_noise, target='qa/masknoise.png', isBackgroundArray=True)
-        noise_std = numpy.std(dwiData[mask_noise], axis=0)
-    
-        print mean_signal, noise_std
+        if targetMaskNoise != None:
+            self.slicerPng(maskNoise, targetMaskNoise, isData=True)
+
+        #masking
+        volumeNumber = dwiData.shape[3]
+        maskCcData4d = numpy.tile(maskCcData,(volumeNumber,1,1,1))
+        maskCcData4d = numpy.rollaxis(maskCcData4d, 0, start=4)
+        maskNoise4d = numpy.tile(maskNoise,(volumeNumber,1,1,1))
+        maskNoise4d = numpy.rollaxis(maskNoise4d, 0, start=4)
+
+        dwiDataMaskCc = numpy.ma.masked_where(maskCcData4d == 0, dwiData)
+        dwiDataMaskNoise = numpy.ma.masked_where(maskNoise4d == 0, dwiData)
+
+        #SNR
+        volumeSize = numpy.prod(dwiData.shape[:3])
+        mean_signal = numpy.reshape(dwiDataMaskCc, [volumeSize, volumeNumber])
+        mean_signal = numpy.mean(mean_signal, axis=0)
+        noise_std = numpy.reshape(dwiDataMaskNoise, [volumeSize, volumeNumber])
+        noise_std = numpy.std(noise_std, axis=0)
+        
+        #mean_signal = numpy.empty(volumeNumber)
+        #noise_std = numpy.empty(volumeNumber)
+        #for num in range(volumeNumber):
+        #    volumeOfInterest = dwiData[:,:,:,num]
+        #    maskCcInd = numpy.where(maskCcData>0)
+        #    maskNoiseInd = numpy.where(maskNoise>0)
+        #    ccData = volumeOfInterest[maskCcInd]
+        #    noiseData = volumeOfInterest[maskNoiseInd]
+        #    mean_signal[num] = numpy.mean(ccData)
+        #    noise_std[num] = numpy.std(noiseData)
+
         SNR = mean_signal / noise_std
-        print SNR
-    
         matplotlib.pyplot.plot(SNR)
         matplotlib.pyplot.xlabel('Volumes')
         matplotlib.pyplot.ylabel('SNR')
-        matplotlib.pyplot.title('SNR in CC for each volumes')
-        matplotlib.pyplot.savefig('qa/snr.png')
+        #matplotlib.pyplot.title('SNR in CC for each volumes')
+        matplotlib.pyplot.savefig(targetSnr)
         matplotlib.pyplot.close()
     
-        #histogramme
-        tempMask = numpy.tile(mask_noise,(33,1,1,1))
-        tempMask = numpy.rollaxis(tempMask, 0, start=4)
-        print tempMask.shape
-        noiseHist = numpy.ma.masked_where(tempMask == 0, dwiData)
-        noiseHist = noiseHist[:,:,:,1:]
-        slicerPng(noiseHist[:,:,:,3], target='qa/noiseHist.png', isBackgroundArray=True)
-        size = numpy.prod(noiseHist.shape)
-        reshapeNoise = numpy.reshape(noiseHist, size)
+        #Hist plot
+        #tempMask = numpy.tile(maskNoise,(33,1,1,1))
+        #tempMask = numpy.rollaxis(tempMask, 0, start=4)
+        #print tempMask.shape
+        #noiseHist = numpy.ma.masked_where(tempMask == 0, dwiData)
+        noiseHistData = dwiDataMaskNoise[:,:,:,1:]
+        #slicerPng(noiseHist[:,:,:,3], target='qa/noiseHist.png', isBackgroundArray=True)
+        noiseHistData = numpy.reshape(noiseHistData, numpy.prod(noiseHistData.shape))
         num_bins = 20
-        matplotlib.pyplot.hist(reshapeNoise, num_bins, histtype='stepfilled', facecolor='g')
-        #matplotlib.pyplot.plot(bins)
+        matplotlib.pyplot.hist(noiseHistData, num_bins, histtype='stepfilled', facecolor='g')
         matplotlib.pyplot.xlabel('Intensity')
         matplotlib.pyplot.ylabel('Voxels number')
-        matplotlib.pyplot.title('Noise histogram, 10x10x10 box, all diffusion weighted volumes')
-        matplotlib.pyplot.savefig('qa/hist.png')
+        #matplotlib.pyplot.title('Noise histogram, 10x10x10 box, all diffusion weighted volumes')
+        matplotlib.pyplot.savefig(targetHist)
     
         matplotlib.pyplot.close()
     
