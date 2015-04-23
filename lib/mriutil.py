@@ -546,7 +546,12 @@ def createVtkPng(source, anatomical, roi):
     sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
     sourceActor = fvtk.streamtube(sourceImage, line_colors(sourceImage))
     roiActor = fvtk.contour(roiImage.get_data(), levels=[1], colors=[(1., 1., 0.)], opacities=[1.])
-    anatomicalActor = fvtk.slicer(anatomicalImage.get_data(), voxsz=(1.0, 1.0, 1.0), plane_i=None, plane_j=None, plane_k=[65], outline=False)
+    anatomicalActor = fvtk.slicer(anatomicalImage.get_data(),
+                                  voxsz=(1.0, 1.0, 1.0),
+                                  plane_i=None,
+                                  plane_j=None,
+                                  plane_k=[65],
+                                  outline=False)
 
     sourceActor.RotateX(-70)
     sourceActor.RotateY(2.5)
@@ -566,3 +571,24 @@ def createVtkPng(source, anatomical, roi):
     fvtk.add(ren, anatomicalActor)
     fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1, verbose=True, cam_pos=(90.03, 118.33, 700.59))
     return target
+
+
+def isAfreesurferStructure(directory):
+    """Validate if the specified directory qualify as a freesurfer structure
+
+    Args:
+        directory: A directory that contain freesurfer structure
+
+    Return:
+        True if the specified directory if a freesurfer structure, False otherwise
+    """
+    def find(name):
+        for root, dirs, files in os.walk(directory):
+            if name in files:
+                return True
+        return False
+
+    for image in ["T1.mgz", "aparc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz", "talairach.m3z"]:
+        if not find(image):
+            return False
+    return True

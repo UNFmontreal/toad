@@ -36,10 +36,6 @@ class Preprocessing(GenericTask):
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
 
-        dwi2x2X2 = self.__upsampling(dwi, "2 2 2", self.buildName(dwi, "2x2x2"))
-        b02x2x2 = os.path.join(self.workingDir, os.path.basename(dwi2x2X2).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
-        self.info(mriutil.extractFirstB0FromDwi(dwi2x2X2, b02x2x2, bVals))
-
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
         brainAnat  = self.__bet(anat)
 
@@ -198,9 +194,7 @@ class Preprocessing(GenericTask):
 
     def isDirty(self):
         images = Images((self.getImage(self.workingDir, 'dwi', "upsample"), 'upsampled diffusion weighted'),
-                  (self.getImage(self.workingDir, 'dwi', "2x2x2"), '2x2x2 diffusion weighted'),
                   (self.getImage(self.workingDir, 'b0', "upsample"), 'upsampled b0'),
-                  (self.getImage(self.workingDir, 'b0', "2x2x2"), '2x2x2 b0'),
                   (self.getImage(self.workingDir, 'anat', "brain"), 'high resolution brain extracted'),
                   (self.getImage(self.workingDir, 'anat', ["brain", "wm"]), 'high resolution white matter brain extracted'))
         return images.isSomeImagesMissing()

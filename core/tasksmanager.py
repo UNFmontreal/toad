@@ -28,6 +28,7 @@ class TasksManager(object):
         """
         return self.__tasks
 
+
     def getQaTasks(self):
         """get the list of all available task who implement the methods qaSupplier
 
@@ -40,7 +41,8 @@ class TasksManager(object):
         for task in self.__tasks:
             if "qaSupplier" in dir(task):
                 tasks.append(task)
-        return tasks
+        return sorted(tasks)
+
 
     def getRunnableTasks(self):
         """Return a list of task with ignored task remove.
@@ -80,6 +82,65 @@ class TasksManager(object):
         """
         for task in self.__runnableTasks:
             task.run()
+
+
+    def __initialize(self):
+        """Create a list of task instances.
+
+        The list is order by tasks order ascending
+
+        Returns:
+            A list of task instances
+
+        """
+        tasks =[]
+        tasksFiles = glob.glob("{}/tasks/*.py".format(self.__subject.getConfig().get('arguments','toad_dir')))
+        for taskFile in tasksFiles:
+            task= self.__instanciateFromFile(taskFile)
+            if task is not None:
+                tasks.append(task)
+            else:
+                print "File {} do not appear as a valid task file".format(taskFile)
+        return tasks
+
+
+    def __instanciateFromFile(self, taskFile):
+        """ return an array of tasks files names order by the first 2 digits of the filename name
+
+        This function also validate the filename and the extension validity.
+
+        Args:
+            tasksFiles: An unsorted array of python tasks file.
+
+        Returns:
+            the array sorted by the first 2 digit of the filename
+
+        """
+        def __isDefined(clazz, method):
+            return method in vars(clazz.__class__) and inspect.isroutine(vars(clazz.__class__)[method])
+
+        [taskName, ext] = os.path.splitext(os.path.basename(taskFile))
+        if ext == ".py":
+            try:
+                package = taskName
+                module = importlib.import_module("tasks.{}".format(package))
+                classes = inspect.getmembers(module, inspect.isclass)
+                for clazz in classes:
+                    if clazz[1].__module__=="tasks.{}".format(package):
+                        clazz = clazz[1](self.__subject)
+                        if not __isDefined(clazz,"isDirty"):
+                            print "Warning: isDirty() method missing in class {}".format(clazz)
+                            return None
+                        if not __isDefined(clazz,"meetRequirement"):
+                            print "Warning: meetRequirement() method missing in class {}".format(clazz)
+                            return None
+                        if not __isDefined(clazz,"implement"):
+                            print "Warning: implement() method missing in class {}".format(clazz)
+                            return None
+                        return clazz
+            except ValueError:
+                pass
+        return None
 
 
     def __initializeRunnableTasks(self, tasks):
@@ -155,63 +216,6 @@ class TasksManager(object):
         return sorted(set(flaggedTasks))
 
 
-    def __initialize(self):
-        """Create a list of task instances.
-
-        The list is order by tasks order ascending
-
-        Returns:
-            A list of task instances
-
-        """
-        tasks =[]
-        tasksFiles = glob.glob("{}/tasks/*.py".format(self.__subject.getConfig().get('arguments','toad_dir')))
-        for taskFile in tasksFiles:
-            task= self.__instanciateFromFile(taskFile)
-            if task is not None:
-                tasks.append(task)
-            else:
-                print "File {} do not appear as a valid task file".format(taskFile)
-        return tasks
-
-
-    def __instanciateFromFile(self, taskFile):
-        """ return an array of tasks files names order by the first 2 digits of the filename name
-
-        This function also validate the filename and the extension validity.
-
-        Args:
-            tasksFiles: An unsorted array of python tasks file.
-
-        Returns:
-            the array sorted by the first 2 digit of the filename
-
-        """
-        def __isDefined(clazz, method):
-            return method in vars(clazz.__class__) and inspect.isroutine(vars(clazz.__class__)[method])
-
-        [taskName, ext] = os.path.splitext(os.path.basename(taskFile))
-        if ext == ".py":
-            try:
-                package = taskName
-                module = importlib.import_module("tasks.{}".format(package))
-                classes = inspect.getmembers(module, inspect.isclass)
-                for clazz in classes:
-                    if clazz[1].__module__=="tasks.{}".format(package):
-                        clazz = clazz[1](self.__subject)
-                        if not __isDefined(clazz,"isDirty"):
-                            print "Warning: isDirty() method missing in class {}".format(clazz)
-                            return None
-                        if not __isDefined(clazz,"meetRequirement"):
-                            print "Warning: meetRequirement() method missing in class {}".format(clazz)
-                            return None
-                        if not __isDefined(clazz,"implement"):
-                            print "Warning: implement() method missing in class {}".format(clazz)
-                            return None
-                        return clazz
-            except ValueError:
-                pass
-        return None
 
 
     def __getDirtyTasks(self, tasks):

@@ -1,7 +1,7 @@
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import util, mriutil
-
+import os
 __author__ = 'desmat'
 
 
@@ -47,6 +47,11 @@ class Preparation(GenericTask):
                     self.info(mriutil.stride3DImage(image, self.buildName(image, "stride"), expectedLayout))
                 else:
                     self.info("Found {} image, linking {} to {}".format(description, image, util.symlink(image, self.workingDir)))
+
+        for directory in [os.path.join(self.dependDir, directory) for directory in os.listdir(self.dependDir) if os.path.isdir(os.path.join(self.dependDir, directory))]:
+            if mriutil.isAfreesurferStructure(directory):
+                self.info("{} seem\'s a valid freesurfer structure: linking to {} directory".format(directory, self.workingDir))
+                os.symlink(directory, self.config.get("parcellation", "id"))
 
         #QA
         workingDirAnat = self.getImage(self.workingDir, 'anat')

@@ -113,12 +113,12 @@ def __manageEnvironnement(logger):
     except ValueError:
         logger.error("Cannot determine your version of python installed")
 
-    packages = ['numpy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
+    packages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
     for package in packages:
         try:
             imp.find_module(package)
         except ImportError:
-            logger.error("Cannot find package {}.".format(package))
+            logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
 
     hostname = socket.gethostname()
     if hostname in ['magma', 'stark']:

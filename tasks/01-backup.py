@@ -4,7 +4,7 @@ import os
 
 from core.generictask import GenericTask
 from lib.images import Images
-
+from lib import mriutil
 
 __author__ = 'desmat'
 
@@ -41,6 +41,11 @@ class Backup(GenericTask):
                 self.info("Found {} image: moving it to {} directory".format(description, image, self.workingDir))
                 shutil.move(image, self.workingDir)
 
+        directories = [os.path.join(self.subjectDir, directory) for directory in os.listdir(self.subjectDir) if os.path.isdir(os.path.join(self.subjectDir, directory))]
+        for directory in directories:
+            if mriutil.isAfreesurferStructure(directory):
+                self.info("{} seem\'s a valid freesurfer structure: moving it to {} directory".format(directory, self.workingDir))
+                shutil.move(directory, self.workingDir)
 
     def meetRequirement(self):
         return True
