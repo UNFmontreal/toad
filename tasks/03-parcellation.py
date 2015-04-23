@@ -30,7 +30,6 @@ class Parcellation(GenericTask):
         if self.getBoolean('cleanup'):
             self.__cleanup()
 
-
     def __findAndLinkFreesurferStructure(self):
         """Look if a freesurfer structure already exists in the backup.
 
@@ -39,12 +38,11 @@ class Parcellation(GenericTask):
         Returns:
             Return the linked directory name if a freesurfer structure is found, False otherwise
         """
-        for directory in [directory for directory in os.listdir(".") if os.path.isdir(self.dependDir)]:
-            if mriutil.isAfreesurferStructure(directory):
-                self.info("{} seem\'s a valid freesurfer structure: moving it to {} directory".format(directory, self.workingDir))
-                self.id = directory
-                mriutil.symlink(os.path.join(directory), self.id)
-                return True
+        freesurferStructure = os.path.join(self.dependDir, self.id)
+        if mriutil.isAfreesurferStructure(freesurferStructure):
+           self.info("{} seem\'s a valid freesurfer structure: moving it to {} directory".format(freesurferStructure, self.workingDir))
+           util.symlink(freesurferStructure, self.id)
+           return True
         return False
 
 
@@ -86,12 +84,9 @@ class Parcellation(GenericTask):
             self.__convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)), target)
 
 
-    def __createBrodmannImage(self, freesurferDirectory):
+    def __createBrodmannImage(self):
         """
             Create a brodmann area map
-
-        Args:
-            freesurferDirectory: the directory where to find freesurfer structure
 
         Returns:
             A brodmann area images
@@ -176,7 +171,7 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'brodmann'), 'brodmann'))
         return images.isSomeImagesMissing()
 
-
+    """
     def qaSupplier(self):
 
         anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
@@ -191,10 +186,7 @@ class Parcellation(GenericTask):
                        (aparcAsegPng,'aparcaseg segmentaion from freesurfer'),
                        (brodmannPng,'Brodmann segmentation from freesurfer'))
 
-
-
-
-
+    """
 
     def __linkExistingImage(self, images):
         """

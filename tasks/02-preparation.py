@@ -48,11 +48,10 @@ class Preparation(GenericTask):
                 else:
                     self.info("Found {} image, linking {} to {}".format(description, image, util.symlink(image, self.workingDir)))
 
-
-        for directory in [os.path.join(self.subjectDir, directory) for directory in os.listdir(self.subjectDir) if os.path.isdir(os.path.join(self.subjectDir, directory))]:
+        for directory in [os.path.join(self.dependDir, directory) for directory in os.listdir(self.dependDir) if os.path.isdir(os.path.join(self.dependDir, directory))]:
             if mriutil.isAfreesurferStructure(directory):
                 self.info("{} seem\'s a valid freesurfer structure: linking to {} directory".format(directory, self.workingDir))
-                util.symlink(directory, self.workingDir)
+                os.symlink(directory, self.config.get("parcellation", "id"))
 
         #QA
         workingDirAnat = self.getImage(self.workingDir, 'anat')

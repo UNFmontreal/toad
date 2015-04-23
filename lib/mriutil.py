@@ -591,4 +591,4 @@ def isAfreesurferStructure(directory):
     for image in ["T1.mgz", "aparc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz", "talairach.m3z"]:
         if not find(image):
             return False
-        return True
+    return True
