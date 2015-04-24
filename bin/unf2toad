@@ -9,6 +9,7 @@ import glob
 import sys
 import os
 
+from xml.dom import minidom
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from lib import util, arguments
 from collections import OrderedDict
@@ -17,7 +18,7 @@ __author__ = "Guillaume Vallet, Mathieu Desrosiers"
 __copyright__ = "Copyright 2015, The Toad Project"
 __credits__ = ["Guillaume Vallet", "Mathieu Desrosiers"]
 __license__ = "GPL"
-__version__ = "1.0"
+__version__ = "1.1"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Development"
@@ -81,7 +82,6 @@ class Pattern(object):
 
 class Unftoad(object):
 
-    #constants
     __initialPrefixs = OrderedDict([('anat', "Anatomical (T1--MPRAGE)"),
                                     ('dwi', "Diffusion weighted image (DWI - DTI)"),
                                     ('b0_ap', "B0 AP (anterior -> posterior)"),
@@ -107,7 +107,6 @@ class Unftoad(object):
         self.__sequences = OrderedDict()
 
     #@TODO none unf options, reshuffle dicom
-    #@TODO a user may choose is strides values
     def run(self):
 
         self.__validateToadDependencies()
@@ -120,6 +119,9 @@ class Unftoad(object):
         while len(self.__sessions) > 0:
 
             outputDir = self.__arguments.dirName if self.__arguments.dirName else "toad_data"
+
+            configXmlFile = os.path.join(outputDir, ".unftoad.xml")
+            self.__initializeSelectedSessionsFromXmlDocument(configXmlFile)
 
             choosedSession = self.__sessions[0] if len(self.__sessions) == 1 \
                 else self.__chooseFromSessions("Please choose a session to convert")
@@ -163,7 +165,10 @@ class Unftoad(object):
                                                     configFile)
                         else:
                             self.__convert(prefix, sequence, name, prefixs[prefix], targetDir)
+
                     self.__markSessionAsSelected(session)
+
+                self.__parseConfigInXmlDocument(configXmlFile)
 
             if len(self.__sessions) == 1:
                 break
@@ -172,6 +177,12 @@ class Unftoad(object):
         for (directory, archive) in rootDirectories:
             if archive is not None:
                 shutil.rmtree(directory)
+
+    def __getSesionsByName(self, name):
+        for session in self.__sessions:
+            if session.name == name:
+                return session
+        return False
 
     def __validateToadDependencies(self):
         """verify environments variables and lib importations for prior utilisation
@@ -198,9 +209,9 @@ class Unftoad(object):
         parser.add_argument("-f","--fieldmap", help="Add fieldmap capability", action="store_true")
         parser.add_argument("-n","--noConfig", help="Do not produce the config.cfg file into the root folder", action="store_true")
         parser.add_argument("-s","--noStride", help="Keep original stride orientation.", action="store_true")
-
         parser.add_argument("-d", "--dirName", nargs='?', metavar=('dirname'), required=False,
                             help="Specify the name of the destination directory. Default: toad_data")
+
         args = parser.parse_args()
         return args
 
@@ -268,11 +279,74 @@ class Unftoad(object):
                                            "".join([sequence.sequence for sequence in sequences ]),
                                            False))
 
+
+    def __initializeSelectedSessionsFromXmlDocument(self, xmlDocument):
+        """Update sessions from attribute comming from an xml document.
+
+        Args:
+            xmlDocument: A minidom Document
+
+        """
+        if os.path.isfile(xmlDocument):
+            xmlDocument = minidom.parse(xmlDocument)
+            xmlSessions = xmlDocument.getElementsByTagName("session")
+            for xmlSession in xmlSessions:
+                session = self.__getSesionsByName(xmlSession.firstChild.data)
+                self.__markSessionAsSelected(session)
+
+
+    def __parseConfigInXmlDocument(self, cacheFile):
+        """Gathers already converted session and parse them into a config file
+
+        Args:
+            cacheFile: A xml file
+
+        """
+        if os.path.isfile(cacheFile):
+            xmlDocument = minidom.parse(cacheFile)
+        else:
+            xmlDocument = minidom.Document()
+
+        if len(xmlDocument.getElementsByTagName("sessions")) == 0:
+            baseXml = xmlDocument.createElement("unftoad")
+            xmlDocument.appendChild(baseXml)
+            xmlVersions = xmlDocument.createElement('versions')
+            xmlSessions = xmlDocument.createElement('sessions')
+        else:
+            xmlVersions = xmlDocument.getElementsByTagName('versions')[0]
+            xmlSessions = xmlDocument.getElementsByTagName("sessions")[0]
+
+        mrconvertVersion = util.launchCommand("mrconvert --version")[1].split()
+        if len(mrconvertVersion) > 2:
+            mrconvertVersion = mrconvertVersion[2]
+            nodes = [node for node in xmlSessions.getElementsByTagName('versions') if node.getAttribute('name') == 'mrconvert']
+            if len(nodes) == 0:
+                xmlVersion = xmlDocument.createElement('version')
+                xmlVersion.setAttribute("name", 'mrconvert')
+                xmlVersionContain = xmlDocument.createTextNode(mrconvertVersion)
+                xmlVersion.appendChild(xmlVersionContain)
+                xmlVersions.appendChild(xmlVersion)
+                xmlDocument.childNodes[0].appendChild(xmlVersions)
+
+        for name in [session.name for session in self.__sessions if session.isConvert]:
+            nodes = [node for node in xmlSessions.getElementsByTagName('session') if node.getAttribute('name') == name]
+            if len(nodes) == 0:
+                xmlSession = xmlDocument.createElement('session')
+                xmlSession.setAttribute("name", name)
+                xmlSessionContain = xmlDocument.createTextNode(name)
+                xmlSession.appendChild(xmlSessionContain)
+                xmlSessions.appendChild(xmlSession)
+
+        xmlDocument.childNodes[0].appendChild(xmlSessions)
+        with open(cacheFile,"w") as w:
+            xmlDocument.writexml(w)
+
+
     def __markSessionAsSelected(self, aSession):
         """Utility function that mark a session as converted
 
         Args:
-            aSessions: the specific session to mark
+            aSessions: the specific session to mark as selected
 
         """
         sessions= []
