@@ -71,6 +71,10 @@ class Config(object):
         if arguments.emergency:
             config.set('general', 'nb_threads', 'unlimited')
 
+
+        if os.environ.get("SGEQUEUE") is not None:
+            config.set('general', 'sge_queue', os.environ.get("SGEQUEUE"))
+
         return config
 
 
