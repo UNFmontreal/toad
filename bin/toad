@@ -106,56 +106,22 @@ def __manageEnvironnement(logger):
         logger: the logger
 
     """
-    try:
-        version = float(sys.version[0:3])
-        if version < 2.7:
-            logger.warning("Note that toad had never run with a version of python < 2.7")
-    except ValueError:
-        logger.error("Cannot determine your version of python installed")
 
-    packages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
-    for package in packages:
+    if os.environ.get('TOADSERVER') is None:
+
         try:
-            imp.find_module(package)
-        except ImportError:
-            logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
+            version = float(sys.version[0:3])
+            if version < 2.7:
+                logger.warning("Note that toad had never run with a version of python < 2.7")
+        except ValueError:
+            logger.error("Cannot determine your version of python installed")
 
-    hostname = socket.gethostname()
-    if hostname in ['magma', 'stark']:
-
-        #disable KMP_AFFINITY
-        os.environ["KMP_AFFINITY"] = 'none'
-
-        #setup variables for freesurfer
-        os.environ["FREESURFER_HOME"] = "/usr/local/freesurfer"
-        os.environ["FSFAST_HOME"]     = "/usr/local/freesurfer/fsfast"
-        os.environ["SUBJECTS_DIR"] = "/usr/local/freesurfer/subjects"
-        
-        #setup variables for FSL
-        os.environ["FSLDIR"] = "/usr/local/fsl"
-        os.environ["FSLOUTPUTTYPE"] = "NIFTI_GZ"
-
-        if "PERL5LIB" in os.environ:
-            #setup perl library environnement
-            os.environ["PERL5LIB"] = os.environ["PERL5LIB"] + ":/usr/local/freesurfer/mni/lib/perl5/5.8.5/"
-        else:
-            os.environ["PERL5LIB"] = "/usr/local/freesurfer/mni/lib/perl5/5.8.5/"
-
-        #setup variable PATH
-        os.environ["PATH"] = ("/usr/local/fsl/bin:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:"
-                              "/usr/local/mrtrix3/scripts:/usr/local/freesurfer/fsfast/bin:"
-                              "/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:"
-                              "/usr/local/freesurfer/tktools:/usr/local/c3d/bin:") + os.environ["PATH"]
-
-        if hostname == 'stark':
-            if "LD_LIBRARY_PATH" in os.environ:
-                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib:"+os.environ["LD_LIBRARY_PATH"]
-            else:
-                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib"
-
-        os.environ["MRTRIX_PYTHON_SCRIPTS"] = "/usr/local/mrtrix3/scripts"
-
-    else:
+        packages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
+        for package in packages:
+            try:
+                imp.find_module(package)
+            except ImportError:
+                logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
 
         try:
             os.environ["FREESURFER_HOME"]
@@ -176,7 +142,7 @@ def __manageEnvironnement(logger):
             else:
                 logger.error("Your version of Mrtrix3 is too old, transformcalc could not be found. Please install the package again. ")
         else:
-            os.environ["MRTRIX_PYTHON_SCRIPTS"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))),"scripts")
+            os.environ["MRTRIX_PYTHON_SCRIPTS"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))), "scripts")
 
         if util.which("matlab") is None:
             logger.error("Matlab not found. Please install matlab or set the environment variable $PATH correctly")
@@ -186,10 +152,10 @@ def __manageEnvironnement(logger):
             if "SPM_NOT_FOUND" in output:
                 logger.error("Spm package not found, Please install spm or set the pathdef variable correctly")
 
+        result = util.which("convert")
+        if result is None:
+            logger.error("ImageMagick not found. Please install the package or set the environment variable $PATH correctly")
 
-    result = util.which("convert")
-    if result is None:
-        logger.error("ImageMagick not found. Please install the package or set the environment variable $PATH correctly")
 
 
 if __name__ == '__main__':
