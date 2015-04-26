@@ -11,7 +11,6 @@ case "$HOSTNAME" in
         export TOADSERVER=stark
         APPDIR=/usr/local
         export SGEQUEUE='toad.q'
-
     ;;
     magma)
         export TOADSERVER=magma
@@ -22,7 +21,6 @@ case "$HOSTNAME" in
     *)
     if [ -z "${BQMAMMOUTH}" ];
         then
-            #TOADSERVER=localhost
             APPDIR=/usr/local
             echo "Warning, unknown server $HOSTNAME, will guess environment!"
 

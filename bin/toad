@@ -82,11 +82,10 @@ def __parseArguments():
                             help="Specify the location of an alternative the config.cfg file")
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
-    parser.add_argument("-t", "--stopBeforeTask", nargs='?',metavar=('task name'), required=False,
+    parser.add_argument("-t", "--stopBeforeTask", nargs='?',metavar=('task_name'), required=False,
                             help="Stop the pipeline at a specific task. TOAD will create the working directory."
                                  "Usefull if you want to introduce your own freesurfer tree into the pipeline. "
                                  "This command will apply to all subject.")
-    parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
     parser.add_argument("-p","--noPrompt", help=("Disable command prompt and always assume yes as answer"), action="store_true")
     parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
     parser.add_argument("-v","--verbose", help="increase output verbosity (not implemented yet)", action="store_true")
@@ -94,6 +93,10 @@ def __parseArguments():
                         "If more than one subject is submit, this parameter will be ignored "
                         "(This parameter is dangerous and may crash the server or create deadlocks.)"
                         ), action="store_true")
+    parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
+    parser.add_argument("-q", "--queue", nargs='?',metavar=('queue_name'), required=False,
+                            help="Specify an alternative queue name to use for the grid engine")
+
     args = parser.parse_args()
     args.subject = None
     return args
@@ -108,7 +111,6 @@ def __manageEnvironnement(logger):
     """
 
     if os.environ.get('TOADSERVER') is None:
-
         try:
             version = float(sys.version[0:3])
             if version < 2.7:

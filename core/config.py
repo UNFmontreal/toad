@@ -66,14 +66,23 @@ class Config(object):
         if arguments.subject and isinstance(arguments.subject, basestring):
             config.set('arguments', 'subjectDir', arguments.subject)
 
+        if os.environ.get("SGEQUEUE") is not None:
+            config.set('general', 'sge_queue', os.environ.get("SGEQUEUE"))
+
+        if arguments.queue:
+            config.set('general', 'sge_queue', arguments.queue)
 
         #Should be safe to overwrite value base on command line arguments here
         if arguments.emergency:
             config.set('general', 'nb_threads', 'unlimited')
 
+        if os.environ.get("TOADSERVER") is not None:
+            config.set('general', 'server', os.environ.get("TOADSERVER"))
+        else:
+            config.set('general', 'server', 'unknown')
 
-        if os.environ.get("SGEQUEUE") is not None:
-            config.set('general', 'sge_queue', os.environ.get("SGEQUEUE"))
+
+
 
         return config
 

@@ -7,20 +7,19 @@ __author__ = 'mathieu'
 class Load(object):
 
 
-    def __init__(self, nbSubjects, nbThreads="algorithm"):
+    def __init__(self, config):
         """Determine the number of threads a package should consume without stressing the server.
 
         The package should implement some multithreading capabilty prior to use that package
 
         Args:
 
-            nbSubjects: The number of subjects that have been submit
-            nbThreads: if not set to "algorithm" or "unlimited", Force to override the return value to a specific number.
-
+           config: a configParser
         """
-        self.nbThreads = nbThreads
+        self.__config = config
+        self.__nbThreads = self.config.get('general', 'nb_threads')
         try:
-            self.nbSubjects = int(nbSubjects)
+            self.nbSubjects = int(self.config.get('general', 'nb_subjects'))
         except ValueError:
             self.nbSubjects = 1000
 
@@ -82,7 +81,8 @@ class Load(object):
             the suggested number of threads that should be deploy
 
         """
-        serverName = socket.gethostname()
+
+        serverName = self.__config.get('general', 'server')
 
         #First compute the number of threads base on the server capacity
         if 'magma' in serverName:
@@ -106,8 +106,21 @@ class Load(object):
                 value = 2
             else:
                 value = 1
+
+        elif 'mammouth' in serverName:
+            if self.nbSubjects <= 5:
+                value = 10
+            elif self.nbSubjects <= 10:
+                value = 8
+            elif self.nbSubjects <= 15:
+                value = 6
+            elif self.nbSubjects <= 20:
+                value = 4
+            else:
+                value = 2
         else:
             value = 1
+
 
         #Second look if nbThreads have not been overwrite into the config file
         if self.nbThreads is not "algorithm" or self.nbThreads is not "unlimited":

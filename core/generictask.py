@@ -41,7 +41,7 @@ class GenericTask(Logger, Load, Qa):
         self.toadDir = self.config.get('arguments', 'toad_dir')
         self.workingDir = os.path.join(self.subjectDir, self.__moduleName)
         Logger.__init__(self, subject.getLogDir())
-        Load.__init__(self, self.config.get('general', 'nb_subjects'), self.config.get('general', 'nb_threads'))
+        Load.__init__(self, self.config)
         self.dependencies = []
         self.__dependenciesDirNames = {}
         for arg in args:
