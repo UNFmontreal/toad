@@ -17,9 +17,9 @@ class Load(object):
            config: a configParser
         """
         self.__config = config
-        self.__nbThreads = self.config.get('general', 'nb_threads')
+        self.__nbThreads = self.__config.get('general', 'nb_threads')
         try:
-            self.nbSubjects = int(self.config.get('general', 'nb_subjects'))
+            self.nbSubjects = int(self.__config.get('general', 'nb_subjects'))
         except ValueError:
             self.nbSubjects = 1000
 
@@ -123,9 +123,9 @@ class Load(object):
 
 
         #Second look if nbThreads have not been overwrite into the config file
-        if self.nbThreads is not "algorithm" or self.nbThreads is not "unlimited":
+        if self.__nbThreads is not "algorithm" or self.__nbThreads is not "unlimited":
             try:
-                nbThreads = int(self.nbThreads)
+                nbThreads = int(self.__nbThreads)
                 if nbThreads <= value:
                     value = nbThreads
             except ValueError:
@@ -137,7 +137,7 @@ class Load(object):
             value = 1
 
         #Last, if emergency have been call, pray to avoid a crash
-        if self.nbThreads is "unlimited" and self.nbSubjects == 1:
+        if self.__nbThreads is "unlimited" and self.nbSubjects == 1:
             value = 100
 
         return str(value)

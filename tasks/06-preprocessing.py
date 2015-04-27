@@ -39,10 +39,10 @@ class Preprocessing(GenericTask):
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
         brainAnat  = self.__bet(anat)
 
-        brainAnatUncompress = self.uncompressImage(brainAnat)
-        whiteMatterAnat = self.__segmentation(brainAnatUncompress)
-        util.gzip(brainAnatUncompress)
-        util.gzip(whiteMatterAnat)
+        #brainAnatUncompress = self.uncompressImage(brainAnat)
+        #whiteMatterAnat = self.__segmentation(brainAnatUncompress)
+        #util.gzip(brainAnatUncompress)
+        #util.gzip(whiteMatterAnat)
 
         #QA
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
@@ -204,18 +204,16 @@ class Preprocessing(GenericTask):
 
 
     def isDirty(self):
+        #(self.getImage(self.workingDir, 'anat', ["brain", "wm"]), 'high resolution white matter brain extracted')
         images = Images((self.getImage(self.workingDir, 'dwi', "upsample"), 'upsampled diffusion weighted'),
                   (self.getImage(self.workingDir, 'b0', "upsample"), 'upsampled b0'),
-                  (self.getImage(self.workingDir, 'anat', "brain"), 'high resolution brain extracted'),
-                  (self.getImage(self.workingDir, 'anat', ["brain", "wm"]), 'high resolution white matter brain extracted'))
+                  (self.getImage(self.workingDir, 'anat', "brain"), 'high resolution brain extracted'))
         return images.isSomeImagesMissing()
 
 
-    def qaSupplier(self):
+    #def qaSupplier(self):
 
         anatBrainMaskPng = self.getImage(self.workingDir, 'anat', ['brain', 'mask'], ext='png')
-        anatWmMaskPng = self.getImage(self.workingDir, 'anat', ['brain', 'wm'], ext='png')
-
-        return Images((anatBrainMaskPng, 'Brain mask on high resolution anatomical image of freesurfer'),
-                     (anatWmMaskPng, 'White matter mask on high resolution anatomical image of freesurfer'),
-                    )
+        #anatWmMaskPng = self.getImage(self.workingDir, 'anat', ['brain', 'wm'], ext='png')
+        #(anatWmMaskPng, 'White matter mask on high resolution anatomical image of freesurfer'),
+        return Images((anatBrainMaskPng, 'Brain mask on high resolution anatomical image of freesurfer'))
