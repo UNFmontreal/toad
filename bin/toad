@@ -78,11 +78,15 @@ def __parseArguments():
         Check whether it CROAK like a toad and WALK like a toad. It is not uncommon to find a warty skinned frog that isn\'t a toad.
         """)
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the subjects, wildcard * ? are accepted")
-    parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
+    parser.add_argument("-c", "--config", nargs='+',metavar=('filename'), required=False,
                             help="Specify the location of an alternative the config.cfg file")
+
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
-    parser.add_argument("-t", "--stopBeforeTask", nargs='?',metavar=('task_name'), required=False,
+    parser.add_argument("-t", "--task", nargs='+',metavar=('task_file_name'), required=False,
+                            help="Specify a custom task to be submit")
+
+    parser.add_argument("-b", "--stopBeforeTask", nargs='?',metavar=('task_name'), required=False,
                             help="Stop the pipeline at a specific task. TOAD will create the working directory."
                                  "Usefull if you want to introduce your own freesurfer tree into the pipeline. "
                                  "This command will apply to all subject.")
@@ -102,14 +106,15 @@ def __parseArguments():
     return args
 
 
-def __manageEnvironnement(logger):
+def __manageEnvironnement(logger, arguments):
     """Set and verify environments variables and lib importations for prior utilisation
 
     Args:
         logger: the logger
+        arguments: an argument parser object
 
     """
-
+    #@TODOL IMITATION: matlab is not available on HPC, vtk crash on magma
     if os.environ.get('TOADSERVER') is None:
         try:
             version = float(sys.version[0:3])
@@ -143,8 +148,6 @@ def __manageEnvironnement(logger):
                 logger.error("Mrtrix3 not found. Please install the package or set the environment variable $PATH correctly")
             else:
                 logger.error("Your version of Mrtrix3 is too old, transformcalc could not be found. Please install the package again. ")
-        else:
-            os.environ["MRTRIX_PYTHON_SCRIPTS"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))), "scripts")
 
         if util.which("matlab") is None:
             logger.error("Matlab not found. Please install matlab or set the environment variable $PATH correctly")
@@ -158,6 +161,7 @@ def __manageEnvironnement(logger):
         if result is None:
             logger.error("ImageMagick not found. Please install the package or set the environment variable $PATH correctly")
 
+    return arguments
 
 
 if __name__ == '__main__':
@@ -169,7 +173,7 @@ if __name__ == '__main__':
     arguments = __parseArguments()
 
     #manage the environnement
-    __manageEnvironnement(logger)
+    arguments = __manageEnvironnement(logger, arguments)
 
     #define toad directory
     realPath = os.path.realpath(__file__)
