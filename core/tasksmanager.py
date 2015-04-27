@@ -95,8 +95,17 @@ class TasksManager(object):
         """
         tasks =[]
         tasksFiles = glob.glob("{}/tasks/*.py".format(self.__subject.getConfig().get('arguments','toad_dir')))
+
+        #if a custom task have been specified
+        customTasks = self.__subject.getConfig().get('arguments','custom_tasks')
+        if customTasks is not None:
+            for customTask in customTasks:
+                if os.path.isfile(customTask):
+                    tasksFiles.append(customTask)
+
+
         for taskFile in tasksFiles:
-            task= self.__instanciateFromFile(taskFile)
+            task= self.__instanciateIfATask(taskFile)
             if task is not None:
                 tasks.append(task)
             else:
@@ -104,7 +113,7 @@ class TasksManager(object):
         return tasks
 
 
-    def __instanciateFromFile(self, taskFile):
+    def __instanciateIfATask(self, taskFile):
         """ return an array of tasks files names order by the first 2 digits of the filename name
 
         This function also validate the filename and the extension validity.

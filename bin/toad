@@ -78,11 +78,15 @@ def __parseArguments():
         Check whether it CROAK like a toad and WALK like a toad. It is not uncommon to find a warty skinned frog that isn\'t a toad.
         """)
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the subjects, wildcard * ? are accepted")
-    parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
+    parser.add_argument("-c", "--config", nargs='+',metavar=('filename'), required=False,
                             help="Specify the location of an alternative the config.cfg file")
+
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
-    parser.add_argument("-t", "--stopBeforeTask", nargs='?',metavar=('task_name'), required=False,
+    parser.add_argument("-t", "--task", nargs='+',metavar=('task_file_name'), required=False,
+                            help="Specify a custom task to be submit")
+
+    parser.add_argument("-b", "--stopBeforeTask", nargs='?',metavar=('task_name'), required=False,
                             help="Stop the pipeline at a specific task. TOAD will create the working directory."
                                  "Usefull if you want to introduce your own freesurfer tree into the pipeline. "
                                  "This command will apply to all subject.")
