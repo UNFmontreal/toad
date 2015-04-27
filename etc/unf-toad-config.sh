@@ -22,7 +22,9 @@ case "$HOSTNAME" in
     if [ -z "${BQMAMMOUTH}" ];
         then
             APPDIR=/usr/local
-            echo "Warning, unknown server $HOSTNAME, will guess environment!"
+            echo "Warning, Toad is meant to dedicated server"
+            echo "Please contact mathieu.desrosiers@criugm.qc.ca for further information"
+            echo "unknown server $HOSTNAME, will guess environment!"
 
         else
             export TOADSERVER=mammouth
@@ -50,6 +52,7 @@ export FSLOUTPUTTYPE=NIFTI_GZ
 PATH=${FSLDIR}/bin:${PATH}
 . ${FSLDIR}/etc/fslconf/fsl.sh
 export FSLDIR PATH
+
 
 export PATH=$TOADDIR/bin:$APPDIR/matlab-8.0/bin:$APPDIR/mrtrix3/bin:$APPDIR/mrtrix3/scripts:$PATH
 export PATH=$FREESURFER_HOME/mni/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$PATH
