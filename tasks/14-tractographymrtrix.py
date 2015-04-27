@@ -34,7 +34,6 @@ class TractographyMrtrix(GenericTask):
         mriutil.plotConnectome(tckDetConnectome, self.buildName(tckDetConnectome, None, "png"))
         tckDetRoi = self.__tckedit(tckDet, mask253, self.buildName(tckDet, 'roi','tck'))
         tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, anatBrainResample , self.buildName(tckDetRoi, None, 'trk'))
-        mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
 
 
         tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Prob')
@@ -42,7 +41,6 @@ class TractographyMrtrix(GenericTask):
         mriutil.plotConnectome(tckProbConnectome, self.buildName(tckProbConnectome, None, "png"))
         tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, anatBrainResample , self.buildName(tckProbRoi, None, 'trk'))
-        mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
         
         #HARDI part
         fod =  self.getImage(self.hardimrtrixDir,'dwi','fod')
@@ -51,7 +49,6 @@ class TractographyMrtrix(GenericTask):
         mriutil.plotConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, None, "png"))
         hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
         tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, anatBrainResample , self.buildName(hardiTckRoi, None, 'trk'))
-        mriutil.createVtkPng(tckgenRoiTrk, anatBrainResample, mask253)
 
 
         tcksift = self.__tcksift(hardiTck, fod)
@@ -59,7 +56,12 @@ class TractographyMrtrix(GenericTask):
         mriutil.plotConnectome(tcksiftConnectome, self.buildName(tcksiftConnectome, None, "png"))                
         tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, anatBrainResample , self.buildName(tcksiftRoi, None, 'trk'))
-        tcksiftRoiTrk = mriutil.createVtkPng(tcksiftRoiTrk, anatBrainResample, mask253)
+
+        #create PNG
+        mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tckgenRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tcksiftRoiTrk, anatBrainResample, mask253)
 
     def __tckedit(self, source, include, target, downsample= "2"):
 
