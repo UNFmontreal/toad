@@ -2,6 +2,7 @@ import functools
 import importlib
 import inspect
 import glob
+import sys
 import os
 
 class TasksManager(object):
@@ -95,15 +96,11 @@ class TasksManager(object):
         """
         tasks =[]
         tasksFiles = glob.glob("{}/tasks/*.py".format(self.__subject.getConfig().get('arguments','toad_dir')))
-
-        #if a custom task have been specified
         customTasks = self.__subject.getConfig().get('arguments','custom_tasks')
         if customTasks is not None:
             for customTask in customTasks:
                 if os.path.isfile(customTask):
-                    tasksFiles.append(customTask)
-
-
+                    tasksFiles.append(os.path.abspath(customTask))
         for taskFile in tasksFiles:
             task= self.__instanciateIfATask(taskFile)
             if task is not None:
@@ -127,15 +124,20 @@ class TasksManager(object):
         """
         def __isDefined(clazz, method):
             return method in vars(clazz.__class__) and inspect.isroutine(vars(clazz.__class__)[method])
-
-        [taskName, ext] = os.path.splitext(os.path.basename(taskFile))
+        [directory, fileName] = os.path.split(taskFile)
+        [taskName, ext] = os.path.splitext(os.path.basename(fileName))
         if ext == ".py":
             try:
                 package = taskName
-                module = importlib.import_module("tasks.{}".format(package))
+                try:
+                    module = importlib.import_module("tasks.{}".format(package))
+                except ImportError:
+                    print "Custom task name: {} found in {} directory".format(package, directory)
+                    sys.path.append(directory)
+                    module = importlib.import_module(package)
                 classes = inspect.getmembers(module, inspect.isclass)
                 for clazz in classes:
-                    if clazz[1].__module__=="tasks.{}".format(package):
+                    if package in clazz[1].__module__:
                         clazz = clazz[1](self.__subject)
                         if not __isDefined(clazz,"isDirty"):
                             print "Warning: isDirty() method missing in class {}".format(clazz)
