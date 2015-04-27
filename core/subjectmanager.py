@@ -182,7 +182,7 @@ class SubjectManager(Logger, Config):
             subject:  a subject
 
         """
-        if subject.getConfig().get('general', 'hostname') in ['magma' , 'stark']:
+        if subject.getConfig().get('general', 'server') in ['magma' , 'stark']:
             notify = " -notify "
         else:
             notify = ""
