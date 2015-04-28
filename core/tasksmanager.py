@@ -125,19 +125,15 @@ class TasksManager(object):
         def __isDefined(clazz, method):
             return method in vars(clazz.__class__) and inspect.isroutine(vars(clazz.__class__)[method])
         [directory, fileName] = os.path.split(taskFile)
-        [taskName, ext] = os.path.splitext(os.path.basename(fileName))
+        [package, ext] = os.path.splitext(os.path.basename(fileName))
         if ext == ".py":
             try:
-                print "sys.path=", sys.path
-                package = taskName
-                sys.exit()
-                try:
-
-                    module = importlib.import_module("tasks.{}".format(package))
-                except ImportError:
-                    print "Custom task name: {} found in {} directory".format(package, directory)
+                if directory not in sys.path:
                     sys.path.append(directory)
+                try:
                     module = importlib.import_module(package)
+                except ImportError:
+                     self.info("Cannot instanciate {} module, module discarted.".format(package))
                 classes = inspect.getmembers(module, inspect.isclass)
                 for clazz in classes:
                     if package in clazz[1].__module__:
