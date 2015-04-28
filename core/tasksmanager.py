@@ -128,8 +128,11 @@ class TasksManager(object):
         [taskName, ext] = os.path.splitext(os.path.basename(fileName))
         if ext == ".py":
             try:
+                print "sys.path=", sys.path
                 package = taskName
+                sys.exit()
                 try:
+
                     module = importlib.import_module("tasks.{}".format(package))
                 except ImportError:
                     print "Custom task name: {} found in {} directory".format(package, directory)
@@ -140,13 +143,13 @@ class TasksManager(object):
                     if package in clazz[1].__module__:
                         clazz = clazz[1](self.__subject)
                         if not __isDefined(clazz,"isDirty"):
-                            print "Warning: isDirty() method missing in class {}".format(clazz)
+                            print "Warning: isDirty() method not found. Class {} discard".format(clazz)
                             return None
                         if not __isDefined(clazz,"meetRequirement"):
-                            print "Warning: meetRequirement() method missing in class {}".format(clazz)
+                            print "Warning: meetRequirement() method not found. Class {} discard".format(clazz)
                             return None
                         if not __isDefined(clazz,"implement"):
-                            print "Warning: implement() method missing in class {}".format(clazz)
+                            print "Warning: implement() method not found.  Class {} discard".format(clazz)
                             return None
                         return clazz
             except ValueError:
