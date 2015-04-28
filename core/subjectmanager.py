@@ -182,9 +182,18 @@ class SubjectManager(Logger, Config):
             subject:  a subject
 
         """
-        cmd = "echo {0}/bin/toad {1} -l -p | qsub -notify -V -N {2} -o {3} -e {3} -q {4}".format(self.config.get('arguments', 'toad_dir'),
-              subject.getDir(), subject.getName(), subject.getLogDir(),subject.getConfig().get('general', 'sge_queue'))
+        if subject.getConfig().get('general', 'server') in ['magma' , 'stark']:
+            notify = " -notify "
+        else:
+            notify = ""
+
+        if subject.getConfig().get('general', 'server') in ['mammouth']:
+            walllTime = "-l walltime=48:00:00 "
+
+        cmd = "echo {0}/bin/toad {1} -l -p | qsub {2} -V -N {3} -o {4} -e {4} -q {5} {6}".format(self.config.get('arguments', 'toad_dir'),
+              subject.getDir(), notify, subject.getName(), subject.getLogDir(),subject.getConfig().get('general', 'sge_queue'), walllTime)
         self.info("Command launch: {}".format(cmd))
+
         import subprocess
         process = subprocess.Popen(cmd, stdout=None, stderr=None, shell=True)
         process.wait()

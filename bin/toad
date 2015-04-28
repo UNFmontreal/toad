@@ -78,15 +78,18 @@ def __parseArguments():
         Check whether it CROAK like a toad and WALK like a toad. It is not uncommon to find a warty skinned frog that isn\'t a toad.
         """)
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the subjects, wildcard * ? are accepted")
-    parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
+    parser.add_argument("-c", "--config", nargs='+',metavar=('filename'), required=False,
                             help="Specify the location of an alternative the config.cfg file")
+
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
-    parser.add_argument("-t", "--stopBeforeTask", nargs='?',metavar=('task name'), required=False,
+    parser.add_argument("-t", "--task", nargs='+',metavar=('task_file_name'), required=False,
+                            help="Specify a custom task to be submit")
+
+    parser.add_argument("-b", "--stopBeforeTask", nargs='?',metavar=('task_name'), required=False,
                             help="Stop the pipeline at a specific task. TOAD will create the working directory."
                                  "Usefull if you want to introduce your own freesurfer tree into the pipeline. "
                                  "This command will apply to all subject.")
-    parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
     parser.add_argument("-p","--noPrompt", help=("Disable command prompt and always assume yes as answer"), action="store_true")
     parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
     parser.add_argument("-v","--verbose", help="increase output verbosity (not implemented yet)", action="store_true")
@@ -94,68 +97,38 @@ def __parseArguments():
                         "If more than one subject is submit, this parameter will be ignored "
                         "(This parameter is dangerous and may crash the server or create deadlocks.)"
                         ), action="store_true")
+    parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
+    parser.add_argument("-q", "--queue", nargs='?',metavar=('queue_name'), required=False,
+                            help="Specify an alternative queue name to use for the grid engine")
+
     args = parser.parse_args()
     args.subject = None
     return args
 
 
-def __manageEnvironnement(logger):
+def __manageEnvironnement(logger, arguments):
     """Set and verify environments variables and lib importations for prior utilisation
 
     Args:
         logger: the logger
+        arguments: an argument parser object
 
     """
-    try:
-        version = float(sys.version[0:3])
-        if version < 2.7:
-            logger.warning("Note that toad had never run with a version of python < 2.7")
-    except ValueError:
-        logger.error("Cannot determine your version of python installed")
-
-    packages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
-    for package in packages:
+    #@TODOL IMITATION: matlab is not available on HPC, vtk crash on magma
+    if os.environ.get('TOADSERVER') is None:
         try:
-            imp.find_module(package)
-        except ImportError:
-            logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
+            version = float(sys.version[0:3])
+            if version < 2.7:
+                logger.warning("Note that toad had never run with a version of python < 2.7")
+        except ValueError:
+            logger.error("Cannot determine your version of python installed")
 
-    hostname = socket.gethostname()
-    if hostname in ['magma', 'stark']:
-
-        #disable KMP_AFFINITY
-        os.environ["KMP_AFFINITY"] = 'none'
-
-        #setup variables for freesurfer
-        os.environ["FREESURFER_HOME"] = "/usr/local/freesurfer"
-        os.environ["FSFAST_HOME"]     = "/usr/local/freesurfer/fsfast"
-        os.environ["SUBJECTS_DIR"] = "/usr/local/freesurfer/subjects"
-        
-        #setup variables for FSL
-        os.environ["FSLDIR"] = "/usr/local/fsl"
-        os.environ["FSLOUTPUTTYPE"] = "NIFTI_GZ"
-
-        if "PERL5LIB" in os.environ:
-            #setup perl library environnement
-            os.environ["PERL5LIB"] = os.environ["PERL5LIB"] + ":/usr/local/freesurfer/mni/lib/perl5/5.8.5/"
-        else:
-            os.environ["PERL5LIB"] = "/usr/local/freesurfer/mni/lib/perl5/5.8.5/"
-
-        #setup variable PATH
-        os.environ["PATH"] = ("/usr/local/fsl/bin:/usr/local/matlab-8.0/bin:/usr/local/mrtrix3/bin:"
-                              "/usr/local/mrtrix3/scripts:/usr/local/freesurfer/fsfast/bin:"
-                              "/usr/local/freesurfer/mni/bin:/usr/local/freesurfer/bin:"
-                              "/usr/local/freesurfer/tktools:/usr/local/c3d/bin:") + os.environ["PATH"]
-
-        if hostname == 'stark':
-            if "LD_LIBRARY_PATH" in os.environ:
-                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib:"+os.environ["LD_LIBRARY_PATH"]
-            else:
-                os.environ["LD_LIBRARY_PATH"] = "/usr/local/freesurfer/lib"
-
-        os.environ["MRTRIX_PYTHON_SCRIPTS"] = "/usr/local/mrtrix3/scripts"
-
-    else:
+        packages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
+        for package in packages:
+            try:
+                imp.find_module(package)
+            except ImportError:
+                logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
 
         try:
             os.environ["FREESURFER_HOME"]
@@ -175,8 +148,6 @@ def __manageEnvironnement(logger):
                 logger.error("Mrtrix3 not found. Please install the package or set the environment variable $PATH correctly")
             else:
                 logger.error("Your version of Mrtrix3 is too old, transformcalc could not be found. Please install the package again. ")
-        else:
-            os.environ["MRTRIX_PYTHON_SCRIPTS"]=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(mrtrix))),"scripts")
 
         if util.which("matlab") is None:
             logger.error("Matlab not found. Please install matlab or set the environment variable $PATH correctly")
@@ -186,10 +157,11 @@ def __manageEnvironnement(logger):
             if "SPM_NOT_FOUND" in output:
                 logger.error("Spm package not found, Please install spm or set the pathdef variable correctly")
 
+        result = util.which("convert")
+        if result is None:
+            logger.error("ImageMagick not found. Please install the package or set the environment variable $PATH correctly")
 
-    result = util.which("convert")
-    if result is None:
-        logger.error("ImageMagick not found. Please install the package or set the environment variable $PATH correctly")
+    return arguments
 
 
 if __name__ == '__main__':
@@ -201,7 +173,7 @@ if __name__ == '__main__':
     arguments = __parseArguments()
 
     #manage the environnement
-    __manageEnvironnement(logger)
+    arguments = __manageEnvironnement(logger, arguments)
 
     #define toad directory
     realPath = os.path.realpath(__file__)

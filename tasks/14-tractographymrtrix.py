@@ -34,7 +34,6 @@ class TractographyMrtrix(GenericTask):
         mriutil.plotConnectome(tckDetConnectome, self.buildName(tckDetConnectome, None, "png"))
         tckDetRoi = self.__tckedit(tckDet, mask253, self.buildName(tckDet, 'roi','tck'))
         tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, anatBrainResample , self.buildName(tckDetRoi, None, 'trk'))
-        mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
 
 
         tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Prob')
@@ -42,7 +41,6 @@ class TractographyMrtrix(GenericTask):
         mriutil.plotConnectome(tckProbConnectome, self.buildName(tckProbConnectome, None, "png"))
         tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, anatBrainResample , self.buildName(tckProbRoi, None, 'trk'))
-        mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
         
         #HARDI part
         fod =  self.getImage(self.hardimrtrixDir,'dwi','fod')
@@ -51,7 +49,6 @@ class TractographyMrtrix(GenericTask):
         mriutil.plotConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, None, "png"))
         hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
         tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, anatBrainResample , self.buildName(hardiTckRoi, None, 'trk'))
-        mriutil.createVtkPng(tckgenRoiTrk, anatBrainResample, mask253)
 
 
         tcksift = self.__tcksift(hardiTck, fod)
@@ -59,14 +56,19 @@ class TractographyMrtrix(GenericTask):
         mriutil.plotConnectome(tcksiftConnectome, self.buildName(tcksiftConnectome, None, "png"))                
         tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, anatBrainResample , self.buildName(tcksiftRoi, None, 'trk'))
-        tcksiftRoiTrk = mriutil.createVtkPng(tcksiftRoiTrk, anatBrainResample, mask253)
+
+        #create PNG
+        mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tckgenRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tcksiftRoiTrk, anatBrainResample, mask253)
 
     def __tckedit(self, source, include, target, downsample= "2"):
 
         self.info("Starting tckedit creation from mrtrix on {}".format(source))
 
         tmp = self.buildName(source, "tmp", "tck")        
-	cmd = "tckedit {} {} -downsample {} -quiet ".format(source, tmp, downsample)
+        cmd = "tckedit {} {} -downsample {} -quiet ".format(source, tmp, downsample)
 
         if isinstance(include, basestring):
             cmd += " -include {}".format(include)
@@ -217,31 +219,20 @@ class TractographyMrtrix(GenericTask):
                   (self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck'), 'tcksift'),
                   (self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome'], 'csv'), 'connectome matrix from a tcksift csv'))
 
-	print 'Dirty =', images
+        print 'Dirty =', images
         return images.isSomeImagesMissing()
 
 
     def qaSupplier(self):
 
-        tckgenDet = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome' ], 'csv')
-        tckgenProb = self.getImage(self.workingDir, 'dwi', ['tensor_prob','connectome'], 'csv')
-        fodProb = self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome'], 'csv')
 
-        tckgenDetPlot = mriutil.plotConnectome(tckgenDet, self.buildName(tckgenDet, None, "png"))
-        tckgenProbPlot = mriutil.plotConnectome(tckgenProb, self.buildName(tckgenProb, None, "png"))
-        fodProbPlot = mriutil.plotConnectome(fodProb, self.buildName(fodProb, None, "png"))
-
-        images = Images((tckgenDetPlot, 'Connectome matrix from a deterministic streamlines'),
-                       (tckgenProbPlot,'Connectome matrix from a probabilistic streamlines'),
-                       (fodProbPlot, 'Connectome matrix from a fod probabilistic streamlines'))
-
-	tensorDetPng = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'roi'], 'png')
+        tensorDetPng = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'roi'], 'png')
         tensorDetPlot = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome'], 'png')
-	tensorProbPng = self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'roi'], 'png')
+        tensorProbPng = self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'roi'], 'png')
         tensorProbPlot = self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'connectome'], 'png')
-	hardiProbPng = self.getImage(self.workingDir, 'dwi', ['hardi_prob', 'roi'], 'png')        
+        hardiProbPng = self.getImage(self.workingDir, 'dwi', ['hardi_prob', 'roi'], 'png')
         hardiProbPlot = self.getImage(self.workingDir, 'dwi', ['hardi_prob', 'connectome'], 'png')
-	tcksiftPng = self.getImage(self.workingDir, 'dwi', ['tcksift', 'roi'], 'png')        
+        tcksiftPng = self.getImage(self.workingDir, 'dwi', ['tcksift', 'roi'], 'png')
         tcksiftPlot = self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome'], 'png')
 
         images = Images((tensorDetPng, 'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),
@@ -250,7 +241,7 @@ class TractographyMrtrix(GenericTask):
                        (tensorProbPlot,'Connectome matrix from a probabilistic tensor streamlines'),
                        (hardiProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines'),
                        (hardiProbPlot, 'Connectome matrix from a probabilistic hardi streamlines'),
-                       (tcksiftPlot, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
+                       (tcksiftPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
                        (tcksiftPlot, 'tcksift'))
         print images
         return images

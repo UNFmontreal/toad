@@ -2,6 +2,7 @@ import functools
 import importlib
 import inspect
 import glob
+import sys
 import os
 
 class TasksManager(object):
@@ -95,8 +96,13 @@ class TasksManager(object):
         """
         tasks =[]
         tasksFiles = glob.glob("{}/tasks/*.py".format(self.__subject.getConfig().get('arguments','toad_dir')))
+        customTasks = self.__subject.getConfig().get('arguments','custom_tasks')
+        if customTasks is not None:
+            for customTask in customTasks:
+                if os.path.isfile(customTask):
+                    tasksFiles.append(os.path.abspath(customTask))
         for taskFile in tasksFiles:
-            task= self.__instanciateFromFile(taskFile)
+            task= self.__instanciateIfATask(taskFile)
             if task is not None:
                 tasks.append(task)
             else:
@@ -104,7 +110,7 @@ class TasksManager(object):
         return tasks
 
 
-    def __instanciateFromFile(self, taskFile):
+    def __instanciateIfATask(self, taskFile):
         """ return an array of tasks files names order by the first 2 digits of the filename name
 
         This function also validate the filename and the extension validity.
@@ -118,24 +124,28 @@ class TasksManager(object):
         """
         def __isDefined(clazz, method):
             return method in vars(clazz.__class__) and inspect.isroutine(vars(clazz.__class__)[method])
-
-        [taskName, ext] = os.path.splitext(os.path.basename(taskFile))
+        [directory, fileName] = os.path.split(taskFile)
+        [package, ext] = os.path.splitext(os.path.basename(fileName))
         if ext == ".py":
             try:
-                package = taskName
-                module = importlib.import_module("tasks.{}".format(package))
+                if directory not in sys.path:
+                    sys.path.append(directory)
+                try:
+                    module = importlib.import_module(package)
+                except ImportError:
+                     self.info("Cannot instanciate {} module, module discarted.".format(package))
                 classes = inspect.getmembers(module, inspect.isclass)
                 for clazz in classes:
-                    if clazz[1].__module__=="tasks.{}".format(package):
+                    if package in clazz[1].__module__:
                         clazz = clazz[1](self.__subject)
                         if not __isDefined(clazz,"isDirty"):
-                            print "Warning: isDirty() method missing in class {}".format(clazz)
+                            print "Warning: isDirty() method not found. Class {} discard".format(clazz)
                             return None
                         if not __isDefined(clazz,"meetRequirement"):
-                            print "Warning: meetRequirement() method missing in class {}".format(clazz)
+                            print "Warning: meetRequirement() method not found. Class {} discard".format(clazz)
                             return None
                         if not __isDefined(clazz,"implement"):
-                            print "Warning: implement() method missing in class {}".format(clazz)
+                            print "Warning: implement() method not found.  Class {} discard".format(clazz)
                             return None
                         return clazz
             except ValueError:

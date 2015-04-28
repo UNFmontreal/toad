@@ -86,15 +86,13 @@ class Masking(GenericTask):
 
 
     def __actAnatPrepareFreesurfer(self, source):
-
-        sys.path.append(os.environ["MRTRIX_PYTHON_SCRIPTS"])
         target = self.buildName(source, 'act')
         freesurfer_lut = os.path.join(os.environ['FREESURFER_HOME'], 'FreeSurferColorLUT.txt')
 
         if not os.path.isfile(freesurfer_lut):
           self.error("Could not find FreeSurfer lookup table file: Expected location: {}".format(freesurfer_lut))
 
-        config_path = os.path.join(os.environ["MRTRIX_PYTHON_SCRIPTS"], 'data', 'FreeSurfer2ACT.txt');
+        config_path = os.path.join("{}/templates/lookup_tables".format(self.toadDir), 'FreeSurfer2ACT.txt');
         if not os.path.isfile(config_path):
           self.error("Could not find config file for converting FreeSurfer parcellation output to tissues: Expected location: {}".format(config_path))
 

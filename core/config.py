@@ -63,13 +63,28 @@ class Config(object):
         else:
             config.set('arguments', 'prompt', 'True')
 
+        if arguments.task:
+            config.set('arguments', 'custom_tasks', arguments.task)
+        else:
+            config.set('arguments', 'custom_tasks', None)
+
         if arguments.subject and isinstance(arguments.subject, basestring):
             config.set('arguments', 'subjectDir', arguments.subject)
 
+        if os.environ.get("SGEQUEUE") is not None:
+            config.set('general', 'sge_queue', os.environ.get("SGEQUEUE"))
+
+        if arguments.queue:
+            config.set('general', 'sge_queue', arguments.queue)
 
         #Should be safe to overwrite value base on command line arguments here
         if arguments.emergency:
             config.set('general', 'nb_threads', 'unlimited')
+
+        if os.environ.get("TOADSERVER") is not None:
+            config.set('general', 'server', os.environ.get("TOADSERVER"))
+        else:
+            config.set('general', 'server', 'unknown')
 
         return config
 
@@ -112,6 +127,7 @@ class Config(object):
                     configFiles.append(configFile)
 
         if arguments.config:
-            if os.path.isfile(arguments.config):
-                configFiles.append(arguments.config)
+            for config in arguments.config:
+                if os.path.isfile(config):
+                    configFiles.append(config)
         return configFiles
