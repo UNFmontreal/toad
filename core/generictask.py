@@ -126,7 +126,7 @@ class GenericTask(Logger, Load, Qa):
         if "qaSupplier" in dir(self):
             self.createQaReport(self.qaSupplier())
         else:
-            self.info("task {} does not implement qaSupplier method")
+            self.info("task {} does not implement qaSupplier method".format(self.getName()))
 
         os.chdir(self.subjectDir)
 
