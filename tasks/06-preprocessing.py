@@ -52,8 +52,8 @@ class Preprocessing(GenericTask):
         anatBrainMaskPng = self.buildName(anatBrainMask, None, 'png')
         anatWmMaskPng = self.buildName(anatWmMask, None, 'png')
 
-        self.slicerPng(anat, anatBrainMaskPng, maskOverlay=anatBrainMask)
-        self.slicerPng(anat, anatWmMaskPng, maskOverlay=anatWmMask)
+        self.slicerPng(anat, anatBrainMaskPng, maskOverlay=anatBrainMask, boundaries=anatBrainMask)
+        self.slicerPng(anat, anatWmMaskPng, maskOverlay=anatWmMask, boundaries=anatWmMask)
 
 
     def __linkDwiImage(self):
