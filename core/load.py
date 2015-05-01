@@ -108,16 +108,7 @@ class Load(object):
                 value = 1
 
         elif 'mammouth' in serverName:
-            if self.nbSubjects <= 5:
-                value = 10
-            elif self.nbSubjects <= 10:
-                value = 8
-            elif self.nbSubjects <= 15:
-                value = 6
-            elif self.nbSubjects <= 20:
-                value = 4
-            else:
-                value = 2
+                value = 24
         else:
             value = 1
 
