@@ -12,7 +12,6 @@ class TractographyMrtrix(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preprocessing', 'hardimrtrix', 'masking', 'registration','qa')
 
-
     def implement(self):
 
         act = self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"])
@@ -27,7 +26,7 @@ class TractographyMrtrix(GenericTask):
 
         bFile = self.getImage(self.dependDir, 'grad', None, 'b')
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
-
+         
         #tensor part
         tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Det')
         tckDetConnectome = self.__tck2connectome(tckDet, brodmann, self.buildName(tckDet, 'connectome', 'csv'))
@@ -41,7 +40,7 @@ class TractographyMrtrix(GenericTask):
         mriutil.plotConnectome(tckProbConnectome, self.buildName(tckProbConnectome, None, "png"))
         tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, anatBrainResample , self.buildName(tckProbRoi, None, 'trk'))
-        
+
         #HARDI part
         fod =  self.getImage(self.hardimrtrixDir,'dwi','fod')
         hardiTck = self.__tckgenHardi(fod, self.buildName(fod, 'hardi_prob', 'tck'), act)
