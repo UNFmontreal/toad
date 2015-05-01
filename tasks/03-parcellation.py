@@ -39,9 +39,9 @@ class Parcellation(GenericTask):
         aparcAsegPng = self.buildName(aparcAseg, None, 'png')
         brodmannPng = self.buildName(brodmann, None, 'png')
 
-        self.slicerPng(workingDirAnat, anatPng)
-        self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg)
-        self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann)
+        self.slicerPng(workingDirAnat, anatPng, boundaries=aparcAseg)
+        self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
+        self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
 
 
     def __findAndLinkFreesurferStructure(self):
