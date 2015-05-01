@@ -544,15 +544,19 @@ def createVtkPng(source, anatomical, roi):
     anatomicalImage = nibabel.load(anatomical)
 
     sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
-    sourceActor = fvtk.streamtube(sourceImage, line_colors(sourceImage))
-    roiActor = fvtk.contour(roiImage.get_data(), levels=[1], colors=[(1., 1., 0.)], opacities=[1.])
-    anatomicalActor = fvtk.slicer(anatomicalImage.get_data(),
+    try:
+        sourceActor = fvtk.streamtube(sourceImage, line_colors(sourceImage))
+
+        roiActor = fvtk.contour(roiImage.get_data(), levels=[1], colors=[(1., 1., 0.)], opacities=[1.])
+        anatomicalActor = fvtk.slicer(anatomicalImage.get_data(),
                                   voxsz=(1.0, 1.0, 1.0),
                                   plane_i=None,
                                   plane_j=None,
                                   plane_k=[65],
                                   outline=False)
-
+    except ValueError:
+        return False
+        
     sourceActor.RotateX(-70)
     sourceActor.RotateY(2.5)
     sourceActor.RotateZ(185)
