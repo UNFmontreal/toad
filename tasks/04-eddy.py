@@ -103,8 +103,8 @@ class Eddy(GenericTask):
         rotationPng = self.buildName(workingDirDwi, 'rotations', 'png')
         bVecsGif = self.buildName(workingDirDwi, 'vectors', 'gif')
 
-        self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif)
-        self.slicerGif(workingDirDwi, dwiGif)
+        self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=mask)
+        self.slicerGif(workingDirDwi, dwiGif, boundaries=mask)
         self.plotMovement(eddyParameterFiles, translationsPng, rotationPng)
         self.plotvectors(bVecs, bVecsCorrected, bVecsGif)
         

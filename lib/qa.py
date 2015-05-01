@@ -11,11 +11,12 @@ matplotlib.use('Agg')
 import matplotlib.pyplot
 import mpl_toolkits.mplot3d
 import scipy.ndimage.morphology
+import dipy.segment.mask
 
 
 class Qa(object):
 
-    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, isData=False):
+    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, isData=False):
         """Utility method to slice a 3d image
         Args:
             source : background image
@@ -35,7 +36,7 @@ class Qa(object):
         width, fig_dims = self.__configFigure(imageData)
         fig = matplotlib.pyplot.figure(figsize=fig_dims)
     
-        slices = self.__image3d2slices(imageData, width)
+        slices = self.__image3d2slices(imageData, width, boundaries=boundaries)
         imageImshow = functools.partial(matplotlib.pyplot.imshow, \
                                         vmin=0, \
                                         vmax=vmax, \
@@ -44,12 +45,12 @@ class Qa(object):
         if maskOverlay != None:
             mask = nibabel.load(maskOverlay)
             maskData = mask.get_data()
-            maskSlices = self.__image3d2slices(maskData, width)
+            maskSlices = self.__image3d2slices(maskData, width, boundaries=boundaries)
 
         if segOverlay != None:
             seg = nibabel.load(segOverlay)
             segData = seg.get_data()
-            segSlices = self.__image3d2slices(segData, width)
+            segSlices = self.__image3d2slices(segData, width, boundaries=boundaries)
             segSlices = [numpy.ma.masked_where(segSlices[dim] == 0, segSlices[dim]) for dim in range(3)]
             lutFiles = os.path.join(self.toadDir, "templates/lookup_tables/",'FreeSurferColorLUT_ItkSnap.txt')
             lutData = numpy.loadtxt(lutFiles, usecols=(0,1,2,3))
@@ -107,7 +108,7 @@ class Qa(object):
 
 
 
-    def slicerGif(self, source, target, gifSpeed=30, vmax=100):
+    def slicerGif(self, source, target, gifSpeed=30, vmax=100, boundaries=None):
         """Create a animated gif from a 4d NIfTI
         Args:
             source: 4D NIfTI image
@@ -122,7 +123,7 @@ class Qa(object):
         imageList = []
         for num in range(imageData.shape[-1]):
             output = gifId + '{0:04}.png'.format(num)
-            self.slicerPng(imageData[:,:,:,num], output, vmax=vmax, isData=True)
+            self.slicerPng(imageData[:,:,:,num], output, vmax=vmax, isData=True, boundaries=boundaries)
             imageList.append(output)
         
         self.__imageList2Gif(imageList, target, gifSpeed)
@@ -134,7 +135,7 @@ class Qa(object):
              
 
 
-    def slicerGifCompare(self, source1, source2, target, gifSpeed=100, vmax=100):
+    def slicerGifCompare(self, source1, source2, target, gifSpeed=100, vmax=100, boundaries=None):
         """Create a animated gif from a 4d NIfTI
         Args:
             source: 4D NIfTI image
@@ -152,7 +153,7 @@ class Qa(object):
         imageList = []
         for num, image in enumerate([imageData1, imageData2]):
             output = gifId + '{0:04}.png'.format(num)
-            self.slicerPng(image[:,:,:,2], output, vmax=vmax, isData=True)
+            self.slicerPng(image[:,:,:,2], output, vmax=vmax, isData=True, boundaries=boundaries)
             imageList.append(output)
 
         self.__imageList2Gif(imageList, target, gifSpeed)
@@ -367,7 +368,7 @@ class Qa(object):
 
 
 
-    def __image3d2slices(self, image3dData, maxWidth):
+    def __image3d2slices(self, image3dData, maxWidth, boundaries=None):
         """Slice a 3d image along the 3 axis given a maximum Width
         Args:
             image3dData: 3d image
@@ -380,15 +381,33 @@ class Qa(object):
         ySlicesNumber = maxWidth / image3dData.shape[0]
         zSlicesNumber = ySlicesNumber
         slicesNumbers = (xSlicesNumber, ySlicesNumber, zSlicesNumber)
-    
+        
+        mins, maxs = (0, 0, 0), image3dData.shape
+        
+        if boundaries != None:
+            boundariesImage = nibabel.load(boundaries)
+            boundariesData = boundariesImage.get_data()
+            mins, maxs = dipy.segment.mask.bounding_box(boundariesData)
+        
         slicesIndices3d = []
-        for dimSize, slicesNumber in zip(image3dData.shape, slicesNumbers):
-            start = dimSize / slicesNumber
-            stop = dimSize
+        for minimum, maximum, slicesNumber in zip(mins, maxs, slicesNumbers):
+            dimSize = maximum - minimum
+            start = minimum + (dimSize / slicesNumber)
+            stop = maximum
             slicesIndices = numpy.linspace(start, stop, slicesNumber, endpoint=False)
             slicesIndices = slicesIndices.astype('uint8')
             slicesIndices3d.append(slicesIndices)
-    
+        
+        '''param = [(ximage3dDataSliced),
+                    (yimage3dDataSliced),
+                    (zimage3dDataSliced),
+                   ]
+        for image3dDataSliced in param:
+            #So just to recap: to invert the effect of rollaxis(x,n), use rollaxis(x,0,n+1)
+            image3dDataSliced = image3dData[slicesIndices3d[0], :, :]
+            xNewShape = (image3dData.shape[1] * xSlicesNumber, image3dData.shape[2])
+            ximage3dDataSliced = numpy.reshape(ximage3dDataSliced, xNewShape)'''
+
         ximage3dDataSliced = image3dData[slicesIndices3d[0], :, :]
         xNewShape = (image3dData.shape[1] * xSlicesNumber, image3dData.shape[2])
         ximage3dDataSliced = numpy.reshape(ximage3dDataSliced, xNewShape)
@@ -402,7 +421,7 @@ class Qa(object):
         zimage3dDataSliced = numpy.rollaxis(zimage3dDataSliced, 2)
         zNewShape = (image3dData.shape[0] * zSlicesNumber, image3dData.shape[1])
         zimage3dDataSliced = numpy.reshape(zimage3dDataSliced, zNewShape)
-        #So just to recap: to invert the effect of rollaxis(x,n), use rollaxis(x,0,n+1)
+        
         return (ximage3dDataSliced, yimage3dDataSliced, zimage3dDataSliced)
 
 
