@@ -54,14 +54,12 @@ class Eddy(GenericTask):
         else:
 
             #concatenate B0 image together
-
+            print "buildname=", self.buildName("b0pa_b0ap", None, "nii.gz")
             if self.get("phase_enc_dir") == "0":
-                b0Image = self.__concatenateB0(b0PA, b0AP,
-                                os.path.join(self.workingDir, self.get('b0s_filename')))
+                b0Image = self.__concatenateB0(b0PA, b0AP, self.buildName("b0pa_b0ap", None, "nii.gz"))
 
             elif self.get("phase_enc_dir") == "1":
-                 b0Image = self.__concatenateB0(b0AP, b0PA,
-                                os.path.join(self.workingDir, self.get('b0s_filename')))
+                 b0Image = self.__concatenateB0(b0AP, b0PA, self.buildName("b0ap_b0pa", None, "nii.gz" ))
 
             #create the acquisition parameter file
             acqpTopup = self.__createAcquisitionParameterFile('topup')
