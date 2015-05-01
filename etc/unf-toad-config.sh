@@ -16,6 +16,7 @@ case "$HOSTNAME" in
         export TOADSERVER=magma
         APPDIR=/usr/local
         export PATH=/usr/local/python-toad/bin:$PATH
+        export LD_LIBRARY_PATH=$APPDIR/gcc-toad/lib64:$LD_LIBRARY_PATH
         export SGEQUEUE='toad.q'
     ;;
     *)
