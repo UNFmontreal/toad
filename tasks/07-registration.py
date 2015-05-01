@@ -60,9 +60,9 @@ class Registration(GenericTask):
         aparcAsegPng = self.buildName(aparcAseg, None, 'png')
         brodmannPng = self.buildName(brodmann, None, 'png')
 
-        self.slicerPng(b0, b0BrainMaskPng, maskOverlay=b0BrainMask)
-        self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg)
-        self.slicerPng(b0, brodmannPng, segOverlay=brodmann)
+        self.slicerPng(b0, b0BrainMaskPng, maskOverlay=b0BrainMask, boundaries=b0BrainMask)
+        self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg, boundaries=b0BrainMask)
+        self.slicerPng(b0, brodmannPng, segOverlay=brodmann, boundaries=b0BrainMask)
 
 
     def __multiply(self, source, ribbon, target):
