@@ -189,7 +189,8 @@ class SubjectManager(Logger, Config):
 
         if subject.getConfig().get('general', 'server') in ['mammouth']:
             walllTime = "-l walltime=48:00:00 "
-
+        else:
+            walllTime = ""
         cmd = "echo {0}/bin/toad {1} -l -p | qsub {2} -V -N {3} -o {4} -e {4} -q {5} {6}".format(self.config.get('arguments', 'toad_dir'),
               subject.getDir(), notify, subject.getName(), subject.getLogDir(),subject.getConfig().get('general', 'sge_queue'), walllTime)
         self.info("Command launch: {}".format(cmd))
