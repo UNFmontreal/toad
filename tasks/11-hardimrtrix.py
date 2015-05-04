@@ -21,16 +21,17 @@ class HardiMrtrix(GenericTask):
         maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask'])
         outputDwi2Response = self.__dwi2response(dwi, maskDwi2Response, bFile)
 
-        maskDwi2fod =  self.getImage(self.maskingDir, 'anat',['resample', 'extended', 'mask'])
-        fodImage = self.__dwi2fod(dwi, outputDwi2Response, maskDwi2fod, bFile)
+        maskDwi2csd =  self.getImage(self.maskingDir, 'anat',['resample', 'extended', 'mask'])
+        csdImage = self.__dwi2csd(dwi, outputDwi2Response, maskDwi2csd, bFile, self.buildName(dwi, "csd"))
 
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
-        self.__fod2metrics(fodImage, mask)
+        fixelPeak = self.__csd2fixelPeak(csdImage, mask, self.buildName(dwi, "fixel_peak", 'msf'))
+        self.__fixelPeak2nufo(fixelPeak, mask,self.buildName(dwi, 'nufo'))
 
 
     def __dwi2response(self, source, mask, bFile):
 
-        target = self.buildName(source, None,'txt')
+        target = self.buildName(source, None, 'txt')
         tmp = self.buildName(source, "tmp",'txt')
 
         self.info("Starting dwi2response creation from mrtrix on {}".format(source))
@@ -40,13 +41,11 @@ class HardiMrtrix(GenericTask):
         return self.rename(tmp, target)
 
 
-    def __dwi2fod(self, source, dwi2response, mask, bFile):
+    def __dwi2csd(self, source, dwi2response, mask, bFile, target):
+
+        self.info("Starting dwi2fod creation for csd from mrtrix on {}".format(source))
 
         tmp = self.buildName(source, "tmp")
-        target = self.buildName(source, "fod")
-
-        self.info("Starting dwi2fod creation from mrtrix on {}".format(source))
-
         cmd = "dwi2fod {} {} {} -mask {} -grad {} -nthreads {} -quiet"\
             .format(source, dwi2response, tmp, mask, bFile, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
@@ -57,29 +56,29 @@ class HardiMrtrix(GenericTask):
         return target
 
 
-    def __fod2metrics(self, source, mask=None):
-        """Produce fixel and nufo image from an fod
+    def __csd2fixelPeak(self, source, mask, target):
+        """Produce fixel and nufo image from an csd image
 
         Args:
             source: the source image
 
         Return:
-            the nufo image
+            the fixel peak image
 
         """
-
         tmp = self.buildName(source, "tmp")
-        fixelTarget = self.buildName(source,"fixel_peak", 'msf')
-        nufoImage = self.buildName(source, 'nufo')
-
         self.info("Starting fod2fixel creation from mrtrix on {}".format(source))
-        cmd = "fod2fixel {} -peak {} -force -nthreads {} -quiet".format(source, fixelTarget, self.getNTreadsMrtrix())
+        cmd = "fod2fixel {} -peak {} -force -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
+        self.info("renaming {} to {}".format(tmp, target))
+        os.rename(tmp, target)
 
 
-        cmd = "fixel2voxel {} count {} -nthreads {} -quiet".format(fixelTarget, tmp,  self.getNTreadsMrtrix())
+    def __fixelPeak2nufo(self, source, mask, target):
+        tmp = self.buildName(source, "tmp")
+        cmd = "fixel2voxel {} count {} -nthreads {} -quiet".format(source, tmp,  self.getNTreadsMrtrix())
         self.launchCommand(cmd)
-        return self.rename(tmp, nufoImage)
+        return self.rename(tmp, target)
 
 
     def meetRequirement(self):
@@ -94,8 +93,8 @@ class HardiMrtrix(GenericTask):
     def isDirty(self):
 
         images = Images((self.getImage(self.workingDir, 'dwi', None, 'txt'), "response function estimation text file"),
-                  (self.getImage(self.workingDir, 'dwi', 'fod'), "fibre orientation distribution estimation"),
-                  (self.getImage(self.workingDir,'dwi','nufo'), 'nufo'),
+                  (self.getImage(self.workingDir, 'dwi', 'csd'), "fibre orientation distribution estimation"),
+                  (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'),
                   (self.getImage(self.workingDir,'dwi', 'fixel_peak', 'msf'), 'fixel peak image'))
 
         return images.isSomeImagesMissing()

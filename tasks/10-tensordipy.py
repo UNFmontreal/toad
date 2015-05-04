@@ -24,7 +24,7 @@ class TensorDipy(GenericTask):
         bVecsFile = self.getImage(self.dependDir, 'grad', None, 'bvecs')
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
-        target, fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
+        fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
 
         #QA
         maskCc = self.__computeCcMask(dwi, mask, fit)
@@ -45,7 +45,6 @@ class TensorDipy(GenericTask):
 
     def __produceTensors(self, source, bValsFile, bVecsFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
-        target = self.buildName(source, "tensor")
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
         maskData = maskImage.get_data()
@@ -60,24 +59,24 @@ class TensorDipy(GenericTask):
         correctOrder = [0,1,3,2,4,5]
         tensorsValuesReordered = tensorsValues[:,:,:,correctOrder]
         tensorsImage = nibabel.Nifti1Image(tensorsValuesReordered.astype(numpy.float32), dwiImage.get_affine())
-        nibabel.save(tensorsImage, target)
+        nibabel.save(tensorsImage, self.buildName(source, "tensor"))
 
-        nibabel.save(nibabel.Nifti1Image(fit.fa.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "fa"))
-        nibabel.save(nibabel.Nifti1Image(fit.ad.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "ad"))
-        nibabel.save(nibabel.Nifti1Image(fit.rd.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "rd"))
-        nibabel.save(nibabel.Nifti1Image(fit.md.astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "md"))
-        nibabel.save(nibabel.Nifti1Image(fit.evecs[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v1"))
-        nibabel.save(nibabel.Nifti1Image(fit.evecs[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v2"))
-        nibabel.save(nibabel.Nifti1Image(fit.evecs[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(target, "v3"))
+        nibabel.save(nibabel.Nifti1Image(fit.fa.astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "fa"))
+        nibabel.save(nibabel.Nifti1Image(fit.ad.astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "ad"))
+        nibabel.save(nibabel.Nifti1Image(fit.rd.astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "rd"))
+        nibabel.save(nibabel.Nifti1Image(fit.md.astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "md"))
+        nibabel.save(nibabel.Nifti1Image(fit.evecs[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "v1"))
+        nibabel.save(nibabel.Nifti1Image(fit.evecs[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "v2"))
+        nibabel.save(nibabel.Nifti1Image(fit.evecs[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "v3"))
         #nibabel.save(nibabel.Nifti1Image(fit.adc(dipy.data.get_sphere('symmetric724')).astype(numpy.float32),
         #                                 dwiImage.get_affine()), self.buildName(target, "adc"))
 
         faColor = numpy.clip(fit.fa, 0, 1)
         rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
-        nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(target, "rgb"))
+        nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(source, "tensor_rgb"))
 
-        self.info("End tensor and metrics creation from dipy, resulting file is {} ".format(target))
-        return target, fit
+        self.info("End tensor and metrics creation from dipy, resulting file is {} ".format(fit))
+        return fit
 
 
     def __computeCcMask(self, source, mask, fit):

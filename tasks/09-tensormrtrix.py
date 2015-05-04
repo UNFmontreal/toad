@@ -18,9 +18,7 @@ class TensorMrtrix(GenericTask):
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
         tensorsMrtrix = self.__produceTensors(dwi, bFile, mask)
-
-        print 'tensor=',tensorsMrtrix
-        self.__produceMetrics(tensorsMrtrix, mask)
+        self.__produceMetrics(tensorsMrtrix, mask, dwi)
 
 
     # convert diffusion-weighted images to tensor images.
@@ -37,16 +35,16 @@ class TensorMrtrix(GenericTask):
         return self.rename(tmp, target)
 
 
-    def __produceMetrics(self, source, mask = None):
+    def __produceMetrics(self, source, mask, target):
         self.info("Launch tensor2metric from mrtrix.\n")
-        adc = self.buildName(source, "adc")
-        fa = self.buildName(source, "fa")
-        vector = self.buildName(source, "vector")
-        adImage = self.buildName(source, "ad")
-        rdImage = self.buildName(source, "rd")
-        mdImage = self.buildName(source, "md")
-        value2 = self.buildName(source, "value2")
-        value3 = self.buildName(source, "value3")
+        adc = self.buildName(target, "adc")
+        fa = self.buildName(target, "fa")
+        vector = self.buildName(target, "vector")
+        adImage = self.buildName(target, "ad")
+        rdImage = self.buildName(target, "rd")
+        mdImage = self.buildName(target, "md")
+        value2 = self.buildName(target, "l2")
+        value3 = self.buildName(target, "l3")
         modulate = self.get('modulate')
 
         cmd1 = "tensor2metric {} -adc {} -fa {} -num 1 -vector {} -value {} -modulate {} -nthreads {} -quiet "\

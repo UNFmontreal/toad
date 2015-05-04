@@ -74,7 +74,7 @@ class HardiDipy(GenericTask):
 
 
         #NUFO
-        target = self.buildName(source,'nufo')
+        target = self.buildName(source, 'nufo')
         nuDirs = gfa
         for x in range(gfa.shape[0]):
             for y in range(gfa.shape[1]):
