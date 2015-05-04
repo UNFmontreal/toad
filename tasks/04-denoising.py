@@ -21,6 +21,7 @@ class Denoising(GenericTask):
     def implement(self):
         if self.get("algorithm").lower() in "none":
             self.info("Skipping denoising process")
+
         else:
             dwi = self.__getDwiImage()
             target = self.buildName(dwi, "denoise")
@@ -44,7 +45,7 @@ class Denoising(GenericTask):
                 denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, mask)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
 
-            else:
+            elif self.config.getboolean('general', 'matlab_available'):
                 dwi = self.__getDwiImage()
                 dwiUncompress = self.uncompressImage(dwi)
 
@@ -59,17 +60,23 @@ class Denoising(GenericTask):
                 if self.getBoolean("cleanup"):
                     self.info("Removing redundant image {}".format(dwiUncompress))
                     os.remove(dwiUncompress)
+            else:
+                #@TODO send an error message to QA report
+                self.warning("You ask for {} algorithm but matlab is not available on this server."
+                             "Please configure matlab or set denoising algorithm to nlmeans or none"
+                             .format(self.get("algorithm")))
 
             #QA
             workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
-            #@TODO add a method to get the correct mask
-            mask = os.path.join(self.dependDir, 'topup_results_image_tmean_brain.nii.gz')
-            
-            dwiCompareGif = self.buildName(workingDirDwi, 'compare', 'gif')
-            dwiGif = self.buildName(workingDirDwi, None, 'gif')
+            if workingDirDwi:
+                #@TODO add a method to get the correct mask
+                mask = os.path.join(self.dependDir, 'topup_results_image_tmean_brain.nii.gz')
 
-            self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=mask)
-            self.slicerGif(workingDirDwi, dwiGif, boundaries=mask)
+                dwiCompareGif = self.buildName(workingDirDwi, 'compare', 'gif')
+                dwiGif = self.buildName(workingDirDwi, None, 'gif')
+
+                self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=mask)
+                self.slicerGif(workingDirDwi, dwiGif, boundaries=mask)
 
 
     def __getDwiImage(self):

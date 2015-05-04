@@ -26,7 +26,7 @@ class Validation(object):
         self.config = config
         self.logger = logger
         self.workingDir = workingDir
-        self.backupDir = os.path.join(self.workingDir, "01-backup")
+        self.backupDir = os.path.join(self.workingDir, "00-backup")
 
 
     def isAToadSubject(self):

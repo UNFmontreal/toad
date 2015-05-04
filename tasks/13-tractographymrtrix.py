@@ -57,10 +57,12 @@ class TractographyMrtrix(GenericTask):
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, anatBrainResample , self.buildName(tcksiftRoi, None, 'trk'))
 
         #create PNG
-        mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
-        mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
-        mriutil.createVtkPng(tckgenRoiTrk, anatBrainResample, mask253)
-        mriutil.createVtkPng(tcksiftRoiTrk, anatBrainResample, mask253)
+        if self.config.getboolean('general', 'vtk_available'):
+            mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
+            mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
+            mriutil.createVtkPng(tckgenRoiTrk, anatBrainResample, mask253)
+            mriutil.createVtkPng(tcksiftRoiTrk, anatBrainResample, mask253)
+
 
     def __tckedit(self, source, include, target, downsample= "2"):
 
