@@ -26,7 +26,7 @@ class HardiMrtrix(GenericTask):
 
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
         fixelPeak = self.__csd2fixelPeak(csdImage, mask, self.buildName(dwi, "fixel_peak", 'msf'))
-        self.__fixelPeak2nufo(fixelPeak, mask,self.buildName(dwi, 'nufo'))
+        self.__fixelPeak2nufo(fixelPeak, mask, self.buildName(dwi, 'nufo'))
 
 
     def __dwi2response(self, source, mask, bFile):
@@ -51,9 +51,7 @@ class HardiMrtrix(GenericTask):
         self.launchCommand(cmd)
 
         self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
-
-        return target
+        return self.rename(tmp, target)
 
 
     def __csd2fixelPeak(self, source, mask, target):
@@ -66,20 +64,20 @@ class HardiMrtrix(GenericTask):
             the fixel peak image
 
         """
-        tmp = self.buildName(source, "tmp")
+        tmp = self.buildName(source, "tmp", "msf")
         self.info("Starting fod2fixel creation from mrtrix on {}".format(source))
         cmd = "fod2fixel {} -peak {} -force -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
         self.info("renaming {} to {}".format(tmp, target))
-        os.rename(tmp, target)
+        return self.rename(tmp, target)
 
 
     def __fixelPeak2nufo(self, source, mask, target):
-        tmp = self.buildName(source, "tmp")
+        tmp = self.buildName(source, "tmp","nii.gz")
         cmd = "fixel2voxel {} count {} -nthreads {} -quiet".format(source, tmp,  self.getNTreadsMrtrix())
         self.launchCommand(cmd)
         return self.rename(tmp, target)
-
+        
 
     def meetRequirement(self):
 
@@ -96,5 +94,4 @@ class HardiMrtrix(GenericTask):
                   (self.getImage(self.workingDir, 'dwi', 'csd'), "fibre orientation distribution estimation"),
                   (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'),
                   (self.getImage(self.workingDir,'dwi', 'fixel_peak', 'msf'), 'fixel peak image'))
-
         return images.isSomeImagesMissing()

@@ -335,11 +335,12 @@ class Qa(object):
         tablesCode = ''
         print "createQaReport images =", images
         for imageLink, legend in images:
-            #@TODO Take into account multiple run of QA
-            path, filename =  os.path.split(imageLink)
-            shutil.copyfile(imageLink, os.path.join(imagesDir, filename))
-            tags = {'imageLink':os.path.join('img', filename),'legend':legend}
-            tablesCode += self.parseTemplate(tags, os.path.join(self.toadDir, 'templates/files/qa.table.tpl'))
+            if imageLink:
+                #@TODO Take into account multiple run of QA
+                path, filename =  os.path.split(imageLink)
+                shutil.copyfile(imageLink, os.path.join(imagesDir, filename))
+                tags = {'imageLink':os.path.join('img', filename),'legend':legend}
+                tablesCode += self.parseTemplate(tags, os.path.join(self.toadDir, 'templates/files/qa.table.tpl'))
 
         htmlCode = self.parseTemplate({'parseHtmlTables':tablesCode}, os.path.join(self.qaDir, 'qa.main.tpl'))
 

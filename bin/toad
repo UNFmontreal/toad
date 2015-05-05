@@ -179,14 +179,7 @@ def __manageEnvironnement(logger, arguments):
 
 def __manageVersions(logger, arguments):
 
-    logger.info("--Versions------")
-
-    logger.info("This computer is:".format(" ".join(os.uname())))
-
-    command, output, results = util.launchCommand(cmd)
-    version = [line.replace("Part of FSL", "") for line in results.splitlines() if "build" in line].pop()
-    logger.info("FSL is running at version: {}".format(version))
-
+    logger.info("Computer identification: {}".format(" ".join(os.uname())))
 
     logger.info("Toad is running at version: {}".format(__version__))
     logger.info("Python is running at version: {}".format(sys.version[0:6]))
@@ -220,9 +213,9 @@ def __manageVersions(logger, arguments):
         if not "vtk" in package:
             module = __import__(package)
             logger.info("{} is at version: {}".format(package, module.__version__))
-
-    logger.info("--Versions------")
-
+        elif arguments.isVTKAvailable:
+            logger.info("{} is at version: {}".format(package, module.__version__))
+           
 
 if __name__ == '__main__':
 

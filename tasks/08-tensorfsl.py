@@ -53,8 +53,8 @@ class TensorFsl(GenericTask):
             cmd += "-m {}".format(mask)
         self.launchCommand(cmd)
 
-        fslPostfix = {'fa': '_FA', 'ad': '_AD', 'md': '_MD', 'rd': '_RD', 'mo': '_MO', 'so': '_S0',
-                      'v1': '_V1', 'v2': '_V2', 'v3': '_V3', 'l1': '_L1', 'l2': '_L2', 'l3': '_L3'}
+        fslPostfix = {'fa': 'FA', 'md': 'MD', 'mo': 'MO', 'so': 'S0',
+                      'v1': 'V1', 'v2': 'V2', 'v3': 'V3', 'l1': 'L1', 'l2': 'L2', 'l3': 'L3'}
         for postfix, value in fslPostfix.iteritems():
             src = self.buildName(source, value)
             dst = self.buildName(source, postfix)
