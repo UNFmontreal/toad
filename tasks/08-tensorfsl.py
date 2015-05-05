@@ -1,5 +1,7 @@
 from core.generictask import GenericTask
 from lib.images import Images
+import os
+
 __author__ = 'desmat'
 
 class TensorFsl(GenericTask):
@@ -16,19 +18,19 @@ class TensorFsl(GenericTask):
 
         """
 
-        dwi = self.getImage(self.dependDir,'dwi','upsample')
+        dwi = self.getImage(self.dependDir,'dwi', 'upsample')
         bVals = self.getImage(self.dependDir, 'grad', None, 'bvals')
         bVecs = self.getImage(self.dependDir, 'grad', None, 'bvecs')
         mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
 
         self.__produceTensors(dwi, bVecs, bVals, mask)
 
-        l1 = self.getImage(self.workingDir, 'dwi', 'fsl_l1')
-        l2 = self.getImage(self.workingDir, 'dwi', 'fsl_l2')
-        l3 = self.getImage(self.workingDir, 'dwi', 'fsl_l3')
+        l1 = self.getImage(self.workingDir, 'dwi', 'l1')
+        l2 = self.getImage(self.workingDir, 'dwi', 'l2')
+        l3 = self.getImage(self.workingDir, 'dwi', 'l3')
 
-        ad = self.buildName(dwi, 'fsl_ad')
-        rd = self.buildName(dwi, 'fsl_rd')
+        ad = self.buildName(dwi, 'ad')
+        rd = self.buildName(dwi, 'rd')
 
         self.rename(l1, ad)
         self.__mean(l2, l3, rd)
@@ -46,37 +48,22 @@ class TensorFsl(GenericTask):
         """
         self.info("Starting dtifit from fsl")
         target = self.buildName(source, None,  '')
-        cmd ="dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVecs, bVals)
+        cmd = "dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVecs, bVals)
         if mask:
             cmd += "-m {}".format(mask)
         self.launchCommand(cmd)
 
+        fslPostfix = {'fa': 'FA', 'md': 'MD', 'mo': 'MO', 'so': 'S0',
+                      'v1': 'V1', 'v2': 'V2', 'v3': 'V3', 'l1': 'L1', 'l2': 'L2', 'l3': 'L3'}
+        for postfix, value in fslPostfix.iteritems():
+            src = self.buildName(source, value)
+            dst = self.buildName(source, postfix)
+            self.info("rename {} to {}".format(src, dst))
+            os.rename(src, dst)
 
     def __mean(self, source1, source2, target):
         cmd = "fslmaths {} -add {} -div 2 {}".format(source1, source2, target)
         self.launchCommand(cmd)
-
-
-    def __createMask(self, source):
-        """deletes non-brain tissue from an image of the whole head
-
-        bias field & neck cleanup will always be perform by this method
-
-        Args:
-            source: The input file name
-
-        Return:
-            The resulting output file name
-        """
-        self.info("Launch brain extraction from fsl")
-        target = self.buildName(source, "brain")
-        fractionalIntensity = 0.4
-        verticalGradient = 0
-        self.info("End brain extraction from fsl")
-        cmd = "bet {} {} -f {} -g {} -m".format(source, target, fractionalIntensity, verticalGradient)
-        self.launchCommand(cmd)
-
-        return target
 
 
     def meetRequirement(self, result=True):
@@ -95,13 +82,13 @@ class TensorFsl(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        images = Images((self.getImage(self.workingDir, 'dwi', 'fsl_v1'), "1st eigenvector"),
-                      (self.getImage(self.workingDir, 'dwi', 'fsl_v2'), "2rd eigenvector"),
-                      (self.getImage(self.workingDir, 'dwi', 'fsl_v3'), "3rd eigenvector"),
-                      (self.getImage(self.workingDir, 'dwi', 'fsl_ad'), "selected eigenvalue(s) AD"),
-                      (self.getImage(self.workingDir, 'dwi', 'fsl_rd'), "selected eigenvalue(s) RD"),
-                      (self.getImage(self.workingDir, 'dwi', 'fsl_md'), "mean diffusivity"),
-                      (self.getImage(self.workingDir, 'dwi', 'fsl_fa'), "fractional anisotropy"),
-                      (self.getImage(self.workingDir, 'dwi', 'fsl_so'), "raw T2 signal with no weighting"))
+        images = Images((self.getImage(self.workingDir, 'dwi', 'v1'), "1st eigenvector"),
+                      (self.getImage(self.workingDir, 'dwi', 'v2'), "2rd eigenvector"),
+                      (self.getImage(self.workingDir, 'dwi', 'v3'), "3rd eigenvector"),
+                      (self.getImage(self.workingDir, 'dwi', 'ad'), "selected eigenvalue(s) AD"),
+                      (self.getImage(self.workingDir, 'dwi', 'rd'), "selected eigenvalue(s) RD"),
+                      (self.getImage(self.workingDir, 'dwi', 'md'), "mean diffusivity"),
+                      (self.getImage(self.workingDir, 'dwi', 'fa'), "fractional anisotropy"),
+                      (self.getImage(self.workingDir, 'dwi', 'so'), "raw T2 signal with no weighting"))
 
         return images.isSomeImagesMissing()

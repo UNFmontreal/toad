@@ -242,7 +242,7 @@ class SubjectManager(Logger, Config):
             if os.path.isdir(absoluteDirectory):
                 results.append(absoluteDirectory)
                 directories = glob.glob("{}/*".format(absoluteDirectory))
-                if not find("01-backup", directories):
+                if not find("00-backup", directories):
                     for directory in directories:
                         if os.path.isdir(directory):
                             results.append(directory)

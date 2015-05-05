@@ -42,25 +42,27 @@ class TractographyMrtrix(GenericTask):
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, anatBrainResample , self.buildName(tckProbRoi, None, 'trk'))
 
         #HARDI part
-        fod =  self.getImage(self.hardimrtrixDir,'dwi','fod')
-        hardiTck = self.__tckgenHardi(fod, self.buildName(fod, 'hardi_prob', 'tck'), act)
+        csd =  self.getImage(self.hardimrtrixDir,'dwi','csd')
+        hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), act)
         hardiTckConnectome = self.__tck2connectome(hardiTck, brodmann, self.buildName(hardiTck, 'connectome', 'csv'))
         mriutil.plotConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, None, "png"))
         hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
         tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, anatBrainResample , self.buildName(hardiTckRoi, None, 'trk'))
 
 
-        tcksift = self.__tcksift(hardiTck, fod)
+        tcksift = self.__tcksift(hardiTck, csd)
         tcksiftConnectome = self.__tck2connectome(tcksift, brodmann, self.buildName(tcksift, 'connectome', 'csv'))
         mriutil.plotConnectome(tcksiftConnectome, self.buildName(tcksiftConnectome, None, "png"))                
         tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, anatBrainResample , self.buildName(tcksiftRoi, None, 'trk'))
 
         #create PNG
-        mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
-        mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
-        mriutil.createVtkPng(tckgenRoiTrk, anatBrainResample, mask253)
-        mriutil.createVtkPng(tcksiftRoiTrk, anatBrainResample, mask253)
+        if self.config.getboolean('general', 'vtk_available'):
+            mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
+            mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
+            mriutil.createVtkPng(tckgenRoiTrk, anatBrainResample, mask253)
+            mriutil.createVtkPng(tcksiftRoiTrk, anatBrainResample, mask253)
+
 
     def __tckedit(self, source, include, target, downsample= "2"):
 
@@ -151,12 +153,12 @@ class TractographyMrtrix(GenericTask):
         return self.rename(tmp, target)
 
 
-    def __tcksift(self, source, dwi2fod):
+    def __tcksift(self, source, csd):
         """ filter a whole-brain fibre-tracking data set such that the streamline densities match the FOD lobe integral.
 
         Args:
             source: the input track file.
-            dwi2fod: input image containing the spherical harmonics of the fibre orientation distributions
+            csd: input image containing the spherical harmonics of the fibre orientation distributions
 
         Returns:
             The resulting output filtered tracks file
@@ -166,7 +168,7 @@ class TractographyMrtrix(GenericTask):
         target = self.buildName(source, 'tcksift','.tck')
         self.info("Starting tcksift creation from mrtrix on {}".format(source))
 
-        cmd = "tcksift {} {} {} -nthreads {} -quiet".format(source, dwi2fod, tmp, self.getNTreadsMrtrix())
+        cmd = "tcksift {} {} {} -nthreads {} -quiet".format(source, csd, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
         return self.rename(tmp, target)
@@ -218,7 +220,6 @@ class TractographyMrtrix(GenericTask):
                   (self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck'), 'tcksift'),
                   (self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome'], 'csv'), 'connectome matrix from a tcksift csv'))
 
-        print 'Dirty =', images
         return images.isSomeImagesMissing()
 
 
@@ -242,5 +243,4 @@ class TractographyMrtrix(GenericTask):
                        (hardiProbPlot, 'Connectome matrix from a probabilistic hardi streamlines'),
                        (tcksiftPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
                        (tcksiftPlot, 'tcksift'))
-        print images
         return images

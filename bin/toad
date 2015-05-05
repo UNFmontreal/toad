@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import argparse
-import socket
 import imp
 import sys
 import os
@@ -14,11 +13,12 @@ __author__ = "Mathieu Desrosiers, Arnaud Bore and Christophe Bedetti"
 __copyright__ = "Copyright 2014, The Toad Project"
 __credits__ = ["Mathieu Desrosiers", "Arnaud Bore", "Christophe Bedetti", "Guillaume Vallet"]
 __license__ = "GPL"
-__version__ = "0.6"
+__version__ = "0.9"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Beta"
 
+__pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
 
 def __parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.
@@ -103,6 +103,9 @@ def __parseArguments():
 
     args = parser.parse_args()
     args.subject = None
+    args.matlabIsAvailable = None
+    args.isVTKAvailable = None
+
     return args
 
 
@@ -114,8 +117,14 @@ def __manageEnvironnement(logger, arguments):
         arguments: an argument parser object
 
     """
-    #@TODOL IMITATION: matlab is not available on HPC, vtk crash on magma
-    if os.environ.get('TOADSERVER') is None:
+
+    serverName = os.environ.get('TOADSERVER')
+    if serverName is not None:
+        arguments.matlabIsAvailable = False if "mammouth" in serverName else True
+        arguments.isVTKAvailable = False if "magma" in serverName else True
+        logger.info("Configuration for {} server found".format(os.environ.get('TOADSERVER')))
+
+    else:
         try:
             version = float(sys.version[0:3])
             if version < 2.7:
@@ -123,18 +132,23 @@ def __manageEnvironnement(logger, arguments):
         except ValueError:
             logger.error("Cannot determine your version of python installed")
 
-        packages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
-        for package in packages:
+        for package in __pythonPackages:
             try:
                 imp.find_module(package)
+                if 'vtk' in package:
+                    arguments.isVTKAvailable = True
             except ImportError:
+                if 'vtk' in package:
+                    __pythonPackages.remove('vtk')
+                    logger.warning("VTK not found, Please install vtk correctly")
+                    arguments.isVTKAvailable = False
+
                 logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
 
         try:
             os.environ["FREESURFER_HOME"]
         except KeyError:
             logger.error("Please set the environment variable FREESURFER_HOME and source FreeSurferEnv.sh file")
-            sys.exit()
 
         try:
             os.environ["FSLDIR"]
@@ -150,12 +164,11 @@ def __manageEnvironnement(logger, arguments):
                 logger.error("Your version of Mrtrix3 is too old, transformcalc could not be found. Please install the package again. ")
 
         if util.which("matlab") is None:
-            logger.error("Matlab not found. Please install matlab or set the environment variable $PATH correctly")
+            arguments.matlabIsAvailable = False
+            logger.warning("Matlab not found. Please install matlab or set the environment variable $PATH correctly")
+
         else:
-            cmd = "matlab -nodisplay -nodesktop -nojvm -nosplash -r \"if exist('spm')~=2,fprintf('SPM_NOT_FOUND');end;quit\""
-            (executedCmd, output, error) = util.launchCommand(cmd)
-            if "SPM_NOT_FOUND" in output:
-                logger.error("Spm package not found, Please install spm or set the pathdef variable correctly")
+            arguments.matlabIsAvailable = True
 
         result = util.which("convert")
         if result is None:
@@ -163,6 +176,46 @@ def __manageEnvironnement(logger, arguments):
 
     return arguments
 
+
+def __manageVersions(logger, arguments):
+
+    logger.info("Computer identification: {}".format(" ".join(os.uname())))
+
+    logger.info("Toad is running at version: {}".format(__version__))
+    logger.info("Python is running at version: {}".format(sys.version[0:6]))
+
+    cmd = "fast"
+    command, output, results = util.launchCommand(cmd)
+    version = [line.replace("Part of FSL", "") for line in results.splitlines() if "build" in line].pop()
+    logger.info("FSL is running at version: {}".format(version))
+
+    cmd = "cat  $FREESURFER_HOME/build-stamp.txt"
+    command, version, errors = util.launchCommand(cmd)
+    logger.info("Freesurfer is running at version: {}".format(version.strip()))
+
+    cmd = "tckgen -version"
+    command, results, errors = util.launchCommand(cmd)
+    version = [line.replace("tckgen", "").strip("== ") for line in results.splitlines() if "tckgen" in line].pop()
+    logger.info("Mrtrix is running at version: {}".format(version))
+
+    if arguments.matlabIsAvailable:
+        cmd = "matlab -nodisplay -nodesktop -nojvm -nosplash -r \"quit\""
+        command, results, errors = util.launchCommand(cmd)
+        version = [line.strip() for line in results.splitlines() if "Version" in line].pop()
+        logger.info("Matlab is running at version: {}".format(version))
+
+    cmd = "convert -version"
+    command, results, errors = util.launchCommand(cmd)
+    version = [line for line in results.splitlines() if "Version:" in line].pop().split()
+    logger.info("ImageMagick is running at version: {}".format(" ".join(version[2:6])))
+
+    for package in __pythonPackages:
+        if not "vtk" in package:
+            module = __import__(package)
+            logger.info("{} is at version: {}".format(package, module.__version__))
+        elif arguments.isVTKAvailable:
+            logger.info("{} is at version: {}".format(package, module.__version__))
+           
 
 if __name__ == '__main__':
 
@@ -174,6 +227,9 @@ if __name__ == '__main__':
 
     #manage the environnement
     arguments = __manageEnvironnement(logger, arguments)
+
+    #make sure to log versions before starting the pipeline
+    __manageVersions(logger, arguments)
 
     #define toad directory
     realPath = os.path.realpath(__file__)

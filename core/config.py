@@ -16,7 +16,7 @@ class Config(object):
             arguments: arguments specified in command line by the users.
 
         """
-        if(arguments is not None):
+        if arguments is not None:
             self.config = self.__buildConfiguration(arguments)
 
 
@@ -86,6 +86,16 @@ class Config(object):
         else:
             config.set('general', 'server', 'unknown')
 
+        if arguments.matlabIsAvailable:
+            config.set('general', 'matlab_available', 'True')
+        else:
+            config.set('general', 'matlab_available', 'False')
+
+        if arguments.isVTKAvailable:
+            config.set('general', 'vtk_available', 'True')
+        else:
+            config.set('general', 'vtk_available', 'False')
+
         return config
 
 
@@ -121,7 +131,7 @@ class Config(object):
         if arguments.subject:
             for directory in [os.path.dirname(arguments.subject),
                            arguments.subject,
-                           os.path.join(arguments.subject, "01-backup")]:
+                           os.path.join(arguments.subject, "00-backup")]:
                 configFile = "{}/config.cfg".format(directory)
                 if os.path.exists(configFile):
                     configFiles.append(configFile)
