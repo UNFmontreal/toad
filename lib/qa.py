@@ -16,7 +16,7 @@ import dipy.segment.mask
 
 class Qa(object):
 
-    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, isData=False):
+    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, grid=False, isData=False):
         """Utility method to slice a 3d image
         Args:
             source : background image
@@ -52,7 +52,7 @@ class Qa(object):
             segData = seg.get_data()
             segSlices = self.__image3d2slices(segData, width, boundaries=boundaries)
             segSlices = [numpy.ma.masked_where(segSlices[dim] == 0, segSlices[dim]) for dim in range(3)]
-            lutFiles = os.path.join(self.toadDir, "templates/lookup_tables/",'FreeSurferColorLUT_ItkSnap.txt')
+            lutFiles = os.path.join(self.toadDir, 'templates', 'lookup_tables', self.config.get('qa', 'freesurfer_lut'))
             lutData = numpy.loadtxt(lutFiles, usecols=(0,1,2,3))
             lutCmap = matplotlib.colors.ListedColormap(lutData[:,1:]/256)
             norm = matplotlib.colors.BoundaryNorm(lutData[:,0], lutCmap.N)
@@ -69,43 +69,22 @@ class Qa(object):
                 matplotlib.pyplot.contour(numpy.rot90(maskSlices[dim]), [0], colors='r')
             if segOverlay != None:
                 segImshow(numpy.rot90(segSlices[dim]))
-            ax.set_axis_off()
+            if grid:
+                try:
+                    step = int(min(imageData.shape) / 5)
+                except ValueError:
+                    step = 16
+                ax.xaxis.set_ticks(numpy.arange(step,slices[dim].shape[0],step))
+                ax.yaxis.set_ticks(numpy.arange(step,slices[dim].shape[1],step))
+                ax.grid(True, color='0.75', linestyle='-', linewidth=1)
+                ax.set_axisbelow(True)
+            else:
+                ax.set_axis_off()
     
         matplotlib.pyplot.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.001)
         fig.savefig(target, facecolor='black')
         matplotlib.pyplot.close()
         matplotlib.rcdefaults()
-    
-
-    def c3dSegmentation(self, backgroundImage, segmentationImage, scale, opacity, target=None):
-        """Utility method to use c3d from ITKSnap package
-        
-        if target is None, the output filename will be base on the segmentation image name
-        
-        Args:
-            backgroundImage : background image
-            segmentationImage : segmentation image
-            scale the background image
-            opacity of the segmentation between 0 and 1
-            target : output filename in png format
-        """
-        if target is None:
-            target = self.buildName(segmentationImage, '', 'png')
-        
-        lutImage = os.path.join(self.toadDir, "templates/lookup_tables/",'FreeSurferColorLUT_ItkSnap.txt')
-        for axes in ['x', 'y', 'z']:
-            tmp = self.buildName(axes,'', 'png')
-            cmd = 'c3d {} -scale {} {} -foreach -flip z -slice {} 50% -endfor -oli {} {} -type uchar -omc {}'\
-                .format(backgroundImage, scale, segmentationImage, axes, lutImage, opacity, tmp)
-            self.launchCommand(cmd)
-        
-        cmd = 'pngappend x.png + y.png + z.png {}'.format(target)
-        self.launchCommand(cmd)
-        
-        cmd = 'rm x.png y.png z.png'
-        self.launchCommand(cmd)
-        return target
-
 
 
     def slicerGif(self, source, target, gifSpeed=30, vmax=100, boundaries=None):
@@ -123,7 +102,7 @@ class Qa(object):
         imageList = []
         for num in range(imageData.shape[-1]):
             output = gifId + '{0:04}.png'.format(num)
-            self.slicerPng(imageData[:,:,:,num], output, vmax=vmax, isData=True, boundaries=boundaries)
+            self.slicerPng(imageData[:,:,:,num], output, vmax=vmax, isData=True, boundaries=boundaries, grid=True)
             imageList.append(output)
         
         self.__imageList2Gif(imageList, target, gifSpeed)
@@ -330,19 +309,26 @@ class Qa(object):
         Args:
            images : an Images object
         """
-
-        imagesDir = os.path.join(self.qaDir, 'img')
+        mainTemplate = os.path.join(self.qaDir, 'qa.main.tpl')
+        tableTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.table.tpl')
+        taskInfo = images.getInformation()
+        imagesDir = self.qaImagesDir
         tablesCode = ''
+        
         print "createQaReport images =", images
         for imageLink, legend in images:
+            #@TODO Take into account multiple run of QA
             if imageLink:
-                #@TODO Take into account multiple run of QA
                 path, filename =  os.path.split(imageLink)
                 shutil.copyfile(imageLink, os.path.join(imagesDir, filename))
-                tags = {'imageLink':os.path.join('img', filename),'legend':legend}
-                tablesCode += self.parseTemplate(tags, os.path.join(self.toadDir, 'templates/files/qa.table.tpl'))
+                tags = {'imageLink':os.path.join(self.config.get('qa', 'images_dir'), filename),'legend':legend}
+                tablesCode += self.parseTemplate(tags, tableTemplate)
+            else:
+                tags = {'imageLink':'', 'legend':legend}
+                tablesCode += self.parseTemplate(tags, tableTemplate)
 
-        htmlCode = self.parseTemplate({'parseHtmlTables':tablesCode}, os.path.join(self.qaDir, 'qa.main.tpl'))
+        tags = {'taskInfo':taskInfo,'parseHtmlTables':tablesCode}
+        htmlCode = self.parseTemplate(tags, mainTemplate)
 
         htmlFile = os.path.join(self.qaDir,'{}.html'.format(self.getName()))
         util.createScript(htmlFile, htmlCode)
@@ -351,21 +337,28 @@ class Qa(object):
     def __configFigure(self, imageData, nbrOfSlices=7, dpi=72.27):
         """
         """
-        fig_width_px  = max(imageData.shape) * nbrOfSlices
-        fig_height_px = max(imageData.shape) * 3
-    
+        width = max(imageData.shape) * nbrOfSlices
+
+        fig_width_px  = 2000
+        try:
+            fig_height_px = int(2000 * 3 / nbrOfSlices)#max(imageData.shape) * 3
+        except ValueError:
+            fig_height_px = 857
+        
+
         fig_width_in  = fig_width_px  / dpi  # figure width in inches
         fig_height_in = fig_height_px / dpi  # figure height in inches
         fig_dims      = [fig_width_in, fig_height_in] # fig dims as a list
-    
+
         #Figure parameters
         matplotlib.rcParams['figure.figsize'] = fig_dims
         matplotlib.rcParams['figure.dpi'] = dpi
-    
+
         #savefig parameter
         matplotlib.rcParams['savefig.dpi'] = dpi
-    
-        return fig_width_px, fig_dims
+
+        return width, fig_dims
+
 
 
 
@@ -377,7 +370,7 @@ class Qa(object):
         Return:
             tuple a lenght 3 with slices along the 3 axis (x, y, z)
         """
-        # 
+        
         xSlicesNumber = maxWidth / image3dData.shape[1]
         ySlicesNumber = maxWidth / image3dData.shape[0]
         zSlicesNumber = ySlicesNumber

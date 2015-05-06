@@ -3,6 +3,7 @@ import os
 class Images(object):
 
     def __init__(self, *args):
+        self.__information = ''
         self.__images = []
         for arg in args:
             if isinstance(arg, tuple) and len(arg) == 2:
@@ -23,6 +24,9 @@ class Images(object):
     def getData(self):
         return self.__images
 
+    def getInformation(self):
+        return self.__information
+
     def size(self):
         return len(self.__images)
 
@@ -35,6 +39,8 @@ class Images(object):
     def insert(self, index, tupleItem):
         self.__images.insert(index, tupleItem)
 
+    def setInformation(self, information):
+        self.__information = information
 
     def isSomeImagesMissing(self):
         """Iterate over a structure to see if all image exists

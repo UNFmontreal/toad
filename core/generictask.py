@@ -40,6 +40,7 @@ class GenericTask(Logger, Load, Qa):
         self.subjectDir = subject.getDir()
         self.toadDir = self.config.get('arguments', 'toad_dir')
         self.workingDir = os.path.join(self.subjectDir, self.__moduleName)
+        self.qaDir = None
         Logger.__init__(self, subject.getLogDir())
         Load.__init__(self, self.config)
         self.dependencies = []
@@ -55,6 +56,8 @@ class GenericTask(Logger, Load, Qa):
                 self.__dependenciesDirNames["{}Dir".format(arg)] = dir
                 if i == 0:
                     self.dependDir = dir
+        if self.qaDir != None:
+            self.qaImagesDir = os.path.join(self.qaDir, self.config.get('qa', 'images_dir'))
 
     def getOrder(self):
         """return the order of execution of this subclasses

@@ -56,9 +56,16 @@ class Preparation(GenericTask):
         #QA
         workingDirAnat = self.getImage(self.workingDir, 'anat')
         workingDirDwi = self.getImage(self.workingDir, 'dwi')
+        workingDirAp = self.getImage(self.workingDir, 'b0_ap')
+        workingDirPa = self.getImage(self.workingDir, 'b0_pa')
 
         anatPng = self.buildName(workingDirAnat, None, 'png')
         dwiGif = self.buildName(workingDirDwi, None, 'gif')
+
+        for image in (workingDirAp, workingDirPa):
+            if image:
+                targetPng = self.buildName(image, None, 'png')
+                self.slicerPng(image, targetPng)
 
         self.slicerPng(workingDirAnat, anatPng)
         self.slicerGif(workingDirDwi, dwiGif)
@@ -151,8 +158,15 @@ class Preparation(GenericTask):
         """
         anatPng = self.getImage(self.workingDir, 'anat', ext='png')
         dwiGif = self.getImage(self.workingDir, 'dwi', ext='gif')
-        
-        return Images((anatPng, 'High resolution anatomical image'),
-                       (dwiGif, 'Diffusion image'))
+        b0ApPng = self.getImage(self.workingDir, 'b0_ap', ext='png')
+        b0PaPng = self.getImage(self.workingDir, 'b0_pa', ext='png')
+        fieldmapPng = False
 
+        images = Images((anatPng, 'High resolution anatomical image'),
+                        (dwiGif, 'Diffusion image'),
+                        (b0ApPng, 'B0 AP image'),
+                        (b0PaPng, 'B0 PA image'),
+                        (fieldmapPng, 'Fieldmap image'),
+                       )
 
+        return images
