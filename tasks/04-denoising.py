@@ -137,6 +137,9 @@ class Denoising(GenericTask):
         denoiseGif = self.getImage(self.workingDir, 'dwi', 'denoise', ext='gif')
         compareGif = self.getImage(self.workingDir, 'dwi', 'compare', ext='gif')
 
-        return Images((denoiseGif,'Denoised diffusion image'),
-                      (compareGif,'Before and after denoising'),
-                     )
+        images = Images((denoiseGif,'Denoised diffusion image'),
+                        (compareGif,'Before and after denoising'),
+                       )
+        images.setInformation(self.get("algorithm"))
+
+        return images
