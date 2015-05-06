@@ -70,7 +70,10 @@ class Qa(object):
             if segOverlay != None:
                 segImshow(numpy.rot90(segSlices[dim]))
             if grid:
-                step = int(min(imageData.shape) / 5)
+                try:
+                    step = int(min(imageData.shape) / 5)
+                except ValueError:
+                    step = 16
                 ax.xaxis.set_ticks(numpy.arange(step,slices[dim].shape[0],step))
                 ax.yaxis.set_ticks(numpy.arange(step,slices[dim].shape[1],step))
                 ax.grid(True, color='0.75', linestyle='-', linewidth=1)
