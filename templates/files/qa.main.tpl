@@ -13,8 +13,8 @@
                 margin-right: 15px;}
             table{
                 background-color:white;
-                text-align:center; 
-                margin-left:auto; 
+                text-align:center;
+                margin-left:auto;
                 margin-right:auto;}
             .size{
                 width:80vw;}
@@ -25,8 +25,8 @@
     <body>
         <header>
             <div id="logo_titre">
-                <a href="index.html"><h1>Toad-Qa for $subject</h1></a>
-                <h2>$taskInfo</h2>
+                <a href="index.html"><h1>Toad-Qa</h1></a>
+                <h2>Subject : $subject</h2>
             </div>
             <nav>
                 <ul>
@@ -34,11 +34,11 @@
                 </ul>
             </nav>
         </header>
-        
+        <h1>$taskInfo</h1>
         <section id="results">
 $parseHtmlTables
         </section>
-        
+
         <footer></footer>
     </body>
 </html>
