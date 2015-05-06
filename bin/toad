@@ -128,7 +128,7 @@ def __manageEnvironnement(logger, arguments):
         try:
             version = float(sys.version[0:3])
             if version < 2.7:
-                logger.warning("Note that toad had never run with a version of python < 2.7")
+                logger.warning("Note that toad had never run with a version of python < 2.7", pause=True)
         except ValueError:
             logger.error("Cannot determine your version of python installed")
 
@@ -140,10 +140,10 @@ def __manageEnvironnement(logger, arguments):
             except ImportError:
                 if 'vtk' in package:
                     __pythonPackages.remove('vtk')
-                    logger.warning("VTK not found, Please install vtk correctly")
+                    logger.warning("VTK not found, Please install vtk correctly", pause=True)
                     arguments.isVTKAvailable = False
-
-                logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
+                else:
+                    logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
 
         try:
             os.environ["FREESURFER_HOME"]
@@ -165,7 +165,7 @@ def __manageEnvironnement(logger, arguments):
 
         if util.which("matlab") is None:
             arguments.matlabIsAvailable = False
-            logger.warning("Matlab not found. Please install matlab or set the environment variable $PATH correctly")
+            logger.warning("Matlab not found. Please install matlab or set the environment variable $PATH correctly", pause=True)
 
         else:
             arguments.matlabIsAvailable = True
@@ -173,6 +173,11 @@ def __manageEnvironnement(logger, arguments):
         result = util.which("convert")
         if result is None:
             logger.error("ImageMagick not found. Please install the package or set the environment variable $PATH correctly")
+
+        result = util.which("qsub")
+        if result is None:
+            logger.warning("No grid engine found. Pipeline will run locally", pause=True)
+            arguments.local = True
 
     return arguments
 
@@ -203,13 +208,14 @@ def __manageVersions(logger, arguments):
         cmd = "matlab -nodisplay -nodesktop -nojvm -nosplash -r \"quit\""
         command, results, errors = util.launchCommand(cmd)
         messages=results.splitlines()
-	for index, token in enumerate(messages):
+        for index, token in enumerate(messages):
             if "< M A T L A B (R) >" in token:
                 logger.info("Matlab is running at version: {}".format(messages[index+2].strip()))
                 found = True
                 break
         if not found:
             logger.info("Cannot determine Matlab version")
+
 
     cmd = "convert -version"
     command, results, errors = util.launchCommand(cmd)

@@ -111,8 +111,6 @@ class Logger(object):
         if self.__logIntoFile:
             with open(self.filename,'a') as f:
                 f.write(message)
-        if level == 'ERROR':
-            sys.exit()
 
 
     def info(self, message):
@@ -125,14 +123,16 @@ class Logger(object):
         self.__log(message, 'INFO')
 
 
-    def warning(self, message):
+    def warning(self, message, pause = False):
         """Wrapper for user friendly message that have warning level
 
         Args:
             message: the message to write
-
+            pause: Stop pipeline and ask user to hit RETURN to continue
         """
         self.__log(message, 'WARNING')
+        if pause:
+            raw_input("Press Enter to continue...")
 
 
     def error(self, message):
@@ -143,7 +143,7 @@ class Logger(object):
 
         """
         self.__log(message, 'ERROR')
-
+        sys.exit()
 
     def quit(self, message = None):
         """Wrapper for user friendly message that have info level and quit the pipeline silently
