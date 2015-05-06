@@ -18,7 +18,7 @@ class QA(GenericTask):
 
     def implement(self):
     	
-        mainTemplate = os.path.join(self.toadDir, 'templates/files/qa.main.tpl')
+        mainTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.main.tpl')
         imagesDir = os.path.join(self.workingDir, self.config.get('qa', 'images_dir'))
 
         #make image directory
