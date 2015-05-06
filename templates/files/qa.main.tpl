@@ -13,9 +13,11 @@
                 margin-right: 15px;}
             table{
                 background-color:white;
-                text-align:center; 
-                margin-left:auto; 
+                text-align:center;
+                margin-left:auto;
                 margin-right:auto;}
+            .size{
+                width:80vw;}
         </style>
         <title>TOAD-Qa</title>
     </head>
@@ -23,8 +25,8 @@
     <body>
         <header>
             <div id="logo_titre">
-                <a href="index.html"><img src="img/logo.png" alt="Toad logo" id="logo"/></a>
-                <h1>Toad-Qa</h1>
+                <a href="index.html"><h1>Toad-Qa</h1></a>
+                <h2>Subject : $subject</h2>
             </div>
             <nav>
                 <ul>
@@ -32,16 +34,11 @@
                 </ul>
             </nav>
         </header>
-        
+        <h1>$taskInfo</h1>
         <section id="results">
 $parseHtmlTables
         </section>
-        
-        <footer>
-            <!--
-            <img src="Thalamus.png" alt="Image not found" onError="this.onerror=null;this.src='Thalamus2.png';" />
-            Logo made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a>
-            -->
-        </footer>
+
+        <footer></footer>
     </body>
 </html>
