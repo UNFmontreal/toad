@@ -17,11 +17,17 @@ class QA(GenericTask):
 
 
     def implement(self):
-        if not os.path.exists('img'):
-            os.makedirs('img')
+    	
+        mainTemplate = os.path.join(self.toadDir, 'templates/files/qa.main.tpl')
+        imagesDir = os.path.join(self.workingDir, self.config.get('qa', 'images_dir'))
 
-        shutil.copyfile(os.path.join(self.toadDir, 'templates/files/logo.png'), 'img/logo.png')
+        #make image directory
+        if not os.path.exists(imagesDir):
+            os.makedirs(imagesDir)
 
+        #shutil.copyfile(os.path.join(self.toadDir, 'templates/files/logo.png'), 'img/logo.png')
+
+        #Create menu links only for tasks with implemented QA
         menuHtml = ""
         qaTasksList = []
         taskManager = TasksManager(self.__subject)
@@ -30,18 +36,25 @@ class QA(GenericTask):
             qaTasksList.append(name)
             menuHtml +="\n<li><a id=\"{0}\" href=\"{0}.html\">{0}</a></li>".format(name)
 
-	message = "Task is running on the server. Refresh to check if QA is over"
-	for name in qaTasksList:
+        #Create temporary html for each task
+        message = "Task is running on the server. Refresh to check if QA is over"
+        for name in qaTasksList:
             htmlTaskFileName = "{}.html".format(name)
             if not os.path.exists(htmlTaskFileName):
-                htmlCode = self.parseTemplate({'parseHtmlTables':message, 'menuHtml':menuHtml}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
+                tags = {'subject':self.__subject.getName(), 'menuHtml':menuHtml, 'taskInfo':'', 'parseHtmlTables':message}
+                htmlCode = self.parseTemplate(tags, mainTemplate)
                 util.createScript(htmlTaskFileName, htmlCode)
-        
-        htmlCode = self.parseTemplate({'menuHtml':menuHtml}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
+
+        #Create template specific to the subject
+        tags = {'subject':self.__subject.getName(), 'menuHtml':menuHtml}
+        htmlCode = self.parseTemplate(tags, mainTemplate)
         util.createScript('qa.main.tpl', htmlCode)
 
-        htmlCode = self.parseTemplate({'parseHtmlTables':'', 'menuHtml':menuHtml}, os.path.join(self.toadDir, 'templates/files/qa.main.tpl'))
+        #Create index.html
+        tags = {'subject':self.__subject.getName(), 'menuHtml':menuHtml, 'taskInfo':'', 'parseHtmlTables':''}
+        htmlCode = self.parseTemplate(tags, mainTemplate)
         util.createScript('index.html', htmlCode)
+
 
 
     def meetRequirement(self, result=True):
