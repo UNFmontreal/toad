@@ -106,7 +106,7 @@ class Parcellation(GenericTask):
             A brodmann area images
 
         """
-        brodmannTemplate = os.path.join(self.toadDir, self.get("templates_brodmann"))
+        brodmannTemplate = os.path.join(self.toadDir, "templates", "mri", self.get("templates_brodmann"))
         target = self.get("brodmann")
         self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
         os.environ["SUBJECTS_DIR"] = self.workingDir

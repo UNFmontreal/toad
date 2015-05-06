@@ -32,6 +32,7 @@ class Preprocessing(GenericTask):
         bVals = util.symlink(bVals, self.workingDir)
         bVecs = util.symlink(bVecs, self.workingDir)
 
+
         dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
@@ -182,7 +183,7 @@ class Preprocessing(GenericTask):
                'wm1': options[6], 'wm2': options[7], 'wm3': options[8]}
 
 
-        template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/segment.tpl"))
+        template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "segment.tpl"))
         util.createScript(scriptName, template)
 
         return scriptName

@@ -392,7 +392,7 @@ class GenericTask(Logger, Load, Qa):
 
         [scriptName, ext] = os.path.splitext(os.path.basename(source))
         tags={ 'script': scriptName, 'workingDir': self.workingDir}
-        cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/matlab.tpl"))
+        cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "matlab.tpl"))
         self.info("Launching matlab command: {}".format(cmd))
         self.launchCommand(cmd, stdout, stderr, timeout, nice)
 

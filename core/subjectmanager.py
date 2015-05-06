@@ -87,7 +87,7 @@ class SubjectManager(Logger, Config):
             if len(locks) == 1:
                 subject = locks[0]
                 tags = {"name": subject.getName(), "lock":subject.getLock()}
-                msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/lock.tpl"))
+                msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates", "files", "lock.tpl"))
 
             else:
                 subjectsNames = []
@@ -96,7 +96,7 @@ class SubjectManager(Logger, Config):
                     subjectsNames.append(subject.getName())
                     locksFileNames.append(subject.getLock())
                     tags = {"names": ", ".join(subjectsNames) ,"locks":"\t,\n".join(locksFileNames)}
-                    msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/locks.tpl"))
+                    msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates", "files", "locks.tpl"))
 
             if self.config.getboolean('arguments', 'prompt'):
                 answer = util.displayContinueQuitRemoveMessage(msg)
@@ -191,6 +191,7 @@ class SubjectManager(Logger, Config):
             walllTime = "-l walltime=48:00:00 "
         else:
             walllTime = ""
+
         cmd = "echo {0}/bin/toad {1} -l -p | qsub {2} -V -N {3} -o {4} -e {4} -q {5} {6}".format(self.config.get('arguments', 'toad_dir'),
               subject.getDir(), notify, subject.getName(), subject.getLogDir(),subject.getConfig().get('general', 'sge_queue'), walllTime)
         self.info("Command launch: {}".format(cmd))
