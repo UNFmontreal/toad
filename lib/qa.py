@@ -310,7 +310,7 @@ class Qa(object):
            images : an Images object
         """
         mainTemplate = os.path.join(self.qaDir, 'qa.main.tpl')
-        tableTemplate = os.path.join(self.toadDir, 'templates/files/qa.table.tpl')
+        tableTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.table.tpl')
         taskInfo = images.getInformation()
         imagesDir = self.qaImagesDir
         tablesCode = ''
@@ -340,7 +340,11 @@ class Qa(object):
         width = max(imageData.shape) * nbrOfSlices
 
         fig_width_px  = 2000
-        fig_height_px = int(2000 * 3 / nbrOfSlices)#max(imageData.shape) * 3
+        try:
+            fig_height_px = int(2000 * 3 / nbrOfSlices)#max(imageData.shape) * 3
+        except ValueError:
+            fig_height_px = 857
+        
 
         fig_width_in  = fig_width_px  / dpi  # figure width in inches
         fig_height_in = fig_height_px / dpi  # figure height in inches
