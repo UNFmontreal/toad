@@ -32,6 +32,7 @@ class Preprocessing(GenericTask):
         bVals = util.symlink(bVals, self.workingDir)
         bVecs = util.symlink(bVecs, self.workingDir)
 
+
         dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
