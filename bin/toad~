@@ -209,7 +209,7 @@ def __manageVersions(logger, arguments):
                 found = True
                 break
         if not found:
-            logger.info("Cannot determine Matlab version")
+            logger.info("Cannot determine Matlab version"
 
     cmd = "convert -version"
     command, results, errors = util.launchCommand(cmd)
