@@ -25,8 +25,6 @@ class QA(GenericTask):
         if not os.path.exists(imagesDir):
             os.makedirs(imagesDir)
 
-        #shutil.copyfile(os.path.join(self.toadDir, 'templates/files/logo.png'), 'img/logo.png')
-
         #Create menu links only for tasks with implemented QA
         menuHtml = ""
         qaTasksList = []

@@ -87,7 +87,7 @@ class SubjectManager(Logger, Config):
             if len(locks) == 1:
                 subject = locks[0]
                 tags = {"name": subject.getName(), "lock":subject.getLock()}
-                msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/lock.tpl"))
+                msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates", "files", "lock.tpl"))
 
             else:
                 subjectsNames = []
@@ -96,7 +96,7 @@ class SubjectManager(Logger, Config):
                     subjectsNames.append(subject.getName())
                     locksFileNames.append(subject.getLock())
                     tags = {"names": ", ".join(subjectsNames) ,"locks":"\t,\n".join(locksFileNames)}
-                    msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates/files/locks.tpl"))
+                    msg = util.parseTemplate(tags, os.path.join(self.arguments.toadDir, "templates", "files", "locks.tpl"))
 
             if self.config.getboolean('arguments', 'prompt'):
                 answer = util.displayContinueQuitRemoveMessage(msg)

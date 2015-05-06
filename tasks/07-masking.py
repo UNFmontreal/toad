@@ -54,7 +54,7 @@ class Masking(GenericTask):
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
         seed_gmwmi = self.__launch5tt2gmwmi(actRegister)
 
-        colorLut = "{}/templates/lookup_tables/FreeSurferColorLUT_ItkSnap.txt".format(self.toadDir)
+        colorLut =  os.path.join(self.toadDir, "templates", "lookup_tables", self.config.get("qa", "freesurfer_lut"))
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
         shutil.copy(colorLut, self.workingDir)
 
@@ -92,7 +92,7 @@ class Masking(GenericTask):
         if not os.path.isfile(freesurfer_lut):
           self.error("Could not find FreeSurfer lookup table file: Expected location: {}".format(freesurfer_lut))
 
-        config_path = os.path.join("{}/templates/lookup_tables".format(self.toadDir), 'FreeSurfer2ACT.txt');
+        config_path = os.path.join(self.toadDir, "templates", "lookup_tables", "FreeSurfer2ACT.txt");
         if not os.path.isfile(config_path):
           self.error("Could not find config file for converting FreeSurfer parcellation output to tissues: Expected location: {}".format(config_path))
 

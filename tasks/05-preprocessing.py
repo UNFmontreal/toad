@@ -183,7 +183,7 @@ class Preprocessing(GenericTask):
                'wm1': options[6], 'wm2': options[7], 'wm3': options[8]}
 
 
-        template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/segment.tpl"))
+        template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "segment.tpl"))
         util.createScript(scriptName, template)
 
         return scriptName

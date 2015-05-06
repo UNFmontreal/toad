@@ -100,9 +100,9 @@ class Denoising(GenericTask):
                'nbthreads': self.getNTreadsDenoise()}
 
         if self.get("algorithm") == "aonlm":
-            template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/denoise_aonlm.tpl"))
+            template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "denoise_aonlm.tpl"))
         else:
-            template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/denoise_lpca.tpl"))
+            template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "denoise_lpca.tpl"))
 
         util.createScript(scriptName, template)
         return scriptName
