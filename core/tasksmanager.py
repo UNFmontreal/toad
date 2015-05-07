@@ -31,7 +31,8 @@ class TasksManager(object):
 
 
     def getQaTasks(self):
-        """get the list of all available task who implement the methods qaSupplier
+        """
+        get the list of all available task who implement the methods qaSupplier
 
         the task list is not sort so there is no guaranty that dependencies is respected
 
@@ -107,6 +108,9 @@ class TasksManager(object):
                 tasks.append(task)
             else:
                 print "File {} do not appear as a valid task file".format(taskFile)
+
+        for task in tasks:
+            task.initializeDependenciesDirectories(tasks)
         return tasks
 
 
@@ -307,22 +311,22 @@ class TasksManager(object):
             a list of set of Tasks in topological order
 
         """
-        taksDictionnaries = {}
+        tasksDictionnaries = {}
         numericalDictionnaries = {}
         tasksGraph = []
         order = 0
 
         for task in tasks:
             task.setOrder(order)
-            taksDictionnaries[task] = order
+            tasksDictionnaries[task] = order
             order+=1
 
-        for task, order in taksDictionnaries.iteritems():
+        for task, order in tasksDictionnaries.iteritems():
             dependenciesSet = set()
             for dependency in task.getDependencies():
                 for task in tasks:
                     if task.getName() == dependency:
-                        dependenciesSet |= {taksDictionnaries[task]}
+                        dependenciesSet |= {tasksDictionnaries[task]}
             numericalDictionnaries[order] = dependenciesSet
 
         for sets in  list(self.__sortGraph(numericalDictionnaries)):

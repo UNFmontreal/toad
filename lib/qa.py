@@ -87,7 +87,7 @@ class Qa(object):
         matplotlib.rcdefaults()
 
 
-    def slicerGif(self, source, target, gifSpeed=30, vmax=100, boundaries=None):
+    def slicerGif(self, source, target, gifSpeed=30, vmax=None, boundaries=None):
         """Create a animated gif from a 4d NIfTI
         Args:
             source: 4D NIfTI image

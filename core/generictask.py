@@ -40,24 +40,23 @@ class GenericTask(Logger, Load, Qa):
         self.subjectDir = subject.getDir()
         self.toadDir = self.config.get('arguments', 'toad_dir')
         self.workingDir = os.path.join(self.subjectDir, self.__moduleName)
-        self.qaDir = None
+        self.tasksAsReferences = None
         Logger.__init__(self, subject.getLogDir())
         Load.__init__(self, self.config)
         self.dependencies = []
         self.__dependenciesDirNames = {}
         for arg in args:
             self.dependencies.append(arg)
-        for i, arg in enumerate(args):
-            images = glob.glob("{}/tasks/??-{}.py".format(self.toadDir, arg))
-            if len(images) == 1:
-                [name, ext] = os.path.splitext(os.path.basename(images[0]))
-                dir = os.path.join(self.subjectDir, name)
-                setattr(self, "{}Dir".format(arg), dir)
-                self.__dependenciesDirNames["{}Dir".format(arg)] = dir
-                if i == 0:
-                    self.dependDir = dir
-        if self.qaDir != None:
-            self.qaImagesDir = os.path.join(self.qaDir, self.config.get('qa', 'images_dir'))
+
+    def initializeDependenciesDirectories(self, tasks):
+        self.tasksAsReferences = tasks
+        for index, dependency in enumerate(self.dependencies):
+            for task in tasks:
+                if dependency == task.__name:
+                    self.__dependenciesDirNames["{}Dir".format(dependency)] = task.workingDir
+                    setattr(self, "{}Dir".format(dependency), task.workingDir)
+                    if index == 0:
+                        self.dependDir = task.workingDir
 
     def getOrder(self):
         """return the order of execution of this subclasses
@@ -75,7 +74,6 @@ class GenericTask(Logger, Load, Qa):
             order: an integer that represent the order of the execution of the task
         """
         self.__order = order
-
 
     def __repr__(self):
         """Return the name of the task as a a printable representation of the task object."""
@@ -265,11 +263,15 @@ class GenericTask(Logger, Load, Qa):
     def run(self):
         """Method that have the responsibility to launch the implementation
 
+        Args:
+            tasks: the list of all  qualified task for this pipeline
+
         """
         #@TODO relocate logHeader 'implements'
         attempt = 0
         self.logHeader("implement")
         start = datetime.now()
+
         if self.__meetRequirement():
             try:
                 nbSubmission = int(self.config.get('general', 'nb_submissions'))

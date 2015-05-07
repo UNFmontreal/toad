@@ -66,6 +66,10 @@ class TensorFsl(GenericTask):
         self.launchCommand(cmd)
 
 
+    def isIgnore(self):
+        return self.get("ignore").lower() in "true"
+
+
     def meetRequirement(self, result=True):
         """Validate if all requirements have been met prior to launch the task
 

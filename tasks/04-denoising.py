@@ -115,7 +115,7 @@ class Denoising(GenericTask):
 
 
     def isIgnore(self):
-        return self.get("algorithm").lower() in "none"
+        return (self.get("algorithm").lower() in "none") or (self.get("ignore").lower() in "true")
 
 
     def meetRequirement(self, result = True):

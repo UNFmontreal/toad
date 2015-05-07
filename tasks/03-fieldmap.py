@@ -277,7 +277,8 @@ class Fieldmap(GenericTask):
     def isIgnore(self):
         dependImages = Images((self.getImage(self.dependDir, 'mag'), 'magnitude'), (self.getImage(self.dependDir, 'phase'),  'phase'))
         subjectImages = Images((self.getImage(self.subjectDir, 'mag'), 'magnitude'), (self.getImage(self.subjectDir, 'phase'), 'phase'))
-	return not (dependImages.isAllImagesExists() or subjectImages.isAllImagesExists())
+        return (not (dependImages.isAllImagesExists() or subjectImages.isAllImagesExists())) or self.get("ignore").lower() in "true"
+
 
     def meetRequirement(self, result=True):
         """Validate if all requirements have been met prior to launch the task
