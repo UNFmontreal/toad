@@ -54,7 +54,7 @@ class Masking(GenericTask):
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
         seed_gmwmi = self.__launch5tt2gmwmi(actRegister)
 
-        colorLut =  os.path.join(self.toadDir, "templates", "lookup_tables", self.config.get("qa", "freesurfer_lut"))
+        colorLut =  os.path.join(self.toadDir, "templates", "lookup_tables", self.config.get("template", "freesurfer_lut"))
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
         shutil.copy(colorLut, self.workingDir)
 
