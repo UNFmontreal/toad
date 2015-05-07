@@ -256,7 +256,7 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
         config: A configParser that contain config.cfg information
         target: The path of the resulting target filename
         source: The input file name, a config prefix or simply a string
-        postfix: An option item specified in config at the postfix section
+        postfix: An item or a list of items specified in config at the postfix section
         extension: the Extension of the new target
         absolute: a boolean if the full path must be absolute
 

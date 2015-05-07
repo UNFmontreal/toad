@@ -221,35 +221,29 @@ class Qa(object):
         return target
 
 
-
-    def noiseAnalysis(self, source, brain, maskCc, targetSnr, targetHist, targetMaskNoise=None):
+    def noiseAnalysis(self, source, maskNoise, maskCc, targetSnr, targetHist):
         """
         """
         dwiImage = nibabel.load(source)
-        brainImage = nibabel.load(brain)
+        maskNoiseImage = nibabel.load(maskNoise)
         maskCcImage = nibabel.load(maskCc)
 
         dwiData = dwiImage.get_data()
-        brainData = brainImage.get_data()
+        maskNoiseData = maskNoiseImage.get_data()
         maskCcData = maskCcImage.get_data()
 
-        brainData[brainData>0] = 1
-        maskNoise = scipy.ndimage.morphology.binary_dilation(brainData, iterations=10)
-        maskNoise[..., :maskNoise.shape[-1]//2] = 1
-        maskNoise = ~maskNoise
-        #mask_noise_img = nib.Nifti1Image(mask_noise.astype(np.uint8), affine)
-        #nibabel.save(mask_noise_img, 'mask_noise.nii.gz')
-        if targetMaskNoise != None:
-            self.slicerPng(maskNoise, targetMaskNoise, isData=True)
-
-        #masking
         volumeNumber = dwiData.shape[3]
+
+        #Corpus Callossum masking
+        dwiDataMaskCc = numpy.empty(dwiData.shape)
         maskCcData4d = numpy.tile(maskCcData,(volumeNumber,1,1,1))
         maskCcData4d = numpy.rollaxis(maskCcData4d, 0, start=4)
-        maskNoise4d = numpy.tile(maskNoise,(volumeNumber,1,1,1))
-        maskNoise4d = numpy.rollaxis(maskNoise4d, 0, start=4)
-
         dwiDataMaskCc = numpy.ma.masked_where(maskCcData4d == 0, dwiData)
+
+        #Noise masking
+        dwiDataMaskNoise = numpy.empty(dwiData.shape)
+        maskNoise4d = numpy.tile(maskNoiseData,(volumeNumber,1,1,1))
+        maskNoise4d = numpy.rollaxis(maskNoise4d, 0, start=4)
         dwiDataMaskNoise = numpy.ma.masked_where(maskNoise4d == 0, dwiData)
 
         #SNR
@@ -258,42 +252,26 @@ class Qa(object):
         mean_signal = numpy.mean(mean_signal, axis=0)
         noise_std = numpy.reshape(dwiDataMaskNoise, [volumeSize, volumeNumber])
         noise_std = numpy.std(noise_std, axis=0)
-        
-        #mean_signal = numpy.empty(volumeNumber)
-        #noise_std = numpy.empty(volumeNumber)
-        #for num in range(volumeNumber):
-        #    volumeOfInterest = dwiData[:,:,:,num]
-        #    maskCcInd = numpy.where(maskCcData>0)
-        #    maskNoiseInd = numpy.where(maskNoise>0)
-        #    ccData = volumeOfInterest[maskCcInd]
-        #    noiseData = volumeOfInterest[maskNoiseInd]
-        #    mean_signal[num] = numpy.mean(ccData)
-        #    noise_std[num] = numpy.std(noiseData)
 
         SNR = mean_signal / noise_std
         matplotlib.pyplot.plot(SNR)
         matplotlib.pyplot.xlabel('Volumes')
         matplotlib.pyplot.ylabel('SNR')
-        #matplotlib.pyplot.title('SNR in CC for each volumes')
         matplotlib.pyplot.savefig(targetSnr)
         matplotlib.pyplot.close()
-    
+        matplotlib.rcdefaults()
+
         #Hist plot
-        #tempMask = numpy.tile(maskNoise,(33,1,1,1))
-        #tempMask = numpy.rollaxis(tempMask, 0, start=4)
-        #print tempMask.shape
-        #noiseHist = numpy.ma.masked_where(tempMask == 0, dwiData)
         noiseHistData = dwiDataMaskNoise[:,:,:,1:]
-        #slicerPng(noiseHist[:,:,:,3], target='qa/noiseHist.png', isBackgroundArray=True)
         noiseHistData = numpy.reshape(noiseHistData, numpy.prod(noiseHistData.shape))
-        num_bins = 20
-        matplotlib.pyplot.hist(noiseHistData, num_bins, histtype='stepfilled', facecolor='g')
+        num_bins = 40
+        #xlim = numpy.percentile(noiseHistData, 98)
+        matplotlib.pyplot.hist(noiseHistData, num_bins, histtype='stepfilled', facecolor='g', range=[0, 150])
         matplotlib.pyplot.xlabel('Intensity')
         matplotlib.pyplot.ylabel('Voxels number')
-        #matplotlib.pyplot.title('Noise histogram, 10x10x10 box, all diffusion weighted volumes')
         matplotlib.pyplot.savefig(targetHist)
-    
         matplotlib.pyplot.close()
+        matplotlib.rcdefaults()
     
     
     def writeTable(self, imageLink, legend):
@@ -312,7 +290,7 @@ class Qa(object):
         mainTemplate = os.path.join(self.qaDir, 'qa.main.tpl')
         tableTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.table.tpl')
         taskInfo = images.getInformation()
-        imagesDir = self.qaImagesDir
+        imagesDir = os.path.join(self.qaDir, self.config.get('qa', 'images_dir'))
         tablesCode = ''
         
         print "createQaReport images =", images
