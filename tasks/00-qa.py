@@ -15,9 +15,8 @@ class QA(GenericTask):
         self.setCleanupBeforeImplement(False)
         self.__subject = subject
 
-
     def implement(self):
-    	
+
         mainTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.main.tpl')
         imagesDir = os.path.join(self.workingDir, self.config.get('qa', 'images_dir'))
 
@@ -27,12 +26,9 @@ class QA(GenericTask):
 
         #Create menu links only for tasks with implemented QA
         menuHtml = ""
-        qaTasksList = []
-        taskManager = TasksManager(self.__subject)
-        for task in taskManager.getQaTasks():
-            name = task.getName()
-            qaTasksList.append(name)
-            menuHtml +="\n<li><a id=\"{0}\" href=\"{0}.html\">{0}</a></li>".format(name)
+        qaTasksList = [task.getName() for task in sorted(self.tasksAsReferences) if "qaSupplier" in dir(task)]
+        for taskName in qaTasksList:
+            menuHtml +="\n<li><a id=\"{0}\" href=\"{0}.html\">{0}</a></li>".format(taskName)
 
         #Create temporary html for each task
         message = "Task is running on the server. Refresh to check if QA is over"
@@ -52,7 +48,6 @@ class QA(GenericTask):
         tags = {'subject':self.__subject.getName(), 'menuHtml':menuHtml, 'taskInfo':'', 'parseHtmlTables':''}
         htmlCode = self.parseTemplate(tags, mainTemplate)
         util.createScript('index.html', htmlCode)
-
 
 
     def meetRequirement(self, result=True):
