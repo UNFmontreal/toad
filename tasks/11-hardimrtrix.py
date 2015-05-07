@@ -79,6 +79,10 @@ class HardiMrtrix(GenericTask):
         return self.rename(tmp, target)
         
 
+    def isIgnore(self):
+        return self.get("ignore").lower() in "true"
+
+
     def meetRequirement(self):
 
         images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),

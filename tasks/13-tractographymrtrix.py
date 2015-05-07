@@ -195,6 +195,16 @@ class TractographyMrtrix(GenericTask):
         return self.rename(tmp, target)
 
 
+    def isIgnore(self):
+        if self.get("ignore").lower() in "true":
+            return True
+        elif self.config.get('hardimrtrix', 'ignore').lower() in 'true':
+            self.warning('This task depend on hardi mrtrix task that is set to ignore.')
+            return True
+
+        return False
+
+
     def meetRequirement(self):
 
         images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'upsampled diffusion weighted'),

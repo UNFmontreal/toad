@@ -29,7 +29,6 @@ class HardiDipy(GenericTask):
 
     def __produceMetrics(self, source, bValsFile, bVecsFile, mask):
         self.info("Starting tensors creation from dipy on {}".format(source))
-        #target = self.buildName(source, "dipy")
 
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
@@ -39,7 +38,7 @@ class HardiDipy(GenericTask):
         dwiData = dipy.segment.mask.applymask(dwiData, maskData)
 
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
-        sphere = dipy.data.get_sphere('symmetric724')
+        sphere = dipy.data.get_sphere(self.get("triangulated_spheres"))
 
         response, ratio = dipy.reconst.csdeconv.auto_response(gradientTable, dwiData, roi_radius=10, fa_thr=0.7)
         csdModel = dipy.reconst.csdeconv.ConstrainedSphericalDeconvModel(gradientTable, response)
@@ -83,6 +82,10 @@ class HardiDipy(GenericTask):
 
         numDirsImage = nibabel.Nifti1Image(nuDirs.astype(numpy.float32), dwiImage.get_affine())
         nibabel.save(numDirsImage, target)
+
+
+    def isIgnore(self):
+        return self.get("ignore").lower() in "true"
 
 
     def meetRequirement(self):

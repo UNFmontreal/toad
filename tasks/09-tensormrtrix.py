@@ -65,6 +65,11 @@ class TensorMrtrix(GenericTask):
         cmd = "mrmath {} {} {} mean {} -nthreads {} -quiet ".format(adImage, value2, value3, mdImage, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
+
+    def isIgnore(self):
+        return self.get("ignore").lower() in "true"
+
+
     def meetRequirement(self):
         images = Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
                   (self.getImage(self.dependDir, 'grad', None, 'b'), "gradient encoding b file"),

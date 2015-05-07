@@ -1,6 +1,5 @@
 import tempfile
 import shutil
-import sys
 import os
 
 from core.generictask import GenericTask
@@ -72,6 +71,7 @@ class Masking(GenericTask):
         cmd = "flirt -in {} -ref {} -cost {} -out {}".format(source, reference, self.get('cost'), target)
         self.launchCommand(cmd)
         return matrix
+
 
     def __createRegionMaskFromAparcAseg(self, source, operand):
 

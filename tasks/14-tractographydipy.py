@@ -8,8 +8,13 @@ class TractographyDipy(GenericTask):
 
         GenericTask.__init__(self, subject)
 
+
     def implement(self):
         pass
+
+
+    def isIgnore(self):
+        return self.get("ignore").lower() in "true"
 
 
     def meetRequirement(self):
