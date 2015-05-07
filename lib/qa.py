@@ -52,7 +52,7 @@ class Qa(object):
             segData = seg.get_data()
             segSlices = self.__image3d2slices(segData, width, boundaries=boundaries)
             segSlices = [numpy.ma.masked_where(segSlices[dim] == 0, segSlices[dim]) for dim in range(3)]
-            lutFiles = os.path.join(self.toadDir, 'templates', 'lookup_tables', self.config.get('qa', 'freesurfer_lut'))
+            lutFiles = os.path.join(self.toadDir, 'templates', 'lookup_tables', self.config.get('template', 'freesurfer_lut'))
             lutData = numpy.loadtxt(lutFiles, usecols=(0,1,2,3))
             lutCmap = matplotlib.colors.ListedColormap(lutData[:,1:]/256)
             norm = matplotlib.colors.BoundaryNorm(lutData[:,0], lutCmap.N)
