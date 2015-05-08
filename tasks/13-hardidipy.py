@@ -97,7 +97,7 @@ class HardiDipy(GenericTask):
 
 
     def isDirty(self):
-        images = Images((self.getImage(self.workingDir, 'dwi', 'csd'), "csd"),
+        images = Images((self.getImage(self.workingDir, 'dwi', 'csd'), "constrained spherical deconvolution"),
                   (self.getImage(self.workingDir,'dwi', 'gfa'), "generalised Fractional Anisotropy"),
                   (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'))
         return images.isSomeImagesMissing()
