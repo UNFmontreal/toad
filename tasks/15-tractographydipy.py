@@ -21,33 +21,40 @@ class TractographyDipy(GenericTask):
         act = self.getImage(self.maskingDir, "aparc_aseg", ['resample', 'act'])
         csd = self.getImage(self.hardimrtrixDir, "dwi", 'csd')
 
-        gm = self.buildName(act, "gm")
-        kernel = self.buildName(act, "kernel")
-        wm = self.buildName(act, "wm")
-        csf = self.buildName(act, "csf") #exclude
-
-        for area, target in { 0: gm, 1: kernel, 2: wm , 3: csf}.iteritems():
-            self.info(mriutil.extractSubVolume(act, target, 3, area, self.getNTreadsMrtrix()))
-
-        include = self.buildName(act, "include")
-        self.info("Add {} and {} images together in order to create input image"
-                  .format(gm, kernel))
-
-        self.info(mriutil.fslmaths(gm, include, 'add', kernel))
-        #self.__createMask(extended)
-
-        includeImage = nibabel.load(include)
-        excludeImage = nibabel.load(csf)
+        actImage = nibabel.load(act)
         csdImage = nibabel.load(csd)
 
+        actImage = actImage.get_data()
+        print actImage.shape
+        self.quit()
 
-        includeData  = includeImage.get_data()
-        excludeData = excludeImage.get_data()
+        #gm = self.buildName(act, "gm")
+        #kernel = self.buildName(act, "kernel")
+        #wm = self.buildName(act, "wm")
+        #csf = self.buildName(act, "csf") #exclude
+
+        #for area, target in { 0: gm, 1: kernel, 2: wm , 3: csf}.iteritems():
+        #    self.info(mriutil.extractSubVolume(act, target, 3, area, self.getNTreadsMrtrix()))
+
+        #include = self.buildName(act, "include")
+        #self.info("Add {} and {} images together in order to create input image"
+        #          .format(gm, kernel))
+
+        #self.info(mriutil.fslmaths(gm, include, 'add', kernel))
+        #self.__createMask(extended)
+
+        #includeImage = nibabel.load(include)
+        #excludeImage = nibabel.load(csf)
+        #csdImage = nibabel.load(csd)
+
+
+        #includeData  = includeImage.get_data()
+        #excludeData = excludeImage.get_data()
         csdData = csdImage.get_data()
 
         classifier = ActTissueClassifier(includeData, excludeData)
         classifierImage = nibabel.Nifti1Image(classifier.astype(numpy.float32), includeData.get_affine())
-        nibabel.save(classifierImage, csf = self.buildName(act, "classifier"))
+        nibabel.save(classifierImage, self.buildName(act, "classifier"))
 
 
         deterministicGetter = DeterministicMaximumDirectionGetter.from_shcoeff(csdImage.shm_coeff,
