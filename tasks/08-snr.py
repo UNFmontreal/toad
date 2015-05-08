@@ -50,12 +50,14 @@ class Snr(GenericTask):
         maskNoisePng = self.buildName(maskNoise2mm, None, 'png')
 
         self.noiseAnalysis(dwiPreparation, maskNoise2mm, maskCc2mm, dwiPreparationSnrPng, dwiPreparationHistPng)
-        if dwiUnwarp:
-            self.noiseAnalysis(dwiUnwarp, maskNoise2mm, maskCc2mm, dwiUnwarpSnrPng, dwiUnwarpHistPng)
-        if dwiDenoising:
-            self.noiseAnalysis(dwiDenoising, maskNoise2mm, maskCc2mm, dwiDenoisingSnrPng, dwiDenoisingHistPng)
-        self.slicerPng(b0, maskCcPng, maskOverlay=maskCc2mm, boundaries=maskCc2mm)
-        self.slicerPng(b0, maskNoisePng, maskOverlay=maskNoise2mm, boundaries=maskNoise2mm, vmax=100)
+
+        #@BUGS see issues #70 
+        #if dwiUnwarp:
+        #    self.noiseAnalysis(dwiUnwarp, maskNoise2mm, maskCc2mm, dwiUnwarpSnrPng, dwiUnwarpHistPng)
+        #if dwiDenoising:
+        #    self.noiseAnalysis(dwiDenoising, maskNoise2mm, maskCc2mm, dwiDenoisingSnrPng, dwiDenoisingHistPng)
+        #self.slicerPng(b0, maskCcPng, maskOverlay=maskCc2mm, boundaries=maskCc2mm)
+        #self.slicerPng(b0, maskNoisePng, maskOverlay=maskNoise2mm, boundaries=maskNoise2mm, vmax=100)
 
 
     def __getUnwarpImage(self):
@@ -97,7 +99,7 @@ class Snr(GenericTask):
         #    self.warning("Voxel size not specified correctly during upsampling")
 
         #cmd = "mri_convert -voxsize {} --input_volume {} --output_volume {}".format(voxelSize, source, target)
-        cmd = "mrtransform -oversample 2,2,2 -template {} {} {}".format(template, source, target)
+        cmd = "mrtransform -oversample 2,2,2 -template {} {} {} -quiet".format(template, source, target)
         self.launchCommand(cmd)
         return target
 
@@ -155,5 +157,4 @@ class Snr(GenericTask):
                              (maskNoisePng, 'Noise mask to compute SNR'),
                             )
                      )
-
         return images
