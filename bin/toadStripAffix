@@ -37,6 +37,8 @@ def parseArguments():
     parser.add_argument('prefix', help="Specify an abbreviation")
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the files, wildcard * ? are accepted")
     parser.add_argument("-e", "--execute", help="Proceed to the operation", action="store_true")
+    parser.add_argument('-v', '--version', action='version', version="%(prog)s ({})".format(__version__))
+
     args = parser.parse_args()
 
     return args

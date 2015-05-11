@@ -36,7 +36,7 @@ class Eddy(GenericTask):
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
         #make sure all the images have the same voxel size and dimension scale between them
-        self.__validateSizeAndDimension([dwi, b0, b0AP, b0PA])
+        self.__validateSizeAndDimension(dwi, b0, b0AP, b0PA)
 
         #Generate a missing b0 image if we could. --> 0 = P>>A, 1 = A>>P
         if self.get("phase_enc_dir") == "0" and b0PA and b0AP is False:
@@ -45,7 +45,7 @@ class Eddy(GenericTask):
         if self.get("phase_enc_dir") == "1" and b0AP and b0PA is False :
             b0PA = b0
 
-        [dwi, b0, b0AP, b0PA] = self.__oddImagesWithEvenNumberOfSlices([dwi, b0, b0AP, b0PA])
+        [dwi, b0, b0AP, b0PA] = self.__oddEvenNumberOfSlices(dwi, b0, b0AP, b0PA)
 
         if b0AP is False or b0PA is False:
             topupBaseName = None
@@ -54,7 +54,6 @@ class Eddy(GenericTask):
         else:
 
             #concatenate B0 image together
-            print "buildname=", self.buildName("b0pa_b0ap", None, "nii.gz")
             if self.get("phase_enc_dir") == "0":
                 b0Image = self.__concatenateB0(b0PA, b0AP, self.buildName("b0pa_b0ap", None, "nii.gz"))
 
@@ -108,41 +107,34 @@ class Eddy(GenericTask):
         
 
 
-    def __oddImagesWithEvenNumberOfSlices(self, sources):
+    def __oddEvenNumberOfSlices(self, *args):
         """return a list of images that will count a odd number of slices in z direction
 
             If an even number of slices is found, the upper volume will be remove
 
         Args:
-            sources: a list of images
+            *args: a list of images
 
         Returns:
-             the same list but with images modified
+             a list of images stripped
 
         """
-        for i, source in enumerate(sources):
-            if source:
-                zDims = int(mriutil.getMriDimensions(source)[2])
-                if zDims%2 == 1:
-                    sources[i]= self.__extractZSlices(source, "0:{}".format(zDims-2))
-        return sources
-
-
-    def __extractZSlices(self, source, slices):
-        """Extract slices along the Z axes from an image
-
-        Args:
-            source: The input image
-            slices:  A list of slices, starting at 0
-
-        Returns:
-             The name of the resulting image
-        """
-        tmp =  self.buildName(source, "tmp")
-        target = self.buildName(source, "subset")
-        cmd = "mrconvert {} {} -coord +2 {} -nthreads {} -quiet".format(source, tmp, slices, self.getNTreadsMrtrix())
-        self.launchCommand(cmd)
-        return self.rename(tmp, target)
+        output = []
+        for image in args:
+            if image:
+                try:
+                    zDims = int(mriutil.getMriDimensions(image)[2])
+                    if zDims%2 == 1:
+                        target = self.buildName(image, "subset")
+                        mriutil.extractSubVolume(image, target, '+2',"0:{}".format(zDims-2), self.getNTreadsMrtrix())
+                        output.append(target)
+                    else:
+                        output.append(image)
+                except ValueError:
+                    output.append(image)
+            else:
+                output.append(False)
+        return output
 
 
     def __concatenateB0(self, source1, source2, target):
@@ -228,13 +220,13 @@ class Eddy(GenericTask):
         return target
 
 
-    def __validateSizeAndDimension(self, sources):
+    def __validateSizeAndDimension(self, *args):
 
         names = []
         dims = []
         sizes = []
 
-        for source in sources:
+        for source in args:
             if source:
                 names.append(source)
                 dimensions = mriutil.getMriDimensions(source)

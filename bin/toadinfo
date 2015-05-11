@@ -17,7 +17,7 @@ __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright 2014, The Toad Project"
 __credits__ = ["Mathieu Desrosiers"]
 __license__ = "GPL"
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Development"
@@ -39,6 +39,7 @@ def parseArguments():
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Write output into a config.cfg file or create a new one if it doesn't exist")
     parser.add_argument("-f","--fieldmap", help="Add a section for fieldmap into the config file", action="store_true")
+    parser.add_argument('-v', '--version', action='version', version="%(prog)s ({})".format(__version__))
     args = parser.parse_args()
     return args
 
@@ -72,6 +73,25 @@ def __getEpiFactor(source):
                     return 1
     return 1
 
+def __getPhaseResolution(source):
+    with open(source, 'r') as f:
+        for line in f.readlines():
+            if "sKSpace.dPhaseResolution" in line:
+                try:
+                    return int(line.split("=")[-1].strip())
+                except ValueError:
+                    return 1
+    return 1
+
+def __getPhaseOversampling(source):
+    with open(source, 'r') as f:
+        for line in f.readlines():
+            if "sKSpace.dPhaseOversamplingForDialog" in line:
+                try:
+                    return int(line.split("=")[-1].strip())
+                except ValueError:
+                    return 1
+    return 1
 
 def __returnPhaseEncodingDirection(line):
 
@@ -97,13 +117,13 @@ def __returnPhaseEncodingDirection(line):
     return 1
 
 
-def __getEchoSpacing(source, epiFactor, patFactor = 1):
+def __getEchoSpacing(source, epiFactor, patFactor = 1, phaseResolution = 1, phaseOversampling = 1):
 
     header=dicomwrappers.wrapper_from_file(source, force=True)
 
     try:
         bpppe = header.csa_header['tags']['BandwidthPerPixelPhaseEncode']['items'][0]
-        echoSpacing = 1/(epiFactor*bpppe)*1000 *patFactor
+        echoSpacing = 1/(bpppe* epiFactor) *1000 *patFactor *phaseResolution *phaseOversampling
         echoTime = header.get('EchoTime')
 
     except AttributeError:
@@ -151,7 +171,9 @@ if __name__ == '__main__':
     phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
     patFactor = __getPatFactor(arguments.dcmFile)
     epiFactor = __getEpiFactor(arguments.dcmFile)
-    echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, epiFactor, patFactor)
+    phaseResolution = __getPhaseResolution(arguments.dcmFile)
+    phaseOversampling = __getPhaseOversampling(arguments.dcmFile)
+    echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, epiFactor, patFactor, phaseResolution, phaseOversampling)
 
     if arguments.config and arguments.fieldmap:
         writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)

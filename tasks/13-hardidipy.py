@@ -58,7 +58,7 @@ class HardiDipy(GenericTask):
                                                                   nbr_processes=int(self.getNTreads()))
 
         #CSD
-        target = self.buildName(source,'csd')
+        target = self.buildName(source, 'csd')
         csdCoeff = csdPeaks.shm_coeff
         csdCoeffImage = nibabel.Nifti1Image(csdCoeff.astype(numpy.float32), dwiImage.get_affine())
         nibabel.save(csdCoeffImage, target)
@@ -97,7 +97,7 @@ class HardiDipy(GenericTask):
 
 
     def isDirty(self):
-        images = Images((self.getImage(self.workingDir, 'dwi', 'csd'), "csd"),
+        images = Images((self.getImage(self.workingDir, 'dwi', 'csd'), "constrained spherical deconvolution"),
                   (self.getImage(self.workingDir,'dwi', 'gfa'), "generalised Fractional Anisotropy"),
                   (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'))
         return images.isSomeImagesMissing()

@@ -95,7 +95,7 @@ class HardiMrtrix(GenericTask):
     def isDirty(self):
 
         images = Images((self.getImage(self.workingDir, 'dwi', None, 'txt'), "response function estimation text file"),
-                  (self.getImage(self.workingDir, 'dwi', 'csd'), "fibre orientation distribution estimation"),
+                  (self.getImage(self.workingDir, 'dwi', 'csd'), "constrained spherical deconvolution"),
                   (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'),
                   (self.getImage(self.workingDir,'dwi', 'fixel_peak', 'msf'), 'fixel peak image'))
         return images.isSomeImagesMissing()
