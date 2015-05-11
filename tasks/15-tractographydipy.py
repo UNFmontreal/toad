@@ -15,13 +15,13 @@ class TractographyDipy(GenericTask):
 
     def __init__(self, subject):
 
-        GenericTask.__init__(self, subject, "masking", "hardimrtrix")
+        GenericTask.__init__(self, subject, "masking", "hardidipy")
 
 
     def implement(self):
 
         act = self.getImage(self.maskingDir, "aparc_aseg", ['resample', 'act'])
-        csd = self.getImage(self.hardimrtrixDir, "dwi", 'csd')
+        csd = self.getImage(self.hardidipyDir, "dwi", 'csd')
         """
         actImage = nibabel.load(act)
         csdImage = nibabel.load(csd)
@@ -56,19 +56,19 @@ class TractographyDipy(GenericTask):
 
         classifier = ActTissueClassifier(includeData, excludeData)
 	
-	figure = matplotlib.figure()
-	matplotlib.subplot(121)
-	matplotlib.xticks([])
-	matplotlib.yticks([])
-	matplotlib.imshow(includeData[:, :, actData.shape[2] / 2].T, cmap='gray', origin='lower',
-		   interpolation='nearest')
-	matplotlib.subplot(122)
-	matplotlib.xticks([])
-	matplotlib.yticks([])
-	matplotlib.imshow(excludeData[:, :, actData.shape[2] / 2].T, cmap='gray', origin='lower',
-		   interpolation='nearest')
-	figure.tight_layout()
-	figure.savefig('act_maps.png')
+        figure = matplotlib.figure()
+        matplotlib.subplot(121)
+        matplotlib.xticks([])
+        matplotlib.yticks([])
+        matplotlib.imshow(includeData[:, :, actData.shape[2] / 2].T, cmap='gray', origin='lower',
+               interpolation='nearest')
+        matplotlib.subplot(122)
+        matplotlib.xticks([])
+        matplotlib.yticks([])
+        matplotlib.imshow(excludeData[:, :, actData.shape[2] / 2].T, cmap='gray', origin='lower',
+               interpolation='nearest')
+        figure.tight_layout()
+        figure.savefig('act_maps.png')
         
         print "includeImage.get_affine()=", includeImage.get_affine()
         print "csdImage.get_affine()=",csdImage.get_affine()
@@ -105,7 +105,7 @@ class TractographyDipy(GenericTask):
 
     def meetRequirement(self):
         return Images((self.getImage(self.maskingDir, "aparc_aseg", ["resample", "act"]), 'resampled anatomically constrained tractography'),
-                      (self.getImage(self.hardimrtrixDir, "dwi", 'csd'), 'constrained spherical deconvolution'))\
+                      (self.getImage(self.hardidipyDir, "dwi", 'csd'), 'constrained spherical deconvolution'))\
             .isAllImagesExists()
 
     def isDirty(self):
