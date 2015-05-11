@@ -58,7 +58,7 @@ class HardiDipy(GenericTask):
                                                                   nbr_processes=int(self.getNTreads()))
 
         #CSD
-        target = self.buildName(source,'csd')
+        target = self.buildName(source, 'csd')
         csdCoeff = csdPeaks.shm_coeff
         csdCoeffImage = nibabel.Nifti1Image(csdCoeff.astype(numpy.float32), dwiImage.get_affine())
         nibabel.save(csdCoeffImage, target)

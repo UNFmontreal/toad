@@ -81,7 +81,7 @@ class TractographyDipy(GenericTask):
 
 
     def meetRequirement(self):
-        return Images(self.getImage(self.workingDir, "aparc_aseg", ["resample", "act"]), 'resampled anatomically constrained tractography',
+        return Images(self.getImage(self.maskingDir, "aparc_aseg", ["resample", "act"]), 'resampled anatomically constrained tractography',
                       self.getImage(self.hardimrtrixDir, "dwi", 'csd'), 'constrained spherical deconvolution')\
             .isSomeImagesMissing()
 

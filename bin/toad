@@ -33,45 +33,42 @@ def __parseArguments():
         for furthers informations""",
                                 epilog= """\n
 
-        An input must have the following structure
+        An input directory must have the following structure
 
              |-input---\\
              |         |- t1_001.nii
              |         |- dwi_001.nii
              |         |- dwi_001.b ou (dwi_001.bvals et dwi_001.bvecs)
-             |         |-(optionnal) aparc_aseg.nii
-             |         |-(optionnal) freesurfer_anat.nii.gz
-             |         |-(optionnal) lh_ribbon.nii.gz
-             |         |-(optionnal) rh_ribbon.nii.gz
-             |         |-(optionnal) brodmann.nii.gz
              |         |-(optionnal) b0ap_001.nii
              |         |-(optionnal) b0pa_001.nii
              |         |-(optionnal) mag_001.nii
              |         |-(optionnal) phase_001.nii
              |         |-(optionnal) config.cfg
+             |         |-(optionnal) A freesurfer directory structure
 
 
         Then a subject completed will look like this
         sujN--\\
-              |- 00-logs
-              |- 01-backup
-              |- 02-preparation
-              |- 03-parcellation
-              |- 04-eddy
-              |- 04-fieldmap
-              |- 05-denoising
-              |- 06-preprocessing
-              |- 07-registration
-              |- 08-masking
-              |- 09-dtifit
-              |- 10-tensors
-              |- 11-tensorsmetric
-              |- 12-tensorstractography
-              |- 13-hardi
-              |- 14-hardimetric
-              |- 15-harditractography
-              |- 16-qa
-              |- 17-results
+              |- 00-backup
+              |- 00-qa
+              |- 01-preparation
+              |- 02-parcellation
+              |- 03-eddy
+              |- 03-fieldmap
+              |- 04-denoising
+              |- 05-preprocessing
+              |- 06-registration
+              |- 07-masking
+              |- 08-snr
+              |- 09-tensorfsl
+              |- 10-tensormrtrix
+              |- 11-tensordipy
+              |- 12-hardimrtrix
+              |- 13-hardidipy
+              |- 14-tractographymrtrix
+              |- 15-tractographydipy
+              |- 16-results
+              |- 99-logs
 
 
         Please report bugs to mathieu.desrosiers@criugm.qc.ca
@@ -83,16 +80,16 @@ def __parseArguments():
 
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
+
     parser.add_argument("-t", "--task", nargs='+',metavar=('task_file_name'), required=False,
                             help="Specify a custom task to be submit")
 
     parser.add_argument("-b", "--stopBeforeTask", nargs='?',metavar=('task_name'), required=False,
-                            help="Stop the pipeline at a specific task. TOAD will create the working directory."
-                                 "Usefull if you want to introduce your own freesurfer tree into the pipeline. "
-                                 "This command will apply to all subject.")
-    parser.add_argument("-p","--noPrompt", help=("Disable command prompt and always assume yes as answer"), action="store_true")
+                            help="Stop the pipeline at the beginning of a specific task. TOAD will create the working directory."
+                                 "Note this command will apply to all subject.")
+
+    parser.add_argument("-p","--noPrompt", help=("Disable command prompt and assume yes to any answer (not recommended)"), action="store_true")
     parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
-    parser.add_argument("-v","--verbose", help="increase output verbosity (not implemented yet)", action="store_true")
     parser.add_argument("-e","--emergency", help=("Overwrite nb_threads parameter and deploy unlimited number of threads at each parallelizable steps. "
                         "If more than one subject is submit, this parameter will be ignored "
                         "(This parameter is dangerous and may crash the server or create deadlocks.)"
@@ -100,6 +97,7 @@ def __parseArguments():
     parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
     parser.add_argument("-q", "--queue", nargs='?',metavar=('queue_name'), required=False,
                             help="Specify an alternative queue name to use for the grid engine")
+    parser.add_argument('-v', '--version', action='version', version="%(prog)s ({})".format(__version__))
 
     args = parser.parse_args()
     args.subject = None
@@ -203,6 +201,7 @@ def __manageVersions(logger, arguments):
     version = [line.replace("tckgen", "").strip("== ") for line in results.splitlines() if "tckgen" in line].pop()
     logger.info("Mrtrix is running at version: {}".format(version))
 
+
     if arguments.matlabIsAvailable:
         found = False
         cmd = "matlab -nodisplay -nodesktop -nojvm -nosplash -r \"quit\""
@@ -215,7 +214,6 @@ def __manageVersions(logger, arguments):
                 break
         if not found:
             logger.warning("Cannot determine Matlab version")
-
 
     cmd = "convert -version"
     command, results, errors = util.launchCommand(cmd)
