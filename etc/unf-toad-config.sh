@@ -28,7 +28,7 @@ case "$HOSTNAME" in
 
         else
             export TOADSERVER=mammouth
-            APPDIR=/home/desrosie/local
+            APPDIR=/netmount/ip01_home/desrosie/local
             export LD_LIBRARY_PATH=$APPDIR/osmesa/lib:$APPDIR/lib:$APPDIR/vtk/lib:$APPDIR/python-2.7/lib:$LD_LIBRARY_PATH
             export PATH=$APPDIR/python-2.7/bin:$APPDIR/imagemagik-6.9/bin:$PATH
             export SGEQUEUE='qwork@mp2'
