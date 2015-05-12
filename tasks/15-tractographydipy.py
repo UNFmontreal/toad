@@ -6,6 +6,7 @@ from dipy.tracking.local import ActTissueClassifier, LocalTracking
 from dipy.direction import DeterministicMaximumDirectionGetter
 from dipy.data import default_sphere
 from dipy.io.trackvis import save_trk
+from dipy.tracking import utils
 import matplotlib
 matplotlib.use('Agg')
 
@@ -76,10 +77,11 @@ class TractographyDipy(GenericTask):
                                                       max_angle=30.,
                                                       sphere=default_sphere)
 
+        seeds = utils.seeds_from_mask(actData[:,:,:,2], density=1, affine=actImage.get_affine())
 
         validStreamlinesActClassifier = LocalTracking(deterministicGetter,
                                                          classifier,
-                                                         actData[:,:,:,2], #white matter
+                                                         seeds, #white matter
                                                          csdImage.get_affine(),
                                                          step_size=.5,
                                                          return_all=False)

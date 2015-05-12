@@ -106,6 +106,7 @@ class Unftoad(object):
         self.__prefixs = OrderedDict()
         self.__sequences = OrderedDict()
 
+
     #@TODO none unf options, reshuffle dicom
     def run(self):
 
@@ -125,12 +126,10 @@ class Unftoad(object):
                 else self.__chooseFromSessions("Please choose a session to convert")
 
             sequences = self.__getSequencesBySession(choosedSession)
-            choosedSequences = self.__getSelectedSequences(sequences)
-
-            if len(choosedSequences) > 0:
-                isPrefixHaveBeenChange = self.__isUserDefinedCustomPrefixs(choosedSequences)
-                prefixs = self.__defineCustomPrefixs(choosedSequences) if isPrefixHaveBeenChange else self.__prefixs
-
+            originalSequences = self.__getSelectedSequences(sequences)
+            if len(originalSequences) > 0:
+                isPrefixHaveBeenChange = self.__isUserDefinedCustomPrefixs(originalSequences)
+                prefixs = self.__defineCustomPrefixs(originalSequences) if isPrefixHaveBeenChange else self.__prefixs
                 comparableSessions = self.__getComparableSessions(choosedSession)
 
                 if len(comparableSessions) > 1:
@@ -142,7 +141,7 @@ class Unftoad(object):
 
                 subjectNames = self.__getSubjectNameForSessions(comparableSessions)
 
-                for index, session in enumerate(comparableSessions):
+                for index, comparableSession in enumerate(comparableSessions):
                     name = subjectNames[index]
                     targetDir = os.path.join(os.getcwd(), outputDir, name)
                     if not os.path.exists(targetDir):
@@ -152,34 +151,42 @@ class Unftoad(object):
                     if not self.__arguments.noConfig:
                         self.__setPrefixInConfigFiles(prefixs, configFile)
 
-                    for prefix, sequence in choosedSequences.iteritems():
-                        if 'dwi' in prefix:
-                            if prefix == 'dwi':
-                                self.__convertDwi(sequence, name, prefixs[prefix], targetDir, configFile)
-                            else:
-                                self.__convertDwi(sequence, name, "{}_".format(prefix), targetDir, configFile)
+                    for prefixFromOriginalSequence, sessionFromOriginalSequence in originalSequences.iteritems():
+                        originalSequence = sessionFromOriginalSequence.sequence
+                        for key, sequence in self.__getSequencesBySession(comparableSession).iteritems():
+                            if sequence.sequence == originalSequence:
+                                if prefixs.has_key(prefixFromOriginalSequence):
+                                    prefixName = prefixs[prefixFromOriginalSequence]
+                                else:
+                                    prefixName = "{}_".format(prefixFromOriginalSequence)
+                                if 'dwi' in prefixFromOriginalSequence:
+                                    if prefixFromOriginalSequence == 'dwi':
+                                        self.__convertDwi(sequence, name, prefixName, targetDir, configFile)
+                                    else:
+                                        self.__convertDwi(sequence, name, prefixName, targetDir, configFile)
 
-                        elif prefix == 'mag':
-                            self.__convertMagnitude(sequence,
-                                                    name,
-                                                    prefixs[prefix],
-                                                    targetDir,
-                                                    configFile)
-                        else:
-                            self.__convert(prefix, sequence, name, prefixs[prefix], targetDir)
+                                elif prefixFromOriginalSequence == 'mag':
+                                    self.__convertMagnitude(sequence,
+                                                            name,
+                                                            prefixName,
+                                                            targetDir,
+                                                            configFile)
+                                else:
+                                    self.__convert(prefixName, sequence, name, prefixName, targetDir)
+
 
                     if self.__arguments.multipleDWI is not None:
                         cmd = "mrcat "
                         for index in range(0, self.__arguments.multipleDWI):
                             cmd += "{} ".format(glob.glob('{}/dwi{}_*.nii.gz'.format(targetDir, index)).pop())
-                        cmd += " {}/{}{}.nii.gz".format(targetDir, prefixs['dwi'], name)
+                        cmd += " {}/{}{}.nii.gz".format(targetDir, self.__prefixs['dwi'], name)
                         print cmd
                         util.launchCommand(cmd)
 
                         cmd = "cat "
                         for index in range(0, self.__arguments.multipleDWI):
                             cmd += "{} ".format(glob.glob('{}/dwi{}_*.b'.format(targetDir, index)).pop())
-                        cmd += " > {}/{}{}.b".format(targetDir, prefixs['dwi'], name)
+                        cmd += " > {}/{}{}.b".format(targetDir, self.__prefixs['dwi'], name)
                         print cmd
                         util.launchCommand(cmd)
 
@@ -187,7 +194,7 @@ class Unftoad(object):
                         print cmd
                         util.launchCommand(cmd)
 
-                    self.__markSessionAsSelected(session)
+                    self.__markSessionAsSelected(comparableSession)
 
                 self.__parseConfigInXmlDocument(configXmlFile)
 
@@ -299,7 +306,7 @@ class Unftoad(object):
                     path = path[1:]
                 sequence.sequence = path.split("/")[0]
                 if not self.__sequences.has_key((sequence.session, sequence.sequence)):
-                    self.__sequences[(sequence.session, sequence.sequence)]= sequence
+                    self.__sequences[(sequence.session, sequence.sequence)] = sequence
                     sequences.append(sequence)
             self.__sessions.append(Session(sequence.session,
                                            "".join([sequence.sequence for sequence in sequences ]),
