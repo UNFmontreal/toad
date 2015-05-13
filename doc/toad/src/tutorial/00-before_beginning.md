@@ -26,6 +26,8 @@ Type into the terminal
     ```# source /usr/local/toad/etc/unf-toad-config.sh
     ```
 
+
+<!---
 Connect and launch à un des serveurs de l’UNF (stark ou magma)
 
 
@@ -91,3 +93,4 @@ Whould you like to change default prefix at the beginning of the filename? Actua
 	B0 AP (anterior -> posterior) will be prefix: b0_ap_
 	B0 PA (posterior -> anterior) will be prefix: b0_pa_
 
+---!>

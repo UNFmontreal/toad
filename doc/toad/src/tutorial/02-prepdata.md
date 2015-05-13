@@ -20,8 +20,8 @@ D’autres données peuvent servir à TOAD pour le traitement des données :
 
 Pour des raisons de simplicité, TOAD accepte seulement quelques formats :
 
-- neuroimagerie : **format nifti** (.nii) 
-- encodage :  format regroupé **MRTRIX (.b)** ou séparé en valeurs et vecteurs **(.val et .vec)**.
+- neuroimagerie : **format nifti compressé** (.nii.gz)
+- encodage :  format regroupé **MRTRIX (.b)** ou séparé en valeurs et vecteurs **(.vals et .vecs)**.
 
 
 ## Préparation des données 
@@ -29,8 +29,8 @@ Pour des raisons de simplicité, TOAD accepte seulement quelques formats :
 ### Conversion des fichiers
 
 TOAD propose un logiciel de conversion des données dénommé `unf2toad`. 
-Non seulement `unf2toad` va pouvoir convertir les données brutes d’un participant (.dicom ou .tar.gz issu de l’UNF) ou d’un groupe de participants, mais le logiciel va aussi appliqué une nomemclature commune aux différents types de fichier.
-Cette [nomnmclature](#nomenclature) peut être personnalisée, `unf2toad` va alors créer le fichier de configuration nécessaire au lancement de TOAD. 
+Non seulement `unf2toad` va pouvoir convertir les données brutes d’un participant (en format dicom ou .tar.gz issu de l’UNF) ou d’un groupe de participants, mais le logiciel va aussi appliqué une nomemclature commune aux différents types de fichier.
+Cette [nomenclature](#nomenclature) peut être personnalisée, `unf2toad` va alors créer le fichier de configuration nécessaire au lancement de TOAD.
 Cette nomencalture commune est nécessaire pour que TOAD puisse identifier correctement les fichiers à utiliser. 
 
 ### Lancer la conversion
@@ -52,7 +52,7 @@ Pour lancer la conversion des données, il suffit de suivre la procédure suivan
     ```# unf2toad .
     ```
 
-4. répondre aux différentes questions posées par le logiciel. 
+4. répondre aux différentes questions posées par le logiciel.
 
 
 ### Données déjà converties
@@ -66,15 +66,15 @@ Nous vous recommandons de regrouper les données de la façon suivante :
 ```shell
     PROJET  
     |- Subject1  
-        |- anat_subject1_.nii  
-        |- dwi_subject1_.nii  
+        |- anat_subject1_.nii.gz
+        |- dwi_subject1_.nii.gz
         |- b0_subject1_.b  
     |- Subject2  
     |- Subject3  
     |- ...  
 ```
     
-***Attention :*** *dans ce cas de figure, il est de votre responsabilité de vous assurer les données ont été correctement converties et que le fichier d’encodage respecte bien les normes habituelles (strikes...). 
+***Attention :*** *dans ce cas de figure, il est de votre responsabilité de vous assurer les données ont été correctement converties et que le fichier d’encodage respecte bien les normes habituelles (strides...).
 Afin d’éviter tout problème, si vous disposez encore des données brutes, nous recommandons fortement de reconvertir les données avec le logiciel `unf2toad`.*
 
 
@@ -89,10 +89,10 @@ Lorsque les données antérieur/postérieur ou postérieur/antérieur sont dispo
 Ainsi, les fichiers pour un participant dont le code est PSY01 seront :
 ```shell
 PSY01
-|- anat_PSY01.nii
-|- dwi_PSY01.nii
-|- b0_PSY01.nii
-|- b0_ap_PSY01.nii
+|- anat_PSY01.nii.gz
+|- dwi_PSY01.nii.gz
+|- b0_ap_PSY01.nii.gz
+|- b0_pa_PSY01.nii.gz
 ```
 
 Vous êtes libres cependant d’utiliser n’importe quelle nomenclature du moment qu’elle soit indiquée dans le fichier de configuration `config.cfg`. 
@@ -105,6 +105,5 @@ Cette nomenclature devra être constante à travers les sujets à moins de spéc
 |---------------------------------------|-----------------------|
 | **Anatomique** (T1)                   | anat_                 |
 | **Diffusion** (DWI)                   | dwi_                  |
-| **Carte de B0**                       | b0_                   |
-| **Carte de B0 antérieur-postérieur**  | b0_ap_                |
-| **Carte de B0 postérieur-antérieur**  | b0_pa_                |
+| **Carte de B0** (antérieur-postérieur)  | b0_ap_                |
+| **Carte de B0** (postérieur-antérieur)  | b0_pa_                |
