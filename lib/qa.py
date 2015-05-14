@@ -31,7 +31,7 @@ class Qa(object):
             imageData = image.get_data()
 
         if vmax == None:
-            vmax=numpy.max(imageData)
+            vmax=numpy.percentile(imageData, 99)
     
         width, fig_dims = self.__configFigure(imageData)
         fig = matplotlib.pyplot.figure(figsize=fig_dims)
@@ -98,7 +98,10 @@ class Qa(object):
     
         image = nibabel.load(source)
         imageData = image.get_data()
-    
+
+        if vmax == None:
+            vmax=numpy.percentile(imageData, 99)
+
         imageList = []
         for num in range(imageData.shape[-1]):
             output = gifId + '{0:04}.png'.format(num)
@@ -114,7 +117,7 @@ class Qa(object):
              
 
 
-    def slicerGifCompare(self, source1, source2, target, gifSpeed=100, vmax=100, boundaries=None):
+    def slicerGifCompare(self, source1, source2, target, gifSpeed=100, vmax=None, boundaries=None):
         """Create a animated gif from a 4d NIfTI
         Args:
             source: 4D NIfTI image
@@ -128,6 +131,9 @@ class Qa(object):
 
         image2 = nibabel.load(source2)
         imageData2 = image2.get_data()
+
+        if vmax == None:
+            vmax=numpy.percentile(imageData1, 99)
 
         imageList = []
         for num, image in enumerate([imageData1, imageData2]):
