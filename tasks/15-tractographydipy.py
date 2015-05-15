@@ -36,6 +36,11 @@ class TractographyDipy(GenericTask):
         nibabel.save(includeImage, self.buildName(act, "include"))
         excludeData = actData[:,:,:,3] #csf
 
+        step_det = self.config.getfloat('tractographydipy','step_det')
+        step_prob = self.config.getfloat('tractographydipy','step_prob')
+        density = self.config.getint('tractographydipy','density')
+
+
 
         csdData = csdImage.get_data()
         classifier = ActTissueClassifier(includeData, excludeData)
@@ -48,29 +53,30 @@ class TractographyDipy(GenericTask):
                                                       max_angle=30.,
                                                       sphere=default_sphere)
 
-        seeds = utils.seeds_from_mask(actData[:,:,:,2], density=1, affine=actImage.get_affine())
+
+        seeds = utils.seeds_from_mask(actData[:,:,:,2], density=density, affine=actImage.get_affine())
 
         deterministicValidStreamlinesActClassifier = LocalTracking(deterministicGetter,
                                                          classifier,
                                                          seeds, #white matter
                                                          csdImage.get_affine(),
-                                                         step_size=.5,
+                                                         step_size=step_det,
                                                          return_all=False)
 
         probabilisticValidStreamlinesActClassifier = LocalTracking(probabilisticGetter,
                                                          classifier,
                                                          seeds, #white matter
                                                          csdImage.get_affine(),
-                                                         step_size=.5,
+                                                         step_size=step_prob,
                                                          return_all=False)
 
 
-        save_trk("deterministic_act_classifier_valid.trk",
+        save_trk(self.buildName(csd, 'hardi_det', 'trk'),
                  deterministicValidStreamlinesActClassifier,
                  csdImage.get_affine(),
                  includeData.shape)
 
-        save_trk("probabilistic_act_classifier_valid.trk",
+        save_trk(self.buildName(csd, 'hardi_prob', 'trk'),
                  probabilisticValidStreamlinesActClassifier,
                  csdImage.get_affine(),
                  includeData.shape)
@@ -85,4 +91,6 @@ class TractographyDipy(GenericTask):
             .isAllImagesExists()
 
     def isDirty(self):
-        return True
+        images = Images((self.getImage(self.workingDir, 'dwi', 'hardi_det', 'tck'), "deterministic streamlines act classifier"),
+                  (self.getImage(self.workingDir, 'dwi', 'hardi_prob', 'tck'), "probabilistic streamlines act classifier"))
+        return images.isSomeImagesMissing()
