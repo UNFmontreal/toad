@@ -39,7 +39,7 @@ esac
 
 #disable KMP_AFFINITY
 export KMP_AFFINITY=none
-export MINC_FORCE_V2=1
+export MINC_FORCE_V2=0
 
 #Freesurfer configuration
 export FREESURFER_HOME=$APPDIR/freesurfer
