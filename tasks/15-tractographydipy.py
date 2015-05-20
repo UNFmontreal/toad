@@ -58,14 +58,14 @@ class TractographyDipy(GenericTask):
 
         deterministicValidStreamlinesActClassifier = LocalTracking(deterministicGetter,
                                                          classifier,
-                                                         seeds, #white matter
+                                                         seeds,
                                                          csdImage.get_affine(),
                                                          step_size=step_det,
                                                          return_all=False)
 
         probabilisticValidStreamlinesActClassifier = LocalTracking(probabilisticGetter,
                                                          classifier,
-                                                         seeds, #white matter
+                                                         seeds,
                                                          csdImage.get_affine(),
                                                          step_size=step_prob,
                                                          return_all=False)
