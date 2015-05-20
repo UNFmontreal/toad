@@ -1,6 +1,5 @@
 from core.generictask import GenericTask
 from lib.images import Images
-from lib import mriutil
 import nibabel, numpy
 from dipy.tracking.local import ActTissueClassifier, LocalTracking
 from dipy.direction import DeterministicMaximumDirectionGetter, ProbabilisticDirectionGetter
@@ -10,6 +9,7 @@ from dipy.io.trackvis import save_trk
 from dipy.tracking import utils
 import matplotlib
 matplotlib.use('Agg')
+
 
 __author__ = 'desmat'
 
@@ -34,13 +34,11 @@ class TractographyDipy(GenericTask):
         includeData  = numpy.logical_or(actData[:,:,:,0], actData[:,:,:,1])
         includeImage = nibabel.Nifti1Image(includeData.astype(numpy.float32), actImage.get_affine())
         nibabel.save(includeImage, self.buildName(act, "include"))
-        excludeData = actData[:,:,:,3] #csf
+        excludeData = actData[:,:,:,3]
 
         step_det = self.config.getfloat('tractographydipy','step_det')
         step_prob = self.config.getfloat('tractographydipy','step_prob')
         density = self.config.getint('tractographydipy','density')
-
-
 
         csdData = csdImage.get_data()
         classifier = ActTissueClassifier(includeData, excludeData)
@@ -86,9 +84,9 @@ class TractographyDipy(GenericTask):
 
 
     def meetRequirement(self):
-        return Images((self.getImage(self.maskingDir, "aparc_aseg", ["resample", "act"]), 'resampled anatomically constrained tractography'),
-                      (self.getImage(self.hardidipyDir, "dwi", 'csd'), 'constrained spherical deconvolution'))\
-            .isAllImagesExists()
+        images = Images((self.getImage(self.maskingDir, "aparc_aseg", ["resample", "act"]), 'resampled anatomically constrained tractography'),
+                      (self.getImage(self.hardidipyDir, "dwi", 'csd'), 'constrained spherical deconvolution'))
+        return images.isAllImagesExists()
 
     def isDirty(self):
         images = Images((self.getImage(self.workingDir, 'dwi', 'hardi_det', 'tck'), "deterministic streamlines act classifier"),

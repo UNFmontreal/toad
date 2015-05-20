@@ -39,12 +39,16 @@ esac
 
 #disable KMP_AFFINITY
 export KMP_AFFINITY=none
+export MINC_FORCE_V2=0
 
 #Freesurfer configuration
 export FREESURFER_HOME=$APPDIR/freesurfer
 export FSFAST_HOME=$FREESURFER_HOME/fsfast
+export MINC_BIN_DIR=$FREESURFER_HOME/mni/bin
+export MINC_LIB_DIR=$FREESURFER_HOME/mni/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$FREESURFER_HOME/lib
 export PERL5LIB=$FREESURFER_HOME/mni/lib/perl5/5.8.5:$PERL5LIB
+
 
 # FSL Configuration
 FSLDIR=$APPDIR/fsl
