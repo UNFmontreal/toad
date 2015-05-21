@@ -31,13 +31,20 @@ class QA(GenericTask):
             menuHtml +="\n<li><a id=\"{0}\" href=\"{0}.html\">{0}</a></li>".format(taskName)
 
         #Create temporary html for each task
-        message = "Task is running on the server. Refresh to check if QA is over"
+        message = "Task is being processed. Refresh to check completion."
         for name in qaTasksList:
             htmlTaskFileName = "{}.html".format(name)
             if not os.path.exists(htmlTaskFileName):
                 tags = {'subject':self.__subject.getName(), 'menuHtml':menuHtml, 'taskInfo':'', 'parseHtmlTables':message}
                 htmlCode = self.parseTemplate(tags, mainTemplate)
                 util.createScript(htmlTaskFileName, htmlCode)
+
+        #Change denoising html if user is not running this step
+        if self.config.get('denoising', 'algorithm').lower() in "none":
+            htmlTaskFileName = "denoising.html"
+            tags = {'subject':self.__subject.getName(), 'menuHtml':menuHtml, 'taskInfo':'', 'parseHtmlTables':'Step skipped by the user'}
+            htmlCode = self.parseTemplate(tags, mainTemplate)
+            util.createScript(htmlTaskFileName, htmlCode)
 
         #Create template specific to the subject
         tags = {'subject':self.__subject.getName(), 'menuHtml':menuHtml}
