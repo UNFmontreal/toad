@@ -60,7 +60,7 @@ class HardiDipy(GenericTask):
         #CSD
         target = self.buildName(source, 'csd')
         csdCoeff = csdPeaks.shm_coeff
-        csdCoeffImage = nibabel.Nifti1Image(csdCoeff.astype(numpy.float32), dwiImage.get_affine())
+        csdCoeffImage = nibabel.Nifti1Image(csdCoeff.astype(numpy.double), dwiImage.get_affine())
         nibabel.save(csdCoeffImage, target)
 
 
