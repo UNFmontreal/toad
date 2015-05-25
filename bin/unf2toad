@@ -172,8 +172,7 @@ class Unftoad(object):
                                                             targetDir,
                                                             configFile)
                                 else:
-                                    self.__convert(prefixName, sequence, name, prefixName, targetDir)
-
+                                    self.__convert(prefixFromOriginalSequence, sequence, name, prefixName, targetDir)
 
                     if self.__arguments.multipleDWI is not None:
                         cmd = "mrcat "
