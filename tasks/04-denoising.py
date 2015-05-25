@@ -62,7 +62,7 @@ class Denoising(GenericTask):
                     os.remove(dwiUncompress)
             else:
                 #@TODO send an error message to QA report
-                self.warning("You ask for {} algorithm but matlab is not available on this server."
+                self.warning("Algorithm {} is set but matlab is not available for this server.\n"
                              "Please configure matlab or set denoising algorithm to nlmeans or none"
                              .format(self.get("algorithm")))
 
