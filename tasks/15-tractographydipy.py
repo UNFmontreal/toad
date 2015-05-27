@@ -94,6 +94,22 @@ class TractographyDipy(GenericTask):
             mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
 
 
+    def __tckedit(self, source, include, target, downsample= "2"):
+
+        self.info("Starting tckedit creation from mrtrix on {}".format(source))
+
+        tmp = self.buildName(source, "tmp", "tck")
+        cmd = "tckedit {} {} -downsample {} -quiet ".format(source, tmp, downsample)
+
+        if isinstance(include, basestring):
+            cmd += " -include {}".format(include)
+        else:
+            for element in include:
+                cmd += " -include {}".format(element)
+        self.launchCommand(cmd)
+        return self.rename(tmp, target)
+
+
     def isIgnore(self):
         return self.get("ignore").lower() in "true"
 
