@@ -12,6 +12,7 @@ class TasksManager(object):
         self.__tasks = self.__initialize()
         self.__runnableTasks = self.__initializeRunnableTasks(self.__tasks)
 
+
     def getSubjectName(self):
         """get the name of the current subject
 
