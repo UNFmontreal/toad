@@ -596,3 +596,25 @@ def isAfreesurferStructure(directory):
         if not find(image):
             return False
     return True
+
+
+def tckedit(source, roi, target, downsample= "2"):
+    """ perform various editing operations on track files.
+
+    Args:
+        source: the input track file(s)
+        roi:    specify an inclusion region of interest, as either a binary mask image, or as a sphere
+                using 4 comma-separared values (x,y,z,radius)
+        target: the output track file
+        downsample: increase the density of points along the length of the streamline by some factor
+
+    Returns:
+        the output track file
+    """
+    cmd = "tckedit {} {} -downsample {} -quiet ".format(source, target, downsample)
+    if isinstance(roi, basestring):
+        cmd += " -include {}".format(roi)
+    else:
+        for element in roi:
+            cmd += " -include {}".format(element)
+    return util.launchCommand(cmd)
