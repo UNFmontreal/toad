@@ -77,6 +77,10 @@ class Config(object):
         if arguments.queue:
             config.set('general', 'sge_queue', arguments.queue)
 
+        if arguments.tractography:
+            config.set('tractographymrtrix', 'ignore', 'False')
+            config.set('tractographydipy', 'ignore', 'False')
+
         #Should be safe to overwrite value base on command line arguments here
         if arguments.emergency:
             config.set('general', 'nb_threads', 'unlimited')
@@ -95,6 +99,9 @@ class Config(object):
             config.set('general', 'vtk_available', 'True')
         else:
             config.set('general', 'vtk_available', 'False')
+
+
+
 
         return config
 

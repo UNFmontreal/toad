@@ -64,21 +64,23 @@ class TractographyMrtrix(GenericTask):
             mriutil.createVtkPng(tcksiftRoiTrk, anatBrainResample, mask253)
 
 
-    def __tckedit(self, source, include, target, downsample= "2"):
+    def __tckedit(self, source, roi, target, downsample= "2"):
+        """ perform various editing operations on track files.
 
+        Args:
+            source: the input track file(s)
+            roi:    specify an inclusion region of interest, as either a binary mask image, or as a sphere
+                    using 4 comma-separared values (x,y,z,radius)
+            target: the output track file
+            downsample: increase the density of points along the length of the streamline by some factor
+
+        Returns:
+            the output track file
+        """
         self.info("Starting tckedit creation from mrtrix on {}".format(source))
-
-        tmp = self.buildName(source, "tmp", "tck")        
-        cmd = "tckedit {} {} -downsample {} -quiet ".format(source, tmp, downsample)
-
-        if isinstance(include, basestring):
-            cmd += " -include {}".format(include)
-        else:
-            for element in include:
-                cmd += " -include {}".format(element)
-        self.launchCommand(cmd)
+        tmp = self.buildName(source, "tmp", "tck")
+        mriutil.tckedit(source, roi, tmp, downsample)
         return self.rename(tmp, target)
-
 
 
     def __tckgenTensor(self, source, target, mask = None, act = None , seed_gmwmi = None, bFile = None, algorithm = "iFOD2"):

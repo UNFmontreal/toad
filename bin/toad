@@ -87,7 +87,7 @@ def __parseArguments():
     parser.add_argument("-b", "--stopBeforeTask", nargs='?',metavar=('task_name'), required=False,
                             help="Stop the pipeline at the beginning of a specific task. TOAD will create the working directory."
                                  "Note this command will apply to all subject.")
-
+    parser.add_argument("-a","--tractography", help="Produce diffusion weighted imaging neural tracts", action="store_true")
     parser.add_argument("-p","--noPrompt", help=("Disable command prompt and assume yes to any answer (not recommended)"), action="store_true")
     parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
     parser.add_argument("-e","--emergency", help=("Overwrite nb_threads parameter and deploy unlimited number of threads at each parallelizable steps. "
