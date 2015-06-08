@@ -65,7 +65,7 @@ La documentation de ces sections se situe dans les dossiers `toad/doc/toad/src/t
 
 ### Tâches
 
-Les deux responsables des tâches sont [Mathieu Desrosier](mailto:mathieu.desrosiers@criugm.qc.ca) et [Arnaud Boré](mailto:arnaud.bore@gmail.com). 
+Les deux responsables des tâches sont [Mathieu Desrosiers](mailto:mathieu.desrosiers@criugm.qc.ca) et [Arnaud Boré](mailto:arnaud.bore@gmail.com). 
 Merci de communiquer avec eux pour les modifications à apporter à cette section.
 
 La documentation de cette section respecte un template commun afin d’harmoniser le contenu et ainsi faciliter la lecture. 
