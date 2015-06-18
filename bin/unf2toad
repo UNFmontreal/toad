@@ -159,11 +159,9 @@ class Unftoad(object):
                                     prefixName = prefixs[prefixFromOriginalSequence]
                                 else:
                                     prefixName = "{}_".format(prefixFromOriginalSequence)
+
                                 if 'dwi' in prefixFromOriginalSequence:
-                                    if prefixFromOriginalSequence == 'dwi':
-                                        self.__convertDwi(sequence, name, prefixName, targetDir, configFile)
-                                    else:
-                                        self.__convertDwi(sequence, name, prefixName, targetDir, configFile)
+                                    self.__convertDwi(sequence, name, prefixName, targetDir, configFile)
 
                                 elif prefixFromOriginalSequence == 'mag':
                                     self.__convertMagnitude(sequence,
@@ -173,6 +171,7 @@ class Unftoad(object):
                                                             configFile)
                                 else:
                                     self.__convert(prefixFromOriginalSequence, sequence, name, prefixName, targetDir)
+
 
                     if self.__arguments.multipleDWI is not None:
                         cmd = "mrcat "
@@ -307,9 +306,9 @@ class Unftoad(object):
                 if not self.__sequences.has_key((sequence.session, sequence.sequence)):
                     self.__sequences[(sequence.session, sequence.sequence)] = sequence
                     sequences.append(sequence)
-            self.__sessions.append(Session(sequence.session,
-                                           "".join([sequence.sequence for sequence in sequences ]),
-                                           False))
+            self.__sessions.append( Session(sequence.session,
+                                            "".join([sequence.sequence for sequence in sequences]),
+                                            False))
         print self.__sessions
 
 

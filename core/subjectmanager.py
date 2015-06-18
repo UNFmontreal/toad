@@ -187,13 +187,18 @@ class SubjectManager(Logger, Config):
         else:
             notify = ""
 
+        extraFlags = ""
+
+        if ((subject.getConfig().getboolean('tractographymrtrix', 'ignore') is False) or
+            (subject.getConfig().getboolean('tractographydipy', 'ignore') is False)):
+            extraFlags += " --tractography "
+
         if subject.getConfig().get('general', 'server') in ['mammouth']:
-            walllTime = "-l walltime=48:00:00 "
-        else:
-            walllTime = ""
+            extraFlags += " -l walltime=48:00:00 "
+
 
         cmd = "echo {0}/bin/toad {1} -l -p | qsub {2} -V -N {3} -o {4} -e {4} -q {5} {6}".format(self.config.get('arguments', 'toad_dir'),
-              subject.getDir(), notify, subject.getName(), subject.getLogDir(),subject.getConfig().get('general', 'sge_queue'), walllTime)
+              subject.getDir(), notify, subject.getName(), subject.getLogDir(),subject.getConfig().get('general', 'sge_queue'), extraFlags)
         self.info("Command launch: {}".format(cmd))
 
         import subprocess
