@@ -12,7 +12,7 @@ Elle est accessible soit depuis **le site internet de l‘[unité de neuroimager
 
 1. Connectez-vous à [https://unf-montreal.ca](https://unf-montreal.ca)
 2. Entrer votre identifiant et mot de passe de votre compte UNF
-3. Sélectionner les données à récupérer et cliquer sur `Préparer les images`
+3. Sélectionner les données à récupérer et cliquer sur `Préparer les images` (garder le choix par défaut pour la compression des images `tar.gz`)
 4. Donner un nom à l’archive à télécharger, pour notre exemple `unf-data` et cliquer sur `Soumettre`
 
 ![Interface pour télécharger des sessions d’imagerie](../figs/unf_get_data.png)
@@ -25,19 +25,20 @@ Les données seront prêtes à télécharger après quelques instants.
 Pendant ce temps-là, ouvrez un terminal sur votre ordinateur et connectez-vous en ssh à un des serveurs de l’UNF (Magma ou Stark).
 
 ~~~bash
-# Remplacer 'username' par votre identifiant UNF
+# Remplacer 'username' par votre identifiant de votre compte UNF
 ssh -Y username@stark.criugm.qc.ca
 ~~~ 
 
-Le serveur vous demandera alors votre mot de passe.
+Le serveur vous demandera alors le mot de passe de votre compte UNF.
 
 ![Connexion SSH à Stark](../figs/terminal_ssh.png)
 
 Une fois connecté, naviguer dans votre répertoire de données :
 
 ~~~bash
-# Remplacer 'username' par votre identifiant UNF
-cd /data/username/
+# Remplacer 'labname' par le nom du laboratoire 
+# Remplacer 'username' par l’identifiant de votre compte UNF
+cd /data/labname/username/
 ~~~
 
 Au besoin, créez un nouveau répertoire pour votre projet et déplacez-vous dans ce répertoire :
@@ -85,11 +86,11 @@ unf2toad unf-data.tar.gz
 unf2toad -d DWI unf-data.tar.gz
 ~~~
 
-Le logiciel vous posera une série de questions pour préciser quel dossier correspond à quel type d’images (anatomique, diffusions, etc.), indiquer le nom du participant, etc.
+Le logiciel vous posera une série de questions pour préciser quel dossier correspond à quel type d’images (anatomique, diffusions, etc.), indiquer le code du participant, etc.
 
 Une des forces d’`unf2toad` est de pouvoir gérer de multiples sessions/sujets à la fois. 
 Ainsi, le logiciel vous indiquera tout d’abord une liste des sessions/sujets détectés au sein de l’archive.
-Une `*` qui suit le nom d’un sujet indique que le sujet a déjà été converti.
+Une `*` qui suit le code du sujet indique que le sujet a déjà été converti.
 
 ![unf2toad en action](../figs/terminal_convert_subjects.png)
 
@@ -106,7 +107,7 @@ Les analyses de diffusion nécessitent la présence d’au moins trois types de 
 
 1. **données anatomiques** (T1, type MPRAGE) : création des masques anatomiques, coregistration
 2. **données de diffusion** (DWI) : faisceaux de matière blanche (extraction des fibres)
-3. **données d’encodage :** spécifications relatives à l’acquisition des données de diffusion
+3. **acquisition des données de diffusion** (fichers b) : spécifications relatives à l’acquisition des données de diffusion (intensités et directions) regroupées en un seul fichier (*.b) ou en deux fichiers (*.bval et *.bvec)
 
 D’autres données peuvent servir à TOAD pour le traitement des données :
 
@@ -166,8 +167,9 @@ Suiver les étapes suivantes pour le récupérer :
 ssh -Y username@stark.criugm.qc.ca
 
 # Naviguer dans votre répertoire de données
-# Remplacer 'username' par votre identifiant UNF
-cd /data/username/
+# Remplacer 'labname' par le nom du laboratoire 
+# Remplacer 'username' par l’identifiant de votre compte UNF
+cd /data/labname/username/
 
 # Créer un dossier pour le projet 
 # Remplacer 'project_name' par le nom du projet
