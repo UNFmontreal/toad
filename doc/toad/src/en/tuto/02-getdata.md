@@ -33,7 +33,8 @@ The server will ask for your login information
 Once connected, navigate to your data directory:
 
 ~~~bash
-# Replace `labname` by the name of the lab/group you belong to, and `username` by your user ID at the UNF
+# Replace `labname` by the name of the lab/group you belong to
+# Replace `username` by your user ID at the UNF
 cd /data/labname/username/
 ~~~
 
@@ -74,10 +75,12 @@ Different options are available (see help by typing `unf2tad -h`),
 By default, `unf2toad` creates a new directory called `toad_data` where it stores all the converted files from each subject/session.
 
 ~~~bash
-# Replace 'unf-data.tar.gz' by the name of your data (downloaded from the UNF site)
+# Replace 'unf-data.tar.gz' by the name of your data
+#   (downloaded from the UNF site)
 unf2toad unf-data.tar.gz
 
-# To specify a target directory into which the converted files are written, for example `DWI`
+# To specify a target directory into which the converted files are written
+#   for example `DWI`
 unf2toad -d DWI unf-data.tar.gz
 ~~~
 
@@ -156,7 +159,8 @@ We suggest you to download a sample dataset to discover how the pipeline works b
 ssh -Y username@stark.criugm.qc.ca
 
 # Navigate to your data directory
-# Replace `labname` by the name of the lab/group you belong to, and `username` by your user ID at the UNF
+# Replace `labname` by the name of the lab/group you belong to
+# Replace `username` by your user ID at the UNF
 cd /data/labname/username/
 
 # Create a folder for your project

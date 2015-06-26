@@ -2,6 +2,8 @@
 
 \usepackage{lmodern}
 \usepackage{latexsym} 
+\usepackage{booktabs} 
+\usepackage{longtable} 
 \usepackage[T1]{fontenc}
 \setlength\parindent{0pt}
 \usepackage[french]{babel}
