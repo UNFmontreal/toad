@@ -1,19 +1,20 @@
-site_name: 'Documentation TOAD'
+site_name: 'TOAD Documentation'
 theme: readthedocs
 site_url: http://www.unf-montral.ca/
 repo_url: https://github.com/UNFmontreal/toad
-site_description: 'Documentation de TOAD (Toolkit d’analyse des données de diffusion)' 
-docs_dir: src/fr/
-site_dir: html/fr
+site_description: 'Documentation of TOAD (TOolkit Analyse of Diffusion imaging)' 
+docs_dir: src/en/
+site_dir: html/en
+theme_dir: custom_theme
 use_directory_urls: false
 pages:
 - Home: 'index.md'
-- Tutoriel:
-    - '01-Pré-requis': 'tuto/01-prerequis.md'
-    - '02-Récupération des données': 'tuto/02-getdata.md'
-    - '03-TOAD': 'tuto/03-toadtuto.md'
-    - '04-Visualisation': 'tuto/04-visualisation.md'
-- Tâches:
+- Tutorial:
+    - '01-Requirements': 'tuto/01-requirements.md'
+    - '02-Get data': 'tuto/02-getdata.md'
+    - '03-TOAD': 'tuto/03-runtoad.md'
+    - '04-Visualization': 'tuto/04-visualisation.md'
+- Tasks:
     - '01-Backup': 'tasks/01-Backup.md'
     - '02-Preparation': 'tasks/02-Preparation.md'
     - '03-Parcellation': 'tasks/03-Parcellation.md'

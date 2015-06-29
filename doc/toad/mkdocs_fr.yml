@@ -1,0 +1,34 @@
+site_name: 'Documentation TOAD'
+theme: readthedocs
+site_url: http://www.unf-montral.ca/
+repo_url: https://github.com/UNFmontreal/toad
+site_description: 'Documentation de TOAD (Toolkit d’analyse des données de diffusion)' 
+docs_dir: src/fr/
+site_dir: html/fr
+theme_dir: custom_theme
+use_directory_urls: false
+pages:
+- Home: 'index.md'
+- Tutoriel:
+    - '01-Pré-requis': 'tuto/01-requirements.md'
+    - '02-Récupération des données': 'tuto/02-getdata.md'
+    - '03-TOAD': 'tuto/03-runtoad.md'
+    - '04-Visualisation': 'tuto/04-visualisation.md'
+- Tâches:
+    - '01-Backup': 'tasks/01-Backup.md'
+    - '02-Preparation': 'tasks/02-Preparation.md'
+    - '03-Parcellation': 'tasks/03-Parcellation.md'
+    - '04-Eddy': 'tasks/04-Eddy.md'
+    - '04-Fieldmap': 'tasks/04-Fieldmap.md'
+    - '05-Denoising': 'tasks/05-Denoising.md'
+    - '06-Preprocessing': 'tasks/06-Preprocessing.md'
+    - '07-Registration': 'tasks/07-Registration.md'
+    - '08-Masking': 'tasks/08-Masking.md'
+    - '09-Tensorfsl': 'tasks/09-Tensorfsl.md'
+    - '10-Tensormrtrix': 'tasks/10-Tensormrtrix.md'
+    - '11-Tensordipy': 'tasks/11-Tensordipy.md'
+    - '12-Hardimrtrix': 'tasks/12-Hardimrtrix.md'
+    - '13-Hardidipy': 'tasks/13-Hardidipy.md'
+    - '14-Tractographymrtrix': 'tasks/14-Tractographymrtrix.md'
+    - '15-Tractographydipy': 'tasks/15-Tractographydipy.md'
+
