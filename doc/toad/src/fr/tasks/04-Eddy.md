@@ -1,4 +1,4 @@
-# Tensorstractography
+# Eddy
 ---
 
 |                |                                                       |
