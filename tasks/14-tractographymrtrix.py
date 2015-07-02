@@ -2,7 +2,7 @@
 from core.generictask import GenericTask
 from lib import mriutil
 from lib.images import Images
-
+import numpy
 
 __author__ = 'desmat'
 
@@ -30,14 +30,18 @@ class TractographyMrtrix(GenericTask):
         #tensor part
         tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Det')
         tckDetConnectome = self.__tck2connectome(tckDet, brodmann, self.buildName(tckDet, 'connectome', 'csv'))
-        mriutil.plotConnectome(tckDetConnectome, self.buildName(tckDetConnectome, None, "png"))
+        tckDetConnectomeNormalize = self.__normalizeConnectome(tckDetConnectome, self.buildName(tckDetConnectome, 'normalize', 'csv'))
+        mriutil.plotConnectome(tckDetConnectomeNormalize, self.buildName(tckDetConnectomeNormalize, None, "png"))
+
         tckDetRoi = self.__tckedit(tckDet, mask253, self.buildName(tckDet, 'roi','tck'))
         tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, anatBrainResample , self.buildName(tckDetRoi, None, 'trk'))
 
 
         tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Prob')
         tckProbConnectome = self.__tck2connectome(tckProb, brodmann, self.buildName(tckProb, 'connectome', 'csv'))
-        mriutil.plotConnectome(tckProbConnectome, self.buildName(tckProbConnectome, None, "png"))
+        tckProbConnectomeNormalize = self.__normalizeConnectome(tckProbConnectome, self.buildName(tckProbConnectome, 'normalize', 'csv'))
+        mriutil.plotConnectome(tckProbConnectomeNormalize, self.buildName(tckProbConnectomeNormalize, None, "png"))
+
         tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, anatBrainResample , self.buildName(tckProbRoi, None, 'trk'))
 
@@ -45,14 +49,18 @@ class TractographyMrtrix(GenericTask):
         csd =  self.getImage(self.hardimrtrixDir,'dwi','csd')
         hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), act)
         hardiTckConnectome = self.__tck2connectome(hardiTck, brodmann, self.buildName(hardiTck, 'connectome', 'csv'))
-        mriutil.plotConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, None, "png"))
+        hardiTckConnectomeNormalize = self.__normalizeConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, 'normalize', 'csv'))
+        mriutil.plotConnectome(hardiTckConnectomeNormalize, self.buildName(hardiTckConnectomeNormalize, None, "png"))
+
         hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
         tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, anatBrainResample , self.buildName(hardiTckRoi, None, 'trk'))
 
 
         tcksift = self.__tcksift(hardiTck, csd)
         tcksiftConnectome = self.__tck2connectome(tcksift, brodmann, self.buildName(tcksift, 'connectome', 'csv'))
-        mriutil.plotConnectome(tcksiftConnectome, self.buildName(tcksiftConnectome, None, "png"))                
+        tcksiftConnectomeNormalize = self.__normalizeConnectome(tcksiftConnectome, self.buildName(tcksiftConnectome, 'normalize', 'csv'))
+
+        mriutil.plotConnectome(tcksiftConnectomeNormalize, self.buildName(tcksiftConnectomeNormalize, None, "png"))
         tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, anatBrainResample , self.buildName(tcksiftRoi, None, 'trk'))
 
@@ -197,6 +205,28 @@ class TractographyMrtrix(GenericTask):
         return self.rename(tmp, target)
 
 
+    def __normalizeConnectome(self, source, target):
+        """ generate a connectome matrix which each row is normalize
+
+            if you sum each element of a given lines the result will equal 1.00
+
+        Args:
+            source: a input .csv file containing edge weights. see __tck2connectome
+            target: the output .csv file containing normalize results
+
+        Returns:
+            The resulting .cvs file name
+
+        """
+        matrix = numpy.genfromtxt(source, delimiter=' ')
+        with numpy.errstate(invalid='ignore'):
+            for index, row in enumerate(matrix):
+                    matrix[index] = numpy.divide(row, row.sum())
+
+        matrix[numpy.isnan(matrix)] = 0.0
+        numpy.savetxt(target, matrix, delimiter=' ', fmt='%0.4f')
+
+
     def isIgnore(self):
         if self.get("ignore").lower() in "true":
             return True
@@ -225,12 +255,12 @@ class TractographyMrtrix(GenericTask):
     def isDirty(self, result = False):
 
         images = Images((self.getImage(self.workingDir, 'dwi', 'tensor_det', 'tck'), "deterministic tensor connectome matrix from a streamlines"),
-                  (self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome' ], 'csv'), "deterministic tensor connectome matrix from a streamlines csv"),
+                  (self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome', 'normalize'], 'csv'), "normalize deterministic tensor connectome matrix from a streamlines csv"),
                   (self.getImage(self.workingDir, 'dwi', 'tensor_prob', 'tck'), "probabilistic tensor connectome matrix from a streamlines"),
-                  (self.getImage(self.workingDir, 'dwi', ['tensor_prob','connectome'], 'csv'), "probabilistic tensor connectome matrix from a streamlines csv"),
+                  (self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'connectome', 'normalize'], 'csv'), "normalize probabilistic tensor connectome matrix from a streamlines csv"),
                   (self.getImage(self.workingDir, 'dwi', 'hardi_prob', 'tck'), "tckgen hardi probabilistic streamlines tractography"),
                   (self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck'), 'tcksift'),
-                  (self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome'], 'csv'), 'connectome matrix from a tcksift csv'))
+                  (self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome', 'normalize'], 'csv'), 'normalize connectome matrix from a tcksift csv'))
 
         return images.isSomeImagesMissing()
 
@@ -239,20 +269,20 @@ class TractographyMrtrix(GenericTask):
 
 
         tensorDetPng = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'roi'], 'png')
-        tensorDetPlot = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome'], 'png')
+        tensorDetPlot = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome', 'normalize'], 'png')
         tensorProbPng = self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'roi'], 'png')
-        tensorProbPlot = self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'connectome'], 'png')
+        tensorProbPlot = self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'connectome', 'normalize'], 'png')
         hardiProbPng = self.getImage(self.workingDir, 'dwi', ['hardi_prob', 'roi'], 'png')
-        hardiProbPlot = self.getImage(self.workingDir, 'dwi', ['hardi_prob', 'connectome'], 'png')
+        hardiProbPlot = self.getImage(self.workingDir, 'dwi', ['hardi_prob', 'connectome', 'normalize'], 'png')
         tcksiftPng = self.getImage(self.workingDir, 'dwi', ['tcksift', 'roi'], 'png')
-        tcksiftPlot = self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome'], 'png')
+        tcksiftPlot = self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome', 'normalize'], 'png')
 
         images = Images((tensorDetPng, 'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),
-                       (tensorDetPlot,'Connectome matrix from a deterministic tensor streamlines'),
+                       (tensorDetPlot,'normalize connectome matrix from a deterministic tensor streamlines'),
                        (tensorProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
-                       (tensorProbPlot,'Connectome matrix from a probabilistic tensor streamlines'),
+                       (tensorProbPlot,'normalize connectome matrix from a probabilistic tensor streamlines'),
                        (hardiProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines'),
-                       (hardiProbPlot, 'Connectome matrix from a probabilistic hardi streamlines'),
+                       (hardiProbPlot, 'normalize connectome matrix from a probabilistic hardi streamlines'),
                        (tcksiftPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
                        (tcksiftPlot, 'tcksift'))
         return images
