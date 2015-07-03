@@ -92,14 +92,39 @@ Le site fournit toutes les instructions nécessaires à sa bonne utilisation, ma
 sudo pip install mkdocs
 ```
 
-### Compilation de la documentation
+### Compilation de la documentation en HTML
 
-Pour compiler la documentation, taper la commande ```mkdocs build --clean```.
-La documentation est alors accessible dans le dossier `html`.
+La compilation de la documentation en `html` se fait à partir du dossier ``toad/doc/toad/`. 
+
+- Pour compiler la **documentation en français**, taper la commande suivante à partir du dossier `toad/doc/toad/` :
+
+```bash
+mkdocs build -c -f mkdocs_fr.yml 
+```
+
+- Pour compiler la **documentation en anglais**, taper la commande suivante à partir du dossier `toad/doc/toad/` :
+
+```bash
+mkdocs build -c -f mkdocs_en.yml
+```
+
+La documentation est alors accessible dans le dossier `html` dans les répertoires `en` et `fr` pour la version anglaise et française respectivement.
 
 ### Visualisation de la documentation
 
 Pour prévisualiser le rendu HTML, lancer un terminal, aller dans le dossier de la documentation `toad/doc/toad/` et entrer la commande suivante ```mkdocs serve``` puis ouvrez votre navigateur à la page [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
+
+
+### Compilation de la documentation en PDF
+
+La compilation des tutoriaux au format PDF nécessite une installation fonctionnelle de `pandoc` et de `LaTeX` sur sa machine.
+
+La version française et anglaise sont automatiquement compilées à partir du script `python` situé dans le répertoire `toad/doc/toad`. 
+Il suffit alors de lancer le script avec la commande suivante :
+
+```bash
+python make_tuto_pdf.py
+```
 
 
 [pandoc]: http://johnmacfarlane.net/pandoc/
