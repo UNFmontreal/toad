@@ -107,6 +107,34 @@ class Unftoad(object):
         self.__sequences = OrderedDict()
 
 
+    def __parseArguments(self):
+        """Prepare and parse user friendly command line arguments for sys.argv.
+
+        Returns:
+            a args stucture containing command lines arguments
+        """
+        parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                         description ="""\n
+
+             """)
+        parser.add_argument("sources", nargs='+', help="A list or a single UNF mri session. wilcard *, ? are accepted")
+        parser.add_argument("-c", "--config", nargs='?', metavar=('filename'), required=False,
+                                help="Specify the location of an alternative the config.cfg as input. Default: etc/config.cfg")
+        parser.add_argument("-f","--fieldmap", help="Ask for fieldmap (magnitude and phase) during the conversion", action="store_true")
+        parser.add_argument("-n","--noConfig", help="Do not produce a config.cfg file during conversion", action="store_true")
+        parser.add_argument("-s","--noStride", help="Keep original stride orientation.", action="store_true")
+        parser.add_argument("-d", "--dirName", nargs='?', metavar=('dirname'), required=False,
+                            help="Specify a directory name for the destination. Default: toad_data")
+        parser.add_argument("-m","--multipleDWI", metavar=('N'), type=int,
+                            help="concatenate multiple dwi images from a same session. "
+                                 "N is the number of dwi image to concatenate."
+                                 "Only mrtrix .b encoding file will be produce", required=False)
+        parser.add_argument('-v', '--version', action='version', version="%(prog)s ({})".format(__version__))
+
+        args = parser.parse_args()
+        return args
+
+
     #@TODO none unf options, reshuffle dicom
     def run(self):
 
@@ -218,33 +246,6 @@ class Unftoad(object):
         if (util.which("toadinfo") and util.which("mrconvert")) is None:
             print "toadinfo and/or mrconvert not found. Have you source unf-toad-config.sh?"
             sys.exit()
-
-    def __parseArguments(self):
-        """Prepare and parse user friendly command line arguments for sys.argv.
-
-        Returns:
-            a args stucture containing command lines arguments
-        """
-        parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
-                                         description ="""\n
-
-             """)
-        parser.add_argument("sources", nargs='+', help="A list or a single UNF mri session. wilcard *, ? are accepted")
-        parser.add_argument("-c", "--config", nargs='?', metavar=('filename'), required=False,
-                                help="Specify the location of an alternative the config.cfg as input. Default: etc/config.cfg")
-        parser.add_argument("-f","--fieldmap", help="Ask for fieldmap (magnitude and phase) during the conversion", action="store_true")
-        parser.add_argument("-n","--noConfig", help="Do not produce a config.cfg file during conversion", action="store_true")
-        parser.add_argument("-s","--noStride", help="Keep original stride orientation.", action="store_true")
-        parser.add_argument("-d", "--dirName", nargs='?', metavar=('dirname'), required=False,
-                            help="Specify a directory name for the destination. Default: toad_data")
-        parser.add_argument("-m","--multipleDWI", metavar=('N'), type=int,
-                            help="concatenate multiple dwi images from a same session. "
-                                 "N is the number of dwi image to concatenate."
-                                 "Only mrtrix .b encoding file will be produce", required=False)
-        parser.add_argument('-v', '--version', action='version', version="%(prog)s ({})".format(__version__))
-
-        args = parser.parse_args()
-        return args
 
 
     def __extractRootsDirectory(self, sources):
