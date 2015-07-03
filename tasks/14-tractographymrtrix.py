@@ -219,6 +219,8 @@ class TractographyMrtrix(GenericTask):
 
         """
         matrix = numpy.genfromtxt(source, delimiter=' ')
+        matrix = numpy.add(matrix, numpy.matrix.transpose(matrix))
+
         with numpy.errstate(invalid='ignore'):
             for index, row in enumerate(matrix):
                     matrix[index] = numpy.divide(row, row.sum())
