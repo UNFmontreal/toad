@@ -69,9 +69,9 @@ class Denoising(GenericTask):
             #QA
             workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
             if workingDirDwi:
-                #@TODO add a method to get the correct mask
-                mask = os.path.join(self.dependDir, 'topup_results_image_tmean_brain.nii.gz')
-
+                #@TODO  remove comments --add a method to get the correct mask
+                #mask = os.path.join(self.dependDir, 'topup_results_image_tmean_brain.nii.gz')
+                mask = self.getImage(self.dependDir, 'b0', 'brain')
                 dwiCompareGif = self.buildName(workingDirDwi, 'compare', 'gif')
                 dwiGif = self.buildName(workingDirDwi, None, 'gif')
 

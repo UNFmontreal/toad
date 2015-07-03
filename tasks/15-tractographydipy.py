@@ -20,7 +20,7 @@ class TractographyDipy(GenericTask):
 
 
     def implement(self):
-
+        """
         act = self.getImage(self.maskingDir, "aparc_aseg", ['resample', 'act'])
         csd = self.getImage(self.hardidipyDir, "dwi", 'csd')
         mask253 = self.getImage(self.maskingDir, 'aparc_aseg',['253','mask'])
@@ -93,7 +93,7 @@ class TractographyDipy(GenericTask):
             mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
             mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
 
-
+        """
     def __tckedit(self, source, roi, target, downsample= "2"):
         """ perform various editing operations on track files.
 

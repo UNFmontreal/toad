@@ -38,9 +38,7 @@ def parseArguments():
                             help="Which columns to read into the csv file,"
                                  "ex. usecols = 1,4,5 will extract the 2nd, 5th and 6th columns.")
     parser.add_argument('-v', '--version', action='version', version="%(prog)s ({})".format(__version__))
-
-    args = parser.parse_args('-h'.split())
-
+    args = parser.parse_args()
     return args
 
 if __name__ == '__main__':
@@ -55,6 +53,7 @@ if __name__ == '__main__':
 
     #parse arguments provide in command line
     arguments = parseArguments()
+
     if arguments.title:
         title = arguments.title
     if arguments.lut:
@@ -68,5 +67,4 @@ if __name__ == '__main__':
     if arguments.grid:
         grid = arguments.grid
 
-    print arguments
     mriutil.plotConnectome(arguments.source, arguments.target, lut, title, label, skiprows, usecols, grid)

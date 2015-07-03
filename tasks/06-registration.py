@@ -82,7 +82,7 @@ class Registration(GenericTask):
         name = os.path.basename(source).replace(".nii", "")
         target = self.buildName(name, "transformation", "")
         matrix = self.buildName(name, "transformation", ".mat")
-        cmd = "flirt -in {} -ref {} -cost {} -omat {} -out {}".format(source, reference, self.get('cost'), matrix, target)
+        cmd = "flirt -in {} -ref {} -cost {} -dof {}  -omat {} -out {}".format(source, reference, self.get('cost'), self.get('dof'), matrix, target)
         self.launchCommand(cmd)
         return matrix
 
