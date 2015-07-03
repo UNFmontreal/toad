@@ -199,7 +199,7 @@ class TractographyMrtrix(GenericTask):
         """
         self.info("Starting tck2connectome from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "csv")
-        cmd = "tck2connectome {} {} {} -quiet -nthreads {}".format(source, nodes, tmp, self.getNTreadsMrtrix() )
+        cmd = "tck2connectome {} {} {} -quiet -zero_diagonal -nthreads {}".format(source, nodes, tmp, self.getNTreadsMrtrix() )
 
         self.launchCommand(cmd)
         return self.rename(tmp, target)
@@ -225,7 +225,7 @@ class TractographyMrtrix(GenericTask):
 
         matrix[numpy.isnan(matrix)] = 0.0
         numpy.savetxt(target, matrix, delimiter=' ', fmt='%0.4f')
-
+        return target
 
     def isIgnore(self):
         if self.get("ignore").lower() in "true":
