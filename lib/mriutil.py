@@ -352,11 +352,16 @@ def plotConnectome(source, target,  lutFile=None, title=None, label=None, skipro
         with open(lutFile, 'r') as f:
             dict ={}
             luts = f.readlines()
-            for lut in luts:
-                index = int(lut.split()[0])
-                label = lut.split()[7]
-
-                dict[index] = label.strip().strip("\"")
+            if len(luts) == 1:
+                labels = luts[0].split()
+                if len(labels) == len(locations):
+                    for index, label in enumerate(labels):
+                        dict[index] = label
+            else:
+                for lut in luts:
+                    index = int(lut.split()[0])
+                    label = lut.split()[7]
+                    dict[index] = label.strip().strip("\"")
         values =[]
         for index in locations:
             values.append(dict[index])
