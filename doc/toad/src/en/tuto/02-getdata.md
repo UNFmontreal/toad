@@ -68,10 +68,10 @@ Your data are now being downloaded and will be ready to be converted by TOAD int
 **ATTENTION**
 TOAD uses its own file conversion tool `unf2toad` to convert DICOM images into NIfTI.
 It is **strongly recommended** to use this tool for file conversion, because not only can it convert your data, it also generates a configuration file for TOAD. 
-This file contains all existing information that are unique in the raw data which are lost upon conversion when using other softwares.
+This file contains all existing information that is unique in the raw data which is lost upon conversion when using other softwares.
 
 `unf2toad` automatically unzips and converts your data. 
-Different options are available (see help by typing `unf2tad -h`), 
+Different options are available (see help by typing `unf2tad -h`). 
 By default, `unf2toad` creates a new directory called `toad_data` where it stores all the converted files from each subject/session.
 
 ~~~bash
@@ -146,12 +146,12 @@ For diffusion images, TOAD looks for files that start with `dwi` and for the enc
 When the anterior-posterior or posterior-anterior files are available, TOAD looks for the prefix `b0_ap` and `b0_pa`.
 
 You are free to use any current naming system, as long as it is specified in your configuration file `config.cfg`.
-It must be consistent across all subjects, unless you specify a new configuration file in the folder
+It must be consistent across all subjects, unless you specify a new configuration file in the folder.
 
 
 ## Sample data set and demonstration
 
-We suggest you to download a sample dataset to discover how the pipeline works by following these steps:
+We suggest you download a sample dataset to discover how the pipeline works by following these steps:
 
 ~~~bash
 # Connect to the UNF server

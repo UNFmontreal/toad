@@ -3,7 +3,7 @@
 Welcome to the English version of the documentation of [TOAD](toad.com).
 Sources files as well as installation’s instructionLes are available on [Github](www.github.com/toad).
 
-TOAD offers a pipeline to automatically preprocessed diffusion imaging data (DTI).
+TOAD offers a pipeline to automatically preprocess diffusion imaging data (DTI).
 The different steps allow to:
 
 1. Clean the data
@@ -11,7 +11,7 @@ The different steps allow to:
 3. Extract the main fibers
 4. Extract the main metrics (FA, MD...)
 
-This website will guide you to start using TOAD [(tutorial)](tutorial) and also a more comprehensive documentation about each step followed by TOAD.
+This website will guide you to start using TOAD [(tutorial)](tutorial) and also includes a comprehensive documentation about each step followed by TOAD.
 
 
 The tutorial is also available as a PDF file:

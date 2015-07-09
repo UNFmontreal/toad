@@ -22,7 +22,7 @@ Les données seront prêtes à télécharger après quelques instants.
 
 ### Téléchargement des données
 
-Pendant ce temps-là, ouvrez un terminal sur votre ordinateur et connectez-vous en ssh à un des serveurs de l’UNF (Magma ou Stark).
+Pendant ce temps, ouvrez un terminal sur votre ordinateur et connectez-vous en ssh à un des serveurs de l’UNF (Magma ou Stark).
 
 ~~~bash
 # Remplacer 'username' par votre identifiant de votre compte UNF
@@ -71,7 +71,7 @@ Vos données sont maintenant prêtes à être converties pour TOAD ([voir sectio
 **ATTENTION**
 
 TOAD propose son propre outil de conversion des données DICOM au format NIfTI, `unf2toad`. 
-Il est **très vivement recommander** de l’utiliser, car cet outil permet *non seulement* de convertir vos données, mais *également* de préparer un fichier de configuration pour TOAD.
+Il est **très vivement recommandé** de l’utiliser, car cet outil permet *non seulement* de convertir vos données, mais *également* de préparer un fichier de configuration pour TOAD.
 Ce fichier tient compte d’informations existantes uniquement dans les données brutes et qui seront perdues par tout autre logiciel de conversion !
 
 La décompression et la conversion des données sont automatiquement effectuées par `unf2toad`.
@@ -149,10 +149,10 @@ Si ces données proviennent d’un scanner Siemens (comme à l’UNF), et si vou
 TOAD doit identifier quels fichiers correspondent à quels types d’images. 
 Pour ce faire, TOAD se base sur des préfixes des noms des fichiers qui doivent être communs pour chaque type de fichiers.
 Ainsi, toutes les images anatomiques devront commencer par un même préfixe, par défaut TOAD cherchera des fichiers commençant par `anat`.
-Pour les images de diffusions, TOAD cherchera des fichiers commençant par `dwi` et pour l’encodage à `b0`. 
+Pour les images de diffusion, TOAD cherchera des fichiers commençant par `dwi` et pour l’encodage à `b0`. 
 Lorsque les données antérieur/postérieur ou postérieur/antérieur sont disponibles, TOAD cherchera comme préfixe `b0_ap` et `b0_pa`.
 
-Vous êtes libres d’utiliser n’importe quelle nomenclature du moment qu’elle soit indiquée dans le fichier de configuration `config.cfg`. 
+Vous êtes libre d’utiliser n’importe quelle nomenclature du moment qu’elle soit indiquée dans le fichier de configuration `config.cfg`. 
 Cette nomenclature devra être constante à travers les sujets à moins de spécifier un nouveau fichier de configuration au sein du dossier du participant en question.
 
 
