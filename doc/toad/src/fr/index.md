@@ -1,6 +1,6 @@
 # TOolkit d’Analyse de Diffusion (TOAD)
 
-Bienvenue sur la documentation en française de [TOAD](toad.com).
+Bienvenue sur la documentation en français de [TOAD](toad.com).
 Les sources de TOAD, ainsi que les instructions d’installation sont diposnible sur [Github](www.github.com/toad).
 
 TOAD offre une chaine de traitement automatisé des images de diffusion (DTI). 
