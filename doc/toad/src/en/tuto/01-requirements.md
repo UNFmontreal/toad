@@ -51,7 +51,7 @@ source  /usr/local/toad/etc/unf-toad-config.sh
 
 Alternatively, you can add this line to your session’s profile if you want TOAD to be automatically sourced upon each connection:
 
-1, Open/create the file Ô.bash_profile’ using a text editor:
+1. Open/create the file .bash_profile’ using a text editor:
 
 ~~~bash
 vi ~/.bash_profile
@@ -61,7 +61,7 @@ vi ~/.bash_profile
 
 3. Copy and paste this line to the end of the document (without the quotation marks): 'source  /usr/local/toad/etc/unf-toad-config.sh'
 
-4. Save and quit the editor by first pressing the ÔESC’ key and then type **`:wq`** (do not forget to type the colon!)
+4. Save and quit the editor by first pressing the ESC’ key and then type **`:wq`** (do not forget to type the colon!)
 
 5. To allow this change to take place, refresh the computer’s memory:
 

@@ -29,7 +29,7 @@ Si vos données sont toujours en cours de traitement, vous devriez voir apparaî
 Une fois le travail terminé, vous trouverez un ensemble de nouveaux dossiers dans chacun des répertoires sujets.
 *Pour rappel*, ce dossier est par défaut inclus dans le dossier initial de votre projet sous le nom de `toad_data` ou de celui que vous lui avez donné lors de la conversion des données par `unf2toad`.
  
-Ces nouveaux dossiers contiennent l’ensemble des données, masques, et images produits par TOAD lors du traitement des données de diffusions.
+Ces nouveaux dossiers contiennent l’ensemble des données, masques, et images produits par TOAD lors du traitement des données de diffusion.
 L’ensemble des dossiers pour chaque sujet devrait ressembler à peu près au tableau ci-dessous :
 
 |**Nom du dossier** | **Type de données**                                   |
@@ -56,12 +56,12 @@ L’ensemble des dossiers pour chaque sujet devrait ressembler à peu près au t
 *Note :* Il est possible que cet arbre change avec les versions de TOAD. 
 De même, le choix de certains paramètres au lancement de TOAD ou l’absence de certains type de fichiers (comme les B0 AP/PA) font que certaines tâches ne seront pas lancées. 
 
-Ainsi, une première vérification du bon déroulement de TOAD consiste à vérifier que ces dossiers ont bien été créé pour chaque participant.
-L’absence d’une série de dossier indique que le pipeline a probablement rencontrer un problème et à dû s’arrêter pour le participant en question.
+Ainsi, une première vérification du bon déroulement de TOAD consiste à vérifier que ces dossiers ont bien été créés pour chaque participant.
+L’absence d’une série de dossier indique que le pipeline a probablement rencontré un problème et à dû s’arrêter pour le participant en question.
 
 Dans ce cas, il est utile d’aller regarder le dernier log produit par TOAD. 
-Ce fichier `*.log` se trouvera dans le dernier reperteroire créé par TOAD ou alors dans le dossier `99-logs`.
-Ce dossier renferme également un fichier regroupant les erreurs rencontrés par TOAD, et possède un nom du type `numéro_sujet.e1111` où 1111 correspond au numéro de travail de la tâche dans le système.
+Ce fichier `*.log` se trouvera dans le dernier répertoire créé par TOAD ou alors dans le dossier `99-logs`.
+Ce dossier renferme également un fichier regroupant les erreurs rencontrées par TOAD, et possède un nom du type `numéro_sujet.e1111` où 1111 correspond au numéro de travail de la tâche dans le système.
 
 
 Les résultats peuvent être rapidement évalués grâce aux QA...
