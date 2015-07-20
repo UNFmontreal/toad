@@ -180,6 +180,28 @@ class Parcellation(GenericTask):
         return target
 
 
+    def __linkExistingImage(self, images):
+        """
+            Create symbolic link for each existing input images into the current working directory.
+
+        Args:
+            images: A list of image
+
+        Returns:
+            A list of invalid images
+
+        """
+        unlinkedImages = {}
+        #look for existing map store into preparation and link it so they are not created
+        for key, value in images.iteritems():
+            if value:
+                self.info("Found {} area image, create link from {} to {}".format(key, value, self.workingDir))
+                util.symlink(value, self.workingDir)
+            else:
+                unlinkedImages[key] = value
+        return unlinkedImages
+
+
     def __cleanup(self):
         """Utility method that delete some symbolic links that are not usefull
 
@@ -223,29 +245,12 @@ class Parcellation(GenericTask):
         anatFreesurferPng = self.getImage(self.workingDir, 'anat', 'freesurfer', ext='png')
         aparcAsegPng = self.getImage(self.workingDir, 'aparc_aseg', ext='png')
         brodmannPng = self.getImage(self.workingDir, 'brodmann', ext='png')
+        maskPng = self.buildName(self.getImage(self.workingDir, 'aparc_aseg', 'mask'), None, 'png')
+        normPng = self.buildName(self.getImage(self.workingDir, 'norm'), None, 'png')
 
-        return Images((anatFreesurferPng,'High resolution anatomical image of freesurfer'),
-                       (aparcAsegPng,'aparcaseg segmentation from freesurfer'),
-                       (brodmannPng,'Brodmann segmentation from freesurfer'))
+        return Images((anatFreesurferPng, 'High resolution anatomical image of freesurfer'),
+                       (aparcAsegPng, 'Aparc aseg segmentation from freesurfer'),
+                       (maskPng, 'Aparc aseg mask from freesurfer'),
+                       (brodmannPng, 'Brodmann segmentation from freesurfer'),
+                       (normPng, 'Normalize image from freesurfer'))
 
-
-    def __linkExistingImage(self, images):
-        """
-            Create symbolic link for each existing input images into the current working directory.
-
-        Args:
-            images: A list of image
-
-        Returns:
-            A list of invalid images
-
-        """
-        unlinkedImages = {}
-        #look for existing map store into preparation and link it so they are not created
-        for key, value in images.iteritems():
-            if value:
-                self.info("Found {} area image, create link from {} to {}".format(key, value, self.workingDir))
-                util.symlink(value, self.workingDir)
-            else:
-                unlinkedImages[key] = value
-        return unlinkedImages
