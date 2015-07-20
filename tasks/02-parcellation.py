@@ -1,9 +1,10 @@
 import os
-
+import numpy
+import scipy
+import nibabel
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import util, mriutil
-
 
 __author__ = 'desmat'
 
@@ -26,6 +27,7 @@ class Parcellation(GenericTask):
 
         self.__convertFeesurferImageIntoNifti(anat)
         self.__createBrodmannImage()
+        self.__createSegmentationMask(self.get('aparc_aseg'), self.buildName(self.get('aparc_aseg'), 'mask'))
 
         if self.getBoolean('cleanup'):
             self.__cleanup()
@@ -34,14 +36,20 @@ class Parcellation(GenericTask):
         workingDirAnat = self.getImage(self.workingDir, 'anat', 'freesurfer')
         aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
         brodmann = self.getImage(self.workingDir, 'brodmann')
- 
+        norm = self.getImage(self.workingDir, 'norm')
+        mask = self.getImage(self.workingDir, 'aparc_aseg', 'mask')
+
         anatPng = self.buildName(workingDirAnat, None, 'png')
         aparcAsegPng = self.buildName(aparcAseg, None, 'png')
         brodmannPng = self.buildName(brodmann, None, 'png')
+        normPng = self.buildName(norm, None, 'png')
+        maskPng = self.buildName(mask, None, 'png')
 
         self.slicerPng(workingDirAnat, anatPng, boundaries=aparcAseg)
         self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
         self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
+        self.slicerPng(workingDirAnat, normPng, segOverlay=norm, boundaries=norm)
+        self.slicerPng(workingDirAnat, maskPng, segOverlay=mask, boundaries=mask)
 
 
     def __findAndLinkFreesurferStructure(self):
@@ -93,7 +101,8 @@ class Parcellation(GenericTask):
         for (target, source) in [(self.buildName(anatomicalName, 'freesurfer'), "T1.mgz"),
                                     (self.get('aparc_aseg'), "aparc+aseg.mgz"),
                                     (self.get('rh_ribbon'), "rh.ribbon.mgz"),
-                                    (self.get('lh_ribbon'), "lh.ribbon.mgz")]:
+                                    (self.get('lh_ribbon'), "lh.ribbon.mgz"),
+                                    (self.get('norm'), "norm.mgz")]:
 
             self.__convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)), target)
 
@@ -153,6 +162,24 @@ class Parcellation(GenericTask):
         return False
 
 
+    def __createSegmentationMask(self, source, target):
+        """
+        Compute mask from freesurfer segmentation : aseg then morphological operations
+
+        Args:
+            source: The input source file
+            target: The name of the resulting output file name
+        """
+
+        nii = nibabel.load(source)
+        op = ((numpy.mgrid[:5,:5,:5]-2.0)**2).sum(0)<=4
+        mask = scipy.ndimage.binary_closing(nii.get_data()>0, op, iterations=2)
+        scipy.ndimage.binary_fill_holes(mask, output=mask)
+        nibabel.save(nibabel.Nifti1Image(mask.astype(numpy.uint8), nii.get_affine()), target)
+        del nii, mask, op
+        return target
+
+
     def __cleanup(self):
         """Utility method that delete some symbolic links that are not usefull
 
@@ -164,7 +191,7 @@ class Parcellation(GenericTask):
         #    if os.path.islink(linkName):
         #        os.unlink(linkName)
         
-	for source in ["brodmann_fsaverage.mgz","brodmann_fsaverage.mgz.lta","brodmann_fsaverage.mgz.reg"]:
+	for source in ["brodmann_fsaverage.mgz", "brodmann_fsaverage.mgz.lta", "brodmann_fsaverage.mgz.reg"]:
             if os.path.isfile(source):
                 os.remove(source)
 
@@ -184,7 +211,10 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'anat', 'freesurfer'), 'anatomical'),
                   (self.getImage(self.workingDir, 'rh_ribbon'), 'rh_ribbon'),
                   (self.getImage(self.workingDir, 'lh_ribbon'), 'lh_ribbon'),
-                  (self.getImage(self.workingDir, 'brodmann'), 'brodmann'))
+                  (self.getImage(self.workingDir, 'brodmann'), 'brodmann'),
+                  (self.getImage(self.workingDir, 'norm'), 'norm'),
+                  (self.getImage(self.workingDir, 'aparc_aseg','mask'), 'aparAseg segmentation masks'))
+
         return images.isSomeImagesMissing()
 
 
@@ -195,7 +225,7 @@ class Parcellation(GenericTask):
         brodmannPng = self.getImage(self.workingDir, 'brodmann', ext='png')
 
         return Images((anatFreesurferPng,'High resolution anatomical image of freesurfer'),
-                       (aparcAsegPng,'aparcaseg segmentaion from freesurfer'),
+                       (aparcAsegPng,'aparcaseg segmentation from freesurfer'),
                        (brodmannPng,'Brodmann segmentation from freesurfer'))
 
 

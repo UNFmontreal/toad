@@ -35,10 +35,11 @@ class Fieldmap(GenericTask):
         phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
 
+        mask = self.getImage(self.parcellationDir, "aparc_aseg", "mask")
+
         freesurfer_anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
 
         aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
-        mask = self. __createSegmentationMask(aparcAseg)
 
         self.info("rescaling the phase image")
         phaseRescale = self.__rescaleFieldMap(phase)
@@ -138,20 +139,6 @@ class Fieldmap(GenericTask):
         cmd = "fslmaths {} -mul {} -div {} {} -odt float".format(source, math.pi, 4096 *deltaTE, target)
         self.launchCommand(cmd)
 
-        return target
-
-
-    def __createSegmentationMask(self, source):
-        """
-        Compute mask from freesurfer segmentation : aseg then morphological operations
-        """
-        target = self.buildName(source, 'mask')
-        nii = nibabel.load(source)
-        op = ((numpy.mgrid[:5,:5,:5]-2.0)**2).sum(0)<=4
-        mask = scipy.ndimage.binary_closing(nii.get_data()>0, op, iterations=2)
-        scipy.ndimage.binary_fill_holes(mask, output=mask)
-        nibabel.save(nibabel.Nifti1Image(mask.astype(numpy.uint8), nii.get_affine()), target)
-        del nii, mask, op
         return target
 
 
@@ -286,13 +273,13 @@ class Fieldmap(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
-
         images = Images((self.getImage(self.dependDir, "dwi", 'eddy'), 'eddy corrected'))
         if images.isSomeImagesMissing():
             images = Images((self.getImage(self.preparationDir, "dwi"), 'diffusion weighed'))
 
         images.extend(Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), "freesurfer anatomical"),
                               (self.getImage(self.parcellationDir, 'aparc_aseg'), "parcellation"),
+                              (self.getImage(self.parcellationDir, "aparc_aseg", "mask"),"Aparc aseg mask"),
                               (self.getImage(self.dependDir, 'anat'), "high resolution"),
                               (self.getImage(self.dependDir, 'mag'), "magnitude"),
                               (self.getImage(self.dependDir, 'phase'), "phase")))
