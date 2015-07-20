@@ -235,7 +235,7 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'lh_ribbon'), 'lh_ribbon'),
                   (self.getImage(self.workingDir, 'brodmann'), 'brodmann'),
                   (self.getImage(self.workingDir, 'norm'), 'norm'),
-                  (self.getImage(self.workingDir, 'aparc_aseg','mask'), 'aparAseg segmentation masks'))
+                  (self.getImage(self.workingDir, 'aparc_aseg', 'mask'), 'aparAseg segmentation masks'))
 
         return images.isSomeImagesMissing()
 
