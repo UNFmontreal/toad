@@ -623,3 +623,30 @@ def tckedit(source, roi, target, downsample= "2"):
         for element in roi:
             cmd += " -include {}".format(element)
     return util.launchCommand(cmd)
+
+
+def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, extraArgs):
+    """
+
+    Args:
+        source:    an input image intoo the dwi space
+        reference: usually the freesurfer normalize image
+        sourceToResample: The image to apply the transform matrix: usually the freesurfer mask
+        target: the output image name
+        extraArgs: extra parameters to pass during the resampling computation step
+
+    return
+        A mask into the dwi native space
+
+    """
+    dummyTarget = "tmp_target.nii.gz"
+    matrix = "tmp_transformation.mat"
+    cmd = "flirt -in {} -ref {} -omat {} -out {} {}".format(source, reference, matrix, dummyTarget, extraArgs)
+    util.launchCommand(cmd)
+
+    freesurferToB0 ='transformation_inverse.mat'
+    invertMatrix(matrix, freesurferToB0)
+
+    cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {} ".format(sourceToResample, source, freesurferToB0, target)
+    util.launchCommand(cmd)
+    return target

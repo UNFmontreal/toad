@@ -27,7 +27,7 @@ class Parcellation(GenericTask):
 
         self.__convertFeesurferImageIntoNifti(anat)
         self.__createBrodmannImage()
-        self.__createSegmentationMask(self.get('aparc_aseg'), self.buildName(self.get('aparc_aseg'), 'mask'))
+        self.__createSegmentationMask(self.get('aparc_aseg'), self.buildName(self.get('mask')))
 
         if self.getBoolean('cleanup'):
             self.__cleanup()
@@ -37,7 +37,7 @@ class Parcellation(GenericTask):
         aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
         brodmann = self.getImage(self.workingDir, 'brodmann')
         norm = self.getImage(self.workingDir, 'norm')
-        mask = self.getImage(self.workingDir, 'aparc_aseg', 'mask')
+        mask = self.getImage(self.workingDir, 'mask')
 
         anatPng = self.buildName(workingDirAnat, None, 'png')
         aparcAsegPng = self.buildName(aparcAseg, None, 'png')
@@ -46,9 +46,9 @@ class Parcellation(GenericTask):
         maskPng = self.buildName(mask, None, 'png')
 
         self.slicerPng(workingDirAnat, anatPng, boundaries=aparcAseg)
+        self.slicerPng(workingDirAnat, normPng, boundaries=norm)
         self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
         self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
-        self.slicerPng(workingDirAnat, normPng, segOverlay=norm, boundaries=norm)
         self.slicerPng(workingDirAnat, maskPng, segOverlay=mask, boundaries=mask)
 
 
@@ -235,7 +235,7 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'lh_ribbon'), 'lh_ribbon'),
                   (self.getImage(self.workingDir, 'brodmann'), 'brodmann'),
                   (self.getImage(self.workingDir, 'norm'), 'norm'),
-                  (self.getImage(self.workingDir, 'aparc_aseg', 'mask'), 'aparAseg segmentation masks'))
+                  (self.getImage(self.workingDir, 'mask'), 'freesurfer masks'))
 
         return images.isSomeImagesMissing()
 
@@ -245,12 +245,12 @@ class Parcellation(GenericTask):
         anatFreesurferPng = self.getImage(self.workingDir, 'anat', 'freesurfer', ext='png')
         aparcAsegPng = self.getImage(self.workingDir, 'aparc_aseg', ext='png')
         brodmannPng = self.getImage(self.workingDir, 'brodmann', ext='png')
-        maskPng = self.buildName(self.getImage(self.workingDir, 'aparc_aseg', 'mask'), None, 'png')
+        maskPng = self.buildName(self.getImage(self.workingDir, 'mask'), None, 'png')
         normPng = self.buildName(self.getImage(self.workingDir, 'norm'), None, 'png')
 
         return Images((anatFreesurferPng, 'High resolution anatomical image of freesurfer'),
                        (aparcAsegPng, 'Aparc aseg segmentation from freesurfer'),
-                       (maskPng, 'Aparc aseg mask from freesurfer'),
+                       (maskPng, 'mask from freesurfer'),
                        (brodmannPng, 'Brodmann segmentation from freesurfer'),
                        (normPng, 'Normalize image from freesurfer'))
 

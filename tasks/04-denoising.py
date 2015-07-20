@@ -15,7 +15,7 @@ class Denoising(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'fieldmap', 'qa')
+        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'parcellation', 'fieldmap', 'qa')
 
 
     def implement(self):
@@ -26,24 +26,49 @@ class Denoising(GenericTask):
             dwi = self.__getDwiImage()
             target = self.buildName(dwi, "denoise")
             if self.get("algorithm") == "nlmeans":
+                #@TODO see if the mask could be get from eddy correction
                 if not self.config.getboolean("eddy", "ignore"):
-                    bVals=  self.getImage(self.eddyDir, 'grad',  None, 'bvals')
+                    bVals= self.getImage(self.eddyDir, 'grad',  None, 'bvals')
+
                 else:
                     bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
+
+                #create a suitable mask the same space than the dwi
+                extraArgs = ""
+                if self.getboolean("parcellation", "intrasubject"):
+                    extraArgs += " -usesqform"
+
+                #extract b0 image from the dwi
+                b0Image = os.path.join(self.workingDir,
+                                       os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'),
+                                       self.config.get("prefix", 'b0')))
+                self.info(mriutil.extractFirstB0FromDwi(dwi, b0Image, bVals))
+
+                norm = self.getImage(self.parcellationDir, 'norm')
+                parcellationMask = self.getImage(self.parcellationDir, 'mask')
+
+                mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
+                                                                    norm,
+                                                                    parcellationMask,
+                                                                    self.buildName(parcellationMask, 'resample'),
+                                                                    extraArgs)
+
                 b0Index = mriutil.getFirstB0IndexFromDwi(bVals)
-
-                try:
-                    threshold = int(self.get("nlmeans_mask_threshold"))
-                except ValueError:
-                    threshold = 80
-
                 dwiImage = nibabel.load(dwi)
                 dwiData  = dwiImage.get_data()
-                mask = dwiData[..., b0Index] > threshold
+                maskImage = nibabel.load(mask)
+                maskData = maskImage.get_data()
+
+
                 b0Data = dwiData[..., b0Index]
-                sigma = numpy.std(b0Data[~mask])
-                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, mask)
+                sigma = numpy.std(b0Data[~maskData])
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, maskData)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
+
+
+
+
+
 
             elif self.config.getboolean('general', 'matlab_available'):
                 dwi = self.__getDwiImage()

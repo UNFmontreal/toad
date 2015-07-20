@@ -35,6 +35,7 @@ class Fieldmap(GenericTask):
         phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
 
+        #mask de eddy correction
         mask = self.getImage(self.parcellationDir, "aparc_aseg", "mask")
 
         freesurfer_anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')

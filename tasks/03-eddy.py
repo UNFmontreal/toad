@@ -19,7 +19,7 @@ class Eddy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preparation', 'qa')
+        GenericTask.__init__(self, subject, 'preparation', 'parcellation', 'qa')
 
 
     def implement(self):
@@ -30,6 +30,8 @@ class Eddy(GenericTask):
         bEnc=  self.getImage(self.dependDir, 'grad',  None, 'b')
         bVals=  self.getImage(self.dependDir, 'grad',  None, 'bvals')
         bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvecs')
+        norm=   self.getImage(self.parcellationDir, 'norm')
+        parcellationMask = self.getImage(self.parcellationDir, 'mask')
 
         #extract b0 image from the dwi
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
@@ -47,26 +49,36 @@ class Eddy(GenericTask):
 
         [dwi, b0, b0AP, b0PA] = self.__oddEvenNumberOfSlices(dwi, b0, b0AP, b0PA)
 
+
         if b0AP is False or b0PA is False:
             topupBaseName = None
-            mask = self.__bet(b0)
+            b0Image = b0
 
         else:
-
             #concatenate B0 image together
             if self.get("phase_enc_dir") == "0":
-                b0Image = self.__concatenateB0(b0PA, b0AP, self.buildName("b0pa_b0ap", None, "nii.gz"))
+                concatenateB0Image = self.__concatenateB0(b0PA, b0AP, self.buildName("b0pa_b0ap", None, "nii.gz"))
 
             elif self.get("phase_enc_dir") == "1":
-                 b0Image = self.__concatenateB0(b0AP, b0PA, self.buildName("b0ap_b0pa", None, "nii.gz" ))
+                concatenateB0Image = self.__concatenateB0(b0AP, b0PA, self.buildName("b0ap_b0pa", None, "nii.gz" ))
 
             #create the acquisition parameter file
             acqpTopup = self.__createAcquisitionParameterFile('topup')
 
             #Lauch topup on concatenate B0 image
-            [topupBaseName, topupImage] = self.__topup(b0Image, acqpTopup, self.get('b02b0_filename'))
-            meanTopup = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
-            mask = self.__bet(meanTopup)
+            [topupBaseName, topupImage] = self.__topup(concatenateB0Image, acqpTopup, self.get('b02b0_filename'))
+            b0Image = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
+
+
+        #create a suitable mask the same space than the dwi
+        extraArgs = ""
+        if self.getboolean("parcellation", "intrasubject"):
+            extraArgs += " -usesqform"
+        mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
+                                                    norm,
+                                                    parcellationMask,
+                                                    self.buildName(parcellationMask, 'resample'),
+                                                    extraArgs)
 
 
         #create the acquisition parameter file for eddy
@@ -86,7 +98,10 @@ class Eddy(GenericTask):
                                         bCorrected,
                                         self.buildName(outputEddyImage, None, 'bvecs'),
                                         self.buildName(outputEddyImage, None, 'bvals')))
-             
+
+
+        #@TODO @BUGS apply eddy correction to the mask
+
         #QA
         dwi = self.getImage(self.dependDir, 'dwi')
         workingDirDwi = self.getImage(self.workingDir, 'dwi', 'eddy')
@@ -102,10 +117,11 @@ class Eddy(GenericTask):
 
         self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=mask)
         self.slicerGif(workingDirDwi, dwiGif, boundaries=mask)
+        self.slicerGif(workingDirDwi, dwiGif, boundaries=mask)
+
         self.plotMovement(eddyParameterFiles, translationsPng, rotationPng)
         self.plotvectors(bVecs, bVecsCorrected, bVecsGif)
         
-
 
     def __oddEvenNumberOfSlices(self, *args):
         """return a list of images that will count a odd number of slices in z direction
@@ -310,13 +326,14 @@ class Eddy(GenericTask):
     def isIgnore(self):
         return self.get("ignore").lower() in "true"
 
-
     def meetRequirement(self):
 
         images = Images((self.getImage(self.dependDir, 'dwi'), 'diffusion weighted'),
-                  (self.getImage(self.dependDir, 'grad', None, 'bvals'), 'gradient .bvals encoding file'),
-                  (self.getImage(self.dependDir, 'grad', None, 'bvecs'), 'gradient .bvecs encoding file'),
-                  (self.getImage(self.dependDir, 'grad', None, 'b'), 'gradient .b encoding file'))
+                        (self.getImage(self.parcellationDir, 'norm'), 'freesurfer normalize'),
+                        (self.getImage(self.parcellationDir, 'mask'), 'freesurfer mask'),
+                        (self.getImage(self.dependDir, 'grad', None, 'bvals'), 'gradient .bvals encoding file'),
+                        (self.getImage(self.dependDir, 'grad', None, 'bvecs'), 'gradient .bvecs encoding file'),
+                        (self.getImage(self.dependDir, 'grad', None, 'b'), 'gradient .b encoding file'))
         return images.isAllImagesExists()
 
 
@@ -324,7 +341,8 @@ class Eddy(GenericTask):
         images = Images((self.getImage(self.workingDir, 'dwi', 'eddy'), 'diffusion weighted eddy corrected'),
                   (self.getImage(self.workingDir, 'grad', 'eddy', 'bvals'), 'gradient .bvals encoding file'),
                   (self.getImage(self.workingDir, 'grad', 'eddy', 'bvecs'), 'gradient .bvecs encoding file'),
-                  (self.getImage(self.workingDir, 'grad', 'eddy', 'b'), 'gradient .b encoding file'))
+                  (self.getImage(self.workingDir, 'grad', 'eddy', 'b'), 'gradient .b encoding file'),
+                  (self.getImage(self.workingDir, 'mask', 'resample'), 'dwi space mask'))
         return images.isSomeImagesMissing()
 
 
