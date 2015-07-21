@@ -85,7 +85,7 @@ class Eddy(GenericTask):
                                                     self.buildName(parcellationMask, 'resample'),
                                                     extraArgs)
 
-        print "mask name after = ", mask
+        print "mask after = ", mask
 
         #create the acquisition parameter file for eddy
         acqpEddy = self.__createAcquisitionParameterFile('eddy')

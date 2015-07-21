@@ -27,7 +27,7 @@ class Parcellation(GenericTask):
 
         self.__convertFeesurferImageIntoNifti(anat)
         self.__createBrodmannImage()
-        self.__createSegmentationMask(self.get('aparc_aseg'), self.buildName(self.get('mask')))
+        self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
 
         if self.getBoolean('cleanup'):
             self.__cleanup()
