@@ -1,5 +1,6 @@
-import numpy
 import nibabel
+import random
+import numpy
 import util
 import os
 
@@ -629,7 +630,7 @@ def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, ex
     """
 
     Args:
-        source:    an input image intoo the dwi space
+        source:    an input image into the dwi space
         reference: usually the freesurfer normalize image
         sourceToResample: The image to apply the transform matrix: usually the freesurfer mask
         target: the output image name
@@ -639,14 +640,14 @@ def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, ex
         A mask into the dwi native space
 
     """
-    dummyTarget = "tmp_target.nii.gz"
-    matrix = "tmp_transformation.mat"
+    randomNumber = "{0.6d}".format(random.randint(0,999999999999))
+    dummyTarget = "flirt_{}_target.nii.gz".format(randomNumber)
+    matrix = "b0ToFressurfer_{}_transformation.mat".format(randomNumber)
+    freesurferToB0 ='freesurferToB0_{}_transformation.mat'.format(randomNumber)
+
     cmd = "flirt -in {} -ref {} -omat {} -out {} {}".format(source, reference, matrix, dummyTarget, extraArgs)
     util.launchCommand(cmd)
-
-    freesurferToB0 ='transformation_inverse.mat'
     invertMatrix(matrix, freesurferToB0)
-
     cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {} ".format(sourceToResample, source, freesurferToB0, target)
     util.launchCommand(cmd)
     return target
