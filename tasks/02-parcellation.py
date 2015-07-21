@@ -29,7 +29,7 @@ class Parcellation(GenericTask):
         self.__createBrodmannImage()
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
 
-        if self.getBoolean('cleanup'):
+        if self.get('cleanup'):
             self.__cleanup()
 
         #QA
@@ -141,7 +141,7 @@ class Parcellation(GenericTask):
         """
         self.info("convert {} image to {} ".format(source, target))
         cmd = "mrconvert {} {} -stride {} -force -quiet"\
-            .format(source, target, self.config.get('preparation', 'stride_orientation'))
+            .format(source, target, self.get('preparation', 'stride_orientation'))
         self.launchCommand(cmd)
         return target
 

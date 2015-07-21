@@ -21,14 +21,14 @@ class Fieldmap(GenericTask):
 
     def implement(self):
 
-        if not self.config.getboolean("eddy", "ignore"):
+        if not self.get("eddy", "ignore"):
             dwi = self.getImage(self.eddyDir, "dwi", "eddy")
             bVals=  self.getImage(self.eddyDir, 'grad',  None, 'bvals')
         else:
             dwi = self.getImage(self.preparationDir, "dwi")
             bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
 
-        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
         mag = self.getImage(self.dependDir, "mag")
@@ -102,7 +102,7 @@ class Fieldmap(GenericTask):
 
     def __getDwellTime(self):
         try:
-            spacing = float(self.config.get("eddy","echo_spacing"))/1000.0
+            spacing = float(self.get("eddy", "echo_spacing"))/1000.0
             return str(spacing)
 
         except ValueError:
@@ -111,7 +111,7 @@ class Fieldmap(GenericTask):
 
     def __getUnwarpDirection(self):
         try:
-            direction = int(self.config.get("eddy","phase_enc_dir"))
+            direction = int(self.get("eddy", "phase_enc_dir"))
             value="y"
             if direction == 0:
                 value = "y"
@@ -165,7 +165,7 @@ class Fieldmap(GenericTask):
         cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} "\
             .format(mask, mag, target, outputMatrix, inverseMatrix, self.get("interp"), self.get("datatype"))
 
-        if self.getBoolean("applyxfm"):
+        if self.get("applyxfm"):
             cmd += "-applyxfm "
 
         self.launchCommand(cmd)

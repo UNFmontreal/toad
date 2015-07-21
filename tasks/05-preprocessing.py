@@ -34,7 +34,7 @@ class Preprocessing(GenericTask):
 
 
         dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
-        b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
 
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
@@ -110,7 +110,7 @@ class Preprocessing(GenericTask):
         self.info("End brain extraction from fsl")
 
         cmd = "bet {} {} -f {} -g {} ".format(source, target, fractionalIntensity, verticalGradient)
-        if self.getBoolean('reduce_bias'):
+        if self.get('reduce_bias'):
             cmd += "-B "
         self.launchCommand(cmd)
         self.info(util.gunzip("{}.gz".format(target)))
@@ -148,7 +148,7 @@ class Preprocessing(GenericTask):
             for resultFile in glob.glob("{}/{}{}*.nii".format(self.workingDir,key ,fileBasename)):
                 self.rename(resultFile, "{}/{}_{}.nii".format(self.workingDir ,fileBasename, value))
 
-        if (self.getBoolean("cleanup")):
+        if (self.get("cleanup")):
             self.info("Cleaning up extra files")
             postfixs = ["m{}.nii".format(fileBasename), '_seg_sn.mat', '_seg_inv_sn.mat']
             for postfix in postfixs:
@@ -212,7 +212,7 @@ class Preprocessing(GenericTask):
         return images.isSomeImagesMissing()
 
 
-    #def qaSupplier(self):
+    def qaSupplier(self):
 
         anatBrainMaskPng = self.getImage(self.workingDir, 'anat', ['brain', 'mask'], ext='png')
         #anatWmMaskPng = self.getImage(self.workingDir, 'anat', ['brain', 'wm'], ext='png')

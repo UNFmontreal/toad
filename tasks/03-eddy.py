@@ -34,7 +34,7 @@ class Eddy(GenericTask):
         parcellationMask = self.getImage(self.parcellationDir, 'mask')
 
         #extract b0 image from the dwi
-        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
         #make sure all the images have the same voxel size and dimension scale between them

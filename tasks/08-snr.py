@@ -23,7 +23,7 @@ class Snr(GenericTask):
         bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
         if not bVals:
             bVals= self.getImage(self.eddyDir, 'grad', None, 'bvals')
-        b0Basename = os.path.basename(dwiNative).replace(self.config.get('prefix', 'dwi'), self.config.get('prefix', 'b0'))
+        b0Basename = os.path.basename(dwiNative).replace(self.get('prefix', 'dwi'), self.get('prefix', 'b0'))
         b0 = os.path.join(self.workingDir, b0Basename)
         self.info(mriutil.extractFirstB0FromDwi(dwiNative, b0, bVals))
 
