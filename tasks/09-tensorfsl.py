@@ -67,7 +67,7 @@ class TensorFsl(GenericTask):
 
 
     def isIgnore(self):
-        return self.get("ignore").lower() in "true"
+        return self.get("ignore")
 
 
     def meetRequirement(self, result=True):

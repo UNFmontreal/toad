@@ -35,7 +35,7 @@ class Denoising(GenericTask):
 
                 #create a suitable mask the same space than the dwi
                 extraArgs = ""
-                if self.getboolean("parcellation", "intrasubject"):
+                if self.get("parcellation", "intrasubject"):
                     extraArgs += " -usesqform"
 
                 #extract b0 image from the dwi
@@ -135,7 +135,7 @@ class Denoising(GenericTask):
 
 
     def isIgnore(self):
-        return (self.get("algorithm").lower() in "none") or (self.get("ignore").lower() in "true")
+        return (self.get("algorithm").lower() in "none") or (self.get("ignore"))
 
 
     def meetRequirement(self, result = True):

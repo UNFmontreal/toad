@@ -72,7 +72,7 @@ class Eddy(GenericTask):
 
         self.info("create a suitable mask for the dwi")
         extraArgs = ""
-        if self.getboolean("parcellation", "intrasubject"):
+        if self.get("parcellation", "intrasubject"):
             extraArgs += " -usesqform"
 	print "b0Image before = ", b0Image
 	print "norm before = ", norm
@@ -330,7 +330,7 @@ class Eddy(GenericTask):
 
 
     def isIgnore(self):
-        return self.get("ignore").lower() in "true"
+        return self.get("ignore")
 
     def meetRequirement(self):
 

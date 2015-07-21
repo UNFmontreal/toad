@@ -89,7 +89,7 @@ class TractographyDipy(GenericTask):
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, anatBrainResample , self.buildName(tckProbRoi, None, 'trk'))
 
         #create PNG
-        if self.config.getboolean('general', 'vtk_available'):
+        if self.get('general', 'vtk_available'):
             mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
             mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
 
@@ -114,7 +114,7 @@ class TractographyDipy(GenericTask):
 
 
     def isIgnore(self):
-        return self.get("ignore").lower() in "true"
+        return self.get("ignore")
 
 
     def meetRequirement(self):
