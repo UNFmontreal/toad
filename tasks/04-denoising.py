@@ -26,10 +26,9 @@ class Denoising(GenericTask):
             dwi = self.__getDwiImage()
             target = self.buildName(dwi, "denoise")
             if self.get("algorithm") == "nlmeans":
-                #@TODO see if the mask could be get from eddy correction
+
                 if not self.get("eddy", "ignore"):
                     bVals= self.getImage(self.eddyDir, 'grad',  None, 'bvals')
-
                 else:
                     bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
 
@@ -50,7 +49,7 @@ class Denoising(GenericTask):
                 mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
                                                             norm,
                                                             parcellationMask,
-                                                            self.buildName(parcellationMask, 'resample'),
+                                                            self.buildName(parcellationMask, 'denoise'),
                                                             extraArgs)
 
                 b0Index = mriutil.getFirstB0IndexFromDwi(bVals)
@@ -85,6 +84,7 @@ class Denoising(GenericTask):
                 self.warning("Algorithm {} is set but matlab is not available for this server.\n"
                              "Please configure matlab or set denoising algorithm to nlmeans or none"
                              .format(self.get("algorithm")))
+
 
             #QA
             workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
@@ -149,7 +149,8 @@ class Denoising(GenericTask):
 
 
     def isDirty(self):
-        image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'))
+        image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'),
+                       (self.getImage(self.workingDir, "mask", 'denoise'), 'denoised'))
         return image.isSomeImagesMissing()
 
 

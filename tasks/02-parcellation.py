@@ -213,7 +213,7 @@ class Parcellation(GenericTask):
         #    if os.path.islink(linkName):
         #        os.unlink(linkName)
         
-	for source in ["brodmann_fsaverage.mgz", "brodmann_fsaverage.mgz.lta", "brodmann_fsaverage.mgz.reg"]:
+        for source in ["brodmann_fsaverage.mgz", "brodmann_fsaverage.mgz.lta", "brodmann_fsaverage.mgz.reg"]:
             if os.path.isfile(source):
                 os.remove(source)
 
