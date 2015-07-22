@@ -640,7 +640,7 @@ def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, ex
         A mask into the dwi native space
 
     """
-    randomNumber = "{0.6d}".format(random.randint(0,999999999999))
+    randomNumber = "{0:.6g}".format(random.randint(0,999999))
     dummyTarget = "flirt_{}_target.nii.gz".format(randomNumber)
     matrix = "b0ToFressurfer_{}_transformation.mat".format(randomNumber)
     freesurferToB0 ='freesurferToB0_{}_transformation.mat'.format(randomNumber)
