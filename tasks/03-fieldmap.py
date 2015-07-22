@@ -265,7 +265,7 @@ class Fieldmap(GenericTask):
     def isIgnore(self):
         dependImages = Images((self.getImage(self.dependDir, 'mag'), 'magnitude'), (self.getImage(self.dependDir, 'phase'),  'phase'))
         subjectImages = Images((self.getImage(self.subjectDir, 'mag'), 'magnitude'), (self.getImage(self.subjectDir, 'phase'), 'phase'))
-        return (not (dependImages.isAllImagesExists() or subjectImages.isAllImagesExists())) or self.get("ignore").lower() in "true"
+        return (not (dependImages.isAllImagesExists() or subjectImages.isAllImagesExists())) or self.get("ignore")
 
 
     def meetRequirement(self, result=True):
