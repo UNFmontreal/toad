@@ -634,12 +634,15 @@ def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, ex
         reference: usually the freesurfer normalize image
         sourceToResample: The image to apply the transform matrix: usually the freesurfer mask
         target: the output image name
+
         extraArgs: extra parameters to pass during the resampling computation step
 
     return
         A mask into the dwi native space
 
     """
+
+    #@TODO add dof as arguments parameters
     randomNumber = "{0.6d}".format(random.randint(0,999999999999))
     dummyTarget = "flirt_{}_target.nii.gz".format(randomNumber)
     matrix = "b0ToFressurfer_{}_transformation.mat".format(randomNumber)
