@@ -80,7 +80,7 @@ class Eddy(GenericTask):
         mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
                                                     norm,
                                                     parcellationMask,
-                                                    self.buildName(parcellationMask, 'resample'),
+                                                    self.buildName(parcellationMask, 'temporary'),
                                                     extraArgs)
 
         #create the acquisition parameter file for eddy

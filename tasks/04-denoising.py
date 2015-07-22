@@ -1,8 +1,9 @@
 import os
 
+import dipy.denoise.noise_estimate
 import dipy.denoise.nlmeans
-import numpy
 import nibabel
+import numpy
 
 from core.generictask import GenericTask
 from lib.images import Images
@@ -52,14 +53,13 @@ class Denoising(GenericTask):
                                                             self.buildName(parcellationMask, 'denoise'),
                                                             extraArgs)
 
-                b0Index = mriutil.getFirstB0IndexFromDwi(bVals)
                 dwiImage = nibabel.load(dwi)
                 dwiData  = dwiImage.get_data()
                 maskImage = nibabel.load(mask)
                 maskData = maskImage.get_data()
+                sigma = dipy.denoise.noise_estimate.estimate_sigma(dwiData)
+                self.info("Estimate sigma values = {}".format(sigma))
 
-                b0Data = dwiData[..., b0Index]
-                sigma = numpy.std(b0Data[~maskData])
                 denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, maskData)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
 
@@ -88,7 +88,10 @@ class Denoising(GenericTask):
 
             #QA
             workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
-            if workingDirDwi:
+
+            #@TODO b0 brain mask from eddy tasks do not exists anymore
+            if 0:
+            #if workingDirDwi:
                 #@TODO  remove comments --add a method to get the correct mask
                 #mask = os.path.join(self.dependDir, 'topup_results_image_tmean_brain.nii.gz')
                 mask = self.getImage(self.dependDir, 'b0', 'brain')
