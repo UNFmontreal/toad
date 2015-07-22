@@ -21,37 +21,54 @@ class Fieldmap(GenericTask):
 
     def implement(self):
 
-        if not self.config.getboolean("eddy", "ignore"):
+        if not self.get("eddy", "ignore"):
             dwi = self.getImage(self.eddyDir, "dwi", "eddy")
             bVals=  self.getImage(self.eddyDir, 'grad',  None, 'bvals')
+
         else:
             dwi = self.getImage(self.preparationDir, "dwi")
             bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
 
-        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.config.get("prefix", 'dwi'), self.config.get("prefix", 'b0')))
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
         mag = self.getImage(self.dependDir, "mag")
         phase = self.getImage(self.dependDir, "phase")
         anat = self.getImage(self.dependDir, "anat")
+        norm=   self.getImage(self.parcellationDir, 'norm')
+        parcellationMask = self.getImage(self.parcellationDir, 'mask')
+
+
+        #mask de eddy correction
+        #mask = self.getImage(self.parcellationDir, "aparc_aseg", "mask")
 
         freesurfer_anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
 
-        aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
-        mask = self. __createSegmentationMask(aparcAseg)
+        #aparcAseg = self.getImage(self.parcellationDir, 'aparc_aseg')
 
         self.info("rescaling the phase image")
         phaseRescale = self.__rescaleFieldMap(phase)
 
+        #@START OF SHIT
         self.info('Coregistring magnitude image with the anatomical image produce by freesurfer')
         fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, freesurfer_anat)
 
-        self.info('Compute the transformation from the anatomical image produce by freesurfer to the magnitude image')
-        invertFielmapToAnat =  self.buildName(fieldmapToAnat, 'inverse', 'mat')
-        self.info(mriutil.invertMatrix(fieldmapToAnat, invertFielmapToAnat))
+        extraArgs = ""
+        if self.get("parcellation", "intrasubject"):
+            extraArgs += " -usesqform"
+
+        interpolateMask = mriutil.computeDwiMaskFromFreesurfer(mag,
+                                                               norm,
+                                                               parcellationMask,
+                                                               self.buildName(parcellationMask, 'interpolate'),
+                                                               extraArgs)
+
+        #self.info('Compute the transformation from the anatomical image produce by freesurfer to the magnitude image')
+        #invertFielmapToAnat =  self.buildName(fieldmapToAnat, 'inverse', 'mat')
+        #self.info(mriutil.invertMatrix(fieldmapToAnat, invertFielmapToAnat))
 
         self.info('Resampling the anatomical mask into the phase image space')
-        interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
+        #interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
         fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
 
         self.info('Generate a lossy magnitude file with signal loss and distortion')
@@ -76,7 +93,15 @@ class Fieldmap(GenericTask):
         saveshift = self.__performDistortionCorrection(b0, interpolateFieldmap, magnitudeIntoDwiSpaceMask)
 
         self.info('Perform distortion correction of EPI data')
-        self.__performDistortionCorrectionToDWI(dwi, magnitudeIntoDwiSpaceMask, saveshift)
+        dwiUnwarp = self.__performDistortionCorrectionToDWI(dwi, magnitudeIntoDwiSpaceMask, saveshift)
+
+        b0Target = self.buildName(b0, 'unwarp')
+        self.info(mriutil.extractFirstB0FromDwi(dwiUnwarp, b0Target, bVals))
+        unwarpMask = mriutil.computeDwiMaskFromFreesurfer(b0Target,
+                                                          norm,
+                                                          parcellationMask,
+                                                          self.buildName(parcellationMask, 'unwarp'),
+                                                          extraArgs)
 
 
     def __getMagnitudeEchoTimeDifferences(self):
@@ -100,7 +125,7 @@ class Fieldmap(GenericTask):
 
     def __getDwellTime(self):
         try:
-            spacing = float(self.config.get("eddy","echo_spacing"))/1000.0
+            spacing = float(self.get("eddy", "echo_spacing"))/1000.0
             return str(spacing)
 
         except ValueError:
@@ -109,7 +134,7 @@ class Fieldmap(GenericTask):
 
     def __getUnwarpDirection(self):
         try:
-            direction = int(self.config.get("eddy","phase_enc_dir"))
+            direction = int(self.get("eddy", "phase_enc_dir"))
             value="y"
             if direction == 0:
                 value = "y"
@@ -141,20 +166,6 @@ class Fieldmap(GenericTask):
         return target
 
 
-    def __createSegmentationMask(self, source):
-        """
-        Compute mask from freesurfer segmentation : aseg then morphological operations
-        """
-        target = self.buildName(source, 'mask')
-        nii = nibabel.load(source)
-        op = ((numpy.mgrid[:5,:5,:5]-2.0)**2).sum(0)<=4
-        mask = scipy.ndimage.binary_closing(nii.get_data()>0, op, iterations=2)
-        scipy.ndimage.binary_fill_holes(mask, output=mask)
-        nibabel.save(nibabel.Nifti1Image(mask.astype(numpy.uint8), nii.get_affine()), target)
-        del nii, mask, op
-        return target
-
-
     def __coregisterFieldmapToAnat(self, source, reference):
         """
         Coregister Fieldmap to T1, to get the mask in Fieldmap space
@@ -168,20 +179,20 @@ class Fieldmap(GenericTask):
         return self.get("fieldmapToAnat")
 
 
-    def __interpolateAnatMaskToFieldmap(self, source, mag, inverseMatrix,  mask):
-        """
-        Interpolate the T1 mask in Fieldmap for better preprocessing and distortion correction
-        """
-        target = self.buildName(source, "mask")
-        outputMatrix =self.buildName(source, "mask", "mat")
-        cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} "\
-            .format(mask, mag, target, outputMatrix, inverseMatrix, self.get("interp"), self.get("datatype"))
+    #def __interpolateAnatMaskToFieldmap(self, source, mag, inverseMatrix,  mask):
 
-        if self.getBoolean("applyxfm"):
-            cmd += "-applyxfm "
+    #Interpolate the T1 mask in Fieldmap for better preprocessing and distortion correction
 
-        self.launchCommand(cmd)
-        return target
+    #    target = self.buildName(source, "mask")
+    #    outputMatrix =self.buildName(source, "mask", "mat")
+    #    cmd = "flirt -in {} -ref {} -out {} -omat {} -init {} -interp {} -datatype {} "\
+    #        .format(mask, mag, target, outputMatrix, inverseMatrix, self.get("interp"), self.get("datatype"))#
+
+    #    if self.get("applyxfm"):
+    #        cmd += "-applyxfm "
+
+    #    self.launchCommand(cmd)
+    #    return target
 
 
     def __computeFieldmap(self, source, mask):
@@ -277,7 +288,7 @@ class Fieldmap(GenericTask):
     def isIgnore(self):
         dependImages = Images((self.getImage(self.dependDir, 'mag'), 'magnitude'), (self.getImage(self.dependDir, 'phase'),  'phase'))
         subjectImages = Images((self.getImage(self.subjectDir, 'mag'), 'magnitude'), (self.getImage(self.subjectDir, 'phase'), 'phase'))
-        return (not (dependImages.isAllImagesExists() or subjectImages.isAllImagesExists())) or self.get("ignore").lower() in "true"
+        return (not (dependImages.isAllImagesExists() or subjectImages.isAllImagesExists())) or self.get("ignore")
 
 
     def meetRequirement(self, result=True):
@@ -286,13 +297,14 @@ class Fieldmap(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
-
         images = Images((self.getImage(self.dependDir, "dwi", 'eddy'), 'eddy corrected'))
         if images.isSomeImagesMissing():
             images = Images((self.getImage(self.preparationDir, "dwi"), 'diffusion weighed'))
 
         images.extend(Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), "freesurfer anatomical"),
-                              (self.getImage(self.parcellationDir, 'aparc_aseg'), "parcellation"),
+                              #(self.getImage(self.parcellationDir, 'aparc_aseg'), "parcellation"),
+                              (self.getImage(self.parcellationDir, "norm"),"normalize"),
+                              (self.getImage(self.parcellationDir, "mask"),"freesurfer masks"),
                               (self.getImage(self.dependDir, 'anat'), "high resolution"),
                               (self.getImage(self.dependDir, 'mag'), "magnitude"),
                               (self.getImage(self.dependDir, 'phase'), "phase")))
@@ -306,5 +318,6 @@ class Fieldmap(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        images = Images((self.getImage(self.workingDir, "dwi", 'unwarp'), 'unwarped'))
+        images = Images((self.getImage(self.workingDir, "dwi", 'unwarp'), 'unwarped'),
+                        (self.getImage(self.workingDir, 'mask', 'unwarp'), 'unwarp corrected mask for dwi images'))
         return images.isSomeImagesMissing()

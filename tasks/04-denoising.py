@@ -1,8 +1,9 @@
 import os
 
+import dipy.denoise.noise_estimate
 import dipy.denoise.nlmeans
-import numpy
 import nibabel
+import numpy
 
 from core.generictask import GenericTask
 from lib.images import Images
@@ -15,7 +16,7 @@ class Denoising(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'fieldmap', 'qa')
+        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'parcellation', 'fieldmap', 'qa')
 
 
     def implement(self):
@@ -26,26 +27,44 @@ class Denoising(GenericTask):
             dwi = self.__getDwiImage()
             target = self.buildName(dwi, "denoise")
             if self.get("algorithm") == "nlmeans":
-                if not self.config.getboolean("eddy", "ignore"):
-                    bVals=  self.getImage(self.eddyDir, 'grad',  None, 'bvals')
+
+                if not self.get("eddy", "ignore"):
+                    bVals= self.getImage(self.eddyDir, 'grad',  None, 'bvals')
                 else:
                     bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
-                b0Index = mriutil.getFirstB0IndexFromDwi(bVals)
 
-                try:
-                    threshold = int(self.get("nlmeans_mask_threshold"))
-                except ValueError:
-                    threshold = 80
+                #create a suitable mask the same space than the dwi
+                extraArgs = ""
+                if self.get("parcellation", "intrasubject"):
+                    extraArgs += " -usesqform"
+
+                #extract b0 image from the dwi
+                b0Image = os.path.join(self.workingDir,
+                                       os.path.basename(dwi).replace(self.get("prefix", 'dwi'),
+                                       self.get("prefix", 'b0')))
+                self.info(mriutil.extractFirstB0FromDwi(dwi, b0Image, bVals))
+
+                norm = self.getImage(self.parcellationDir, 'norm')
+                parcellationMask = self.getImage(self.parcellationDir, 'mask')
+
+                mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
+                                                            norm,
+                                                            parcellationMask,
+                                                            self.buildName(parcellationMask, 'denoise'),
+                                                            extraArgs)
 
                 dwiImage = nibabel.load(dwi)
                 dwiData  = dwiImage.get_data()
-                mask = dwiData[..., b0Index] > threshold
-                b0Data = dwiData[..., b0Index]
-                sigma = numpy.std(b0Data[~mask])
-                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, mask)
+                maskImage = nibabel.load(mask)
+                maskData = maskImage.get_data()
+                sigma = dipy.denoise.noise_estimate.estimate_sigma(dwiData)
+                self.info("Estimate sigma values = {}".format(sigma))
+
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, maskData)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
 
-            elif self.config.getboolean('general', 'matlab_available'):
+
+            elif self.get('general', 'matlab_available'):
                 dwi = self.__getDwiImage()
                 dwiUncompress = self.uncompressImage(dwi)
 
@@ -57,7 +76,7 @@ class Denoising(GenericTask):
                 tmpCompress = util.gzip(tmp)
                 self.rename(tmpCompress, target)
 
-                if self.getBoolean("cleanup"):
+                if self.get("cleanup"):
                     self.info("Removing redundant image {}".format(dwiUncompress))
                     os.remove(dwiUncompress)
             else:
@@ -66,9 +85,13 @@ class Denoising(GenericTask):
                              "Please configure matlab or set denoising algorithm to nlmeans or none"
                              .format(self.get("algorithm")))
 
+
             #QA
             workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
-            if workingDirDwi:
+
+            #@TODO b0 brain mask from eddy tasks do not exists anymore
+            if 0:
+            #if workingDirDwi:
                 #@TODO  remove comments --add a method to get the correct mask
                 #mask = os.path.join(self.dependDir, 'topup_results_image_tmean_brain.nii.gz')
                 mask = self.getImage(self.dependDir, 'b0', 'brain')
@@ -115,7 +138,7 @@ class Denoising(GenericTask):
 
 
     def isIgnore(self):
-        return (self.get("algorithm").lower() in "none") or (self.get("ignore").lower() in "true")
+        return (self.get("algorithm").lower() in "none") or (self.get("ignore"))
 
 
     def meetRequirement(self, result = True):
@@ -129,7 +152,8 @@ class Denoising(GenericTask):
 
 
     def isDirty(self):
-        image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'))
+        image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'),
+                       (self.getImage(self.workingDir, "mask", 'denoise'), 'denoised'))
         return image.isSomeImagesMissing()
 
 

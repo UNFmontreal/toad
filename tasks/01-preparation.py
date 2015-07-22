@@ -21,7 +21,7 @@ class Preparation(GenericTask):
         (bEncs, bVecs, bVals) = self.__produceEncodingFiles(bEncs, bVecs, bVals, dwi)
         expectedLayout = self.get('stride_orientation')
         if not mriutil.isDataStridesOrientationExpected(dwi, expectedLayout) \
-                and self.getBoolean("force_realign_strides"):
+                and self.get("force_realign_strides"):
 
             self.warning("Reorienting strides for image {}".format(dwi))
             self.__stride4DImage(dwi, bEncs, bVecs, bVals, expectedLayout)
@@ -43,7 +43,7 @@ class Preparation(GenericTask):
         for image, description in images.getData():
             if image:
                 if not mriutil.isDataStridesOrientationExpected(image, expectedLayout) \
-                        and self.getBoolean("force_realign_strides"):
+                        and self.get("force_realign_strides"):
                     self.info(mriutil.stride3DImage(image, self.buildName(image, "stride"), expectedLayout))
                 else:
                     self.info("Found {} image, linking {} to {}".format(description, image, util.symlink(image, self.workingDir)))
@@ -51,7 +51,7 @@ class Preparation(GenericTask):
         for directory in [os.path.join(self.dependDir, directory) for directory in os.listdir(self.dependDir) if os.path.isdir(os.path.join(self.dependDir, directory))]:
             if mriutil.isAfreesurferStructure(directory):
                 self.info("{} seem\'s a valid freesurfer structure: linking to {} directory".format(directory, self.workingDir))
-                os.symlink(directory, self.config.get("parcellation", "id"))
+                os.symlink(directory, self.get("parcellation", "id"))
 
 
     def __produceEncodingFiles(self, bEncs, bVecs, bVals, dwi):

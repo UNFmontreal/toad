@@ -65,7 +65,7 @@ class TractographyMrtrix(GenericTask):
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, anatBrainResample , self.buildName(tcksiftRoi, None, 'trk'))
 
         #create PNG
-        if self.config.getboolean('general', 'vtk_available'):
+        if self.get('general', 'vtk_available'):
             mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
             mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
             mriutil.createVtkPng(tckgenRoiTrk, anatBrainResample, mask253)
@@ -230,9 +230,10 @@ class TractographyMrtrix(GenericTask):
         return target
 
     def isIgnore(self):
-        if self.get("ignore").lower() in "true":
+        if self.get("ignore"):
             return True
-        elif self.config.get('hardimrtrix', 'ignore').lower() in 'true':
+
+        elif self.get('hardimrtrix', 'ignore'):
             self.warning('This task depend on hardi mrtrix task that is set to ignore.')
             return True
 

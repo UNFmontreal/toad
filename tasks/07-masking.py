@@ -53,7 +53,7 @@ class Masking(GenericTask):
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
         seed_gmwmi = self.__launch5tt2gmwmi(actRegister)
 
-        colorLut =  os.path.join(self.toadDir, "templates", "lookup_tables", self.config.get("template", "freesurfer_lut"))
+        colorLut =  os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", "freesurfer_lut"))
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
         shutil.copy(colorLut, self.workingDir)
 
@@ -188,15 +188,15 @@ class Masking(GenericTask):
                      (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
                      (self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"]), 'resample white segmented act mask'))
 
-        if self.config.get('masking', "start_seeds").strip() != "":
+        if self.get('masking', "start_seeds").strip() != "":
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask']), 'high resolution, start, brain extracted mask'))
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract']), 'high resolution, start, brain extracted'))
 
-        if self.config.get('masking', "stop_seeds").strip() != "":
+        if self.get('masking', "stop_seeds").strip() != "":
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract', 'mask']), 'high resolution, stop, brain extracted mask'))
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract']), 'high resolution, stop, brain extracted'))
 
-        if self.config.get('masking', "exclude_seeds").strip() != "":
+        if self.get('masking', "exclude_seeds").strip() != "":
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract', 'mask']), 'high resolution, excluded, brain extracted, mask'))
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract']), 'high resolution, excluded, brain extracted'))
 

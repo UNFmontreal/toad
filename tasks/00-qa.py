@@ -18,7 +18,7 @@ class QA(GenericTask):
     def implement(self):
 
         mainTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.main.tpl')
-        imagesDir = os.path.join(self.workingDir, self.config.get('qa', 'images_dir'))
+        imagesDir = os.path.join(self.workingDir, self.get('qa', 'images_dir'))
 
         #make image directory
         if not os.path.exists(imagesDir):
@@ -40,7 +40,7 @@ class QA(GenericTask):
                 util.createScript(htmlTaskFileName, htmlCode)
 
         #Change denoising html if user is not running this step
-        if self.config.get('denoising', 'algorithm').lower() in "none":
+        if self.get('denoising', 'algorithm').lower() in "none":
             htmlTaskFileName = "denoising.html"
             tags = {'subject':self.__subject.getName(), 'menuHtml':menuHtml, 'taskInfo':'', 'parseHtmlTables':'Step skipped by the user'}
             htmlCode = self.parseTemplate(tags, mainTemplate)
