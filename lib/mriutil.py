@@ -73,6 +73,9 @@ def mrinfo(source):
     return stdout.splitlines()
 
 def mrcalc(source, value, target):
+    """
+    #@TODO comment the purpose of this function
+    """
     cmd = "mrcalc {} {} -eq {} -quiet".format(source, value, target)
     return util.launchCommand(cmd)
 

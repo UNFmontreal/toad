@@ -36,7 +36,7 @@ class Denoising(GenericTask):
                 #create a suitable mask the same space than the dwi
                 extraArgs = ""
                 if self.get("parcellation", "intrasubject"):
-                    extraArgs += " -usesqform"
+                    extraArgs += " -usesqform  -dof 6"
 
                 #extract b0 image from the dwi
                 b0Image = os.path.join(self.workingDir,
@@ -45,22 +45,22 @@ class Denoising(GenericTask):
                 self.info(mriutil.extractFirstB0FromDwi(dwi, b0Image, bVals))
 
                 norm = self.getImage(self.parcellationDir, 'norm')
-                parcellationMask = self.getImage(self.parcellationDir, 'mask')
+                noiseMask = self.getImage(self.parcellationDir, 'noise_mask')
 
-                mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
+                dwiNoiseMask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
                                                             norm,
-                                                            parcellationMask,
-                                                            self.buildName(parcellationMask, 'denoise'),
+                                                            noiseMask,
+                                                            self.buildName(noiseMask, 'denoise'),
                                                             extraArgs)
 
                 dwiImage = nibabel.load(dwi)
                 dwiData  = dwiImage.get_data()
-                maskImage = nibabel.load(mask)
-                maskData = maskImage.get_data()
+                dwiNoiseMaskImage = nibabel.load(dwiNoiseMask)
+                dwiMaskData = dwiNoiseMaskImage.get_data()
                 sigma = dipy.denoise.noise_estimate.estimate_sigma(dwiData)
                 self.info("Estimate sigma values = {}".format(sigma))
 
-                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, maskData)
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, dwiMaskData)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
 
 

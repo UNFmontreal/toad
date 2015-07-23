@@ -73,7 +73,7 @@ class Eddy(GenericTask):
         self.info("create a suitable mask for the dwi")
         extraArgs = ""
         if self.get("parcellation", "intrasubject"):
-            extraArgs += " -usesqform"
+            extraArgs += " -usesqform -dof 6"
 
 
 

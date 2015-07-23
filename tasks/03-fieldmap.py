@@ -55,7 +55,7 @@ class Fieldmap(GenericTask):
 
         extraArgs = ""
         if self.get("parcellation", "intrasubject"):
-            extraArgs += " -usesqform"
+            extraArgs += " -usesqform  -dof 6"
 
         interpolateMask = mriutil.computeDwiMaskFromFreesurfer(mag,
                                                                norm,
