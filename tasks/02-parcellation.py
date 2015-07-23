@@ -30,6 +30,8 @@ class Parcellation(GenericTask):
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
 
         anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
+
+
         self.__createBackgroundNoiseMask(self, anatFreesurfer, self.get("noise_mask"))
 
 
@@ -192,7 +194,11 @@ class Parcellation(GenericTask):
             source: The input source file
             target: The name of the resulting output file name
         """
-        nii = nibabel.load(source)
+        tmp_target = self.buildName(source, 'tmp')
+        cmd = "mrcalc {} {} -gt {} ".format(source, self.get('backgroundNoiseTreshold'), tmp_target)
+        self.info(self.launchCommand(cmd))
+
+        nii = nibabel.load(tmp_target)
         mask = scipy.ndimage.morphology.binary_closing(nii.get_data()>0, iterations=2)
         scipy.ndimage.binary_fill_holes(mask, output=mask)
         mask = scipy.ndimage.morphology.binary_erosion(mask, iterations=3)
