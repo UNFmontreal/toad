@@ -30,10 +30,7 @@ class Parcellation(GenericTask):
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
 
         anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
-
-
-        self.__createBackgroundNoiseMask(self, anatFreesurfer, self.get("noise_mask"))
-
+        self.__createBackgroundNoiseMask(anatFreesurfer, self.get("noise_mask"))
 
         if self.get('cleanup'):
             self.__cleanup()
