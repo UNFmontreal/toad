@@ -59,7 +59,6 @@ class Denoising(GenericTask):
                 dwiMaskData = dwiNoiseMaskImage.get_data()
                 sigma = dipy.denoise.noise_estimate.estimate_sigma(dwiData)
                 self.info("Estimate sigma values = {}".format(sigma))
-
                 denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, dwiMaskData)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
 
@@ -157,17 +156,18 @@ class Denoising(GenericTask):
 
     def isDirty(self):
         image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'),
-                       (self.getImage(self.workingDir, "mask", 'denoise'), 'denoised'))
+                       (self.getImage(self.workingDir, "noise_mask", 'denoise'), 'denoised'))
+	print image
         return image.isSomeImagesMissing()
 
 
-    def qaSupplier(self):
-        denoiseGif = self.getImage(self.workingDir, 'dwi', 'denoise', ext='gif')
-        compareGif = self.getImage(self.workingDir, 'dwi', 'compare', ext='gif')
+    #def qaSupplier(self):
+    #    denoiseGif = self.getImage(self.workingDir, 'dwi', 'denoise', ext='gif')
+    #    compareGif = self.getImage(self.workingDir, 'dwi', 'compare', ext='gif')
 
-        images = Images((denoiseGif,'Denoised diffusion image'),
-                        (compareGif,'Before and after denoising'),
-                       )
-        images.setInformation(self.get("algorithm"))
+    #    images = Images((denoiseGif,'Denoised diffusion image'),
+    #                    (compareGif,'Before and after denoising'),
+    #                   )
+    #    images.setInformation(self.get("algorithm"))
 
-        return images
+    #    return images
