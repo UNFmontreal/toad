@@ -87,19 +87,19 @@ class Denoising(GenericTask):
 
 
             #QA
-            workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
+            #workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
 
             #@TODO b0 brain mask from eddy tasks do not exists anymore
-            if 0:
+            #if 0:
             #if workingDirDwi:
                 #@TODO  remove comments --add a method to get the correct mask
                 #mask = os.path.join(self.dependDir, 'topup_results_image_tmean_brain.nii.gz')
-                mask = self.getImage(self.dependDir, 'b0', 'brain')
-                dwiCompareGif = self.buildName(workingDirDwi, 'compare', 'gif')
-                dwiGif = self.buildName(workingDirDwi, None, 'gif')
+                #mask = self.getImage(self.dependDir, 'b0', 'brain')
+                #dwiCompareGif = self.buildName(workingDirDwi, 'compare', 'gif')
+                #dwiGif = self.buildName(workingDirDwi, None, 'gif')
 
-                self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=mask)
-                self.slicerGif(workingDirDwi, dwiGif, boundaries=mask)
+                #self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=mask)
+                #self.slicerGif(workingDirDwi, dwiGif, boundaries=mask)
 
 
     def __getDwiImage(self):
@@ -145,6 +145,10 @@ class Denoising(GenericTask):
         images = Images((self.getImage(self.fieldmapDir, "dwi", 'unwarp'), 'fieldmap'),
                        (self.getImage(self.dependDir, "dwi", 'eddy'), 'eddy corrected'),
                        (self.getImage(self.preparationDir, "dwi"), 'diffusion weighted'))
+
+        #@TODO add those image as requierement
+        #norm = self.getImage(self.parcellationDir, 'norm')
+        #noiseMask = self.getImage(self.parcellationDir, 'noise_mask')
         if images.isNoImagesExists():
             result = False
             self.warning("No suitable dwi image found for denoising task")
