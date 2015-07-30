@@ -49,7 +49,7 @@ class QA(GenericTask):
             'menuHtml':menuHtml,
             }
         htmlCode = self.parseTemplate(tags, mainTemplate)
-        util.createScript('qa.main.tpl', htmlCode)
+        util.createScript(self.get('qa', 'subject_template'), htmlCode)
 
         #Create index.html
         tags = {
