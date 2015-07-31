@@ -151,15 +151,15 @@ class Preparation(GenericTask):
                         (dwiGif, 'Diffusion weighted image'))
 
         #Optional images
-        optImages = (
+        tags = (
             ('b0_ap', 'B0 AP image'),
             ('b0_pa', 'B0 PA image'),
             ('mag', 'Magnitude image'),
             ('phase', 'Phase image'),
             )
 
-        for tag, description in optImages:
-            niftiImage = self.getImage(self.workingDir, tag)
+        for prefix, description in tags:
+            niftiImage = self.getImage(self.workingDir, prefix)
             if niftiImage:
                 pngImage = self.buildName(niftiImage, None, 'png')
                 self.slicerPng(niftiImage, pngImage)

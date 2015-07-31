@@ -34,22 +34,22 @@ class Parcellation(GenericTask):
 
         #QA
         workingDirAnat = self.getImage(self.workingDir, 'anat', 'freesurfer')
+        mask = self.getImage(self.workingDir, 'mask')
         aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
         brodmann = self.getImage(self.workingDir, 'brodmann')
         norm = self.getImage(self.workingDir, 'norm')
-        mask = self.getImage(self.workingDir, 'mask')
 
         anatPng = self.buildName(workingDirAnat, None, 'png')
+        maskPng = self.buildName(mask, None, 'png')
         aparcAsegPng = self.buildName(aparcAseg, None, 'png')
         brodmannPng = self.buildName(brodmann, None, 'png')
         normPng = self.buildName(norm, None, 'png')
-        maskPng = self.buildName(mask, None, 'png')
 
-        self.slicerPng(workingDirAnat, anatPng, boundaries=aparcAseg)
-        self.slicerPng(workingDirAnat, normPng, boundaries=norm)
+        self.slicerPng(workingDirAnat, anatPng, boundaries=mask)
+        self.slicerPng(workingDirAnat, maskPng, maskOverlay=mask, boundaries=mask)
         self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
         self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
-        self.slicerPng(workingDirAnat, maskPng, segOverlay=mask, boundaries=mask)
+        self.slicerPng(workingDirAnat, normPng, boundaries=mask)
 
 
     def __findAndLinkFreesurferStructure(self):
@@ -241,16 +241,19 @@ class Parcellation(GenericTask):
 
 
     def qaSupplier(self):
-        
-        anatFreesurferPng = self.getImage(self.workingDir, 'anat', 'freesurfer', ext='png')
-        aparcAsegPng = self.getImage(self.workingDir, 'aparc_aseg', ext='png')
-        brodmannPng = self.getImage(self.workingDir, 'brodmann', ext='png')
-        maskPng = self.buildName(self.getImage(self.workingDir, 'mask'), None, 'png')
-        normPng = self.buildName(self.getImage(self.workingDir, 'norm'), None, 'png')
 
-        return Images((anatFreesurferPng, 'High resolution anatomical image of freesurfer'),
-                       (aparcAsegPng, 'Aparc aseg segmentation from freesurfer'),
-                       (maskPng, 'mask from freesurfer'),
-                       (brodmannPng, 'Brodmann segmentation from freesurfer'),
-                       (normPng, 'Normalize image from freesurfer'))
+        qaImages = Images()
 
+        tags = [
+            ('anat', 'High resolution anatomical image of freesurfer'),
+            ('mask', 'Brain mask from freesurfer'),
+            ('aparc_aseg', 'Aparc aseg segmentation from freesurfer'),
+            ('brodmann', 'Brodmann segmentation from freesurfer'),
+            ('norm', 'Normalized image from freesurfer'),
+            ]
+
+        for prefix, description in tags:
+            pngImage = self.getImage(self.workingDir, prefix, ext='png')
+            qaImages.extend(Images((pngImage, description)))
+
+        return qaImages
