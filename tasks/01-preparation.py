@@ -150,28 +150,19 @@ class Preparation(GenericTask):
         images = Images((anatPng, 'High resolution anatomical image'),
                         (dwiGif, 'Diffusion weighted image'))
 
-        #AP and PA images
-        ap = self.getImage(self.workingDir, 'b0_ap')
-        pa = self.getImage(self.workingDir, 'b0_pa')
+        #Optional images
+        tags = (
+            ('b0_ap', 'B0 AP image'),
+            ('b0_pa', 'B0 PA image'),
+            ('mag', 'Magnitude image'),
+            ('phase', 'Phase image'),
+            )
 
-        if ap:
-            apPng = self.buildName(ap, None, 'png')
-            self.slicerPng(ap, apPng)
-            paPng = self.buildName(pa, None, 'png')
-            self.slicerPng(pa, paPng)
-            images.extend(Images((apPng, 'B0 AP image'),
-                                 (paPng, 'B0 PA image')))
-
-        #Fieldmap
-        mag = self.getImage(self.workingDir, 'mag')
-        phase = self.getImage(self.workingDir, 'phase')
-
-        if mag:
-            magPng = self.buildName(mag, None, 'png')
-            self.slicerPng(mag, magPng)
-            phasePng = self.buildName(phase, None, 'png')
-            self.slicerPng(phase, phasePng)
-            images.extend(Images((magPng, 'MR magnitude'),
-                                 (phasePng, 'MR phase')))
+        for prefix, description in tags:
+            niftiImage = self.getImage(self.workingDir, prefix)
+            if niftiImage:
+                pngImage = self.buildName(niftiImage, None, 'png')
+                self.slicerPng(niftiImage, pngImage)
+                images.extend(Images((pngImage, description)))
 
         return images
