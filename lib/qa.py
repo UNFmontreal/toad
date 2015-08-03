@@ -293,7 +293,7 @@ class Qa(object):
         Args:
            images : an Images object
         """
-        mainTemplate = os.path.join(self.qaDir, 'qa.main.tpl')
+        mainTemplate = os.path.join(self.qaDir, self.get('qa', 'subject_template'))
         tableTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.table.tpl')
         taskInfo = images.getInformation()
         imagesDir = os.path.join(self.qaDir, self.config.get('qa', 'images_dir'))
