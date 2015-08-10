@@ -31,29 +31,13 @@ class Denoising(GenericTask):
                 dwiImage = nibabel.load(dwi)
                 dwiData  = dwiImage.get_data()
 
-                try:
-                    numberArrayCoil = self.get("number_array_coil")
-                except ValueError:
-                    numberArrayCoil = 1
-
-                sigma = numpy.zeros_like(dwiData, dtype=numpy.float32)
-                maskNoise = numpy.zeros(dwiData.shape[:-1], dtype=numpy.bool)
-
-
-                for idx in range(dwiData.shape[2]):
-                    self.info("Now processing axial slice", idx+1, "out of", dwiData.shape[2])
-                    sigma[:, :, idx], maskNoise[:, :, idx] = dipy.denoise.noise_estimate.piesno(dwiData[:, :, idx],
-                                                                                                 N=numberArrayCoil,
-                                                                                                 return_mask=True)
-                len(sigma)
-                print "o,o sigma", sigma[0,0,:]
-                print "all sigma", sigma[:, :, :]
-
-                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, maskNoise)
-
+                sigma, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
+                self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
-                nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32),
+                nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.float32),
                                                  dwiImage.get_affine()), self.buildName(target, "noise_mask"))
+
 
             elif self.get('general', 'matlab_available'):
                 dwi = self.__getDwiImage()
@@ -128,6 +112,36 @@ class Denoising(GenericTask):
         self.launchMatlabCommand(pyscript, None, None, 10800)
 
 
+    def __computeSigmaAndNoiseMask(self, data):
+        """Use piesno algorithm to estimate sigma and noise
+
+        Args:
+            data: A dMRI 4D matrix
+
+        Returns:
+            a float representing sigma "The estimated standard deviation of the gaussian noise"
+            and a mask identyfing all the pure noise voxel that were found.
+        """
+
+        try:
+            numberArrayCoil = int(self.get("number_array_coil"))
+        except ValueError:
+            numberArrayCoil = 1
+        sigmaMatrix = numpy.zeros_like(data, dtype=numpy.float32)
+        sigmaVector = numpy.zeros(data.shape[2], dtype=numpy.float32)
+        maskNoise = numpy.zeros(data.shape[:-1], dtype=numpy.bool)
+
+
+        for idx in range(data.shape[2]):
+            sigmaMatrix[:, :, idx], maskNoise[:, :, idx] = dipy.denoise.noise_estimate.piesno(data[:, :, idx],
+                                                                                         N=numberArrayCoil,
+                                                                                         return_mask=True)
+            sigmaVector[idx] = sigmaMatrix[0,0,idx,0]
+        return numpy.median(sigmaVector), maskNoise
+
+
+
+
     def isIgnore(self):
         return (self.get("algorithm").lower() in "none") or (self.get("ignore"))
 
@@ -163,43 +177,4 @@ class Denoising(GenericTask):
     #    images.setInformation(self.get("algorithm"))
 
     #    return images
-
-    
-    """
-
-    if not self.get("eddy", "ignore"):
-        bVals= self.getImage(self.eddyDir, 'grad',  None, 'bvals')
-    else:
-        bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
-
-    #create a suitable mask the same space than the dwi
-    extraArgs = ""
-    if self.get("parcellation", "intrasubject"):
-        extraArgs += " -usesqform  -dof 6"
-
-    #extract b0 image from the dwi
-    b0Image = os.path.join(self.workingDir,
-                           os.path.basename(dwi).replace(self.get("prefix", 'dwi'),
-                           self.get("prefix", 'b0')))
-    self.info(mriutil.extractFirstB0FromDwi(dwi, b0Image, bVals))
-
-    norm = self.getImage(self.parcellationDir, 'norm')
-    noiseMask = self.getImage(self.parcellationDir, 'noise_mask')
-
-    dwiNoiseMask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
-                                                norm,
-                                                noiseMask,
-                                                self.buildName(noiseMask, 'denoise'),
-                                                extraArgs)
-
-
-    dwiNoiseMaskImage = nibabel.load(dwiNoiseMask)
-    dwiMaskData = dwiNoiseMaskImage.get_data()
-    sigma = dipy.denoise.noise_estimate.estimate_sigma(dwiData)
-    self.info("Estimate sigma values = {}".format(sigma))
-
-
-    sigma, mask = dipy.denoise.noise_estimate.piesno(data, N=1, return_mask=True)
-    alpha=0.01, l=100, itermax=100, eps=1e-5, return_mask=False
-    """
 
