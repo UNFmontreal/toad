@@ -32,27 +32,26 @@ class Denoising(GenericTask):
                 dwiData  = dwiImage.get_data()
 
                 try:
-                    numberArrayCoil = self.get("number_array_coil")
+                    numberArrayCoil = int(self.get("number_array_coil"))
                 except ValueError:
                     numberArrayCoil = 1
-
-                sigma = numpy.zeros_like(dwiData, dtype=numpy.float32)
+                sigmaMatrix = numpy.zeros_like(dwiData, dtype=numpy.float32)
+		sigmaVector = numpy.zeros(dwiData.shape[2], dtype=numpy.float32)
                 maskNoise = numpy.zeros(dwiData.shape[:-1], dtype=numpy.bool)
 
 
                 for idx in range(dwiData.shape[2]):
-                    self.info("Now processing axial slice", idx+1, "out of", dwiData.shape[2])
-                    sigma[:, :, idx], maskNoise[:, :, idx] = dipy.denoise.noise_estimate.piesno(dwiData[:, :, idx],
+                    sigmaMatrix[:, :, idx], maskNoise[:, :, idx] = dipy.denoise.noise_estimate.piesno(dwiData[:, :, idx],
                                                                                                  N=numberArrayCoil,
                                                                                                  return_mask=True)
-                len(sigma)
-                print "o,o sigma", sigma[0,0,:]
-                print "all sigma", sigma[:, :, :]
-
-                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, maskNoise)
-
+                    print "sigma moi le sac=", sigmaMatrix[0,0,idx,0]
+                    sigmaVector[idx] = sigmaMatrix[0,0,idx,0]
+                sigma = numpy.median(sigmaVector)
+                self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
+                #denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, maskNoise)
+		denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
-                nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32),
+                nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.float32),
                                                  dwiImage.get_affine()), self.buildName(target, "noise_mask"))
 
             elif self.get('general', 'matlab_available'):

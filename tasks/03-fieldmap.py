@@ -95,7 +95,7 @@ class Fieldmap(GenericTask):
         self.info('Perform distortion correction of EPI data')
         dwiUnwarp = self.__performDistortionCorrectionToDWI(dwi, magnitudeIntoDwiSpaceMask, saveshift)
 
-        b0Target = self.buildName(b0, 'unwarp')
+        b0Target = self.buildName(b0, ['unwarp', 'mask'])
         self.info(mriutil.extractFirstB0FromDwi(dwiUnwarp, b0Target, bVals))
         unwarpMask = mriutil.computeDwiMaskFromFreesurfer(b0Target,
                                                           norm,
