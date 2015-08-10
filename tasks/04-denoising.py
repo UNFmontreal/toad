@@ -17,6 +17,7 @@ class Denoising(GenericTask):
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'eddy', 'preparation', 'parcellation', 'fieldmap', 'qa')
+        self.matlabWarning = False
 
 
     def implement(self):
@@ -55,15 +56,13 @@ class Denoising(GenericTask):
                     self.info("Removing redundant image {}".format(dwiUncompress))
                     os.remove(dwiUncompress)
             else:
-                #@TODO send an error message to QA report
+                self.matlabWarning = True
                 self.warning("Algorithm {} is set but matlab is not available for this server.\n"
                              "Please configure matlab or set denoising algorithm to nlmeans or none"
                              .format(self.get("algorithm")))
 
-
             #QA
             #workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
-
             #@TODO b0 brain mask from eddy tasks do not exists anymore
             #if 0:
             #if workingDirDwi:
@@ -177,4 +176,14 @@ class Denoising(GenericTask):
     #    images.setInformation(self.get("algorithm"))
 
     #    return images
+
+    #@TODO someone have to fix that
+    #images = Images((denoiseGif,'Denoised diffusion image'),
+    #                (compareGif,'Before and after denoising'),
+    #               )
+
+    #message = 'Algorithm {} is set'.format(self.get("algorithm"))
+    #if self.matlabWarning:
+    #    message += ' but matlab is not available for this server'
+    #images.setInformation(message)
 
