@@ -1,6 +1,6 @@
 import os
 import numpy
-import scipy
+import scipy, scipy.ndimage
 import nibabel
 from core.generictask import GenericTask
 from lib.images import Images
@@ -28,6 +28,9 @@ class Parcellation(GenericTask):
         self.__convertFeesurferImageIntoNifti(anat)
         self.__createBrodmannImage()
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
+
+        anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
+        self.__createBackgroundNoiseMask(anatFreesurfer, self.get("noise_mask"))
 
         if self.get('cleanup'):
             self.__cleanup()
@@ -180,6 +183,27 @@ class Parcellation(GenericTask):
         return target
 
 
+    def __createBackgroundNoiseMask(self, source, target):
+        """
+        Compute mask from freesurfer T1.mgz
+
+        Args:
+            source: The input source file
+            target: The name of the resulting output file name
+        """
+        tmp_target = self.buildName(source, 'tmp')
+        cmd = "mrcalc {} {} -gt {} ".format(source, self.get('backgroundNoiseTreshold'), tmp_target)
+        self.info(self.launchCommand(cmd))
+
+        nii = nibabel.load(tmp_target)
+        mask = scipy.ndimage.morphology.binary_closing(nii.get_data()>0, iterations=2)
+        scipy.ndimage.binary_fill_holes(mask, output=mask)
+        mask = scipy.ndimage.morphology.binary_erosion(mask, iterations=3)
+        mask = scipy.ndimage.morphology.binary_dilation(mask, iterations=6)
+        nibabel.save(nibabel.Nifti1Image(mask.astype(numpy.uint8), nii.get_affine()), target)
+        return target
+
+
     def __linkExistingImage(self, images):
         """
             Create symbolic link for each existing input images into the current working directory.
@@ -235,10 +259,10 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'lh_ribbon'), 'lh_ribbon'),
                   (self.getImage(self.workingDir, 'brodmann'), 'brodmann'),
                   (self.getImage(self.workingDir, 'norm'), 'norm'),
+                  (self.getImage(self.workingDir, 'noise_mask'), 'noise masks'),
                   (self.getImage(self.workingDir, 'mask'), 'freesurfer masks'))
 
         return images.isSomeImagesMissing()
-
 
     def qaSupplier(self):
 

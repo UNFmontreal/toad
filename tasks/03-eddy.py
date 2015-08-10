@@ -73,7 +73,7 @@ class Eddy(GenericTask):
         self.info("create a suitable mask for the dwi")
         extraArgs = ""
         if self.get("parcellation", "intrasubject"):
-            extraArgs += " -usesqform"
+            extraArgs += " -usesqform -dof 6"
 
 
 
@@ -282,20 +282,6 @@ class Eddy(GenericTask):
 
         target = source.replace(".nii", "_tmean.nii")
         self.info(mriutil.fslmaths(source, target, 'Tmean'))
-        return target
-
-
-    def __bet(self, source):
-
-        self.info("Launch brain extraction from fsl")
-        tmp = self.buildName(source, "tmp")
-        target = self.buildName(source, "brain")
-
-        cmd = "bet {} {} -m".format(source, tmp)
-        self.launchCommand(cmd)
-        self.rename(tmp, target)
-
-        self.info("Finish brain extraction from fsl")
         return target
 
 
