@@ -285,20 +285,6 @@ class Eddy(GenericTask):
         return target
 
 
-    def __bet(self, source):
-
-        self.info("Launch brain extraction from fsl")
-        tmp = self.buildName(source, "tmp")
-        target = self.buildName(source, "brain")
-
-        cmd = "bet {} {} -m".format(source, tmp)
-        self.launchCommand(cmd)
-        self.rename(tmp, target)
-
-        self.info("Finish brain extraction from fsl")
-        return target
-
-
     def __correctionEddy2(self, source, mask, topup, index, acqp, bVecs, bVals):
         """Performs eddy correction on a dwi file.
 

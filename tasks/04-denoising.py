@@ -147,9 +147,9 @@ class Denoising(GenericTask):
 
 
     def isDirty(self):
-        image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'),
-                       (self.getImage(self.workingDir, "noise_mask", 'denoise'), 'denoised'))
-	print image
+        image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'))
+                       #(self.getImage(self.workingDir, "noise_mask", 'denoise'), 'denoised'))
+        print image
         return image.isSomeImagesMissing()
 
 
@@ -164,42 +164,42 @@ class Denoising(GenericTask):
 
     #    return images
 
+    
+    """
 
-"""
+    if not self.get("eddy", "ignore"):
+        bVals= self.getImage(self.eddyDir, 'grad',  None, 'bvals')
+    else:
+        bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
 
-if not self.get("eddy", "ignore"):
-    bVals= self.getImage(self.eddyDir, 'grad',  None, 'bvals')
-else:
-    bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
+    #create a suitable mask the same space than the dwi
+    extraArgs = ""
+    if self.get("parcellation", "intrasubject"):
+        extraArgs += " -usesqform  -dof 6"
 
-#create a suitable mask the same space than the dwi
-extraArgs = ""
-if self.get("parcellation", "intrasubject"):
-    extraArgs += " -usesqform  -dof 6"
+    #extract b0 image from the dwi
+    b0Image = os.path.join(self.workingDir,
+                           os.path.basename(dwi).replace(self.get("prefix", 'dwi'),
+                           self.get("prefix", 'b0')))
+    self.info(mriutil.extractFirstB0FromDwi(dwi, b0Image, bVals))
 
-#extract b0 image from the dwi
-b0Image = os.path.join(self.workingDir,
-                       os.path.basename(dwi).replace(self.get("prefix", 'dwi'),
-                       self.get("prefix", 'b0')))
-self.info(mriutil.extractFirstB0FromDwi(dwi, b0Image, bVals))
+    norm = self.getImage(self.parcellationDir, 'norm')
+    noiseMask = self.getImage(self.parcellationDir, 'noise_mask')
 
-norm = self.getImage(self.parcellationDir, 'norm')
-noiseMask = self.getImage(self.parcellationDir, 'noise_mask')
-
-dwiNoiseMask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
-                                            norm,
-                                            noiseMask,
-                                            self.buildName(noiseMask, 'denoise'),
-                                            extraArgs)
-
-
-dwiNoiseMaskImage = nibabel.load(dwiNoiseMask)
-dwiMaskData = dwiNoiseMaskImage.get_data()
-sigma = dipy.denoise.noise_estimate.estimate_sigma(dwiData)
-self.info("Estimate sigma values = {}".format(sigma))
+    dwiNoiseMask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
+                                                norm,
+                                                noiseMask,
+                                                self.buildName(noiseMask, 'denoise'),
+                                                extraArgs)
 
 
-sigma, mask = dipy.denoise.noise_estimate.piesno(data, N=1, return_mask=True)
-alpha=0.01, l=100, itermax=100, eps=1e-5, return_mask=False
-"""
+    dwiNoiseMaskImage = nibabel.load(dwiNoiseMask)
+    dwiMaskData = dwiNoiseMaskImage.get_data()
+    sigma = dipy.denoise.noise_estimate.estimate_sigma(dwiData)
+    self.info("Estimate sigma values = {}".format(sigma))
+
+
+    sigma, mask = dipy.denoise.noise_estimate.piesno(data, N=1, return_mask=True)
+    alpha=0.01, l=100, itermax=100, eps=1e-5, return_mask=False
+    """
 
