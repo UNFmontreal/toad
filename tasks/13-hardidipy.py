@@ -13,13 +13,13 @@ class HardiDipy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'masking')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
-        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
+        mask = self.getImage(self.registrationDir, 'mask', 'resample')
 
         #Look first if there is eddy b encoding files produces
         bValsFile = self.getImage(self.dependDir, 'grad', None, 'bvals')
@@ -92,7 +92,8 @@ class HardiDipy(GenericTask):
         images = Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
                   (self.getImage(self.dependDir, 'grad', None, 'bvals'), "gradient value bvals encoding file"),
                   (self.getImage(self.dependDir, 'grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
-                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'))
+                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'))
+        print images
         return images.isAllImagesExists()
 
 

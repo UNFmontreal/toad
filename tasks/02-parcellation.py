@@ -1,9 +1,9 @@
 import os
-import tvtk
 import numpy
 import scipy, scipy.ndimage
 import nibabel
 import random
+from tvtk.api import tvtk
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import util, mriutil
@@ -28,9 +28,9 @@ class Parcellation(GenericTask):
             self.__submitReconAll(anat)
 
         self.__convertFeesurferImageIntoNifti(anat)
-        self.__createImageFromAtlas("templates_brodmann", self.get("brodmann"))
-        self.__createImageFromAtlas("templates_buckner", self.get("buckner"))
-        self.__createImageFromAtlas("templates_choi", self.get("chois"))
+        self.__createImageFromAtlas("template_brodmann", self.get("brodmann"))
+        self.__createImageFromAtlas("template_buckner", self.get("buckner"))
+        self.__createImageFromAtlas("template_choi", self.get("choi"))
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
         self.__create5ttImage(self.get('tt5'))
 
@@ -42,22 +42,22 @@ class Parcellation(GenericTask):
 
         #QA
         workingDirAnat = self.getImage(self.workingDir, 'anat', 'freesurfer')
-        mask = self.getImage(self.workingDir, 'mask')
+        #mask = self.getImage(self.workingDir, 'mask')
         aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
         brodmann = self.getImage(self.workingDir, 'brodmann')
         norm = self.getImage(self.workingDir, 'norm')
 
-        anatPng = self.buildName(workingDirAnat, None, 'png')
-        maskPng = self.buildName(mask, None, 'png')
-        aparcAsegPng = self.buildName(aparcAseg, None, 'png')
-        brodmannPng = self.buildName(brodmann, None, 'png')
-        normPng = self.buildName(norm, None, 'png')
+        #anatPng = self.buildName(workingDirAnat, None, 'png')
+        #maskPng = self.buildName(mask, None, 'png')
+        #aparcAsegPng = self.buildName(aparcAseg, None, 'png')
+        #brodmannPng = self.buildName(brodmann, None, 'png')
+        #normPng = self.buildName(norm, None, 'png')
 
-        self.slicerPng(workingDirAnat, anatPng, boundaries=mask)
-        self.slicerPng(workingDirAnat, maskPng, maskOverlay=mask, boundaries=mask)
-        self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
-        self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
-        self.slicerPng(workingDirAnat, normPng, boundaries=mask)
+        #self.slicerPng(workingDirAnat, anatPng, boundaries=mask)
+        #self.slicerPng(workingDirAnat, maskPng, maskOverlay=mask, boundaries=mask)
+        #self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
+        #self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
+        #self.slicerPng(workingDirAnat, normPng, boundaries=mask)
 
 
     def __findAndLinkFreesurferStructure(self):
@@ -141,7 +141,7 @@ class Parcellation(GenericTask):
 
 
 
-    def create5ttImage(self, target, subdiv=4):
+    def __create5ttImage(self, target, subdiv=4):
         """
 
         """
@@ -158,31 +158,39 @@ class Parcellation(GenericTask):
                 return gii.darrays[0].data, gii.darrays[1].data
             else:
                 verts,tris =  nibabel.freesurfer.read_geometry(fname)
-                ras2vox = nibabel.array([[-1,0,0,128], [0,0,-1,128], [0,1,0,128], [0,0,0,1]])
+                ras2vox = numpy.array([[-1,0,0,128], [0,0,-1,128], [0,1,0,128], [0,0,0,1]])
                 surf2world = surf_ref.get_affine().dot(ras2vox)
                 verts[:] = nibabel.affines.apply_affine(surf2world, verts)
                 return verts, tris
 
-
-        def surf_fill2(vertices, polys, mat, shape):
-
+	def surf_fill2(vertices, polys, mat, shape):
+            from tvtk.common import is_old_pipeline
             voxverts = nibabel.affines.apply_affine(numpy.linalg.inv(mat), vertices)
 
             pd = tvtk.PolyData(points=voxverts, polys=polys)
 
-            whiteimg = tvtk.ImageData()
-            whiteimg.dimensions = shape
-            whiteimg.scalar_type = 'unsigned_char'
+            if is_old_pipeline():
+                whiteimg = tvtk.ImageData(dimensions = shape, scalar_type = 'unsigned_char')
+            else:
+                whiteimg = tvtk.ImageData(dimensions = shape)
             whiteimg.point_data.scalars = numpy.ones(numpy.prod(shape), dtype=numpy.uint8)
 
             pdtis = tvtk.PolyDataToImageStencil()
-            pdtis.input = pd
+            if is_old_pipeline():
+                pdtis.input = pd
+            else:
+                pdtis.set_input_data(pd)
+                                                                             
             pdtis.output_whole_extent = whiteimg.extent
             pdtis.update()
 
             imgstenc = tvtk.ImageStencil()
-            imgstenc.input = whiteimg
-            imgstenc.stencil = pdtis.output
+            if is_old_pipeline():
+                imgstenc.input = whiteimg
+                imgstenc.stencil = pdtis.output
+            else:
+                imgstenc.set_input_data(whiteimg)
+            imgstenc.set_stencil_data(pdtis.output)
             imgstenc.background_value = 0
             imgstenc.update()
 
@@ -219,7 +227,8 @@ class Parcellation(GenericTask):
         rh_wm = read_surf(rhWhite, parc)
         lh_gm = read_surf(lhPial, parc)
         rh_gm = read_surf(rhPial, parc)
-
+        print "lh_wm=",lh_wm
+        print "rh_wm",rh_wm
         wm_pve = fill_hemis(lh_wm,rh_wm)
         gm_pve = fill_hemis(lh_gm,rh_gm)
 
@@ -282,8 +291,9 @@ class Parcellation(GenericTask):
         tt5/=tt5.sum(-1)[..., numpy.newaxis]
         tt5[numpy.isnan(tt5)]=0
 
-        nibabel.save(nibabel.Nifti1Image(tt5.astype(numpy.float32), target))
+        nibabel.save(nibabel.Nifti1Image(tt5.astype(numpy.float32),parc.get_affine()), target)
         return target
+
 
 
     def __createImageFromAtlas(self, source, target):
@@ -389,19 +399,11 @@ class Parcellation(GenericTask):
         """Utility method that delete some symbolic links that are not usefull
 
         """
+        import glob
         self.info("Cleaning up extra files")
-        #for source in ["rh.EC_average", "lh.EC_average", "fsaverage", "segment.dat"]:
-        #    linkName = os.path.join(self.workingDir, source)
-        #    self.info("Removing symbolic link {}".format(linkName))
-        #    if os.path.islink(linkName):
-        #        os.unlink(linkName)
-
-        for source in ["brodmann_fsaverage.mgz", "brodmann_fsaverage.mgz.lta", "brodmann_fsaverage.mgz.reg"]:
+	sources = glob.glob("*.mgz*")
+        for source in sources:
             if os.path.isfile(source):
-                os.remove(source)
-
-        for source in [self.getImage(self.workingDir, "brodmann", None, "lta"), self.getImage(self.workingDir, "brodmann", None, "reg")]:
-            if source:
                 os.remove(source)
 
     def meetRequirement(self):
@@ -420,11 +422,11 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'buckner'), 'buckner'),
                   (self.getImage(self.workingDir, 'choi'), 'choi'),
                   (self.getImage(self.workingDir, 'norm'), 'norm'),
-                  (self.getImage(self.workingDir, 'mask'), 'freesurfer masks'),
+                  (self.getImage(self.workingDir, 'mask'), 'freesurfer brain masks'),
                   (self.getImage(self.workingDir, 'tt5'), '5tt'),)
-
+        print "isDirty =", images
         return images.isSomeImagesMissing()
-
+    """
     def qaSupplier(self):
 
         qaImages = Images()
@@ -442,3 +444,4 @@ class Parcellation(GenericTask):
             qaImages.extend(Images((pngImage, description)))
 
         return qaImages
+    """

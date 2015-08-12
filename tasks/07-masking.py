@@ -1,6 +1,5 @@
 import shutil
 import os
-
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import util, mriutil
@@ -17,20 +16,21 @@ class Masking(GenericTask):
 
 
     def implement(self):
-        #aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
+        aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
         aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
-        anatBrainResample = self.getImage(self.dependDir,'anat', ['brain','resample'] )
         tt5Register = self.getImage(self.dependDir,"tt5", "register")
         tt5Resample = self.getImage(self.dependDir,"tt5", "resample")
+        maskRegister = self.getImage(self.dependDir,"mask", "register")
+        maskResample = self.getImage(self.dependDir,"mask", "resample")
 
 
-        extended = self.buildName('anat', ['resample', 'extended'])
-        self.info("Add {} and {} images together in order to create the ultimate image"
-                  .format(anatBrainResample, aparcAsegResample))
+        #extended = self.buildName('anat', ['resample', 'extended'])
+        #self.info("Add {} and {} images together in order to create the ultimate image"
+        #          .format(anatBrainResample, aparcAsegResample))
 
-        self.info(mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAsegResample))
-        self.__createMask(extended)
-        self.__createMask(aparcAsegResample)
+        #self.info(mriutil.fslmaths(anatBrainResample, extended, 'add', aparcAsegResample))
+        #self.__createMask(extended)
+        #self.__createMask(aparcAsegResample)
 
         #create a area 253 mask and a 1014 mask
         self.info(mriutil.mrcalc(aparcAsegResample, '253', self.buildName('aparc_aseg', ['253','mask'], 'nii.gz')))
@@ -53,7 +53,7 @@ class Masking(GenericTask):
         whiteMatterAct = self.__extractWhiteMatterFromAct(tt5Resample)
 
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
-        seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
+        #seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 
         colorLut =  os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", "freesurfer_lut"))
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
@@ -163,32 +163,26 @@ class Masking(GenericTask):
     def meetRequirement(self):
         images = Images((self.getImage(self.dependDir,"aparc_aseg", "resample"), 'resampled parcellation'),
                     (self.getImage(self.dependDir,"aparc_aseg", "register"), 'register parcellation'),
-                    (self.getImage(self.dependDir,'anat',['brain','resample']),  'brain extracted, resampled high resolution'))
+                    (self.getImage(self.dependDir,'mask', 'resample'),  'brain extracted, resampled high resolution'))
         return images.isAllImagesExists()
     
 
     def isDirty(self):
-        images = Images(
-            (self.getImage(self.workingDir, "tt5", "register"), 'register 5tt tractography'),
-                     (self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]), 'aparc_aseg mask'),
-                     (self.getImage(self.workingDir, 'anat',['resample', 'extended', 'mask']), 'ultimate extended mask'),
-                     (self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
-                     (os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
+        images = Images((os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
                      (self.getImage(self.workingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
-                     (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'))
+                     (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
+                     (self.getImage(self.workingDir, "tt5", ["resample", "wm", "mask"]), 'resample white segmented mask'))
 
-                     #(self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"]), 'resample white segmented act mask'))
-
-        if self.get('masking', "start_seeds").strip() != "":
+        if self.get("start_seeds").strip() != "":
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask']), 'high resolution, start, brain extracted mask'))
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract']), 'high resolution, start, brain extracted'))
 
-        if self.get('masking', "stop_seeds").strip() != "":
+        if self.get("stop_seeds").strip() != "":
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract', 'mask']), 'high resolution, stop, brain extracted mask'))
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract']), 'high resolution, stop, brain extracted'))
 
-        if self.get('masking', "exclude_seeds").strip() != "":
+        if self.get("exclude_seeds").strip() != "":
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract', 'mask']), 'high resolution, excluded, brain extracted, mask'))
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract']), 'high resolution, excluded, brain extracted'))
-
+        print images
         return images.isSomeImagesMissing()
