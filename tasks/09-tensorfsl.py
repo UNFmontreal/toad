@@ -10,7 +10,7 @@ class TensorFsl(GenericTask):
     def __init__(self, subject):
         """Fits a diffusion tensor model at each voxel
         """
-        GenericTask.__init__(self, subject, 'preprocessing', 'masking', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'masking', 'qa')
 
 
     def implement(self):

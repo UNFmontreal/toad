@@ -1,7 +1,9 @@
 import os
+import tvtk
 import numpy
 import scipy, scipy.ndimage
 import nibabel
+import random
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import util, mriutil
@@ -18,7 +20,7 @@ class Parcellation(GenericTask):
 
 
     def implement(self):
- 
+
         anat = self.getImage(self.dependDir, 'anat')
 
         #look if a freesurfer tree is already available
@@ -26,11 +28,14 @@ class Parcellation(GenericTask):
             self.__submitReconAll(anat)
 
         self.__convertFeesurferImageIntoNifti(anat)
-        self.__createBrodmannImage()
+        self.__createImageFromAtlas("templates_brodmann", self.get("brodmann"))
+        self.__createImageFromAtlas("templates_buckner", self.get("buckner"))
+        self.__createImageFromAtlas("templates_choi", self.get("chois"))
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
+        self.__create5ttImage(self.get('tt5'))
+
 
         anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
-        self.__createBackgroundNoiseMask(anatFreesurfer, self.get("noise_mask"))
 
         if self.get('cleanup'):
             self.__cleanup()
@@ -109,15 +114,15 @@ class Parcellation(GenericTask):
 
             self.__convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)), target)
 
-
+    """
     def __createBrodmannImage(self):
-        """
+
             Create a brodmann area map
 
         Returns:
             A brodmann area images
 
-        """
+
         brodmannTemplate = os.path.join(self.toadDir, "templates", "mri", self.get("templates_brodmann"))
         target = self.get("brodmann")
         self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
@@ -130,6 +135,181 @@ class Parcellation(GenericTask):
 
         cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/{0}/mri/norm.mgz --targ brodmann_fsaverage.mgz --s {0} " \
                " --m3z talairach.m3z --o {1} --interp nearest --inv-morph".format(self.id, target)
+        self.launchCommand(cmd)
+        return self.__convertAndRestride(target, target)
+    """
+
+
+
+    def create5ttImage(self, target, subdiv=4):
+        """
+
+        """
+        subjectDir = os.path.join(self.workingDir, self.id)
+        aparcAseg = self.__findImageInDirectory("aparc+aseg.mgz", subjectDir)
+        lhWhite = self.__findImageInDirectory("lh.white", subjectDir)
+        rhWhite = self.__findImageInDirectory("rh.white", subjectDir)
+        lhPial = self.__findImageInDirectory("lh.pial", subjectDir)
+        rhPial = self.__findImageInDirectory("rh.pial", subjectDir)
+
+        def read_surf(fname, surf_ref):
+            if fname[-4:] == '.gii':
+                gii = nibabel.gifti.read(fname)
+                return gii.darrays[0].data, gii.darrays[1].data
+            else:
+                verts,tris =  nibabel.freesurfer.read_geometry(fname)
+                ras2vox = nibabel.array([[-1,0,0,128], [0,0,-1,128], [0,1,0,128], [0,0,0,1]])
+                surf2world = surf_ref.get_affine().dot(ras2vox)
+                verts[:] = nibabel.affines.apply_affine(surf2world, verts)
+                return verts, tris
+
+
+        def surf_fill2(vertices, polys, mat, shape):
+
+            voxverts = nibabel.affines.apply_affine(numpy.linalg.inv(mat), vertices)
+
+            pd = tvtk.PolyData(points=voxverts, polys=polys)
+
+            whiteimg = tvtk.ImageData()
+            whiteimg.dimensions = shape
+            whiteimg.scalar_type = 'unsigned_char'
+            whiteimg.point_data.scalars = numpy.ones(numpy.prod(shape), dtype=numpy.uint8)
+
+            pdtis = tvtk.PolyDataToImageStencil()
+            pdtis.input = pd
+            pdtis.output_whole_extent = whiteimg.extent
+            pdtis.update()
+
+            imgstenc = tvtk.ImageStencil()
+            imgstenc.input = whiteimg
+            imgstenc.stencil = pdtis.output
+            imgstenc.background_value = 0
+            imgstenc.update()
+
+            data = imgstenc.output.point_data.scalars.to_array().reshape(shape[::-1]).transpose(2,1,0)
+            return data
+
+
+        def fill_hemis(lh_surf,rh_surf):
+            vertices = numpy.vstack([lh_surf[0],rh_surf[0]])
+            tris = numpy.vstack([lh_surf[1],
+                              rh_surf[1]+lh_surf[0].shape[0]])
+            mat = parc.affine.dot(numpy.diag([1/float(subdiv)]*3+[1]))
+            shape = numpy.asarray(parc.shape)*subdiv
+            fill = surf_fill2(vertices, tris, mat, shape)
+            pve = reduce(
+                lambda x,y: x+fill[y[0]::subdiv,y[1]::subdiv,y[2]::subdiv],
+                numpy.mgrid[:subdiv,:subdiv,:subdiv].reshape(3,-1).T,0
+                ).astype(numpy.float32)
+            pve /= float(subdiv**3)
+            return pve
+
+
+        def group_rois(rois_ids):
+            m = numpy.zeros(parc.shape, dtype=numpy.bool)
+            for i in rois_ids:
+                numpy.logical_or(parc_data==i, m, m)
+            return m
+
+
+        parc = nibabel.load(aparcAseg)
+        voxsize = numpy.asarray(parc.header.get_zooms()[:3])
+        parc_data = parc.get_data()
+        lh_wm = read_surf(lhWhite, parc)
+        rh_wm = read_surf(rhWhite, parc)
+        lh_gm = read_surf(lhPial, parc)
+        rh_gm = read_surf(rhPial, parc)
+
+        wm_pve = fill_hemis(lh_wm,rh_wm)
+        gm_pve = fill_hemis(lh_gm,rh_gm)
+
+        gm_rois = group_rois([8,47,17,18,53,54]).astype(numpy.float32)
+        gm_smooth = scipy.ndimage.gaussian_filter(gm_rois, sigma=voxsize)
+
+        subcort_rois = group_rois([10,11,12,13,26,49,50,51,52,58]).astype(numpy.float32)
+        subcort_smooth = scipy.ndimage.gaussian_filter(subcort_rois, sigma=voxsize)
+
+        wm_rois = group_rois([7,16,28,46,60,85,192,88,
+                             250,251,252,253,254,255]).astype(numpy.float32)
+
+        wm_smooth = scipy.ndimage.gaussian_filter(wm_rois,sigma=voxsize)
+        bs_mask = parc_data==16
+        bs_vdc_dil = scipy.ndimage.morphology.binary_dilation(group_rois([16,60,28]), iterations=2)
+        bs_vdc_excl = numpy.logical_and(bs_vdc_dil, numpy.logical_not(group_rois([16,7,46,60,28,10,49,2,41,0])))
+
+        lbs = numpy.where((bs_mask).any(-1).any(0))[0][-1]-3
+
+        parc_data_mask = parc_data>0
+        outer_csf = numpy.logical_and(
+            numpy.logical_not(parc_data_mask),
+            scipy.ndimage.morphology.binary_dilation(parc_data_mask))
+
+
+        csf_rois = group_rois([4,5,14,15,24,30,31,43,44,62,63,72])
+
+        csf_smooth = scipy.ndimage.gaussian_filter(
+            numpy.logical_or(csf_rois, outer_csf).astype(numpy.float32),
+            sigma=voxsize)
+
+        bs_roi = csf_smooth.copy()
+        bs_roi[...,:lbs,:] = 0
+        csf_smooth[...,lbs:,:] = 0
+        wm_smooth[...,lbs:,:] = 0
+
+        # add csf around brainstem and ventral DC to remove direct connection to gray matter
+        csf_smooth[bs_vdc_excl] += gm_smooth[bs_vdc_excl]
+        gm_smooth[bs_vdc_excl] = 0
+
+        mask88 = parc_data==88
+        print csf_smooth[mask88].sum(), subcort_smooth[mask88].sum()
+
+        wm = wm_pve+wm_smooth-csf_smooth-subcort_smooth
+        wm[wm>1] = 1
+        wm[wm<0] = 0
+
+        print 267, numpy.count_nonzero(wm[mask88])
+
+        gm = gm_pve-wm_pve-wm-subcort_smooth+gm_smooth+bs_roi
+        gm[gm<0] = 0
+
+        tt5 = numpy.concatenate([gm[...,numpy.newaxis],
+                              subcort_smooth[...,numpy.newaxis],
+                              wm[...,numpy.newaxis],
+                              csf_smooth[...,numpy.newaxis],
+                              numpy.zeros(parc.shape+(1,),dtype=numpy.float32)],3)
+
+
+        tt5/=tt5.sum(-1)[..., numpy.newaxis]
+        tt5[numpy.isnan(tt5)]=0
+
+        nibabel.save(nibabel.Nifti1Image(tt5.astype(numpy.float32), target))
+        return target
+
+
+    def __createImageFromAtlas(self, source, target):
+        """
+            Create a area map base on a source name
+        Args:
+            source: template name as specify into config.cfg
+            target: output file name
+
+        Returns:
+            A brodmann area images
+
+        """
+        tmpImage = 'tmp_{0:.6g}.mgz'.format(random.randint(0,999999))
+        template = os.path.join(self.toadDir, "templates", "mri", self.get(source))
+
+        self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
+        os.environ["SUBJECTS_DIR"] = self.workingDir
+
+        #@TODO remove all trace of mgz file
+        cmd = "mri_vol2vol --mov {} --targ $FREESURFER_HOME/subjects/fsaverage/mri/T1.mgz" \
+              " --o {} --regheader --interp nearest".format(template, tmpImage)
+        self.launchCommand(cmd)
+
+        cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/{0}/mri/norm.mgz --targ {1} --s {0} " \
+               " --m3z talairach.m3z --o {2} --interp nearest --inv-morph".format(self.id, tmpImage, target)
         self.launchCommand(cmd)
         return self.__convertAndRestride(target, target)
 
@@ -183,27 +363,6 @@ class Parcellation(GenericTask):
         return target
 
 
-    def __createBackgroundNoiseMask(self, source, target):
-        """
-        Compute mask from freesurfer T1.mgz
-
-        Args:
-            source: The input source file
-            target: The name of the resulting output file name
-        """
-        tmp_target = self.buildName(source, 'tmp')
-        cmd = "mrcalc {} {} -gt {} ".format(source, self.get('backgroundNoiseTreshold'), tmp_target)
-        self.info(self.launchCommand(cmd))
-
-        nii = nibabel.load(tmp_target)
-        mask = scipy.ndimage.morphology.binary_closing(nii.get_data()>0, iterations=2)
-        scipy.ndimage.binary_fill_holes(mask, output=mask)
-        mask = scipy.ndimage.morphology.binary_erosion(mask, iterations=3)
-        mask = scipy.ndimage.morphology.binary_dilation(mask, iterations=6)
-        nibabel.save(nibabel.Nifti1Image(mask.astype(numpy.uint8), nii.get_affine()), target)
-        return target
-
-
     def __linkExistingImage(self, images):
         """
             Create symbolic link for each existing input images into the current working directory.
@@ -236,7 +395,7 @@ class Parcellation(GenericTask):
         #    self.info("Removing symbolic link {}".format(linkName))
         #    if os.path.islink(linkName):
         #        os.unlink(linkName)
-        
+
         for source in ["brodmann_fsaverage.mgz", "brodmann_fsaverage.mgz.lta", "brodmann_fsaverage.mgz.reg"]:
             if os.path.isfile(source):
                 os.remove(source)
@@ -258,16 +417,18 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'rh_ribbon'), 'rh_ribbon'),
                   (self.getImage(self.workingDir, 'lh_ribbon'), 'lh_ribbon'),
                   (self.getImage(self.workingDir, 'brodmann'), 'brodmann'),
+                  (self.getImage(self.workingDir, 'buckner'), 'buckner'),
+                  (self.getImage(self.workingDir, 'choi'), 'choi'),
                   (self.getImage(self.workingDir, 'norm'), 'norm'),
-                  (self.getImage(self.workingDir, 'noise_mask'), 'noise masks'),
-                  (self.getImage(self.workingDir, 'mask'), 'freesurfer masks'))
+                  (self.getImage(self.workingDir, 'mask'), 'freesurfer masks'),
+                  (self.getImage(self.workingDir, 'tt5'), '5tt'),)
 
         return images.isSomeImagesMissing()
 
     def qaSupplier(self):
 
         qaImages = Images()
-
+        #@TODO add buckner and choi templates
         tags = [
             ('anat', 'High resolution anatomical image of freesurfer'),
             ('mask', 'Brain mask from freesurfer'),
