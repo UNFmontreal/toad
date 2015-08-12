@@ -1,4 +1,3 @@
-import tempfile
 import shutil
 import os
 
@@ -18,10 +17,12 @@ class Masking(GenericTask):
 
 
     def implement(self):
-        aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
-
+        #aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
         aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
         anatBrainResample = self.getImage(self.dependDir,'anat', ['brain','resample'] )
+        tt5Register = self.getImage(self.dependDir,"tt5", "register")
+        tt5Resample = self.getImage(self.dependDir,"tt5", "resample")
+
 
         extended = self.buildName('anat', ['resample', 'extended'])
         self.info("Add {} and {} images together in order to create the ultimate image"
@@ -44,33 +45,20 @@ class Masking(GenericTask):
             self.__createRegionMaskFromAparcAseg(aparcAsegResample, 'exclude')
 
         #Launch act_anat_prepare_freesurfer
-        actRegister = self.__actAnatPrepareFreesurfer(aparcAsegRegister)
-        actResample = self.__actAnatPrepareFreesurfer(aparcAsegResample)
+        #@TODO register and resampling act
+        #actRegister = self.__actAnatPrepareFreesurfer(aparcAsegRegister)
+        #actResample = self.__actAnatPrepareFreesurfer(aparcAsegResample)
 
         #extract the white matter mask from the act
-        whiteMatterAct = self.__extractWhiteMatterFromAct(actResample)
+        whiteMatterAct = self.__extractWhiteMatterFromAct(tt5Resample)
 
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
-        seed_gmwmi = self.__launch5tt2gmwmi(actRegister)
+        seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 
         colorLut =  os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", "freesurfer_lut"))
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
         shutil.copy(colorLut, self.workingDir)
 
-
-    def __resample(self, source, reference):
-        """Register an image with symmetric normalization and mutual information metric
-
-        Returns:
-            return a file containing the resulting transformation
-        """
-        self.info("Starting registration from fsl")
-        name = os.path.basename(source).replace(".nii","")
-        target = self.buildName(name, "transformation","")
-        matrix = self.buildName(name, "transformation", ".mat")
-        cmd = "flirt -in {} -ref {} -cost {} -out {}".format(source, reference, self.get('cost'), target)
-        self.launchCommand(cmd)
-        return matrix
 
 
     def __createRegionMaskFromAparcAseg(self, source, operand):
@@ -84,7 +72,7 @@ class Masking(GenericTask):
         structures = mriutil.extractStructure(regions, source, target)
         self.__createMask(structures)
 
-
+    """
     def __actAnatPrepareFreesurfer(self, source):
         target = self.buildName(source, 'act')
         freesurfer_lut = os.path.join(os.environ['FREESURFER_HOME'], 'FreeSurferColorLUT.txt')
@@ -123,6 +111,7 @@ class Masking(GenericTask):
         shutil.rmtree(temp_dir)
 
         return target
+        """
 
 
     def __extractWhiteMatterFromAct(self, source):
@@ -179,14 +168,16 @@ class Masking(GenericTask):
     
 
     def isDirty(self):
-        images = Images((self.getImage(self.workingDir, "aparc_aseg", ["register", "act"]), 'register anatomically constrained tractography'),
+        images = Images(
+            (self.getImage(self.workingDir, "tt5", "register"), 'register 5tt tractography'),
                      (self.getImage(self.workingDir,"aparc_aseg", ["resample", "mask"]), 'aparc_aseg mask'),
                      (self.getImage(self.workingDir, 'anat',['resample', 'extended', 'mask']), 'ultimate extended mask'),
                      (self.getImage(self.workingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
                      (os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
                      (self.getImage(self.workingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
-                     (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
-                     (self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"]), 'resample white segmented act mask'))
+                     (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'))
+
+                     #(self.getImage(self.workingDir,"aparc_aseg", ["resample", "act", "wm", "mask"]), 'resample white segmented act mask'))
 
         if self.get('masking', "start_seeds").strip() != "":
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask']), 'high resolution, start, brain extracted mask'))

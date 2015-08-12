@@ -14,7 +14,7 @@ class TensorDipy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'masking', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'masking', 'qa')
 
 
     def implement(self):

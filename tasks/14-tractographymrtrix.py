@@ -10,7 +10,7 @@ class TractographyMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'hardimrtrix', 'masking', 'registration','qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'hardimrtrix', 'masking', 'registration','qa')
 
     def implement(self):
 

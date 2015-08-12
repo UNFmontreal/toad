@@ -13,7 +13,7 @@ class HardiDipy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'masking')
+        GenericTask.__init__(self, subject, 'upsampling', 'masking')
 
 
     def implement(self):

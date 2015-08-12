@@ -17,7 +17,7 @@ __version__ = "0.9"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Beta"
-
+#@TODO add tvtk dependencies
 __pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
 
 def __parseArguments():
