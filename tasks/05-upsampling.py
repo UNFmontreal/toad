@@ -18,12 +18,12 @@ class Upsampling(GenericTask):
 
         dwi = self.__linkDwiImage()
 
-        bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
-        bVecs= self.getImage(self.preparationDir, 'grad', None, 'bvecs')
+        bVals= self.getImage(self.eddyDir, 'grad', None, 'bvals')
+        bVecs= self.getImage(self.eddyDir, 'grad', None, 'bvecs')
 
-        if not bVals:
-            bVals= self.getImage(self.eddyDir, 'grad', None, 'bvals')
-            bVecs= self.getImage(self.eddyDir, 'grad', None, 'bvecs')
+        if not bVals or not bVecs:
+            bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
+            bVecs= self.getImage(self.preparationDir, 'grad', None, 'bvecs')
 
         bVals = util.symlink(bVals, self.workingDir)
         bVecs = util.symlink(bVecs, self.workingDir)
