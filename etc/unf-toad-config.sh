@@ -39,7 +39,12 @@ esac
 
 #disable KMP_AFFINITY
 export KMP_AFFINITY=none
+
+#force minc version 1 (netcdf) utilisation
 export MINC_FORCE_V2=0
+
+#disabled X11 utilisation into mayavi/tvtk package
+export ETS_TOOLKIT='null'
 
 #Freesurfer configuration
 export FREESURFER_HOME=$APPDIR/freesurfer
