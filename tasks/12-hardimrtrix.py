@@ -87,6 +87,7 @@ class HardiMrtrix(GenericTask):
 
         images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
                   (self.getImage(self.dependDir, 'grad', None, 'b'), "gradient encoding b file"),
+                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'),
                   (self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask']), 'white matter segmented mask'),
                   (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'))
         return images.isAllImagesExists()

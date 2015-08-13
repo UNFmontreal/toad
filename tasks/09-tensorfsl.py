@@ -10,7 +10,7 @@ class TensorFsl(GenericTask):
     def __init__(self, subject):
         """Fits a diffusion tensor model at each voxel
         """
-        GenericTask.__init__(self, subject, 'upsampling', 'masking', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'qa')
 
 
     def implement(self):
@@ -21,7 +21,8 @@ class TensorFsl(GenericTask):
         dwi = self.getImage(self.dependDir,'dwi', 'upsample')
         bVals = self.getImage(self.dependDir, 'grad', None, 'bvals')
         bVecs = self.getImage(self.dependDir, 'grad', None, 'bvecs')
-        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
+        #mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
+        mask = self.getImage(self.registrationDir, 'mask', 'resample')
 
         self.__produceTensors(dwi, bVecs, bVals, mask)
 
@@ -75,7 +76,8 @@ class TensorFsl(GenericTask):
 
         """
         images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
-                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate mask'),
+                  #(self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate mask'),
+                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain mask'),
                   (self.getImage(self.dependDir, 'grad', None, 'bvals'), '.bvals gradient encoding file'),
                   (self.getImage(self.dependDir, 'grad', None, 'bvecs'), '.bvecs gradient encoding file'))
 

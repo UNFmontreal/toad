@@ -14,7 +14,7 @@ class TensorDipy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'masking', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'qa')
 
 
     def implement(self):
@@ -22,7 +22,8 @@ class TensorDipy(GenericTask):
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
         bValsFile = self.getImage(self.dependDir, 'grad', None, 'bvals')
         bVecsFile = self.getImage(self.dependDir, 'grad', None, 'bvecs')
-        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
+        #mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
+        mask = self.getImage(self.registrationDir, 'mask', 'resample')
 
         fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
 
@@ -71,7 +72,9 @@ class TensorDipy(GenericTask):
         images = Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
                   (self.getImage(self.dependDir, 'grad', None, 'bvals'), "gradient value bvals encoding file"),
                   (self.getImage(self.dependDir, 'grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
-                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'))
+                  #(self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'),
+                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'))
+
         return images.isAllImagesExists()
 
 

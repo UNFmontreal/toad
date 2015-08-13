@@ -15,7 +15,8 @@ class TractographyMrtrix(GenericTask):
     def implement(self):
 
         act = self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"])
-        seed_gmwmi = self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi")
+        #seed_gmwmi = self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi")
+        seed_gmwmi = self.getImage(self.registrationDir, "tt5", "resample")
         brodmann = self.getImage(self.registrationDir, "brodmann", "resample")
         anatBrainResample = self.getImage(self.registrationDir,'anat', ['brain', 'resample'])
 
@@ -241,16 +242,16 @@ class TractographyMrtrix(GenericTask):
 
 
     def meetRequirement(self):
-
+        #@TODO add brain mask and 5tt as requierement
         images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'upsampled diffusion weighted'),
                   (self.getImage(self.dependDir, 'grad', None, 'b'), '.b gradient encoding file'),
-                  (self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"]), 'resampled anatomically constrained tractography'),
-                  (self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
+                  #(self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"]), 'resampled anatomically constrained tractography'),
+                  #(self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
                   (self.getImage(self.registrationDir, "brodmann", "resample"), 'resampled brodmann area'),
                   (self.getImage(self.maskingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
                   (self.getImage(self.maskingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
-                  (self.getImage(self.registrationDir,'anat', ['brain', 'resample']), 'anatomical brain resampled'),
-                  (self.getImage(self.maskingDir, 'anat',['resample', 'extended','mask']), 'ultimate extended mask'))
+                  (self.getImage(self.registrationDir,'anat', ['brain', 'resample']), 'anatomical brain resampled'))
+                  #(self.getImage(self.maskingDir, 'anat',['resample', 'extended','mask']), 'ultimate extended mask'))
 
         return images.isAllImagesExists()
 

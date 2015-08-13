@@ -8,14 +8,16 @@ class TensorMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'masking', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'qa')
 
 
     def implement(self):
 
         dwi = self.getImage(self.dependDir,'dwi','upsample')
         bFile = self.getImage(self.dependDir, 'grad',  None, 'b')
-        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
+        #mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
+        mask = self.getImage(self.registrationDir, 'mask', 'resample')
+
 
         tensorsMrtrix = self.__produceTensors(dwi, bFile, mask)
         self.__produceMetrics(tensorsMrtrix, mask, dwi)
@@ -73,7 +75,9 @@ class TensorMrtrix(GenericTask):
     def meetRequirement(self):
         images = Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
                   (self.getImage(self.dependDir, 'grad', None, 'b'), "gradient encoding b file"),
-                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'))
+                  #(self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'),
+                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'))
+
         return images.isAllImagesExists()
 
 
