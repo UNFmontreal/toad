@@ -9,7 +9,7 @@ class HardiMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'masking')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking')
 
 
     def implement(self):
@@ -17,14 +17,16 @@ class HardiMrtrix(GenericTask):
         #@TODO produce "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
         dwi = self.getImage(self.dependDir,'dwi', 'upsample')
         bFile = self.getImage(self.dependDir, 'grad', None, 'b')
+        mask = self.getImage(self.registrationDir, 'mask', 'resample')
+
 
         maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask'])
         outputDwi2Response = self.__dwi2response(dwi, maskDwi2Response, bFile)
 
-        maskDwi2csd =  self.getImage(self.maskingDir, 'anat',['resample', 'extended', 'mask'])
-        csdImage = self.__dwi2csd(dwi, outputDwi2Response, maskDwi2csd, bFile, self.buildName(dwi, "csd"))
+        #maskDwi2csd =  self.getImage(self.maskingDir, 'anat',['resample', 'extended', 'mask'])
+        csdImage = self.__dwi2csd(dwi, outputDwi2Response, mask, bFile, self.buildName(dwi, "csd"))
 
-        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
+        #mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
         fixelPeak = self.__csd2fixelPeak(csdImage, mask, self.buildName(dwi, "fixel_peak", 'msf'))
         self.__fixelPeak2nufo(fixelPeak, mask, self.buildName(dwi, 'nufo'))
 
@@ -88,8 +90,8 @@ class HardiMrtrix(GenericTask):
         images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
                   (self.getImage(self.dependDir, 'grad', None, 'b'), "gradient encoding b file"),
                   (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'),
-                  (self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask']), 'white matter segmented mask'),
-                  (self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'))
+                  ????(self.getImage(self.maskingDir, 'mask', ['resample', 'wm']), 'white matter segmented mask'),
+                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain mask'))
         return images.isAllImagesExists()
 
 
