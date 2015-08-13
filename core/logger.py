@@ -123,6 +123,18 @@ class Logger(object):
         self.__log(message, 'INFO')
 
 
+    def debug(self, message, pause = False):
+        """Wrapper for user friendly message that have debug level
+
+        Args:
+            message: the message to write
+            pause: Stop pipeline and ask user to hit RETURN to continue
+        """
+        self.__log(message, 'DEBUG')
+        if pause:
+            raw_input("Press Enter to continue...")
+
+
     def warning(self, message, pause = False):
         """Wrapper for user friendly message that have warning level
 

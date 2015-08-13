@@ -161,11 +161,10 @@ class Masking(GenericTask):
 
 
     def meetRequirement(self):
-        images = Images((self.getImage(self.dependDir,"aparc_aseg", "resample"), 'resampled parcellation'),
+        return Images((self.getImage(self.dependDir,"aparc_aseg", "resample"), 'resampled parcellation'),
                     (self.getImage(self.dependDir,"aparc_aseg", "register"), 'register parcellation'),
                     (self.getImage(self.dependDir,'mask', 'resample'),  'brain extracted, resampled high resolution'))
-        return images.isAllImagesExists()
-    
+
 
     def isDirty(self):
         images = Images((os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
@@ -184,5 +183,5 @@ class Masking(GenericTask):
         if self.get("exclude_seeds").strip() != "":
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract', 'mask']), 'high resolution, excluded, brain extracted, mask'))
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract']), 'high resolution, excluded, brain extracted'))
-        print images
-        return images.isSomeImagesMissing()
+
+        return images

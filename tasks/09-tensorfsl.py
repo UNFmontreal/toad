@@ -75,20 +75,18 @@ class TensorFsl(GenericTask):
         """Validate if all requirements have been met prior to launch the task
 
         """
-        images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
+        return Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
                   #(self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate mask'),
                   (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain mask'),
                   (self.getImage(self.dependDir, 'grad', None, 'bvals'), '.bvals gradient encoding file'),
                   (self.getImage(self.dependDir, 'grad', None, 'bvecs'), '.bvecs gradient encoding file'))
-
-        return images.isAllImagesExists()
 
 
     def isDirty(self):
         """Validate if this tasks need to be submit for implementation
 
         """
-        images = Images((self.getImage(self.workingDir, 'dwi', 'v1'), "1st eigenvector"),
+        return Images((self.getImage(self.workingDir, 'dwi', 'v1'), "1st eigenvector"),
                       (self.getImage(self.workingDir, 'dwi', 'v2'), "2rd eigenvector"),
                       (self.getImage(self.workingDir, 'dwi', 'v3'), "3rd eigenvector"),
                       (self.getImage(self.workingDir, 'dwi', 'ad'), "selected eigenvalue(s) AD"),
@@ -97,7 +95,6 @@ class TensorFsl(GenericTask):
                       (self.getImage(self.workingDir, 'dwi', 'fa'), "fractional anisotropy"),
                       (self.getImage(self.workingDir, 'dwi', 'so'), "raw T2 signal with no weighting"))
 
-        return images.isSomeImagesMissing()
 
     """
     def qaSupplier(self):

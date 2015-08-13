@@ -89,16 +89,13 @@ class HardiDipy(GenericTask):
 
 
     def meetRequirement(self):
-        images = Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
+        return Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
                   (self.getImage(self.dependDir, 'grad', None, 'bvals'), "gradient value bvals encoding file"),
                   (self.getImage(self.dependDir, 'grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
                   (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'))
-        print images
-        return images.isAllImagesExists()
 
 
     def isDirty(self):
-        images = Images((self.getImage(self.workingDir, 'dwi', 'csd'), "constrained spherical deconvolution"),
+        return Images((self.getImage(self.workingDir, 'dwi', 'csd'), "constrained spherical deconvolution"),
                   (self.getImage(self.workingDir,'dwi', 'gfa'), "generalised Fractional Anisotropy"),
                   (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'))
-        return images.isSomeImagesMissing()

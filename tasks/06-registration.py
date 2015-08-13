@@ -124,7 +124,7 @@ class Registration(GenericTask):
 
 
     def meetRequirement(self):
-        images = Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), 'high resolution'),
+        return Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), 'high resolution'),
                           (self.getImage(self.dependDir, 'b0', 'upsample'), 'b0 upsampled'),
                           (self.getImage(self.parcellationDir, 'aparc_aseg'), 'parcellation'),
                           (self.getImage(self.parcellationDir, 'rh_ribbon'), 'right hemisphere ribbon'),
@@ -132,11 +132,10 @@ class Registration(GenericTask):
                           (self.getImage(self.parcellationDir, 'tt5'), '5tt'),
                           (self.getImage(self.parcellationDir, 'mask'), 'brain mask'),
                           (self.getImage(self.parcellationDir, 'brodmann'), 'brodmann'))
-        return images.isAllImagesExists()
 
 
     def isDirty(self):
-        images = Images((self.getImage(self.workingDir,'anat', 'resample'), 'anatomical resampled'),
+        return Images((self.getImage(self.workingDir,'anat', 'resample'), 'anatomical resampled'),
                   (self.getImage(self.workingDir,'aparc_aseg', 'resample'), 'parcellation resample'),
                   (self.getImage(self.workingDir,'aparc_aseg', 'register'), 'parcellation register'),
                   (self.getImage(self.workingDir, 'tt5', 'register'), '5tt image register'),
@@ -145,7 +144,6 @@ class Registration(GenericTask):
                   (self.getImage(self.workingDir, 'mask', 'resample'), 'brain mask resample'),
                   (self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere'),
                   (self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere'))
-        return images.isSomeImagesMissing()
 
     """
     def qaSupplier(self):

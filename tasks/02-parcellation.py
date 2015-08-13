@@ -398,20 +398,19 @@ class Parcellation(GenericTask):
         """
         import glob
         self.info("Cleaning up extra files")
-	sources = glob.glob("*.mgz*")+glob.glob("*.lta")+glob.glob("*.reg")
+        sources = glob.glob("*.mgz*")+glob.glob("*.lta")+glob.glob("*.reg")
         for source in sources:
             if os.path.isfile(source):
                 os.remove(source)
 
     def meetRequirement(self):
 
-        images = Images((self.getImage(self.dependDir, 'anat'), 'high resolution'))
-        return images.isAllImagesExists()
+        return  Images((self.getImage(self.dependDir, 'anat'), 'high resolution'))
 
 
     def isDirty(self):
 
-        images = Images((self.getImage(self.workingDir, 'aparc_aseg'), 'parcellation'),
+        return Images((self.getImage(self.workingDir, 'aparc_aseg'), 'parcellation'),
                   (self.getImage(self.workingDir, 'anat', 'freesurfer'), 'anatomical'),
                   (self.getImage(self.workingDir, 'rh_ribbon'), 'rh_ribbon'),
                   (self.getImage(self.workingDir, 'lh_ribbon'), 'lh_ribbon'),
@@ -421,8 +420,7 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'norm'), 'norm'),
                   (self.getImage(self.workingDir, 'mask'), 'freesurfer brain masks'),
                   (self.getImage(self.workingDir, 'tt5'), '5tt'),)
-        print "isDirty =", images
-        return images.isSomeImagesMissing()
+
     """
     def qaSupplier(self):
 

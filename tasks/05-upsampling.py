@@ -20,14 +20,14 @@ class Upsampling(GenericTask):
 
         bVals= self.getImage(self.eddyDir, 'grad', None, 'bvals')
         bVecs= self.getImage(self.eddyDir, 'grad', None, 'bvecs')
-	bEnc = self.getImage(self.eddyDir, 'grad', None, 'benc')
+        bEnc = self.getImage(self.eddyDir, 'grad', None, 'benc')
         if not bVals or not bVecs:
             bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
             bVecs= self.getImage(self.preparationDir, 'grad', None, 'bvecs')
             bEnc= self.getImage(self.preparationDir, 'grad', None, 'benc')
         bVals = util.symlink(bVals, self.workingDir)
         bVecs = util.symlink(bVecs, self.workingDir)
-	bEnc = util.symlink(bEnc, self.workingDir)
+        bEnc = util.symlink(bEnc, self.workingDir)
 
         dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
@@ -91,15 +91,12 @@ class Upsampling(GenericTask):
             self.warning("No proper dwi image found as requirement")
             result = False
 
-        images = Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), 'freesurfer high resolution'))
-        result = images.isAllImagesExists()
         return result
 
 
     def isDirty(self):
-        images = Images((self.getImage(self.workingDir, 'dwi', "upsample"), 'upsampled diffusion weighted'),
+        return Images((self.getImage(self.workingDir, 'dwi', "upsample"), 'upsampled diffusion weighted'),
                   (self.getImage(self.workingDir, 'b0', "upsample"), 'upsampled b0'))
-        return images.isSomeImagesMissing()
 
     """
     def qaSupplier(self):

@@ -86,19 +86,15 @@ class HardiMrtrix(GenericTask):
 
 
     def meetRequirement(self):
-
-        images = Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
+        return Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
                   (self.getImage(self.dependDir, 'grad', None, 'b'), "gradient encoding b file"),
                   (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'),
                   #@TODO fix me (self.getImage(self.maskingDir, 'mask', ['resample', 'wm']), 'white matter segmented mask'),
                   (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain mask'))
-        return images.isAllImagesExists()
 
 
     def isDirty(self):
-
-        images = Images((self.getImage(self.workingDir, 'dwi', None, 'txt'), "response function estimation text file"),
+        return Images((self.getImage(self.workingDir, 'dwi', None, 'txt'), "response function estimation text file"),
                   (self.getImage(self.workingDir, 'dwi', 'csd'), "constrained spherical deconvolution"),
                   (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'),
                   (self.getImage(self.workingDir,'dwi', 'fixel_peak', 'msf'), 'fixel peak image'))
-        return images.isSomeImagesMissing()
