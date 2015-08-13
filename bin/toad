@@ -135,10 +135,10 @@ def __manageEnvironnement(logger, arguments):
         for package in __pythonPackages:
             try:
                 imp.find_module(package)
-                if 'vtk' in package:
+                if 'vtk' is package:
                     arguments.isVTKAvailable = True
             except ImportError:
-                if 'vtk' in package:
+                if 'vtk' is package:
                     __pythonPackages.remove('vtk')
                     logger.warning("VTK not found, Please install vtk correctly", pause=True)
                     arguments.isVTKAvailable = False
