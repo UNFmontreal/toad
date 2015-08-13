@@ -11,39 +11,45 @@ class Registration(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preprocessing', 'parcellation', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'parcellation', 'qa')
 
 
     def implement(self):
 
         b0 = self.getImage(self.dependDir, 'b0','upsample')
-
+        norm= self.getImage(self.parcellationDir, 'norm')
         anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
-        anatBrain = self.getImage(self.preprocessingDir ,'anat', 'brain')
         aparcAsegFile =  self.getImage(self.parcellationDir, "aparc_aseg")
         rhRibbon = self.getImage(self.parcellationDir, "rh_ribbon")
         lhRibbon = self.getImage(self.parcellationDir, "lh_ribbon")
         brodmann = self.getImage(self.parcellationDir, "brodmann")
+        tt5 = self.getImage(self.parcellationDir, "tt5")
+	mask = self.getImage(self.parcellationDir, "mask")
 
-        b0ToAnatMatrix = self.__computeResample(b0, anat)
-        b0ToAnatMatrixInverse = self.buildName(b0ToAnatMatrix, 'inverse', 'mat')
-        self.info(mriutil.invertMatrix(b0ToAnatMatrix, b0ToAnatMatrixInverse))
+        extraArgs = ""
+        if self.get("parcellation", "intrasubject"):
+            extraArgs += " -usesqform -dof 6"
 
-        self.__applyResampleFsl(anat, b0, b0ToAnatMatrixInverse, self.buildName(anat, "resample"))
-        mrtrixMatrix = self.__transformMatrixFslToMrtrix(anat, b0, b0ToAnatMatrixInverse)
+        freesurferToDWIMatrix = self.__freesurferToDWITransformation(b0, norm, extraArgs)
 
-        self.__applyResampleFsl(anatBrain, b0, b0ToAnatMatrixInverse, self.buildName(anatBrain, "resample"))
+        self.__applyResampleFsl(anat, b0, freesurferToDWIMatrix, self.buildName(anat, "resample"))
+        mrtrixMatrix = self.__transformFslToMrtrixMatrix(anat, b0, freesurferToDWIMatrix)
+
         self.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix)
-        self.__applyResampleFsl(aparcAsegFile, b0, b0ToAnatMatrixInverse, self.buildName(aparcAsegFile, "resample"), True)
+        self.__applyResampleFsl(aparcAsegFile, b0, freesurferToDWIMatrix, self.buildName(aparcAsegFile, "resample"), True)
 
         brodmannRegister = self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
-        self.__applyResampleFsl(brodmann, b0, b0ToAnatMatrixInverse, self.buildName(brodmann, "resample"), True)
+        self.__applyResampleFsl(brodmann, b0, freesurferToDWIMatrix, self.buildName(brodmann, "resample"), True)
 
         lhRibbonRegister = self.__applyRegistrationMrtrix(lhRibbon, mrtrixMatrix)
         rhRibbonRegister = self.__applyRegistrationMrtrix(rhRibbon, mrtrixMatrix)
+        tt5Register = self.__applyRegistrationMrtrix(tt5, mrtrixMatrix)
+        maskRegister = self.__applyRegistrationMrtrix(mask, mrtrixMatrix)
 
-        self.__applyResampleFsl(lhRibbon, b0, b0ToAnatMatrixInverse, self.buildName(lhRibbon, "resample"),True)
-        self.__applyResampleFsl(rhRibbon, b0, b0ToAnatMatrixInverse, self.buildName(rhRibbon, "resample"),True)
+        self.__applyResampleFsl(lhRibbon, b0, freesurferToDWIMatrix, self.buildName(lhRibbon, "resample"),True)
+        self.__applyResampleFsl(rhRibbon, b0, freesurferToDWIMatrix, self.buildName(rhRibbon, "resample"),True)
+        self.__applyResampleFsl(tt5, b0, freesurferToDWIMatrix, self.buildName(tt5, "resample"),True)
+	self.__applyResampleFsl(mask, b0, freesurferToDWIMatrix, self.buildName(mask, "resample"),True)
 
         brodmannLRegister =  self.buildName(brodmannRegister, "left_hemisphere")
         brodmannRRegister =  self.buildName(brodmannRegister, "right_hemisphere")
@@ -52,6 +58,7 @@ class Registration(GenericTask):
         self.__multiply(brodmannRegister, rhRibbonRegister, brodmannRRegister)
 
         #QA
+        '''
         b0BrainMask = self.getImage(self.workingDir, 'anat', ['brain', 'resample'])
         aparcAseg = self.getImage(self.workingDir, 'aparc_aseg', 'resample')
         brodmann = self.getImage(self.workingDir, 'brodmann', 'resample')
@@ -63,7 +70,7 @@ class Registration(GenericTask):
         self.slicerPng(b0, b0BrainMaskPng, maskOverlay=b0BrainMask, boundaries=b0BrainMask)
         self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg, boundaries=b0BrainMask)
         self.slicerPng(b0, brodmannPng, segOverlay=brodmann, boundaries=b0BrainMask)
-
+        '''
 
     def __multiply(self, source, ribbon, target):
 
@@ -72,19 +79,13 @@ class Registration(GenericTask):
         return target
 
 
-    def __computeResample(self, source, reference):
-        """Register an image with symmetric normalization and mutual information metric
-
-        Returns:
-            return a file containing the resulting transformation
-        """
-        self.info("Starting registration from fsl")
-        name = os.path.basename(source).replace(".nii", "")
-        target = self.buildName(name, "transformation", "")
-        matrix = self.buildName(name, "transformation", ".mat")
-        cmd = "flirt -in {} -ref {} -cost {} -dof {}  -omat {} -out {}".format(source, reference, self.get('cost'), self.get('dof'), matrix, target)
+    def __freesurferToDWITransformation(self, source, reference, extraArgs):
+        dwiToFreesurferMatrix = "dwiToFressurfer_transformation.mat"
+        freesurferToDWIMatrix = "fressurferToDWI_transformation.mat"
+        cmd = "flirt -in {} -ref {} -omat {} {}".format(source, reference, dwiToFreesurferMatrix, extraArgs)
         self.launchCommand(cmd)
-        return matrix
+        mriutil.invertMatrix(dwiToFreesurferMatrix, freesurferToDWIMatrix)
+        return freesurferToDWIMatrix
 
 
     def __applyResampleFsl(self, source, reference, matrix, target, nearest = False):
@@ -108,7 +109,7 @@ class Registration(GenericTask):
         return target
 
 
-    def __transformMatrixFslToMrtrix(self, source, b0, matrix ):
+    def __transformFslToMrtrixMatrix(self, source, b0, matrix ):
         target = self.buildName(matrix, "mrtrix", ".mat")
         cmd = "transformcalc -flirt_import {} {} {} {} -quiet".format(source, b0, matrix, target)
         self.launchCommand(cmd)
@@ -123,26 +124,28 @@ class Registration(GenericTask):
 
 
     def meetRequirement(self):
-        images = Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), 'high resolution'),
-                          (self.getImage(self.dependDir, 'anat', 'brain'), 'freesurfer anatomical brain extracted'),
+        return Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), 'high resolution'),
                           (self.getImage(self.dependDir, 'b0', 'upsample'), 'b0 upsampled'),
                           (self.getImage(self.parcellationDir, 'aparc_aseg'), 'parcellation'),
                           (self.getImage(self.parcellationDir, 'rh_ribbon'), 'right hemisphere ribbon'),
                           (self.getImage(self.parcellationDir, 'lh_ribbon'), 'left hemisphere ribbon'),
+                          (self.getImage(self.parcellationDir, 'tt5'), '5tt'),
+                          (self.getImage(self.parcellationDir, 'mask'), 'brain mask'),
                           (self.getImage(self.parcellationDir, 'brodmann'), 'brodmann'))
-        return images.isAllImagesExists()
 
 
     def isDirty(self):
-        images = Images((self.getImage(self.workingDir,'anat', ['brain', 'resample']), 'anatomical brain resampled'),
-                  (self.getImage(self.workingDir,'anat','resample'), 'anatomical resampled'),
+        return Images((self.getImage(self.workingDir,'anat', 'resample'), 'anatomical resampled'),
                   (self.getImage(self.workingDir,'aparc_aseg', 'resample'), 'parcellation resample'),
                   (self.getImage(self.workingDir,'aparc_aseg', 'register'), 'parcellation register'),
+                  (self.getImage(self.workingDir, 'tt5', 'register'), '5tt image register'),
+                  (self.getImage(self.workingDir, 'mask', 'register'), 'brain mask register'),
+                  (self.getImage(self.workingDir, 'tt5', 'resample'), '5tt image resample'),
+                  (self.getImage(self.workingDir, 'mask', 'resample'), 'brain mask resample'),
                   (self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere'),
                   (self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere'))
-        return images.isSomeImagesMissing()
 
-
+    """
     def qaSupplier(self):
 
         b0BrainMaskPng = self.getImage(self.workingDir, 'b0', 'brain', ext='png')
@@ -153,3 +156,4 @@ class Registration(GenericTask):
                       (aparcAsegPng, 'aparcaseg segmentaion on upsampled b0'),
                       (brodmannPng, 'Brodmann segmentaion on upsampled b0'),
                      )
+    """

@@ -28,11 +28,13 @@ class Snr(GenericTask):
         self.info(mriutil.extractFirstB0FromDwi(dwiNative, b0, bVals))
 
         #Brain in native space
-        brainResample = self.getImage(self.registrationDir, 'anat', ['brain', 'resample'])
-        brainNative = self.__resampling(brainResample, b0)
+        #brainResample = self.getImage(self.registrationDir, 'anat', ['brain', 'resample'])
+        #brainNative = self.__resampling(brainResample, b0)
+
+        maskBrain = self.getImage(self.registrationDir, 'mask', 'resample')
 
         #Noise mask computation
-        dwiNativeNoiseMask = self.__computeNoiseMask(brainNative)
+        #dwiNativeNoiseMask = self.__computeNoiseMask(brainNative)
 
         #Corpus Callosum mask computation
         #aparcAseg = self.getImage(self.registrationDir, 'aparc_aseg', 'resample')
@@ -119,11 +121,9 @@ class Snr(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
-        images = Images((self.getImage(self.preparationDir, 'dwi'), 'diffusion weighted'),
-                        (self.getImage(self.registrationDir, 'anat', ['brain', 'resample']), 'Brain image from bet'),
-                        (self.getImage(self.maskingDir, 'aparc_aseg',['253','mask']), 'Corpus Callusum mask from masking task'),
-                       )
-        return images.isAllImagesExists()
+        return Images((self.getImage(self.preparationDir, 'dwi'), 'diffusion weighted'),
+                        (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain mask'),
+                        (self.getImage(self.maskingDir, 'aparc_aseg',['253','mask']), 'Corpus Callusum mask from masking task'))
 
 
     def isDirty(self):
@@ -132,12 +132,11 @@ class Snr(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        images = Images((self.getImage(self.workingDir, 'dwi', ['native', 'snr'], ext='png'), 'SNR of the raw DWI'),
+        return Images((self.getImage(self.workingDir, 'dwi', ['native', 'snr'], ext='png'), 'SNR of the raw DWI'),
                         (self.getImage(self.workingDir, 'dwi', ['native', 'hist'], ext='png'), 'Noise histogram for the raw DWI'),
                        )
-        return images.isSomeImagesMissing()
 
-
+    """
     def qaSupplier(self):
         dwiNative = self.getImage(self.preparationDir, 'dwi')
         dwiUnwarp = self.__getUnwarpImage()
@@ -176,3 +175,4 @@ class Snr(GenericTask):
                              (maskNoisePng, 'Noise mask to compute SNR')))
 
         return images
+    """

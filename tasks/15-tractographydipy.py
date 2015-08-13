@@ -1,4 +1,5 @@
 from core.generictask import GenericTask
+"""
 from lib.images import Images
 import nibabel, numpy
 from dipy.tracking.local import ActTissueClassifier, LocalTracking
@@ -7,11 +8,12 @@ from lib import mriutil
 from dipy.data import default_sphere
 from dipy.io.trackvis import save_trk
 from dipy.tracking import utils
+
 import matplotlib
 matplotlib.use('Agg')
 
 __author__ = 'desmat'
-
+"""
 class TractographyDipy(GenericTask):
 
     def __init__(self, subject):
@@ -94,8 +96,9 @@ class TractographyDipy(GenericTask):
             mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
 
         """
+    """
     def __tckedit(self, source, roi, target, downsample= "2"):
-        """ perform various editing operations on track files.
+         perform various editing operations on track files.
 
         Args:
             source: the input track file(s)
@@ -106,28 +109,33 @@ class TractographyDipy(GenericTask):
 
         Returns:
             the output track file
-        """
+
         self.info("Starting tckedit creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
         mriutil.tckedit(source, roi, tmp, downsample)
         return self.rename(tmp, target)
 
-
+    """
     def isIgnore(self):
         return self.get("ignore")
 
 
     def meetRequirement(self):
+        """
         images = Images((self.getImage(self.maskingDir, "aparc_aseg", ["resample", "act"]), 'resampled anatomically constrained tractography'),
                       (self.getImage(self.hardidipyDir, "dwi", 'csd'), 'constrained spherical deconvolution'))
         return images.isAllImagesExists()
-
+        """
+        return True
 
     def isDirty(self):
+        """
         images = Images((self.getImage(self.workingDir, 'dwi', 'hardi_det', 'tck'), "deterministic streamlines act classifier"),
                   (self.getImage(self.workingDir, 'dwi', 'hardi_prob', 'tck'), "probabilistic streamlines act classifier"))
         return images.isSomeImagesMissing()
-
+        """
+        return False
+    """
 
     def qaSupplier(self):
 
@@ -137,3 +145,4 @@ class TractographyDipy(GenericTask):
                        (hardiProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'))
 
         return images
+    """

@@ -137,22 +137,22 @@ class TasksManager(object):
                     sys.path.append(directory)
                 try:
                     module = importlib.import_module(package)
-                except ImportError:
-                     self.info("Cannot instanciate {} module, module discarted.".format(package))
-                classes = inspect.getmembers(module, inspect.isclass)
-                for clazz in classes:
-                    if package in clazz[1].__module__:
-                        clazz = clazz[1](self.__subject)
-                        if not __isDefined(clazz,"isDirty"):
-                            print "Warning: isDirty() method not found. Class {} discard".format(clazz)
-                            return None
-                        if not __isDefined(clazz,"meetRequirement"):
-                            print "Warning: meetRequirement() method not found. Class {} discard".format(clazz)
-                            return None
-                        if not __isDefined(clazz,"implement"):
-                            print "Warning: implement() method not found.  Class {} discard".format(clazz)
-                            return None
-                        return clazz
+                    classes = inspect.getmembers(module, inspect.isclass)
+                    for clazz in classes:
+                        if package in clazz[1].__module__:
+                            clazz = clazz[1](self.__subject)
+                            if not __isDefined(clazz,"isDirty"):
+                                print "Warning: isDirty() method not found. Class {} discard".format(clazz)
+                                return None
+                            if not __isDefined(clazz,"meetRequirement"):
+                                print "Warning: meetRequirement() method not found. Class {} discard".format(clazz)
+                                return None
+                            if not __isDefined(clazz,"implement"):
+                                print "Warning: implement() method not found.  Class {} discard".format(clazz)
+                                return None
+                            return clazz
+                except ImportError, error:
+                    print("Cannot instanciate {} module, error message is: {}.".format(package, str(error)))
             except ValueError:
                 pass
         return None

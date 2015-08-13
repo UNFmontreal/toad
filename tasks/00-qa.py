@@ -85,4 +85,4 @@ class QA(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        return Images((os.path.join(self.workingDir, 'index.html'), 'QA index.html')).isSomeImagesMissing()
+        return Images((os.path.join(self.workingDir, 'index.html'), 'QA index.html'))

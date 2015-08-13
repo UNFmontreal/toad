@@ -53,6 +53,11 @@ class Config(object):
         else:
             config.set('arguments', 'reinitialize', 'False')
 
+        if arguments.debug:
+            config.set('arguments', 'debug', 'True')
+        else:
+            config.set('arguments', 'debug', 'False')
+
         if arguments.skipValidation:
             config.set('arguments', 'validation', 'False')
         else:
@@ -99,9 +104,6 @@ class Config(object):
             config.set('general', 'vtk_available', 'True')
         else:
             config.set('general', 'vtk_available', 'False')
-
-
-
 
         return config
 

@@ -116,8 +116,8 @@ class GenericTask(Logger, Load, Qa):
             os.mkdir(self.workingDir)
 
         if self.config.has_option("arguments", "stop_before_task"):
-            if (self.config.get("arguments","stop_before_task") == self.__name or
-                self.config.get("arguments","stop_before_task") == self.__moduleName.lower()):
+            if (self.config.get("arguments", "stop_before_task") == self.__name or
+                self.config.get("arguments", "stop_before_task") == self.__moduleName.lower()):
                 self.quit("Reach {} which is the value set by stop_before_task. Stopping the pipeline as user request"
                              .format(self.config.get("arguments", "stop_before_task")))
         os.chdir(self.workingDir)
@@ -162,7 +162,20 @@ class GenericTask(Logger, Load, Qa):
         """
         self.logHeader("meetRequirement")
         result = self.meetRequirement()
-        self.logFooter("meetRequirement", result)
+
+        if isinstance(result, Images):
+            if self.get("arguments", "debug"):
+                self.debug(result)
+            result = result.isAllImagesExists()
+
+        elif isinstance(result, bool):
+            if self.get("arguments", "debug"):
+                self.debug("No debugging information provided for this tasks")
+        else:
+            self.error("Illegal value return by meetRequirement method for task {}".format(self.getName()))
+
+        self.logFooter("isDirty", result)
+
         return result
 
 
@@ -212,9 +225,20 @@ class GenericTask(Logger, Load, Qa):
 
         else:
             result = self.isDirty()
+            if isinstance(result, Images):
+                if self.get("arguments", "debug"):
+                    self.debug(result)
+                result = result.isSomeImagesMissing()
+
+            elif isinstance(result, bool):
+                if self.get("arguments", "debug"):
+                    self.debug("No debugging information provided for this tasks")
+
+            else:
+                self.error("Illegal value return by isDirty method for task {}".format(self.getName()))
+
             self.logFooter("isDirty", result)
             return result
-
 
     def isDirty(self, result = False):
         """Validate if this tasks need to be submit for implementation

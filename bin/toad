@@ -17,8 +17,8 @@ __version__ = "0.9"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Beta"
-
-__pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'vtk']
+#@TODO add tvtk dependencies
+__pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'tvtk', 'vtk']
 
 def __parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.
@@ -77,6 +77,8 @@ def __parseArguments():
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the subjects, wildcard * ? are accepted")
     parser.add_argument("-c", "--config", nargs='+',metavar=('filename'), required=False,
                             help="Specify the location of an alternative the config.cfg file")
+    parser.add_argument("-d","--debug", help="Add additionnal information during the pipeline",
+                            action="store_true")
 
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
@@ -133,16 +135,15 @@ def __manageEnvironnement(logger, arguments):
         for package in __pythonPackages:
             try:
                 imp.find_module(package)
-                if 'vtk' in package:
+                if package == 'vtk':
                     arguments.isVTKAvailable = True
             except ImportError:
-                if 'vtk' in package:
+                if package == 'vtk':
                     __pythonPackages.remove('vtk')
                     logger.warning("VTK not found, Please install vtk correctly", pause=True)
                     arguments.isVTKAvailable = False
                 else:
                     logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
-
         try:
             os.environ["FREESURFER_HOME"]
         except KeyError:

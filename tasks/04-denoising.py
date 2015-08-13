@@ -153,18 +153,12 @@ class Denoising(GenericTask):
         #@TODO add those image as requierement
         #norm = self.getImage(self.parcellationDir, 'norm')
         #noiseMask = self.getImage(self.parcellationDir, 'noise_mask')
-        if images.isNoImagesExists():
-            result = False
-            self.warning("No suitable dwi image found for denoising task")
-        return result
+        return images
 
 
     def isDirty(self):
-        image = Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'))
+        return Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'))
                        #(self.getImage(self.workingDir, "noise_mask", 'denoise'), 'denoised'))
-        print image
-        return image.isSomeImagesMissing()
-
 
     #def qaSupplier(self):
     #    denoiseGif = self.getImage(self.workingDir, 'dwi', 'denoise', ext='gif')
