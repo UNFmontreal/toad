@@ -401,7 +401,7 @@ class Parcellation(GenericTask):
         """
         import glob
         self.info("Cleaning up extra files")
-	sources = glob.glob("*.mgz*")
+	sources = glob.glob("*.mgz*")+glob.glob("*.lta")+glob.glob("*.reg")
         for source in sources:
             if os.path.isfile(source):
                 os.remove(source)

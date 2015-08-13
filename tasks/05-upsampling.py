@@ -20,14 +20,14 @@ class Upsampling(GenericTask):
 
         bVals= self.getImage(self.eddyDir, 'grad', None, 'bvals')
         bVecs= self.getImage(self.eddyDir, 'grad', None, 'bvecs')
-
+	bEnc = self.getImage(self.eddyDir, 'grad', None, 'benc')
         if not bVals or not bVecs:
             bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
             bVecs= self.getImage(self.preparationDir, 'grad', None, 'bvecs')
-
+            bEnc= self.getImage(self.preparationDir, 'grad', None, 'benc')
         bVals = util.symlink(bVals, self.workingDir)
         bVecs = util.symlink(bVecs, self.workingDir)
-
+	bEnc = util.symlink(bEnc, self.workingDir)
 
         dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
