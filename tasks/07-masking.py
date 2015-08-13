@@ -50,7 +50,7 @@ class Masking(GenericTask):
         #actResample = self.__actAnatPrepareFreesurfer(aparcAsegResample)
 
         #extract the white matter mask from the act
-        whiteMatterAct = self.__extractWhiteMatterFromAct(tt5Resample)
+        whiteMatterAct = self.__extractWhiteMatterFrom5tt(tt5Resample)
 
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
         #seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
@@ -114,11 +114,11 @@ class Masking(GenericTask):
         """
 
 
-    def __extractWhiteMatterFromAct(self, source):
+    def __extractWhiteMatterFrom5tt(self, source):
         """Extract the white matter part from the act
 
         Args:
-            An act image
+            An 5tt image
 
         Returns:
             the resulting file filename

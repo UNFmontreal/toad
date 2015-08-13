@@ -32,7 +32,8 @@ class Parcellation(GenericTask):
         self.__createImageFromAtlas("template_buckner", self.get("buckner"))
         self.__createImageFromAtlas("template_choi", self.get("choi"))
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
-        self.__create5ttImage(self.get('tt5'))
+        tt5Mgz = self.__create5ttImage()
+        self. __convertAndRestride(tt5Mgz, self.get('tt5'))
 
 
         anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
@@ -141,16 +142,18 @@ class Parcellation(GenericTask):
 
 
 
-    def __create5ttImage(self, target, subdiv=4):
+    def __create5ttImage(self, subdiv=4):
         """
 
         """
+
         subjectDir = os.path.join(self.workingDir, self.id)
         aparcAseg = self.__findImageInDirectory("aparc+aseg.mgz", subjectDir)
         lhWhite = self.__findImageInDirectory("lh.white", subjectDir)
         rhWhite = self.__findImageInDirectory("rh.white", subjectDir)
         lhPial = self.__findImageInDirectory("lh.pial", subjectDir)
         rhPial = self.__findImageInDirectory("rh.pial", subjectDir)
+        target = 'tmp_5tt_{0:.6g}.mgz'.format(random.randint(0,999999))
 
         def read_surf(fname, surf_ref):
             if fname[-4:] == '.gii':
@@ -163,7 +166,7 @@ class Parcellation(GenericTask):
                 verts[:] = nibabel.affines.apply_affine(surf2world, verts)
                 return verts, tris
 
-	def surf_fill2(vertices, polys, mat, shape):
+        def surf_fill2(vertices, polys, mat, shape):
             from tvtk.common import is_old_pipeline
             voxverts = nibabel.affines.apply_affine(numpy.linalg.inv(mat), vertices)
 
@@ -227,8 +230,6 @@ class Parcellation(GenericTask):
         rh_wm = read_surf(rhWhite, parc)
         lh_gm = read_surf(lhPial, parc)
         rh_gm = read_surf(rhPial, parc)
-        print "lh_wm=",lh_wm
-        print "rh_wm",rh_wm
         wm_pve = fill_hemis(lh_wm,rh_wm)
         gm_pve = fill_hemis(lh_gm,rh_gm)
 
@@ -270,13 +271,9 @@ class Parcellation(GenericTask):
         gm_smooth[bs_vdc_excl] = 0
 
         mask88 = parc_data==88
-        print csf_smooth[mask88].sum(), subcort_smooth[mask88].sum()
-
         wm = wm_pve+wm_smooth-csf_smooth-subcort_smooth
         wm[wm>1] = 1
         wm[wm<0] = 0
-
-        print 267, numpy.count_nonzero(wm[mask88])
 
         gm = gm_pve-wm_pve-wm-subcort_smooth+gm_smooth+bs_roi
         gm[gm<0] = 0
