@@ -18,10 +18,9 @@ class HardiMrtrix(GenericTask):
         dwi = self.getImage(self.dependDir,'dwi', 'upsample')
         bFile = self.getImage(self.dependDir, 'grad', None, 'b')
         mask = self.getImage(self.registrationDir, 'mask', 'resample')
+        wmMask = self.getImage(self.maskingDir, 'tt5', ['resample','wm', 'mask'])
 
-
-        maskDwi2Response = self.getImage(self.maskingDir, 'aparc_aseg', ['resample', 'act', 'wm', 'mask'])
-        outputDwi2Response = self.__dwi2response(dwi, maskDwi2Response, bFile)
+        outputDwi2Response = self.__dwi2response(dwi, wmMask, bFile)
 
         #maskDwi2csd =  self.getImage(self.maskingDir, 'anat',['resample', 'extended', 'mask'])
         csdImage = self.__dwi2csd(dwi, outputDwi2Response, mask, bFile, self.buildName(dwi, "csd"))
@@ -88,8 +87,7 @@ class HardiMrtrix(GenericTask):
     def meetRequirement(self):
         return Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
                   (self.getImage(self.dependDir, 'grad', None, 'b'), "gradient encoding b file"),
-                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'),
-                  #@TODO fix me (self.getImage(self.maskingDir, 'mask', ['resample', 'wm']), 'white matter segmented mask'),
+                  (self.getImage(self.maskingDir, 'tt5', ['resample', 'wm', 'mask']), 'white matter segmented mask'),
                   (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain mask'))
 
 
