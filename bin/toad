@@ -135,16 +135,15 @@ def __manageEnvironnement(logger, arguments):
         for package in __pythonPackages:
             try:
                 imp.find_module(package)
-                if 'vtk' in package:
+                if package == 'vtk':
                     arguments.isVTKAvailable = True
             except ImportError:
-                if 'vtk' in package:
+                if package == 'vtk':
                     __pythonPackages.remove('vtk')
                     logger.warning("VTK not found, Please install vtk correctly", pause=True)
                     arguments.isVTKAvailable = False
                 else:
                     logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
-
         try:
             os.environ["FREESURFER_HOME"]
         except KeyError:
