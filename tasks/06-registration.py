@@ -24,7 +24,7 @@ class Registration(GenericTask):
         lhRibbon = self.getImage(self.parcellationDir, "lh_ribbon")
         brodmann = self.getImage(self.parcellationDir, "brodmann")
         tt5 = self.getImage(self.parcellationDir, "tt5")
-	mask = self.getImage(self.parcellationDir, "mask")
+        mask = self.getImage(self.parcellationDir, "mask")
 
         extraArgs = ""
         if self.get("parcellation", "intrasubject"):
@@ -45,11 +45,13 @@ class Registration(GenericTask):
         rhRibbonRegister = self.__applyRegistrationMrtrix(rhRibbon, mrtrixMatrix)
         tt5Register = self.__applyRegistrationMrtrix(tt5, mrtrixMatrix)
         maskRegister = self.__applyRegistrationMrtrix(mask, mrtrixMatrix)
+        normRegister = self.__applyRegistrationMrtrix(norm, mrtrixMatrix)
 
         self.__applyResampleFsl(lhRibbon, b0, freesurferToDWIMatrix, self.buildName(lhRibbon, "resample"),True)
         self.__applyResampleFsl(rhRibbon, b0, freesurferToDWIMatrix, self.buildName(rhRibbon, "resample"),True)
         self.__applyResampleFsl(tt5, b0, freesurferToDWIMatrix, self.buildName(tt5, "resample"),True)
-	self.__applyResampleFsl(mask, b0, freesurferToDWIMatrix, self.buildName(mask, "resample"),True)
+        self.__applyResampleFsl(mask, b0, freesurferToDWIMatrix, self.buildName(mask, "resample"),True)
+        self.__applyResampleFsl(norm, b0, freesurferToDWIMatrix, self.buildName(norm, "resample"),True)
 
         brodmannLRegister =  self.buildName(brodmannRegister, "left_hemisphere")
         brodmannRRegister =  self.buildName(brodmannRegister, "right_hemisphere")
@@ -142,6 +144,7 @@ class Registration(GenericTask):
                   (self.getImage(self.workingDir, 'mask', 'register'), 'brain mask register'),
                   (self.getImage(self.workingDir, 'tt5', 'resample'), '5tt image resample'),
                   (self.getImage(self.workingDir, 'mask', 'resample'), 'brain mask resample'),
+                  (self.getImage(self.workingDir, 'norm', 'resample'), 'brain  resample'),
                   (self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere'),
                   (self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere'))
 
