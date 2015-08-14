@@ -132,10 +132,10 @@ class Snr(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        return Images((self.getImage(self.workingDir, 'dwi', ['native', 'snr'], ext='png'), 'SNR of the raw DWI'),
-                        (self.getImage(self.workingDir, 'dwi', ['native', 'hist'], ext='png'), 'Noise histogram for the raw DWI'),
-                       )
-
+        #return Images((self.getImage(self.workingDir, 'dwi', ['native', 'snr'], ext='png'), 'SNR of the raw DWI'),
+        #                (self.getImage(self.workingDir, 'dwi', ['native', 'hist'], ext='png'), 'Noise histogram for the raw DWI'),
+        #               )
+	return False
     """
     def qaSupplier(self):
         dwiNative = self.getImage(self.preparationDir, 'dwi')
