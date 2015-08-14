@@ -49,7 +49,6 @@ class GenericTask(Logger, Load, Qa):
             self.dependencies.append(arg)
 
     def initializeDependenciesDirectories(self, tasks):
-        self.tasksAsReferences = tasks
         for index, dependency in enumerate(self.dependencies):
             for task in tasks:
                 if dependency == task.__name:
@@ -57,6 +56,9 @@ class GenericTask(Logger, Load, Qa):
                     setattr(self, "{}Dir".format(dependency), task.workingDir)
                     if index == 0:
                         self.dependDir = task.workingDir
+
+    def initializeTasksAsReferences(self, tasks):
+        self.tasksAsReferences = tasks
 
     def getOrder(self):
         """return the order of execution of this subclasses

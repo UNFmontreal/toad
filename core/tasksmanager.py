@@ -193,8 +193,12 @@ class TasksManager(object):
             workflow += self.__getWorkflow(dirtyTask, dependencies)
 
         #remove duplicate and sort
-        return sorted(set(workflow))
+        tasks = sorted(set(workflow))
 
+        for task in tasks:
+            task.initializeTasksAsReferences(tasks)
+
+        return tasks
 
     def __getWorkflow(self, source, tasks):
         """
