@@ -174,7 +174,7 @@ class GenericTask(Logger, Load, Qa):
         else:
             self.error("Illegal value return by meetRequirement method for task {}".format(self.getName()))
 
-        self.logFooter("isDirty", result)
+        self.logFooter("meetRequirement", result)
 
         return result
 
