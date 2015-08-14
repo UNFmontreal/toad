@@ -213,7 +213,6 @@ class GenericTask(Logger, Load, Qa):
 
         """
         self.logHeader("isDirty")
-
         if self.isIgnore():
             self.logFooter("isDirty", None)
             return False
@@ -229,11 +228,9 @@ class GenericTask(Logger, Load, Qa):
                 if self.get("arguments", "debug"):
                     self.debug(result)
                 result = result.isSomeImagesMissing()
-
             elif isinstance(result, bool):
                 if self.get("arguments", "debug"):
                     self.debug("No debugging information provided for this tasks")
-
             else:
                 self.error("Illegal value return by isDirty method for task {}".format(self.getName()))
 
