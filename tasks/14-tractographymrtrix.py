@@ -14,9 +14,8 @@ class TractographyMrtrix(GenericTask):
 
     def implement(self):
 
-        #act = self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"])
-        #seed_gmwmi = self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi")
-        seed_gmwmi = self.getImage(self.registrationDir, "tt5", "resample")
+        tt5 = self.getImage(self.registrationDir, "tt5", "register")
+        seed_gmwmi = self.getImage(self.maskingDir, "tt5", ["register", "5tt2gmwmi"])
         brodmann = self.getImage(self.registrationDir, "brodmann", "resample")
         norm = self.getImage(self.registrationDir, "norm", "resample")
 
@@ -29,7 +28,7 @@ class TractographyMrtrix(GenericTask):
         mask = self.getImage(self.registrationDir, 'mask', 'resample')
          
         #tensor part
-        tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, seed_gmwmi, seed_gmwmi, bFile, 'Tensor_Det')
+        tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
         tckDetConnectome = self.__tck2connectome(tckDet, brodmann, self.buildName(tckDet, 'connectome', 'csv'))
         tckDetConnectomeNormalize = self.__normalizeConnectome(tckDetConnectome, self.buildName(tckDetConnectome, 'normalize', 'csv'))
         mriutil.plotConnectome(tckDetConnectomeNormalize, self.buildName(tckDetConnectomeNormalize, None, "png"))
@@ -38,7 +37,7 @@ class TractographyMrtrix(GenericTask):
         tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, norm , self.buildName(tckDetRoi, None, 'trk'))
 
 
-        tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, seed_gmwmi, seed_gmwmi, bFile, 'Tensor_Prob')
+        tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
         tckProbConnectome = self.__tck2connectome(tckProb, brodmann, self.buildName(tckProb, 'connectome', 'csv'))
         tckProbConnectomeNormalize = self.__normalizeConnectome(tckProbConnectome, self.buildName(tckProbConnectome, 'normalize', 'csv'))
         mriutil.plotConnectome(tckProbConnectomeNormalize, self.buildName(tckProbConnectomeNormalize, None, "png"))
@@ -250,7 +249,8 @@ class TractographyMrtrix(GenericTask):
                   (self.getImage(self.registrationDir, "norm", "resample"), 'brain resampled'),
                   (self.getImage(self.maskingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
                   (self.getImage(self.registrationDir, "tt5", "resample"),'5tt resampled'),
-                  (self.getImage(self.maskingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'))
+                  (self.getImage(self.maskingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
+                  (self.getImage(self.workingDir, "tt5", ["register", "5tt2gmwmi"]), 'grey matter, white matter interface'))
 
 
 
