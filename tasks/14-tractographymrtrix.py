@@ -14,13 +14,11 @@ class TractographyMrtrix(GenericTask):
 
     def implement(self):
 
-        act = self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"])
+        #act = self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"])
         #seed_gmwmi = self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi")
         seed_gmwmi = self.getImage(self.registrationDir, "tt5", "resample")
         brodmann = self.getImage(self.registrationDir, "brodmann", "resample")
         norm = self.getImage(self.registrationDir, "norm", "resample")
-
-        #anatBrainResample = self.getImage(self.registrationDir,'anat', ['brain', 'resample'])
 
         mask253 = self.getImage(self.maskingDir, 'aparc_aseg',['253','mask'])
         mask1024= self.getImage(self.maskingDir, 'aparc_aseg',['1024','mask'])
@@ -28,10 +26,10 @@ class TractographyMrtrix(GenericTask):
         dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
 
         bFile = self.getImage(self.dependDir, 'grad', None, 'b')
-        mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended','mask'])
+        mask = self.getImage(self.registrationDir, 'mask', 'resample')
          
         #tensor part
-        tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Det')
+        tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, seed_gmwmi, seed_gmwmi, bFile, 'Tensor_Det')
         tckDetConnectome = self.__tck2connectome(tckDet, brodmann, self.buildName(tckDet, 'connectome', 'csv'))
         tckDetConnectomeNormalize = self.__normalizeConnectome(tckDetConnectome, self.buildName(tckDetConnectome, 'normalize', 'csv'))
         mriutil.plotConnectome(tckDetConnectomeNormalize, self.buildName(tckDetConnectomeNormalize, None, "png"))
@@ -40,7 +38,7 @@ class TractographyMrtrix(GenericTask):
         tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, norm , self.buildName(tckDetRoi, None, 'trk'))
 
 
-        tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, act, seed_gmwmi, bFile, 'Tensor_Prob')
+        tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, seed_gmwmi, seed_gmwmi, bFile, 'Tensor_Prob')
         tckProbConnectome = self.__tck2connectome(tckProb, brodmann, self.buildName(tckProb, 'connectome', 'csv'))
         tckProbConnectomeNormalize = self.__normalizeConnectome(tckProbConnectome, self.buildName(tckProbConnectome, 'normalize', 'csv'))
         mriutil.plotConnectome(tckProbConnectomeNormalize, self.buildName(tckProbConnectomeNormalize, None, "png"))
@@ -50,7 +48,7 @@ class TractographyMrtrix(GenericTask):
 
         #HARDI part
         csd =  self.getImage(self.hardimrtrixDir,'dwi','csd')
-        hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), act)
+        hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), seed_gmwmi)
         hardiTckConnectome = self.__tck2connectome(hardiTck, brodmann, self.buildName(hardiTck, 'connectome', 'csv'))
         hardiTckConnectomeNormalize = self.__normalizeConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, 'normalize', 'csv'))
         mriutil.plotConnectome(hardiTckConnectomeNormalize, self.buildName(hardiTckConnectomeNormalize, None, "png"))
@@ -247,14 +245,12 @@ class TractographyMrtrix(GenericTask):
         #@TODO add brain mask and 5tt as requierement
         return Images((self.getImage(self.dependDir,'dwi','upsample'), 'upsampled diffusion weighted'),
                   (self.getImage(self.dependDir, 'grad', None, 'b'), '.b gradient encoding file'),
-                  #(self.getImage(self.maskingDir, "aparc_aseg", ["register", "act"]), 'resampled anatomically constrained tractography'),
-                  #(self.getImage(self.maskingDir, "aparc_aseg", "5tt2gmwmi"), 'seeding streamlines 5tt2gmwmi'),
+                  (self.getImage(self.registrationDir, "mask", "resample"), 'mask resampled'),
                   (self.getImage(self.registrationDir, "brodmann", "resample"), 'resampled brodmann area'),
                   (self.getImage(self.registrationDir, "norm", "resample"), 'brain resampled'),
                   (self.getImage(self.maskingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
                   (self.getImage(self.registrationDir, "tt5", "resample"),'5tt resampled'),
                   (self.getImage(self.maskingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'))
-                  #(self.getImage(self.maskingDir, 'anat',['resample', 'extended','mask']), 'ultimate extended mask'))
 
 
 
