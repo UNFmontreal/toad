@@ -1,3 +1,4 @@
+import random
 import shutil
 import os
 from core.generictask import GenericTask
@@ -18,11 +19,13 @@ class Masking(GenericTask):
     def implement(self):
         aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
         aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
-        tt5Register = self.getImage(self.dependDir,"tt5", "register")
-        tt5Resample = self.getImage(self.dependDir,"tt5", "resample")
         maskRegister = self.getImage(self.dependDir,"mask", "register")
         maskResample = self.getImage(self.dependDir,"mask", "resample")
 
+        tt5Register = self.getImage(self.dependDir,"tt5", "register")
+        tt5Resample = self.getImage(self.dependDir,"tt5", "resample")
+        #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
+        seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 
         #extended = self.buildName('anat', ['resample', 'extended'])
         #self.info("Add {} and {} images together in order to create the ultimate image"
@@ -51,9 +54,6 @@ class Masking(GenericTask):
 
         #extract the white matter mask from the act
         whiteMatterAct = self.__extractWhiteMatterFrom5tt(tt5Resample)
-
-        #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
-        #seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 
         colorLut =  os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", "freesurfer_lut"))
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
@@ -145,7 +145,7 @@ class Masking(GenericTask):
             the output mask image
         """
 
-        tmp = os.path.join(self.workingDir, "tmp.nii")
+        tmp = 'tmp_5tt2gmwmi_{0:.6g}.nii.gz'.format(random.randint(0,999999))
         target = self.buildName(source, "5tt2gmwmi")
         self.info("Starting 5tt2gmwmi creation from mrtrix on {}".format(source))
 
@@ -163,14 +163,17 @@ class Masking(GenericTask):
     def meetRequirement(self):
         return Images((self.getImage(self.dependDir,"aparc_aseg", "resample"), 'resampled parcellation'),
                     (self.getImage(self.dependDir,"aparc_aseg", "register"), 'register parcellation'),
-                    (self.getImage(self.dependDir,'mask', 'resample'),  'brain extracted, resampled high resolution'))
-
+                    (self.getImage(self.dependDir,'mask', 'resample'),  'brain extracted, resampled high resolution'),
+                    (self.getImage(self.dependDir,'mask', 'register'),  'brain extracted, register high resolution'),
+                    (self.getImage(self.dependDir,'tt5', 'resample'),  '5tt resample'),
+                    (self.getImage(self.dependDir,'tt5', 'register'),  '5tt register'))
 
     def isDirty(self):
         images = Images((os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
                      (self.getImage(self.workingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
                      (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
-                     (self.getImage(self.workingDir, "tt5", ["resample", "wm", "mask"]), 'resample white segmented mask'))
+                     (self.getImage(self.workingDir, "tt5", ["resample", "wm", "mask"]), 'resample white segmented mask'),
+                     (self.getImage(self.workingDir, "tt5", ["register", "5tt2gmwmi"]), 'grey matter, white matter interface'))
 
         if self.get("start_seeds").strip() != "":
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask']), 'high resolution, start, brain extracted mask'))
