@@ -227,6 +227,22 @@ class Qa(object):
         return target
 
 
+    def plotSigma(self, sigma, target):
+        """
+        """
+        matplotlib.pyplot.clf()
+        y_pos = numpy.arange(len(sigma))
+        sigmaMedian = numpy.median(sigma)
+        matplotlib.pyplot.barh(y_pos, sigma)
+        matplotlib.pyplot.xlabel('Sigma, median = {0}'.format(sigmaMedian))
+        matplotlib.pyplot.ylabel('z-axis')
+        matplotlib.pyplot.title('Sigma data for each z slice')
+        matplotlib.pyplot.savefig(target)
+        matplotlib.pyplot.close()
+        matplotlib.rcdefaults()
+        return target
+
+
     def noiseAnalysis(self, source, maskNoise, maskCc, targetSnr, targetHist):
         """
         """

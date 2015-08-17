@@ -39,6 +39,14 @@ class Denoising(GenericTask):
                 nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.float32),
                                                  dwiImage.get_affine()), self.buildName(target, "noise_mask"))
 
+                #QA
+                noiseMask = self.getImage(self.workingDir, "noise_mask")
+                noiseMaskPng = self.buildName(noiseMask, None, 'png')
+                #@TODO remplacer dwi par une b0
+                self.slicerPng(dwi, noiseMaskPng, maskOverlay=noiseMask)
+                sigmaPng = self.buildName(dwi, 'sigma', 'png')
+                self.plotSigma(sigma, sigmaPng)
+
 
             elif self.get('general', 'matlab_available'):
                 dwi = self.__getDwiImage()
@@ -62,18 +70,14 @@ class Denoising(GenericTask):
                              .format(self.get("algorithm")))
 
             #QA
-            #workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
-            #@TODO b0 brain mask from eddy tasks do not exists anymore
-            #if 0:
-            #if workingDirDwi:
+            workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
+            if workingDirDwi:
                 #@TODO  remove comments --add a method to get the correct mask
-                #mask = os.path.join(self.dependDir, 'topup_results_image_tmean_brain.nii.gz')
-                #mask = self.getImage(self.dependDir, 'b0', 'brain')
-                #dwiCompareGif = self.buildName(workingDirDwi, 'compare', 'gif')
-                #dwiGif = self.buildName(workingDirDwi, None, 'gif')
-
-                #self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=mask)
-                #self.slicerGif(workingDirDwi, dwiGif, boundaries=mask)
+                dwiGif = self.buildName(workingDirDwi, None, 'gif')
+                dwiCompareGif = self.buildName(workingDirDwi, 'compare', 'gif')
+                brainMask = self.getImage(self.dependDir, 'mask_eddy')
+                self.slicerGif(workingDirDwi, dwiGif, boundaries=brainMask)
+                self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=brainMask)
 
 
     def __getDwiImage(self):
@@ -160,24 +164,27 @@ class Denoising(GenericTask):
         return Images((self.getImage(self.workingDir, "dwi", 'denoise'), 'denoised'))
                        #(self.getImage(self.workingDir, "noise_mask", 'denoise'), 'denoised'))
 
-    #def qaSupplier(self):
-    #    denoiseGif = self.getImage(self.workingDir, 'dwi', 'denoise', ext='gif')
-    #    compareGif = self.getImage(self.workingDir, 'dwi', 'compare', ext='gif')
+    def qaSupplier(self):
+        denoiseGif = self.getImage(self.workingDir, 'dwi', 'denoise', ext='gif')
+        compareGif = self.getImage(self.workingDir, 'dwi', 'compare', ext='gif')
 
-    #    images = Images((denoiseGif,'Denoised diffusion image'),
-    #                    (compareGif,'Before and after denoising'),
-    #                   )
-    #    images.setInformation(self.get("algorithm"))
+        images = Images((denoiseGif,'Denoised diffusion image'),
+                        (compareGif,'Before and after denoising'),
+                       )
 
-    #    return images
+        message = 'Algorithm {} is set'.format(self.get("algorithm"))
+        if self.matlabWarning:
+            message += ' but matlab is not available on this server'
+        images.setInformation(message)
 
-    #@TODO someone have to fix that
-    #images = Images((denoiseGif,'Denoised diffusion image'),
-    #                (compareGif,'Before and after denoising'),
-    #               )
+        tags = (
+            ('sigma', 'Sigmas from nlmean'),
+            ('noise_mask', 'Noise mask from nlmean'),
+            )
 
-    #message = 'Algorithm {} is set'.format(self.get("algorithm"))
-    #if self.matlabWarning:
-    #    message += ' but matlab is not available for this server'
-    #images.setInformation(message)
+        for prefix, description in tags:
+            pngImage = self.getImage(self.workingDir, prefix, ext='png')
+            if pngImage:
+                images.extend(Images((pngImage, description)))
 
+        return images
