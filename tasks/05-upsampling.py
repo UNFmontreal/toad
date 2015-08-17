@@ -11,7 +11,7 @@ class Upsampling(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'eddy', 'fieldmap', 'qa')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'eddy', 'fieldmap')
 
 
     def implement(self):
@@ -33,19 +33,6 @@ class Upsampling(GenericTask):
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
 
-
-        #QA
-        """
-        anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
-        anatBrainMask = self.getImage(self.workingDir, 'anat', ['brain', 'mask'])
-        anatWmMask = self.getImage(self.workingDir, 'anat', ['brain', 'wm'])
-
-        anatBrainMaskPng = self.buildName(anatBrainMask, None, 'png')
-        anatWmMaskPng = self.buildName(anatWmMask, None, 'png')
-
-        self.slicerPng(anat, anatBrainMaskPng, maskOverlay=anatBrainMask, boundaries=anatBrainMask)
-        self.slicerPng(anat, anatWmMaskPng, maskOverlay=anatWmMask, boundaries=anatWmMask)
-        """
 
     def __linkDwiImage(self):
 
@@ -97,12 +84,3 @@ class Upsampling(GenericTask):
     def isDirty(self):
         return Images((self.getImage(self.workingDir, 'dwi', "upsample"), 'upsampled diffusion weighted'),
                   (self.getImage(self.workingDir, 'b0', "upsample"), 'upsampled b0'))
-
-    """
-    def qaSupplier(self):
-
-        anatBrainMaskPng = self.getImage(self.workingDir, 'anat', ['brain', 'mask'], ext='png')
-        #anatWmMaskPng = self.getImage(self.workingDir, 'anat', ['brain', 'wm'], ext='png')
-        #(anatWmMaskPng, 'White matter mask on high resolution anatomical image of freesurfer'),
-        return Images((anatBrainMaskPng, 'Brain mask on high resolution anatomical image of freesurfer'))
-    """
