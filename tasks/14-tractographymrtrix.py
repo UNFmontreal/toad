@@ -47,7 +47,7 @@ class TractographyMrtrix(GenericTask):
 
         #HARDI part
         csd =  self.getImage(self.hardimrtrixDir,'dwi','csd')
-        hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), seed_gmwmi)
+        hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
         hardiTckConnectome = self.__tck2connectome(hardiTck, brodmann, self.buildName(hardiTck, 'connectome', 'csv'))
         hardiTckConnectomeNormalize = self.__normalizeConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, 'normalize', 'csv'))
         mriutil.plotConnectome(hardiTckConnectomeNormalize, self.buildName(hardiTckConnectomeNormalize, None, "png"))
