@@ -254,7 +254,7 @@ class TractographyMrtrix(GenericTask):
 
 
 
-    def isDirty(self, result = False):
+    def isDirty(self):
 
         return Images((self.getImage(self.workingDir, 'dwi', 'tensor_det', 'tck'), "deterministic tensor connectome matrix from a streamlines"),
                   (self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome', 'normalize'], 'csv'), "normalize deterministic tensor connectome matrix from a streamlines csv"),
@@ -264,7 +264,7 @@ class TractographyMrtrix(GenericTask):
                   (self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck'), 'tcksift'),
                   (self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome', 'normalize'], 'csv'), 'normalize connectome matrix from a tcksift csv'))
 
-
+    """
     def qaSupplier(self):
 
 
@@ -286,3 +286,4 @@ class TractographyMrtrix(GenericTask):
                        (tcksiftPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
                        (tcksiftPlot, 'tcksift'))
         return images
+    """

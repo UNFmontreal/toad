@@ -313,11 +313,12 @@ class GenericTask(Logger, Load, Qa):
                 except Exception, exception:
                     print "exception=",exception
                     print "traceBack = ", traceback.format_exc()
-                    self.warning("Exception have been caught, the error message is:".format(exception))
-                    self.warning("Traceback is: ".format(traceback.format_exc()))
+                    self.warning("Exception have been caught, the error message is: {}".format(exception))
+                    self.warning("Traceback is: {}".format(traceback.format_exc()))
                 if attempt == nbSubmission:
                     self.error("I already execute this task {} time and failed, exiting the pipeline")
-                elif self.isDirty():
+
+                elif self.isTaskDirty():
                     self.info("A problems occur during the execution of this task, resubmitting this task again")
                     attempt += 1
                 else:
