@@ -114,7 +114,6 @@ class Eddy(GenericTask):
         #QA
         dwi = self.getImage(self.dependDir, 'dwi')
         workingDirDwi = self.getImage(self.workingDir, 'dwi', 'eddy')
-        eddyParameterFiles = self.getImage(self.workingDir, 'dwi', ext='eddy_parameters')
         bVecs = self.getImage(self.dependDir, 'grad',  None, 'bvecs')
         bVecsCorrected = self.getImage(self.workingDir, 'grad',  'eddy', 'bvecs')
 
@@ -344,7 +343,7 @@ class Eddy(GenericTask):
 
         information = ''
         if self.getImage(self.dependDir, 'b0_ap') and self.getImage(self.dependDir, 'b0_pa'):
-            information = 'Distortion correction done at this step with AP and PA image'
+            information = 'Distortion correction done at this step with AP and PA images'
         elif self.getImage(self.dependDir, 'mag') and self.getImage(self.dependDir, 'phase'):
             information = 'Distorsion correction will be done with fieldmap data'
         else:
