@@ -42,23 +42,22 @@ class Parcellation(GenericTask):
             self.__cleanup()
 
         #QA
-        workingDirAnat = self.getImage(self.workingDir, 'anat', 'freesurfer')
-        #mask = self.getImage(self.workingDir, 'mask')
+        brainMask = self.getImage(self.workingDir, 'mask')
         aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
         brodmann = self.getImage(self.workingDir, 'brodmann')
         norm = self.getImage(self.workingDir, 'norm')
 
-        #anatPng = self.buildName(workingDirAnat, None, 'png')
-        #maskPng = self.buildName(mask, None, 'png')
-        #aparcAsegPng = self.buildName(aparcAseg, None, 'png')
-        #brodmannPng = self.buildName(brodmann, None, 'png')
-        #normPng = self.buildName(norm, None, 'png')
+        anatPng = self.buildName(anatFreesurfer, None, 'png')
+        brainMaskPng = self.buildName(brainMask, None, 'png')
+        aparcAsegPng = self.buildName(aparcAseg, None, 'png')
+        brodmannPng = self.buildName(brodmann, None, 'png')
+        normPng = self.buildName(norm, None, 'png')
 
-        #self.slicerPng(workingDirAnat, anatPng, boundaries=mask)
-        #self.slicerPng(workingDirAnat, maskPng, maskOverlay=mask, boundaries=mask)
-        #self.slicerPng(workingDirAnat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
-        #self.slicerPng(workingDirAnat, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
-        #self.slicerPng(workingDirAnat, normPng, boundaries=mask)
+        self.slicerPng(anatFreesurfer, anatPng, boundaries=brainMask)
+        self.slicerPng(anatFreesurfer, brainMaskPng, maskOverlay=brainMask, boundaries=brainMask)
+        self.slicerPng(anatFreesurfer, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
+        self.slicerPng(anatFreesurfer, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
+        self.slicerPng(norm, normPng, maskOverlay=brainMask, boundaries=brainMask)
 
 
     def __findAndLinkFreesurferStructure(self):
@@ -421,7 +420,7 @@ class Parcellation(GenericTask):
                   (self.getImage(self.workingDir, 'mask'), 'freesurfer brain masks'),
                   (self.getImage(self.workingDir, 'tt5'), '5tt'),)
 
-    """
+    
     def qaSupplier(self):
 
         qaImages = Images()
@@ -439,4 +438,3 @@ class Parcellation(GenericTask):
             qaImages.extend(Images((pngImage, description)))
 
         return qaImages
-    """
