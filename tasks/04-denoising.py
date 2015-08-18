@@ -32,8 +32,7 @@ class Denoising(GenericTask):
                 dwiImage = nibabel.load(dwi)
                 dwiData  = dwiImage.get_data()
 
-                sigmaVector, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
-                sigma = numpy.median(sigmaVector)
+                sigma, sigmaVector, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
                 self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
                 denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
@@ -145,9 +144,7 @@ class Denoising(GenericTask):
                                                                                          N=numberArrayCoil,
                                                                                          return_mask=True)
             sigmaVector[idx] = sigmaMatrix[0,0,idx,0]
-        return sigmaVector, maskNoise
-
-
+        return numpy.median(sigmaVector), sigmaVector, maskNoise
 
 
     def isIgnore(self):
