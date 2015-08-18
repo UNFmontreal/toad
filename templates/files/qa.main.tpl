@@ -16,7 +16,7 @@
                 text-align:center;
                 margin-left:auto;
                 margin-right:auto;}
-            .size{
+            .large_view{
                 width:80vw;}
         </style>
         <title>TOAD-Qa</title>

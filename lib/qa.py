@@ -296,14 +296,6 @@ class Qa(object):
         matplotlib.rcdefaults()
     
     
-    def writeTable(self, imageLink, legend):
-        """
-        return html table with one column
-        """
-        tags = {'imageLink':imageLink, 'legend':legend}
-        return self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/qa.table.tpl"))
-        
-        
     def createQaReport(self, images):
         """create html report for a task with qaSupplier implemented
         Args:
@@ -317,11 +309,18 @@ class Qa(object):
         
         print "createQaReport images =", images
         for imageLink, legend in images:
-            #@TODO Take into account multiple run of QA
             if imageLink:
                 path, filename =  os.path.split(imageLink)
+                classType = 'large_view'
+                if any(_ in filename or _ in ['_translations', '_rotations', '_eddy_vectors', '_sigma']):
+                    classType = 'small_view'
                 shutil.copyfile(imageLink, os.path.join(imagesDir, filename))
-                tags = {'imageLink':os.path.join(self.config.get('qa', 'images_dir'), filename),'legend':legend}
+                relativeLink = os.path.join(self.config.get('qa', 'images_dir'), filename)
+                tags = {
+                    'imageLink':relativeLink,
+                    'legend':legend,
+                    'class':classType,
+                    }
                 tablesCode += self.parseTemplate(tags, tableTemplate)
             else:
                 tags = {'imageLink':'', 'legend':legend}
