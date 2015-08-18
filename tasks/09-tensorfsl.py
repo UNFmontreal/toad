@@ -108,7 +108,7 @@ class TensorFsl(GenericTask):
             ('ad', 'Axial Diffusivity'),
             ('md', 'Mean Diffusivity'),
             ('rd', 'Radial Diffusivity'),
-            ('sse', 'Sum of squared errors')
+            ('sse', 'Sum of squared errors'),
             )
 
         for prefix, description in tags:
