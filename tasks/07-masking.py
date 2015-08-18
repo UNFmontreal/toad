@@ -13,7 +13,7 @@ class Masking(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'registration')
+        GenericTask.__init__(self, subject, 'registration', 'preparation', 'qa')
 
 
     def implement(self):
@@ -58,6 +58,15 @@ class Masking(GenericTask):
         colorLut =  os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", "freesurfer_lut"))
         self.info("Copying {} file into {}".format(colorLut, self.workingDir))
         shutil.copy(colorLut, self.workingDir)
+
+        #QA
+        
+
+        seed_gmwmiPng = self.buildName(seed_gmwmi, None, 'png')
+        whiteMatterActPng = self.buildName(whiteMatterAct, None, 'png')
+
+        self.slicerPng(b0, seed_gmwmiPng, maskOverlay=seed_gmwmi, boundaries=seed_gmwmi)
+        self.slicerPng(b0, whiteMatterActPng, maskOverlay=whiteMatterAct, boundaries=whiteMatterAct)
 
 
 
@@ -188,3 +197,6 @@ class Masking(GenericTask):
             images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract']), 'high resolution, excluded, brain extracted'))
 
         return images
+
+    def qaSupplier(self):
+        
