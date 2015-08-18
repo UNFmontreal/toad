@@ -7,7 +7,7 @@ import numpy
 
 from core.generictask import GenericTask
 from lib.images import Images
-from lib import util
+from lib import util, mriutil
 
 
 __author__ = 'desmat'
@@ -32,7 +32,8 @@ class Denoising(GenericTask):
                 dwiImage = nibabel.load(dwi)
                 dwiData  = dwiImage.get_data()
 
-                sigma, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
+                sigmaVector, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
+                sigma = numpy.median(sigmaVector)
                 self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
                 denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
                 nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
@@ -40,12 +41,16 @@ class Denoising(GenericTask):
                                                  dwiImage.get_affine()), self.buildName(target, "noise_mask"))
 
                 #QA
+                bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
+                b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
+                self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals)) 
+
                 noiseMask = self.getImage(self.workingDir, "noise_mask")
                 noiseMaskPng = self.buildName(noiseMask, None, 'png')
-                #@TODO remplacer dwi par une b0
-                self.slicerPng(dwi, noiseMaskPng, maskOverlay=noiseMask)
+                self.slicerPng(b0, noiseMaskPng, maskOverlay=noiseMask)
+
                 sigmaPng = self.buildName(dwi, 'sigma', 'png')
-                self.plotSigma(sigma, sigmaPng)
+                self.plotSigma(sigmaVector, sigmaPng)
 
 
             elif self.get('general', 'matlab_available'):
@@ -75,7 +80,7 @@ class Denoising(GenericTask):
                 #@TODO  remove comments --add a method to get the correct mask
                 dwiGif = self.buildName(workingDirDwi, None, 'gif')
                 dwiCompareGif = self.buildName(workingDirDwi, 'compare', 'gif')
-                brainMask = self.getImage(self.dependDir, 'mask_eddy')
+                brainMask = self.getImage(self.dependDir, 'mask', 'eddy')
                 self.slicerGif(workingDirDwi, dwiGif, boundaries=brainMask)
                 self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=brainMask)
 
@@ -122,7 +127,7 @@ class Denoising(GenericTask):
             data: A dMRI 4D matrix
 
         Returns:
-            a float representing sigma "The estimated standard deviation of the gaussian noise"
+            a list of float representing sigma "The estimated standard deviation of the gaussian noise" for each z slices
             and a mask identyfing all the pure noise voxel that were found.
         """
 
@@ -140,7 +145,7 @@ class Denoising(GenericTask):
                                                                                          N=numberArrayCoil,
                                                                                          return_mask=True)
             sigmaVector[idx] = sigmaMatrix[0,0,idx,0]
-        return numpy.median(sigmaVector), maskNoise
+        return sigmaVector, maskNoise
 
 
 
