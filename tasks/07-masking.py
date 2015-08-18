@@ -13,7 +13,7 @@ class Masking(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'registration', 'preparation', 'qa')
+        GenericTask.__init__(self, subject, 'registration', 'preparation', 'eddy' 'qa')
 
 
     def implement(self):
@@ -60,7 +60,10 @@ class Masking(GenericTask):
         shutil.copy(colorLut, self.workingDir)
 
         #QA
-        
+        dwi = self.getImage(self.eddyDir, 'dwi')
+        bVals=  self.getImage(self.preparationDir, 'grad',  None, 'bvals')
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
+        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals)) 
 
         seed_gmwmiPng = self.buildName(seed_gmwmi, None, 'png')
         whiteMatterActPng = self.buildName(whiteMatterAct, None, 'png')
@@ -199,4 +202,7 @@ class Masking(GenericTask):
         return images
 
     def qaSupplier(self):
-        
+        return Images(
+            (self.getImage(self.workingDir, "tt5", ["register", "5tt2gmwmi"], ext='png'), 'Grey matter, white matter interface'),
+            (self.getImage(self.workingDir, "tt5", ["resample", "wm", "mask"], ext='png'), 'Resample white segmented mask'),
+            )
