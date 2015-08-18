@@ -50,7 +50,7 @@ class Registration(GenericTask):
         self.__applyResampleFsl(lhRibbon, b0, freesurferToDWIMatrix, self.buildName(lhRibbon, "resample"),True)
         self.__applyResampleFsl(rhRibbon, b0, freesurferToDWIMatrix, self.buildName(rhRibbon, "resample"),True)
         self.__applyResampleFsl(tt5, b0, freesurferToDWIMatrix, self.buildName(tt5, "resample"),True)
-        self.__applyResampleFsl(mask, b0, freesurferToDWIMatrix, self.buildName(mask, "resample"),True)
+        maskResample = self.__applyResampleFsl(mask, b0, freesurferToDWIMatrix, self.buildName(mask, "resample"),True)
         self.__applyResampleFsl(norm, b0, freesurferToDWIMatrix, self.buildName(norm, "resample"),True)
 
         brodmannLRegister =  self.buildName(brodmannRegister, "left_hemisphere")
@@ -60,19 +60,17 @@ class Registration(GenericTask):
         self.__multiply(brodmannRegister, rhRibbonRegister, brodmannRRegister)
 
         #QA
-        '''
-        b0BrainMask = self.getImage(self.workingDir, 'anat', ['brain', 'resample'])
         aparcAseg = self.getImage(self.workingDir, 'aparc_aseg', 'resample')
         brodmann = self.getImage(self.workingDir, 'brodmann', 'resample')
 
-        b0BrainMaskPng = self.buildName(b0, 'brain', 'png')
+        maskResamplePng = self.buildName(maskResample, None, 'png')
         aparcAsegPng = self.buildName(aparcAseg, None, 'png')
         brodmannPng = self.buildName(brodmann, None, 'png')
 
-        self.slicerPng(b0, b0BrainMaskPng, maskOverlay=b0BrainMask, boundaries=b0BrainMask)
-        self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg, boundaries=b0BrainMask)
-        self.slicerPng(b0, brodmannPng, segOverlay=brodmann, boundaries=b0BrainMask)
-        '''
+        self.slicerPng(b0, maskResamplePng, maskOverlay=maskResample, boundaries=maskResample)
+        self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg, boundaries=maskResample)
+        self.slicerPng(b0, brodmannPng, segOverlay=brodmann, boundaries=maskResample)
+
 
     def __multiply(self, source, ribbon, target):
 
@@ -148,15 +146,13 @@ class Registration(GenericTask):
                   (self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere'),
                   (self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere'))
 
-    """
     def qaSupplier(self):
 
-        b0BrainMaskPng = self.getImage(self.workingDir, 'b0', 'brain', ext='png')
+        brainMaskPng = self.getImage(self.workingDir, 'mask', ext='png')
         aparcAsegPng = self.getImage(self.workingDir, 'aparc_aseg', ext='png')
         brodmannPng = self.getImage(self.workingDir, 'brodmann', ext='png')
 
-        return Images((b0BrainMaskPng, 'Brain mask on upsampled b0'),
+        return Images((brainMaskPng, 'Brain mask on upsampled b0'),
                       (aparcAsegPng, 'aparcaseg segmentaion on upsampled b0'),
                       (brodmannPng, 'Brodmann segmentaion on upsampled b0'),
                      )
-    """
