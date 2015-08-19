@@ -121,7 +121,7 @@ class Correction(GenericTask):
                                                     self.buildName(parcellationMask, 'corrected'),
                                                     extraArgs)
 
-        self.rename(outputImage, self.buildName('dwi', 'corrected'))
+        self.rename(outputImage, self.buildName(outputImage, 'corrected'))
 
 
         #QA
