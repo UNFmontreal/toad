@@ -657,10 +657,10 @@ class Unftoad(object):
         config = ConfigParser.ConfigParser()
         if os.path.exists(configFile):
             config.read(configFile)
-        if not config.has_section("fieldmap"):
-            config.add_section('fieldmap')
-        config.set('fieldmap', "echo_time_mag1", echo1)
-        config.set('fieldmap', "echo_time_mag2", echo2)
+        if not config.has_section("correction"):
+            config.add_section('correction')
+        config.set('correction', "echo_time_mag1", echo1)
+        config.set('correction', "echo_time_mag2", echo2)
         with open(configFile,'w') as w:
             config.write(w)
 

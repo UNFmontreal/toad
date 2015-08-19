@@ -180,7 +180,7 @@ class Validation(object):
                   'b0_pa': (util.getImage(self.config, self.workingDir, 'b0_pa'), "anterior to posterior b0")}
 
 
-        if self.config.get('arguments', 'debug'):
+        if self.config.get('arguments', 'debug') == 'True':
             self.logger.debug("Images found into {} directory: {}".format(self.workingDir, images))
 
         for key, (value, description) in images.iteritems():
