@@ -16,7 +16,7 @@ class Denoising(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'parcellation', 'qa')
+        GenericTask.__init__(self, subject, 'correction', 'preparation', 'parcellation', 'qa')
         self.matlabWarning = False
 
 
@@ -97,10 +97,8 @@ class Denoising(GenericTask):
 
 
     def __getDwiImage(self):
-        if self.getImage(self.dependDir, "dwi", 'unwarp'):
-            return self.getImage(self.dependDir, "dwi", 'unwarp')
-        elif self.getImage(self.dependDir, "dwi", 'eddy'):
-            return self.getImage(self.dependDir, "dwi", 'eddy')
+        if self.getImage(self.dependDir, "dwi", 'corrected'):
+            return self.getImage(self.dependDir, "dwi", 'corrected')
         else:
             return self.getImage(self.preparationDir, "dwi")
 
@@ -172,8 +170,7 @@ class Denoising(GenericTask):
 
 
     def meetRequirement(self, result = True):
-        images = Images((self.getImage(self.dependDir, "dwi", 'unwarp'), 'unwarp'),
-                       (self.getImage(self.dependDir, "dwi", 'eddy'), 'eddy corrected'),
+        images = Images((self.getImage(self.dependDir, "dwi", 'corrected'), 'corrected'),
                        (self.getImage(self.preparationDir, "dwi"), 'diffusion weighted'))
 
         if not images.isAtLeastOneImageExists():

@@ -12,7 +12,7 @@ class Snr(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preparation', 'parcellation', 'eddy',
+        GenericTask.__init__(self, subject, 'preparation', 'parcellation', 'correction',
                                             'denoising', 'registration', 'masking', 'qa')
 
 
@@ -22,7 +22,7 @@ class Snr(GenericTask):
         #Extract b0 from dwiNative
         bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
         if not bVals:
-            bVals= self.getImage(self.eddyDir, 'grad', None, 'bvals')
+            bVals= self.getImage(self.correctionDir, 'grad', None, 'bvals')
         b0Basename = os.path.basename(dwiNative).replace(self.get('prefix', 'dwi'), self.get('prefix', 'b0'))
         b0 = os.path.join(self.workingDir, b0Basename)
         self.info(mriutil.extractFirstB0FromDwi(dwiNative, b0, bVals))
@@ -42,12 +42,12 @@ class Snr(GenericTask):
         cCResample = self.getImage(self.maskingDir, 'aparc_aseg', ['253', 'mask'])
         dwiNativeCcMask = self.__resampling(cCResample, b0)
 
-
-    def __getUnwarpImage(self):
-        dwi = self.getImage(self.eddyDir, 'dwi', 'unwarp')
-        if not dwi:
-            dwi = self.getImage(self.eddyDir, 'dwi', 'eddy')
-        return dwi
+    #@DEBUG task correction may not have been run
+    #def __getUnwarpImage(self):
+    ##    dwi = self.getImage(self.correctionDir, 'dwi', 'corrected')
+    #    if not dwi:
+    #        dwi = self.getImage(self.eddyDir, 'dwi', 'eddy')
+    #    return dwi
 
 
     def __computeNoiseMask(self, brain):
