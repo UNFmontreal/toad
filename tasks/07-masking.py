@@ -161,8 +161,8 @@ class Masking(GenericTask):
 
 
     def meetRequirement(self):
-        return Images((self.getImage(self.dependDir,"aparc_aseg", "resample"), 'resampled parcellation'),
-                    (self.getImage(self.dependDir,"aparc_aseg", "register"), 'register parcellation'),
+        return Images((self.getImage(self.dependDir,"aparc_aseg", "resample"), 'resampled parcellation atlas'),
+                    (self.getImage(self.dependDir,"aparc_aseg", "register"), 'register parcellation atlas'),
                     (self.getImage(self.dependDir,'mask', 'resample'),  'brain extracted, resampled high resolution'),
                     (self.getImage(self.dependDir,'mask', 'register'),  'brain extracted, register high resolution'),
                     (self.getImage(self.dependDir,'tt5', 'resample'),  '5tt resample'),
@@ -170,8 +170,8 @@ class Masking(GenericTask):
 
     def isDirty(self):
         images = Images((os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
-                     (self.getImage(self.workingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
-                     (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
+                     (self.getImage(self.workingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg atlas'),
+                     (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg atlas'),
                      (self.getImage(self.workingDir, "tt5", ["resample", "wm", "mask"]), 'resample white segmented mask'),
                      (self.getImage(self.workingDir, "tt5", ["register", "5tt2gmwmi"]), 'grey matter, white matter interface'))
 

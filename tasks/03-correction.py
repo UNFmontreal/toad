@@ -11,7 +11,7 @@ matplotlib.use('Agg')
 __author__ = 'desmat'
 
 
-class Eddy(GenericTask):
+class Correction(GenericTask):
 
 
     def __init__(self, subject):
@@ -91,34 +91,37 @@ class Eddy(GenericTask):
         #create an index file
         indexFile = self.__createIndexFile(mriutil.getNbDirectionsFromDWI(dwi))
 
-        outputEddyImage = self.__correctionEddy2(dwi,
+        outputImage = self.__correctionEddy2(dwi,
                                     mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
 
-
-        b0Target = self.buildName(b0, 'eddy')
-        self.info(mriutil.extractFirstB0FromDwi(outputEddyImage, b0Target, bVals))
-        mask = mriutil.computeDwiMaskFromFreesurfer(b0Target,
-                                                    norm,
-                                                    parcellationMask,
-                                                    self.buildName(parcellationMask, 'eddy'),
-                                                    extraArgs)
 
 
         eddyParameterFiles = self.getImage(self.workingDir, 'dwi', None, 'eddy_parameters')
         if eddyParameterFiles:
             self.info("Apply eddy movement correction to gradient encodings directions")
-            bCorrected = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles, self.buildName(outputEddyImage, None, 'b'))
-            self.info(mriutil.mrtrixToFslEncoding(outputEddyImage,
-                                        bCorrected,
-                                        self.buildName(outputEddyImage, None, 'bvecs'),
-                                        self.buildName(outputEddyImage, None, 'bvals')))
+            bEnc = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles, self.buildName(outputImage, None, 'b'))
+            self.info(mriutil.mrtrixToFslEncoding(outputImage,
+                                        bEnc,
+                                        self.buildName(outputImage, None, 'bvecs'),
+                                        self.buildName(outputImage, None, 'bvals')))
 
 
 
         #proceed with fieldmap if provided
         if mag and phase:
-            self.__computeFieldmap(outputEddyImage, b0Target, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
+           outputImage = self.__computeFieldmap(outputImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
 
+
+        #produce a valid b0 and mask for QA
+        b0Corrected = self.buildName(b0, 'corrected')
+        self.info(mriutil.extractFirstB0FromDwi(outputImage, b0Corrected, bVals))
+        maskCorrected = mriutil.computeDwiMaskFromFreesurfer(b0Corrected,
+                                                    norm,
+                                                    parcellationMask,
+                                                    self.buildName(parcellationMask, 'corrected'),
+                                                    extraArgs)
+
+        self.rename(outputImage, self.buildName('dwi', 'corrected'))
 
 
         #QA
@@ -326,8 +329,11 @@ class Eddy(GenericTask):
 
 
 
-    def __computeFieldmap(self, dwi, b0, bVals, mag, phase, norm, parcellationMask, freesurferAnat):
+    def __computeFieldmap(self, dwi, bVals, mag, phase, norm, parcellationMask, freesurferAnat):
 
+        #extract a b0 from the dwi image
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), "b0_fieldmap_tmp"))
+        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
         self.info("rescaling the phase image")
         phaseRescale = self.__rescaleFieldMap(phase)
@@ -347,7 +353,7 @@ class Eddy(GenericTask):
 
         self.info('Resampling the anatomical mask into the phase image space')
         #interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
-        fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
+        fieldmap = self.__computePhaseFieldmap(phaseRescale, interpolateMask)
 
         self.info('Generate a lossy magnitude file with signal loss and distortion')
         lossy = self.__simulateLossyMap(fieldmap, interpolateMask)
@@ -373,15 +379,7 @@ class Eddy(GenericTask):
         self.info('Perform distortion correction of EPI data')
         dwiUnwarp = self.__performDistortionCorrectionToDWI(dwi, magnitudeIntoDwiSpaceMask, saveshift)
 
-
-        b0Target = self.buildName(b0, ['unwarp', 'mask'])
-        self.info(mriutil.extractFirstB0FromDwi(dwiUnwarp, b0Target, bVals))
-        unwarpMask = mriutil.computeDwiMaskFromFreesurfer(b0Target,
-                                                          norm,
-                                                          parcellationMask,
-                                                          self.buildName(parcellationMask, 'unwarp'),
-                                                          extraArgs)
-
+        return dwiUnwarp
 
     def __getMagnitudeEchoTimeDifferences(self):
         try:
@@ -458,7 +456,7 @@ class Eddy(GenericTask):
         return self.get("fieldmapToAnat")
 
 
-    def __computeFieldmap(self, source, mask):
+    def __computePhaseFieldmap(self, source, mask):
         """
         Preprocess the fieldmap : scaling, masking, smoothing
         """
@@ -568,18 +566,7 @@ class Eddy(GenericTask):
 
 
     def isDirty(self):
-        images = Images((self.getImage(self.workingDir, 'dwi', 'eddy'), 'diffusion weighted eddy corrected'),
-                  (self.getImage(self.workingDir, 'grad', 'eddy', 'bvals'), 'gradient .bvals encoding file'),
-                  (self.getImage(self.workingDir, 'grad', 'eddy', 'bvecs'), 'gradient .bvecs encoding file'),
-                  (self.getImage(self.workingDir, 'grad', 'eddy', 'b'), 'gradient .b encoding file'),
-                  (self.getImage(self.workingDir, 'mask', 'eddy'), 'eddy corrected mask for dwi images'))
-
-
-        #test for fieldmap existence
-        if Images(self.getImage(self.dependDir, "mag") , self.getImage(self.dependDir, "phase")).isAllImagesExists():
-            images.append(Images(self.getImage(self.workingDir, 'dwi', 'unwarp')))
-
-        return images
+        return Images((self.getImage(self.workingDir, 'dwi', 'corrected'), 'diffusion weighted eddy corrected'))
 
 
     def qaSupplier(self):
