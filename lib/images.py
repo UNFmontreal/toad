@@ -30,6 +30,9 @@ class Images(object):
     def size(self):
         return len(self.__images)
 
+    def append(self, tupleItem):
+        self.__images.append(tupleItem)
+
     def extend(self, images):
         self.__images.extend(images)
 
