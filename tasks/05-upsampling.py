@@ -9,16 +9,16 @@ class Upsampling(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'eddy', 'qa')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'correction', 'qa')
 
 
     def implement(self):
 
         dwi = self.__linkDwiImage()
 
-        bVals= self.getImage(self.eddyDir, 'grad', None, 'bvals')
-        bVecs= self.getImage(self.eddyDir, 'grad', None, 'bvecs')
-        bEnc = self.getImage(self.eddyDir, 'grad', None, 'benc')
+        bVals= self.getImage(self.correctionDir, 'grad', None, 'bvals')
+        bVecs= self.getImage(self.correctionDir, 'grad', None, 'bvecs')
+        bEnc = self.getImage(self.correctionDir, 'grad', None, 'benc')
         if not bVals or not bVecs:
             bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
             bVecs= self.getImage(self.preparationDir, 'grad', None, 'bvecs')
@@ -49,9 +49,7 @@ class Upsampling(GenericTask):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
         if not dwi:
-            dwi = self.getImage(self.eddyDir, 'dwi', 'unwarp')
-        if not dwi:
-            dwi = self.getImage(self.eddyDir,'dwi', 'eddy')
+            dwi = self.getImage(self.correctionDir, 'dwi', 'corrected')
         if not dwi:
             dwi = self.getImage(self.preparationDir, 'dwi')
         return util.symlink(dwi, self.workingDir)
@@ -83,7 +81,7 @@ class Upsampling(GenericTask):
 
         #@TODO add gradient files validation and correct this function
         images = Images((self.getImage(self.dependDir, "dwi", 'denoise'), 'denoised'),
-                       (self.getImage(self.eddyDir, "dwi", 'eddy'), 'eddy corrected'),
+                       (self.getImage(self.correctionDir, "dwi", 'corrected'), 'corrected'),
                        (self.getImage(self.preparationDir, "dwi"), 'diffusion weighted'))
         if images.isNoImagesExists():
             self.warning("No proper dwi image found as requirement")
