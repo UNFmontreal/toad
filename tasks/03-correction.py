@@ -402,7 +402,7 @@ class Correction(GenericTask):
 
     def __getDwellTime(self):
         try:
-            spacing = float(self.get("eddy", "echo_spacing"))/1000.0
+            spacing = float(self.get("echo_spacing"))/1000.0
             return str(spacing)
 
         except ValueError:
@@ -411,7 +411,7 @@ class Correction(GenericTask):
 
     def __getUnwarpDirection(self):
         try:
-            direction = int(self.get("eddy", "phase_enc_dir"))
+            direction = int(self.get("phase_enc_dir"))
             value="y"
             if direction == 0:
                 value = "y"

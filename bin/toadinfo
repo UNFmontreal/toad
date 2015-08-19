@@ -142,15 +142,15 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
     if os.path.exists(source):
         config.read(source)
 
-    if not config.has_section("eddy"):
-        config.add_section("eddy")
+    if not config.has_section("correction"):
+        config.add_section("correction")
 
     if phaseEncDir is not None:
-        config.set("eddy", "phase_enc_dir", phaseEncDir)
+        config.set("correction", "phase_enc_dir", phaseEncDir)
     if epiFactor is not None:
-        config.set("eddy", "epi_factor", epiFactor)
+        config.set("correction", "epi_factor", epiFactor)
     if echoSpacing is not None:
-        config.set("eddy", "echo_spacing", echoSpacing)
+        config.set("correction", "echo_spacing", echoSpacing)
 
     if echoTime is not None:
         if not config.has_section("fieldmap"):
