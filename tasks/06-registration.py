@@ -1,5 +1,3 @@
-import os
-
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import mriutil
@@ -82,8 +80,8 @@ class Registration(GenericTask):
 
 
     def __freesurferToDWITransformation(self, source, reference, extraArgs):
-        dwiToFreesurferMatrix = "dwiToFressurfer_transformation.mat"
-        freesurferToDWIMatrix = "fressurferToDWI_transformation.mat"
+        dwiToFreesurferMatrix = "dwiToFreesurfer_transformation.mat"
+        freesurferToDWIMatrix = "freesurferToDWI_transformation.mat"
         cmd = "flirt -in {} -ref {} -omat {} {}".format(source, reference, dwiToFreesurferMatrix, extraArgs)
         self.launchCommand(cmd)
         mriutil.invertMatrix(dwiToFreesurferMatrix, freesurferToDWIMatrix)
@@ -138,15 +136,16 @@ class Registration(GenericTask):
 
     def isDirty(self):
         return Images((self.getImage(self.workingDir,'anat', 'resample'), 'anatomical resampled'),
-                  (self.getImage(self.workingDir,'aparc_aseg', 'resample'), 'parcellation resample'),
-                  (self.getImage(self.workingDir,'aparc_aseg', 'register'), 'parcellation register'),
+                  (self.getImage(self.workingDir,'aparc_aseg', 'resample'), 'parcellation atlas resample'),
+                  (self.getImage(self.workingDir,'aparc_aseg', 'register'), 'parcellation atlas register'),
                   (self.getImage(self.workingDir, 'tt5', 'register'), '5tt image register'),
                   (self.getImage(self.workingDir, 'mask', 'register'), 'brain mask register'),
                   (self.getImage(self.workingDir, 'tt5', 'resample'), '5tt image resample'),
                   (self.getImage(self.workingDir, 'mask', 'resample'), 'brain mask resample'),
                   (self.getImage(self.workingDir, 'norm', 'resample'), 'brain  resample'),
-                  (self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere'),
-                  (self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere'))
+                  (self.getImage(self.workingDir, 'brodmann', 'resample'), 'brodmann atlas  resample'),
+                  (self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere atlas'),
+                  (self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere atlas'))
 
     """
     def qaSupplier(self):

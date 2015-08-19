@@ -1,11 +1,10 @@
 from string import Template
-import argparse
 import subprocess
 import datetime
 import signal
+import shutil
 import time
 import glob
-import sys
 import os
 
 __author__ = 'mathieu'
@@ -34,6 +33,20 @@ def symlink(source, target):
         os.symlink(src, name)
 
     return src
+
+
+def copy(source, destination, name):
+    """copy a file into a new destination with a new name
+
+    Args:
+        source:  name of the source file
+        target:  destination directory
+        name:    the output filename
+
+
+    """
+    if source:
+        shutil.copy(source, os.path.join(destination, name))
 
 
 def gunzip(source):

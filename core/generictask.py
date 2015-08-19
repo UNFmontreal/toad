@@ -37,7 +37,8 @@ class GenericTask(Logger, Load, Qa):
         self.__moduleName = self.__class__.__module__.split(".")[-1]
         self.__cleanupBeforeImplement = True
         self.config = subject.getConfig()
-        self.subjectDir = subject.getDir()
+        self.subject = subject
+        self.subjectDir = self.subject.getDir()
         self.toadDir = self.config.get('arguments', 'toad_dir')
         self.workingDir = os.path.join(self.subjectDir, self.__moduleName)
         self.tasksAsReferences = None

@@ -257,6 +257,7 @@ class SubjectManager(Logger, Config):
         return list(set(results))
 
 
+
     def __subjectsFactory(self, directories):
         """Return a list of directories who qualified for the pipeline
 
