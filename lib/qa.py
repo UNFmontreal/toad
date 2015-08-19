@@ -312,7 +312,7 @@ class Qa(object):
             if imageLink:
                 path, filename =  os.path.split(imageLink)
                 classType = 'large_view'
-                if any(_ in filename or _ in ['_translations', '_rotations', '_eddy_vectors', '_sigma']):
+                if any(_ in filename for _ in ['_translations', '_rotations', '_eddy_vectors', '_sigma']):
                     classType = 'small_view'
                 shutil.copyfile(imageLink, os.path.join(imagesDir, filename))
                 relativeLink = os.path.join(self.config.get('qa', 'images_dir'), filename)
