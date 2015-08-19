@@ -199,7 +199,7 @@ class Validation(object):
 
         #if one and only one b0 image is given, make sure that the b0 image is not on same direction than the dwi.
         if (not (images['b0_ap'][0] and images['b0_pa'][0])) and (images['b0_ap'][0] or images['b0_pa'][0])  \
-            and (self.config.get("eddy", "ignore") == "False"):
+            and (self.config.get("eddy", "ignore") == "False") and self.config.getboolean('arguments', 'prompt'):
             if ((self.config.get("eddy", "phase_enc_dir") == "0") and images['b0_pa'][0]) \
                 or ((self.config.get("eddy", "phase_enc_dir") == "1")  and images['b0_ap'][0]):
                     msg = "Found only one B0 image into the subject directory and that B0 is in " \
@@ -209,7 +209,7 @@ class Validation(object):
                         self.logger.warning("Remove this subject from the list?")
                         return False
 
-        if images['mag'][0] and images['phase'][0] and (images['b0_ap'][0] or images['b0_pa'][0]):
+        if images['mag'][0] and images['phase'][0] and (images['b0_ap'][0] or images['b0_pa'][0]) and self.config.getboolean('arguments', 'prompt'):
             msg = "Found both Fieldmap and B0 images into the subject directory\n" \
                   "We recommend to disabled fieldmap correction?"
             if not util.displayYesNoMessage(msg):
