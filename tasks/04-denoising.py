@@ -21,65 +21,61 @@ class Denoising(GenericTask):
 
 
     def implement(self):
-        if self.get("algorithm").lower() in "none":
-            self.info("Skipping denoising process")
 
-        else:
+        dwi = self.__getDwiImage()
+        bVals = self.__getBValsImage()
+        norm=   self.getImage(self.parcellationDir, 'norm')
+        parcellationMask = self.getImage(self.parcellationDir, 'mask')
+
+        b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
+        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
+
+        self.info("create a suitable mask for the dwi")
+        extraArgs = ""
+        if self.get("parcellation", "intrasubject"):
+            extraArgs += " -usesqform -dof 6"
+
+        mask = mriutil.computeDwiMaskFromFreesurfer(b0,
+                                                    norm,
+                                                    parcellationMask,
+                                                    self.buildName(parcellationMask, 'temporary'),
+                                                    extraArgs)
+
+        target = self.buildName(dwi, "denoise")
+
+        if self.get("algorithm") == "nlmeans":
+
+            dwiImage = nibabel.load(dwi)
+            dwiData  = dwiImage.get_data()
+
+            sigma, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
+            self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
+            denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
+            nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
+            nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.float32),
+                                             dwiImage.get_affine()), self.buildName(target, "noise_mask"))
+
+
+        elif self.get('general', 'matlab_available'):
             dwi = self.__getDwiImage()
-            bVals = self.__getBValsImage()
-            norm=   self.getImage(self.parcellationDir, 'norm')
-            parcellationMask = self.getImage(self.parcellationDir, 'mask')
+            dwiUncompress = self.uncompressImage(dwi)
 
+            tmp = self.buildName(dwiUncompress, "tmp", 'nii')
+            scriptName = self.__createMatlabScript(dwiUncompress, tmp)
+            self.__launchMatlabExecution(scriptName)
 
-            b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
-            self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
+            self.info("compressing {} image".format(tmp))
+            tmpCompress = util.gzip(tmp)
+            self.rename(tmpCompress, target)
 
-            self.info("create a suitable mask for the dwi")
-            extraArgs = ""
-            if self.get("parcellation", "intrasubject"):
-                extraArgs += " -usesqform -dof 6"
-
-            mask = mriutil.computeDwiMaskFromFreesurfer(b0,
-                                                        norm,
-                                                        parcellationMask,
-                                                        self.buildName(parcellationMask, 'temporary'),
-                                                        extraArgs)
-
-            target = self.buildName(dwi, "denoise")
-
-            if self.get("algorithm") == "nlmeans":
-
-                dwiImage = nibabel.load(dwi)
-                dwiData  = dwiImage.get_data()
-
-                sigma, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
-                self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
-                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
-                nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
-                nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.float32),
-                                                 dwiImage.get_affine()), self.buildName(target, "noise_mask"))
-
-
-            elif self.get('general', 'matlab_available'):
-                dwi = self.__getDwiImage()
-                dwiUncompress = self.uncompressImage(dwi)
-
-                tmp = self.buildName(dwiUncompress, "tmp", 'nii')
-                scriptName = self.__createMatlabScript(dwiUncompress, tmp)
-                self.__launchMatlabExecution(scriptName)
-
-                self.info("compressing {} image".format(tmp))
-                tmpCompress = util.gzip(tmp)
-                self.rename(tmpCompress, target)
-
-                if self.get("cleanup"):
-                    self.info("Removing redundant image {}".format(dwiUncompress))
-                    os.remove(dwiUncompress)
-            else:
-                self.matlabWarning = True
-                self.warning("Algorithm {} is set but matlab is not available for this server.\n"
-                             "Please configure matlab or set denoising algorithm to nlmeans or none"
-                             .format(self.get("algorithm")))
+            if self.get("cleanup"):
+                self.info("Removing redundant image {}".format(dwiUncompress))
+                os.remove(dwiUncompress)
+        else:
+            self.matlabWarning = True
+            self.warning("Algorithm {} is set but matlab is not available for this server.\n"
+                         "Please configure matlab or set denoising algorithm to nlmeans or none"
+                         .format(self.get("algorithm")))
 
             #QA
             #workingDirDwi = self.getImage(self.workingDir, 'dwi', 'denoise')
@@ -166,7 +162,7 @@ class Denoising(GenericTask):
 
 
     def isIgnore(self):
-        return (self.get("algorithm").lower() in "none") or (self.get("ignore"))
+        return  self.get("ignore")
 
 
     def meetRequirement(self, result = True):
