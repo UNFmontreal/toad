@@ -1,5 +1,3 @@
-import os
-
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import mriutil
@@ -82,8 +80,8 @@ class Registration(GenericTask):
 
 
     def __freesurferToDWITransformation(self, source, reference, extraArgs):
-        dwiToFreesurferMatrix = "dwiToFressurfer_transformation.mat"
-        freesurferToDWIMatrix = "fressurferToDWI_transformation.mat"
+        dwiToFreesurferMatrix = "dwiToFreesurfer_transformation.mat"
+        freesurferToDWIMatrix = "freesurferToDWI_transformation.mat"
         cmd = "flirt -in {} -ref {} -omat {} {}".format(source, reference, dwiToFreesurferMatrix, extraArgs)
         self.launchCommand(cmd)
         mriutil.invertMatrix(dwiToFreesurferMatrix, freesurferToDWIMatrix)

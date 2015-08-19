@@ -1,10 +1,11 @@
 from lock import Lock
+from validation import Validation
 import shutil
 import os
 
 __author__ = 'mathieu'
 
-class Subject(Lock):
+class Subject(Lock, Validation):
 
 
     def __init__(self, config):
@@ -23,6 +24,7 @@ class Subject(Lock):
         if not os.path.exists(self.__logDir):
             os.mkdir(self.__logDir)
         Lock.__init__(self, self.__logDir, self.__name)
+
 
     def __repr__(self):
         return self.__name

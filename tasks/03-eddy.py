@@ -1,13 +1,9 @@
-import glob
 import os
-
-import numpy
+import math
 import matplotlib
-import mpl_toolkits
-
 from core.generictask import GenericTask
 from lib.images import Images
-from lib import util, mriutil, mriutil
+from lib import util, mriutil
 
 matplotlib.use('Agg')
 
@@ -33,9 +29,16 @@ class Eddy(GenericTask):
         norm=   self.getImage(self.parcellationDir, 'norm')
         parcellationMask = self.getImage(self.parcellationDir, 'mask')
 
+        #fieldmap only
+        mag = self.getImage(self.dependDir, "mag")
+        phase = self.getImage(self.dependDir, "phase")
+        freesurferAnat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
+
+
         #extract b0 image from the dwi
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
+
 
         #make sure all the images have the same voxel size and dimension scale between them
         self.__validateSizeAndDimension(dwi, b0, b0AP, b0PA)
@@ -76,7 +79,6 @@ class Eddy(GenericTask):
             extraArgs += " -usesqform -dof 6"
 
 
-
         mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
                                                     norm,
                                                     parcellationMask,
@@ -111,6 +113,14 @@ class Eddy(GenericTask):
                                         self.buildName(outputEddyImage, None, 'bvecs'),
                                         self.buildName(outputEddyImage, None, 'bvals')))
 
+
+
+        #proceed with fieldmap if provided
+        if mag and phase:
+            self.__computeFieldmap(outputEddyImage, b0Target, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
+
+
+
         #QA
         dwi = self.getImage(self.dependDir, 'dwi')
         workingDirDwi = self.getImage(self.workingDir, 'dwi', 'eddy')
@@ -128,7 +138,7 @@ class Eddy(GenericTask):
         self.slicerGifCompare(dwi, workingDirDwi, dwiCompareGif, boundaries=mask)
         self.plotMovement(eddyParameterFiles, translationsPng, rotationPng)
         self.plotvectors(bVecs, bVecsCorrected, bVecsGif)
-        
+
 
     def __oddEvenNumberOfSlices(self, *args):
         """return a list of images that will count a odd number of slices in z direction
@@ -315,26 +325,262 @@ class Eddy(GenericTask):
         return self.rename(tmp, target)
 
 
+
+    def __computeFieldmap(self, dwi, b0, bVals, mag, phase, norm, parcellationMask, freesurferAnat):
+
+
+        self.info("rescaling the phase image")
+        phaseRescale = self.__rescaleFieldMap(phase)
+
+        self.info('Coregistring magnitude image with the anatomical image produce by freesurfer')
+        fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, freesurferAnat)
+
+        extraArgs = ""
+        if self.get("parcellation", "intrasubject"):
+            extraArgs += " -usesqform  -dof 6"
+
+        interpolateMask = mriutil.computeDwiMaskFromFreesurfer(mag,
+                                                               norm,
+                                                               parcellationMask,
+                                                               self.buildName(parcellationMask, 'interpolate'),
+                                                               extraArgs)
+
+        self.info('Resampling the anatomical mask into the phase image space')
+        #interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
+        fieldmap = self.__computeFieldmap(phaseRescale, interpolateMask)
+
+        self.info('Generate a lossy magnitude file with signal loss and distortion')
+        lossy = self.__simulateLossyMap(fieldmap, interpolateMask)
+
+        magnitudeMask = self.__computeMap(mag, interpolateMask, 'brain')
+        lossyMagnitude = self.__computeMap(magnitudeMask, lossy, 'lossy')
+
+        warped = self.__computeForwardDistorsion(fieldmap, lossyMagnitude, interpolateMask)
+
+        self.info('Coregister the simulated lossy fieldmap with the EPI')
+        matrixName = self.get("epiTo_b0fm")
+        self.__coregisterEpiLossyMap(b0, warped, matrixName, lossy)
+
+        self.info('Reslice magnitude and fieldmap in the EPI space')
+        invertMatrixName = self.buildName(matrixName, 'inverse', 'mat')
+        self.info(mriutil.invertMatrix(matrixName, invertMatrixName))
+        magnitudeIntoDwiSpace = self.__interpolateFieldmapInEpiSpace(warped, b0, invertMatrixName)
+        magnitudeIntoDwiSpaceMask = self.__mask(magnitudeIntoDwiSpace)
+        interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
+        self.info('Create the shift map')
+        saveshift = self.__performDistortionCorrection(b0, interpolateFieldmap, magnitudeIntoDwiSpaceMask)
+
+        self.info('Perform distortion correction of EPI data')
+        dwiUnwarp = self.__performDistortionCorrectionToDWI(dwi, magnitudeIntoDwiSpaceMask, saveshift)
+
+
+        b0Target = self.buildName(b0, ['unwarp', 'mask'])
+        self.info(mriutil.extractFirstB0FromDwi(dwiUnwarp, b0Target, bVals))
+        unwarpMask = mriutil.computeDwiMaskFromFreesurfer(b0Target,
+                                                          norm,
+                                                          parcellationMask,
+                                                          self.buildName(parcellationMask, 'unwarp'),
+                                                          extraArgs)
+
+
+    def __getMagnitudeEchoTimeDifferences(self):
+        try:
+            echo1 = float(self.get("echo_time_mag1"))/1000.0
+            echo2 = float(self.get("echo_time_mag2"))/1000.0
+            return str(echo2-echo1)
+
+        except ValueError:
+            self.error("cannot determine difference echo time between the two magnitude image")
+
+
+    def __getDwiEchoTime(self):
+        try:
+            echo = float(self.get("echo_time_dwi"))/1000.0
+            return str(echo)
+
+        except ValueError:
+            self.error("cannot determine the echo time of the dwi image")
+
+
+    def __getDwellTime(self):
+        try:
+            spacing = float(self.get("eddy", "echo_spacing"))/1000.0
+            return str(spacing)
+
+        except ValueError:
+            self.error("cannot determine the effective echo spacing of the dwi image")
+
+
+    def __getUnwarpDirection(self):
+        try:
+            direction = int(self.get("eddy", "phase_enc_dir"))
+            value="y"
+            if direction == 0:
+                value = "y"
+            elif direction == 1:
+                value = "y-"
+            elif direction == 2:
+                value = "x-"
+            elif direction == 3:
+                value = "x"
+            return value
+
+        except ValueError:
+            self.error("cannot determine unwarping direction of the the dwi image")
+
+
+    def __rescaleFieldMap(self, source):
+        """
+        Rescale the fieldmap to get Rad/sec
+        """
+        target = self.buildName(source, 'rescale')
+        try:
+            deltaTE = float(self.__getMagnitudeEchoTimeDifferences())
+        except ValueError:
+            deltaTE = 0.00246
+
+        cmd = "fslmaths {} -mul {} -div {} {} -odt float".format(source, math.pi, 4096 *deltaTE, target)
+        self.launchCommand(cmd)
+
+        return target
+
+
+    def __coregisterFieldmapToAnat(self, source, reference):
+        """
+        Coregister Fieldmap to T1, to get the mask in Fieldmap space
+        """
+        target = self.buildName(source, "flirt")
+        cmd = "flirt -in {} -ref {} -out {} -omat {} -cost {} -searchcost {} -dof {} "\
+            .format(source, reference , target,
+                self.get("fieldmapToAnat"), self.get("cost"), self.get("searchcost"), self.get("dof"))
+
+        self.launchCommand(cmd)
+        return self.get("fieldmapToAnat")
+
+
+    def __computeFieldmap(self, source, mask):
+        """
+        Preprocess the fieldmap : scaling, masking, smoothing
+        """
+        target = self.buildName(source, 'fieldmap')
+        cmd = "fugue --asym={} --loadfmap={} --savefmap={} --mask={} --smooth3={}"\
+            .format(self.__getMagnitudeEchoTimeDifferences(), source, target,  mask, self.get("smooth3"))
+
+        self.launchCommand(cmd)
+        return target
+
+
+    def __simulateLossyMap(self, source, mask):
+        """
+        Compute the sigloss map from the fieldmap
+        """
+        target = self.buildName(source, 'sigloss')
+        cmd = "sigloss --te={} -i {} -m {} -s {}".format(self.__getDwiEchoTime(), source, mask, target)
+        self.launchCommand(cmd)
+        return target
+
+
+    def __computeMap(self, source, mask, prefix):
+
+        target = self.buildName(source, prefix)
+        cmd = "fslmaths {} -mul {} {}".format(source, mask, target)
+        self.launchCommand(cmd)
+        return target
+
+
+    def __computeForwardDistorsion(self, source, lossyImage, mask):
+        """
+        Apply expected distortion to magnitude to improve flirt registration
+        """
+        target = self.buildName(source, 'warp')
+        cmd = "fugue --dwell={} --loadfmap={} --in={} --mask={}  --nokspace --unwarpdir={} --warp={} ".format(self.__getDwellTime(),source, lossyImage,  mask, self.__getUnwarpDirection(), target )
+        self.launchCommand(cmd)
+        return target
+
+
+    def __coregisterEpiLossyMap(self, source, reference, matrix, weighted ):
+        """
+        Perform coregistration of EPI onto the simulated lossy distorted fieldmap magnitude
+        """
+        target = self.buildName(source, 'flirt')
+        cmd = "flirt -in {} -ref {} -omat {} -cost normmi -searchcost normmi -dof {} -interp trilinear -refweight {} ".format(source, reference, matrix, self.get("dof"), weighted)
+        self.launchCommand(cmd)
+        return target
+
+
+    def __interpolateFieldmapInEpiSpace(self, source, reference, initMatrix):
+        """
+        Interpolate fieldmap in EPI space using flirt
+        """
+        target = self.buildName(source, 'flirt')
+        cmd = "flirt -in {} -ref {} -out {} -applyxfm -init {}".format(source, reference, target, initMatrix)
+        self.launchCommand(cmd)
+        return target
+
+
+    def __mask(self, source):
+        target = self.buildName(source, 'mask')
+        cmd = "fslmaths {} -bin {}".format(source, target)
+        self.launchCommand(cmd)
+        return target
+
+
+    def __performDistortionCorrection(self, source, fieldmap, mask):
+        """
+        Compute the shiftmap and unwarp the B0 image
+        """
+        unwarp = self.buildName(source, 'unwarp')
+        target = self.buildName(source, 'vsm')
+        cmd = "fugue --in={}  --loadfmap={} --mask={} --saveshift={} --unwarpdir={} --unwarp={} --dwell={} "\
+            .format(source,  fieldmap, mask, target, self.__getUnwarpDirection(), unwarp, self.__getDwellTime())
+        self.launchCommand(cmd)
+        return target
+
+
+    def __performDistortionCorrectionToDWI(self, source, mask, shift):
+        """
+        Unwarp the whole DWI data
+        """
+        target = self.buildName(source, 'unwarp')
+        cmd= "fugue --in={} --mask={} --loadshift={}  --unwarpdir={} --unwarp={}  "\
+            .format(source, mask, shift, self.__getUnwarpDirection(), target)
+        self.launchCommand(cmd)
+        return target
+
+
     def isIgnore(self):
         return self.get("ignore")
 
 
     def meetRequirement(self):
-
-        return Images((self.getImage(self.dependDir, 'dwi'), 'diffusion weighted'),
+        images = Images((self.getImage(self.dependDir, 'dwi'), 'diffusion weighted'),
                         (self.getImage(self.parcellationDir, 'norm'), 'freesurfer normalize'),
                         (self.getImage(self.parcellationDir, 'mask'), 'freesurfer mask'),
                         (self.getImage(self.dependDir, 'grad', None, 'bvals'), 'gradient .bvals encoding file'),
                         (self.getImage(self.dependDir, 'grad', None, 'bvecs'), 'gradient .bvecs encoding file'),
                         (self.getImage(self.dependDir, 'grad', None, 'b'), 'gradient .b encoding file'))
 
+        #if fieldmap available
+        if Images(self.getImage(self.dependDir, "mag") , self.getImage(self.dependDir, "phase")).isAllImagesExists():
+            images.append(self.getImage(self.parcellationDir, 'anat', 'freesurfer'))
+
+        return images
+
 
     def isDirty(self):
-        return Images((self.getImage(self.workingDir, 'dwi', 'eddy'), 'diffusion weighted eddy corrected'),
+        images = Images((self.getImage(self.workingDir, 'dwi', 'eddy'), 'diffusion weighted eddy corrected'),
                   (self.getImage(self.workingDir, 'grad', 'eddy', 'bvals'), 'gradient .bvals encoding file'),
                   (self.getImage(self.workingDir, 'grad', 'eddy', 'bvecs'), 'gradient .bvecs encoding file'),
                   (self.getImage(self.workingDir, 'grad', 'eddy', 'b'), 'gradient .b encoding file'),
                   (self.getImage(self.workingDir, 'mask', 'eddy'), 'eddy corrected mask for dwi images'))
+
+
+        #test for fieldmap existence
+        if Images(self.getImage(self.dependDir, "mag") , self.getImage(self.dependDir, "phase")).isAllImagesExists():
+            images.append(Images(self.getImage(self.workingDir, 'dwi', 'unwarp')))
+
+        return images
+
 
     def qaSupplier(self):
         """Create and supply images for the report generated by qa task
@@ -364,3 +610,32 @@ class Eddy(GenericTask):
             qaImages.extend(Images((linkImage, description)))
 
         return qaImages
+
+    #@TODO QA introduce fieldmap
+    """
+
+        #QA
+        dwiGif = self.buildName(dwiUnwarp, None, 'gif')
+        dwiCompareGif = self.buildName(dwiUnwarp, 'compare', 'gif')
+
+        self.slicerGif(dwiUnwarp, dwiGif, boundaries=unwarpMask)
+        self.slicerGifCompare(dwi, dwiUnwarp, dwiCompareGif, boundaries=unwarpMask)
+
+
+    def qaSupplier(self):
+        Create and supply images for the report generated by qa task
+
+
+        qaImages = Images()
+
+        tags = [
+            ('unwarp', 'gif', 'DWI eddy corrected'),
+            ('compare', 'gif', 'Before and after eddy corrections'),
+            ]
+
+        for postfix, extension, description in tags:
+            linkImage = self.getImage(self.workingDir, 'dwi', postfix, ext=extension)
+            qaImages.extend(Images((linkImage, description)))
+
+        return qaImages
+    """

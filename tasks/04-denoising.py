@@ -7,7 +7,7 @@ import numpy
 
 from core.generictask import GenericTask
 from lib.images import Images
-from lib import util
+from lib import util, mriutil
 
 
 __author__ = 'desmat'
@@ -16,7 +16,7 @@ class Denoising(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'parcellation', 'fieldmap', 'qa')
+        GenericTask.__init__(self, subject, 'eddy', 'preparation', 'parcellation', 'qa')
         self.matlabWarning = False
 
 
@@ -26,7 +26,27 @@ class Denoising(GenericTask):
 
         else:
             dwi = self.__getDwiImage()
+            bVals = self.__getBValsImage()
+            norm=   self.getImage(self.parcellationDir, 'norm')
+            parcellationMask = self.getImage(self.parcellationDir, 'mask')
+
+
+            b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
+            self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
+
+            self.info("create a suitable mask for the dwi")
+            extraArgs = ""
+            if self.get("parcellation", "intrasubject"):
+                extraArgs += " -usesqform -dof 6"
+
+            mask = mriutil.computeDwiMaskFromFreesurfer(b0,
+                                                        norm,
+                                                        parcellationMask,
+                                                        self.buildName(parcellationMask, 'temporary'),
+                                                        extraArgs)
+
             target = self.buildName(dwi, "denoise")
+
             if self.get("algorithm") == "nlmeans":
 
                 dwiImage = nibabel.load(dwi)
@@ -77,12 +97,20 @@ class Denoising(GenericTask):
 
 
     def __getDwiImage(self):
-        if self.getImage(self.fieldmapDir, "dwi", 'unwarp'):
-            return self.getImage(self.fieldmapDir, "dwi", 'unwarp')
+        if self.getImage(self.dependDir, "dwi", 'unwarp'):
+            return self.getImage(self.dependDir, "dwi", 'unwarp')
         elif self.getImage(self.dependDir, "dwi", 'eddy'):
             return self.getImage(self.dependDir, "dwi", 'eddy')
         else:
             return self.getImage(self.preparationDir, "dwi")
+
+
+    def __getBValsImage(self):
+        if self.getImage(self.dependDir, 'grad',  None, 'bvals'):
+            return self.getImage(self.dependDir, 'grad',  None, 'bvals')
+        else:
+            return self.getImage(self.preparationDir, 'grad',  None, 'bvals')
+
 
 
     def __createMatlabScript(self, source, target):
@@ -139,21 +167,22 @@ class Denoising(GenericTask):
         return numpy.median(sigmaVector), maskNoise
 
 
-
-
     def isIgnore(self):
         return (self.get("algorithm").lower() in "none") or (self.get("ignore"))
 
 
     def meetRequirement(self, result = True):
-        images = Images((self.getImage(self.fieldmapDir, "dwi", 'unwarp'), 'fieldmap'),
+        images = Images((self.getImage(self.dependDir, "dwi", 'unwarp'), 'unwarp'),
                        (self.getImage(self.dependDir, "dwi", 'eddy'), 'eddy corrected'),
                        (self.getImage(self.preparationDir, "dwi"), 'diffusion weighted'))
 
-        #@TODO add those image as requierement
-        #norm = self.getImage(self.parcellationDir, 'norm')
-        #noiseMask = self.getImage(self.parcellationDir, 'noise_mask')
-        return images.isAtLeastOneImageExists()
+        if not images.isAtLeastOneImageExists():
+            return False
+
+        images = Images((self.getImage(self.parcellationDir, 'norm'), 'freesurfer normalize'),
+                        (self.getImage(self.parcellationDir, 'mask'), 'freesurfer mask'))
+
+        return images
 
 
     def isDirty(self):

@@ -12,7 +12,7 @@ class Snr(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preparation', 'parcellation', 'eddy', 'fieldmap',
+        GenericTask.__init__(self, subject, 'preparation', 'parcellation', 'eddy',
                                             'denoising', 'registration', 'masking', 'qa')
 
 
@@ -44,7 +44,7 @@ class Snr(GenericTask):
 
 
     def __getUnwarpImage(self):
-        dwi = self.getImage(self.fieldmapDir, 'dwi', 'unwarp')
+        dwi = self.getImage(self.eddyDir, 'dwi', 'unwarp')
         if not dwi:
             dwi = self.getImage(self.eddyDir, 'dwi', 'eddy')
         return dwi

@@ -1,6 +1,4 @@
-import glob
 import os
-
 from core.generictask import GenericTask
 from lib import util, mriutil
 from lib.images import Images
@@ -11,7 +9,7 @@ class Upsampling(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'eddy', 'fieldmap', 'qa')
+        GenericTask.__init__(self, subject, 'denoising', 'preparation', 'parcellation', 'eddy', 'qa')
 
 
     def implement(self):
@@ -51,7 +49,7 @@ class Upsampling(GenericTask):
 
         dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
         if not dwi:
-            dwi = self.getImage(self.fieldmapDir, 'dwi', 'unwarp')
+            dwi = self.getImage(self.eddyDir, 'dwi', 'unwarp')
         if not dwi:
             dwi = self.getImage(self.eddyDir,'dwi', 'eddy')
         if not dwi:
