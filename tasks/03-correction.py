@@ -560,7 +560,7 @@ class Correction(GenericTask):
 
         #if fieldmap available
         if Images(self.getImage(self.dependDir, "mag") , self.getImage(self.dependDir, "phase")).isAllImagesExists():
-            images.append(self.getImage(self.parcellationDir, 'anat', 'freesurfer'))
+            images.append((self.getImage(self.parcellationDir, 'anat', 'freesurfer'),"freesurfer anatomical"))
 
         return images
 
