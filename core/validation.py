@@ -148,6 +148,7 @@ class Validation(object):
         if (not bEnc) and (not bVals or not bVecs):
             self.logger.warning("No valid .b encoding or (.bvals, .bvecs) files found in directory: {}".format(self.workingDir))
             return False
+
         else:
 
             nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
@@ -171,21 +172,20 @@ class Validation(object):
 
         #Validate optionnal images
         images = {
-                  'high resolution': anat,
-                  'diffusion weighted': dwi,
-                  'MR magnitude ': util.getImage(self.config, self.workingDir, 'mag'),
-                  'MR phase ': util.getImage(self.config, self.workingDir, 'phase'),
-                  'parcellation': util.getImage(self.config, self.workingDir,'aparc_aseg'),
-                  'anatomical': util.getImage(self.config, self.workingDir, 'anat','freesurfer'),
-                  'left hemisphere ribbon': util.getImage(self.config, self.workingDir, 'lh_ribbon'),
-                  'right hemisphere ribbon': util.getImage(self.config, self.workingDir, 'rh_ribbon'),
-                  'brodmann': util.getImage(self.config, self.workingDir, 'brodmann'),
-                  "posterior to anterior b0 ": util.getImage(self.config, self.workingDir, 'b0_ap'),
-                  "anterior to posterior b0": util.getImage(self.config, self.workingDir, 'b0_pa')}
+                  'anat': (anat, 'high resolution'),
+                  'dwi': (dwi,'diffusion weighted'),
+                  'mag': (util.getImage(self.config, self.workingDir, 'mag'), 'MR magnitude '),
+                  'phase': (util.getImage(self.config, self.workingDir, 'phase'), 'MR phase '),
+                  'b0_ap': (util.getImage(self.config, self.workingDir, 'b0_ap'), "posterior to anterior b0 "),
+                  'b0_pa': (util.getImage(self.config, self.workingDir, 'b0_pa'), "anterior to posterior b0")}
 
-        for key, value in images.iteritems():
+
+        if self.config.get('arguments', 'debug') == 'True':
+            self.logger.debug("Images found into {} directory: {}".format(self.workingDir, images))
+
+        for key, (value, description) in images.iteritems():
             if value:
-                if not mriutil.isDataStridesOrientationExpected(value, self.config.get('preparation','stride_orientation'))\
+                if not mriutil.isDataStridesOrientationExpected(value, self.config.get('preparation', 'stride_orientation'))\
                         and self.config.getboolean('arguments', 'prompt')\
                         and self.config.getboolean("preparation", "force_realign_strides"):
                     msg = "Data strides layout for {} is unexpected and force_realign_strides is set to True.\n \
@@ -196,6 +196,26 @@ class Validation(object):
                         return False
                     else:
                         break
+
+        #if one and only one b0 image is given, make sure that the b0 image is not on same direction than the dwi.
+        if (not (images['b0_ap'][0] and images['b0_pa'][0])) and (images['b0_ap'][0] or images['b0_pa'][0])  \
+            and (self.config.get("eddy", "ignore") == "False") and self.config.getboolean('arguments', 'prompt'):
+            if ((self.config.get("eddy", "phase_enc_dir") == "0") and images['b0_pa'][0]) \
+                or ((self.config.get("eddy", "phase_enc_dir") == "1")  and images['b0_ap'][0]):
+                    msg = "Found only one B0 image into the subject directory and that B0 is in " \
+                          "the same phase encoding direction than the DWI.\n" \
+                          "We recommend to remove the B0 image so at least a motion correction will be perform"
+                    if not util.displayYesNoMessage(msg):
+                        self.logger.warning("Remove this subject from the list?")
+                        return False
+
+        if images['mag'][0] and images['phase'][0] and (images['b0_ap'][0] or images['b0_pa'][0]) and self.config.getboolean('arguments', 'prompt'):
+            msg = "Found both Fieldmap and B0 images into the subject directory\n" \
+                  "We recommend to disabled fieldmap correction?"
+            if not util.displayYesNoMessage(msg):
+                self.logger.warning("Remove this subject from the list?")
+                return False
+
         return True
 
 

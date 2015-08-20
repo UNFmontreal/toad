@@ -409,13 +409,13 @@ class Parcellation(GenericTask):
 
     def isDirty(self):
 
-        return Images((self.getImage(self.workingDir, 'aparc_aseg'), 'parcellation'),
+        return Images((self.getImage(self.workingDir, 'aparc_aseg'), 'parcellation  atlas'),
                   (self.getImage(self.workingDir, 'anat', 'freesurfer'), 'anatomical'),
                   (self.getImage(self.workingDir, 'rh_ribbon'), 'rh_ribbon'),
                   (self.getImage(self.workingDir, 'lh_ribbon'), 'lh_ribbon'),
-                  (self.getImage(self.workingDir, 'brodmann'), 'brodmann'),
-                  (self.getImage(self.workingDir, 'buckner'), 'buckner'),
-                  (self.getImage(self.workingDir, 'choi'), 'choi'),
+                  (self.getImage(self.workingDir, 'brodmann'), 'brodmann atlas'),
+                  (self.getImage(self.workingDir, 'buckner'), 'buckner atlas'),
+                  (self.getImage(self.workingDir, 'choi'), 'choi atlas'),
                   (self.getImage(self.workingDir, 'norm'), 'norm'),
                   (self.getImage(self.workingDir, 'mask'), 'freesurfer brain masks'),
                   (self.getImage(self.workingDir, 'tt5'), '5tt'),)

@@ -18,7 +18,7 @@ __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Beta"
 #@TODO add tvtk dependencies
-__pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib', 'tvtk', 'vtk']
+__pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib',  'vtk']
 
 def __parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.
@@ -54,7 +54,6 @@ def __parseArguments():
               |- 01-preparation
               |- 02-parcellation
               |- 03-eddy
-              |- 03-fieldmap
               |- 04-denoising
               |- 05-preprocessing
               |- 06-registration
