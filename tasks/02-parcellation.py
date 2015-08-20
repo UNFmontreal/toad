@@ -410,7 +410,7 @@ class Parcellation(GenericTask):
         #@TODO add buckner and choi templates
 
         #Get images
-        anat = self.getImage(self.workingDir, 'anat')
+        anat = self.getImage(self.workingDir, 'anat', 'freesurfer')
         norm = self.getImage(self.workingDir, 'norm')
         brainMask = self.getImage(self.workingDir, 'mask')
         aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
@@ -435,4 +435,4 @@ class Parcellation(GenericTask):
             (brodmannPng, 'Brodmann segmentation from freesurfer'),
             )
 
-        return qaImage
+        return qaImages
