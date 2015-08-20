@@ -19,12 +19,12 @@ class Results(GenericTask):
                     'brodmann': self.getImage(self.registrationDir, 'brodmann', 'resample')}
 
         for postfix, image in structs.iteritems():
-           util.copy(image, self.workingDir,  self.buildName(self.subject.getName(), postfix,'nii.gz'))
+           util.copy(image, self.workingDir,  self.buildName(self.subject.getName(), postfix, 'nii.gz'))
 
         for extension in ['bvals', 'bvecs', 'benc']:
             util.copy(self.getImage(self.upsamplingDir, 'grad', None, extension), self.workingDir, self.buildName(self.subject.getName(), None, extension))
 
-	self.__copyMetrics(['mrtrix', 'dipy', 'fsl'], ['fa','ad','rd','md'], 'tensor')
+        self.__copyMetrics(['mrtrix', 'dipy', 'fsl'], ['fa','ad','rd','md'], 'tensor')
         self.__copyMetrics(['mrtrix', 'dipy'], ['nufo','csd','gfa'], 'hardi')
 
 
@@ -34,8 +34,6 @@ class Results(GenericTask):
                 source = self.getImage(getattr(self, "{}{}Dir".format(method, software)), "dwi", postfix)
                 target = self.buildName(self.subject.getName(), [postfix, software], 'nii.gz')
                 util.copy(source, self.workingDir, target)
-
-
 
     def meetRequirement(self):
         images = Images((self.getImage(self.upsamplingDir, 'dwi'), 'diffusion weighted'),
@@ -48,7 +46,6 @@ class Results(GenericTask):
 
         #@TODO Add all metrics dependencies
         return images
-
 
     def isDirty(self):
         #@TODO implement that
