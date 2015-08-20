@@ -9,7 +9,7 @@ class Results(GenericTask):
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'upsampling', 'registration', 'tensormrtrix', 'tensordipy', 'tensorfsl', 'hardidipy','hardimrtrix')
-
+        self.__finished = False
 
     def implement(self):
 
@@ -26,13 +26,13 @@ class Results(GenericTask):
 
 	self.__copyMetrics(['mrtrix', 'dipy', 'fsl'], ['fa','ad','rd','md'], 'tensor')
         self.__copyMetrics(['mrtrix', 'dipy'], ['nufo','csd','gfa'], 'hardi')
-
+        self.__finished = True
 
     def __copyMetrics(self, softwares, postfixs, method):
         for software in softwares:
             for postfix in postfixs:
                 source = self.getImage(getattr(self, "{}{}Dir".format(method, software)), "dwi", postfix)
-                target = self.buildName(self.subject.getName(), [postfix, software], 'nii.gz')
+                target = self.buildName(self.subject.getName(), [software, postfix], 'nii.gz')
                 util.copy(source, self.workingDir, target)
 
 
@@ -52,4 +52,4 @@ class Results(GenericTask):
 
     def isDirty(self):
         #@TODO implement that
-        return True
+        return not self.__finished
