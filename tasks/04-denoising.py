@@ -126,7 +126,8 @@ class Denoising(GenericTask):
             data: A dMRI 4D matrix
 
         Returns:
-            a list of float representing sigma "The estimated standard deviation of the gaussian noise" for each z slices
+            a list of float representing sigmas for each z slices
+            a float representing sigma "The estimated standard deviation of the gaussian noise"
             and a mask identyfing all the pure noise voxel that were found.
         """
 
