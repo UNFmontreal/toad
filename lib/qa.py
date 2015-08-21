@@ -227,6 +227,22 @@ class Qa(object):
         return target
 
 
+    def plotSigma(self, sigma, target):
+        """
+        """
+        matplotlib.pyplot.clf()
+        y_pos = numpy.arange(len(sigma))
+        sigmaMedian = numpy.median(sigma)
+        matplotlib.pyplot.barh(y_pos, sigma)
+        matplotlib.pyplot.xlabel('Sigma, median = {0}'.format(sigmaMedian))
+        matplotlib.pyplot.ylabel('z-axis')
+        matplotlib.pyplot.title('Sigma data for each z slice')
+        matplotlib.pyplot.savefig(target)
+        matplotlib.pyplot.close()
+        matplotlib.rcdefaults()
+        return target
+
+
     def noiseAnalysis(self, source, maskNoise, maskCc, targetSnr, targetHist):
         """
         """
@@ -280,14 +296,6 @@ class Qa(object):
         matplotlib.rcdefaults()
     
     
-    def writeTable(self, imageLink, legend):
-        """
-        return html table with one column
-        """
-        tags = {'imageLink':imageLink, 'legend':legend}
-        return self.parseTemplate(tags, os.path.join(self.toadDir, "templates/files/qa.table.tpl"))
-        
-        
     def createQaReport(self, images):
         """create html report for a task with qaSupplier implemented
         Args:
@@ -301,11 +309,18 @@ class Qa(object):
         
         print "createQaReport images =", images
         for imageLink, legend in images:
-            #@TODO Take into account multiple run of QA
             if imageLink:
                 path, filename =  os.path.split(imageLink)
+                classType = 'large_view'
+                if any(_ in filename for _ in ['_translations', '_rotations', '_vectors', '_sigma']):
+                    classType = 'small_view'
                 shutil.copyfile(imageLink, os.path.join(imagesDir, filename))
-                tags = {'imageLink':os.path.join(self.config.get('qa', 'images_dir'), filename),'legend':legend}
+                relativeLink = os.path.join(self.config.get('qa', 'images_dir'), filename)
+                tags = {
+                    'imageLink':relativeLink,
+                    'legend':legend,
+                    'class':classType,
+                    }
                 tablesCode += self.parseTemplate(tags, tableTemplate)
             else:
                 tags = {'imageLink':'', 'legend':legend}
