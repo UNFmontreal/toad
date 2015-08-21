@@ -31,7 +31,7 @@ class Template(GenericTask):
 
             Note that you may supply additional arguments to generic tasks.
             Exemple: if you provide GenericTask.__init__(self, subject, foo, bar ...)
-            toad will create an variable fooDir and barDir and then create an alias 'dependDir'
+            toad will create an variable fooDir and barDir
             that will point to the first additionnal argurments fooDir.
 
         """

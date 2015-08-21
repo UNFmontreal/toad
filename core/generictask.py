@@ -27,7 +27,7 @@ class GenericTask(Logger, Load, Qa):
         Define, create and aliases a Working directory for the tasks.
 
         If more arguments have been supplied to generic tasks, GenericTask will create an alias
-        for each additionnal arg adding the suffix Dir to the name provided and then create  an alias 'dependDir'
+        for each additionnal arg adding the suffix Dir to the name provided
         on the first optionnal arg provided to __init__
 
         """
@@ -55,8 +55,6 @@ class GenericTask(Logger, Load, Qa):
                 if dependency == task.__name:
                     self.__dependenciesDirNames["{}Dir".format(dependency)] = task.workingDir
                     setattr(self, "{}Dir".format(dependency), task.workingDir)
-                    if index == 0:
-                        self.dependDir = task.workingDir
 
     def initializeTasksAsReferences(self, tasks):
         self.tasksAsReferences = tasks

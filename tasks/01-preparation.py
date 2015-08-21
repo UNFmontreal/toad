@@ -48,7 +48,7 @@ class Preparation(GenericTask):
                 else:
                     self.info("Found {} image, linking {} to {}".format(description, image, util.symlink(image, self.workingDir)))
 
-        for directory in [os.path.join(self.dependDir, directory) for directory in os.listdir(self.dependDir) if os.path.isdir(os.path.join(self.dependDir, directory))]:
+        for directory in [os.path.join(self.backupDir, directory) for directory in os.listdir(self.backupDir) if os.path.isdir(os.path.join(self.backupDir, directory))]:
             if mriutil.isAfreesurferStructure(directory):
                 self.info("{} seem\'s a valid freesurfer structure: linking to {} directory".format(directory, self.workingDir))
                 os.symlink(directory, self.get("parcellation", "id"))
@@ -118,7 +118,7 @@ class Preparation(GenericTask):
         if not (self.getBackupImage('grad', None, 'b') or
                 (self.getBackupImage('grad', None, 'bvals')
                  and self.getBackupImage('grad', None, 'bvecs'))):
-            self.error("No gradient encoding file found in {}".format(self.dependDir))
+            self.error("No gradient encoding file found in {}".format(self.backupDir))
             result = False
 
         return result

@@ -50,7 +50,7 @@ class Parcellation(GenericTask):
         Returns:
             Return the linked directory name if a freesurfer structure is found, False otherwise
         """
-        freesurferStructure = os.path.join(self.dependDir, self.id)
+        freesurferStructure = os.path.join(self.preparationDir, self.id)
         if mriutil.isAfreesurferStructure(freesurferStructure):
            self.info("{} seem\'s a valid freesurfer structure: moving it to {} directory".format(freesurferStructure, self.workingDir))
            util.symlink(freesurferStructure, self.id)
