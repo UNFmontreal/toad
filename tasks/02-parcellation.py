@@ -21,7 +21,7 @@ class Parcellation(GenericTask):
 
     def implement(self):
 
-        anat = self.getImage(self.dependDir, 'anat')
+        anat = self.getPreparationImage('anat')
 
         #look if a freesurfer tree is already available
         if not  self.__findAndLinkFreesurferStructure():
@@ -36,7 +36,7 @@ class Parcellation(GenericTask):
         self. __convertAndRestride(tt5Mgz, self.get('tt5'))
 
 
-        anatFreesurfer = self.getImage(self.workingDir, 'anat', 'freesurfer')
+        anatFreesurfer = self.getImage('anat', 'freesurfer')
 
         if self.get('cleanup'):
             self.__cleanup()
@@ -386,21 +386,21 @@ class Parcellation(GenericTask):
 
     def meetRequirement(self):
 
-        return  Images((self.getImage(self.dependDir, 'anat'), 'high resolution'))
+        return  Images((self.getPreparationImage('anat'), 'high resolution'))
 
 
     def isDirty(self):
 
-        return Images((self.getImage(self.workingDir, 'aparc_aseg'), 'parcellation  atlas'),
-                  (self.getImage(self.workingDir, 'anat', 'freesurfer'), 'anatomical'),
-                  (self.getImage(self.workingDir, 'rh_ribbon'), 'rh_ribbon'),
-                  (self.getImage(self.workingDir, 'lh_ribbon'), 'lh_ribbon'),
-                  (self.getImage(self.workingDir, 'brodmann'), 'brodmann atlas'),
-                  (self.getImage(self.workingDir, 'buckner'), 'buckner atlas'),
-                  (self.getImage(self.workingDir, 'choi'), 'choi atlas'),
-                  (self.getImage(self.workingDir, 'norm'), 'norm'),
-                  (self.getImage(self.workingDir, 'mask'), 'freesurfer brain masks'),
-                  (self.getImage(self.workingDir, 'tt5'), '5tt'),)
+        return Images((self.getImage('aparc_aseg'), 'parcellation  atlas'),
+                  (self.getImage('anat', 'freesurfer'), 'anatomical'),
+                  (self.getImage('rh_ribbon'), 'rh_ribbon'),
+                  (self.getImage('lh_ribbon'), 'lh_ribbon'),
+                  (self.getImage('brodmann'), 'brodmann atlas'),
+                  (self.getImage('buckner'), 'buckner atlas'),
+                  (self.getImage('choi'), 'choi atlas'),
+                  (self.getImage('norm'), 'norm'),
+                  (self.getImage('mask'), 'freesurfer brain masks'),
+                  (self.getImage('tt5'), '5tt'),)
 
     
     def qaSupplier(self):
@@ -410,11 +410,11 @@ class Parcellation(GenericTask):
         #@TODO add buckner and choi templates
 
         #Get images
-        anat = self.getImage(self.workingDir, 'anat', 'freesurfer')
-        norm = self.getImage(self.workingDir, 'norm')
-        brainMask = self.getImage(self.workingDir, 'mask')
-        aparcAseg = self.getImage(self.workingDir, 'aparc_aseg')
-        brodmann = self.getImage(self.workingDir, 'brodmann')
+        anat = self.getImage('anat', 'freesurfer')
+        norm = self.getImage('norm')
+        brainMask = self.getImage('mask')
+        aparcAseg = self.getImage('aparc_aseg')
+        brodmann = self.getImage('brodmann')
 
         #Build qa names
         anatPng = self.buildName(anat, None, 'png')

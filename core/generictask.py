@@ -107,6 +107,20 @@ class GenericTask(Logger, Load, Qa):
         return (hash(self.__name)<<1) ^ hash(self.__order)
 
 
+
+    def __getattr__(self, items):
+
+        if items.startswith('get') and items.endswith('Image') and len(items) > len("getImage")+2:
+            taskName = items.strip("get").strip('Image').lower()
+            directory = getattr(self, "{}Dir".format(taskName))
+            def wrapper(*args):
+                arguments = [self.config, directory] + list(args)
+                return util.getImage(*arguments)
+            return wrapper
+        else:
+            raise AttributeError()
+
+
     def __implement(self):
         """Generic implementation of a tasks
 
@@ -423,13 +437,12 @@ class GenericTask(Logger, Load, Qa):
         self.launchCommand(cmd, stdout, stderr, timeout, nice)
 
 
-    def getImage(self, dir, prefix, postfix=None, ext="nii.gz"):
+    def getImage(self, prefix, postfix=None, ext="nii.gz"):
         """A simple utility function that return an mri image given certain criteria
 
         this is a wrapper over mriutil getImage function
 
         Args:
-            dir:     the directory where looking for the image
             prefix:  an expression that the filename should start with
             postfix: an expression that the filename should end with (excluding the extension)
             ext:     name of the extension of the filename. defaults: nii.gz
@@ -438,7 +451,9 @@ class GenericTask(Logger, Load, Qa):
             the relative filename if found, False otherwise
 
         """
-        return util.getImage(self.config, dir, prefix, postfix, ext)
+        return util.getImage(self.config, self.workingDir, prefix, postfix, ext)
+
+
 
 
     def buildName(self, source, postfix, ext=None, absolute = True):

@@ -14,15 +14,15 @@ class Registration(GenericTask):
 
     def implement(self):
 
-        b0 = self.getImage(self.dependDir, 'b0','upsample')
-        norm= self.getImage(self.parcellationDir, 'norm')
-        anat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
-        aparcAsegFile =  self.getImage(self.parcellationDir, "aparc_aseg")
-        rhRibbon = self.getImage(self.parcellationDir, "rh_ribbon")
-        lhRibbon = self.getImage(self.parcellationDir, "lh_ribbon")
-        brodmann = self.getImage(self.parcellationDir, "brodmann")
-        tt5 = self.getImage(self.parcellationDir, "tt5")
-        mask = self.getImage(self.parcellationDir, "mask")
+        b0 = self.getUpsamplingImage('b0','upsample')
+        norm= self.getParcellationImage('norm')
+        anat = self.getParcellationImage('anat', 'freesurfer')
+        aparcAsegFile =  self.getParcellationImage("aparc_aseg")
+        rhRibbon = self.getParcellationImage("rh_ribbon")
+        lhRibbon = self.getParcellationImage("lh_ribbon")
+        brodmann = self.getParcellationImage("brodmann")
+        tt5 = self.getParcellationImage("tt5")
+        mask = self.getParcellationImage("mask")
 
         extraArgs = ""
         if self.get("parcellation", "intrasubject"):
@@ -110,38 +110,39 @@ class Registration(GenericTask):
 
 
     def meetRequirement(self):
-        return Images((self.getImage(self.parcellationDir, 'anat', 'freesurfer'), 'high resolution'),
-                          (self.getImage(self.dependDir, 'b0', 'upsample'), 'b0 upsampled'),
-                          (self.getImage(self.parcellationDir, 'aparc_aseg'), 'parcellation'),
-                          (self.getImage(self.parcellationDir, 'rh_ribbon'), 'right hemisphere ribbon'),
-                          (self.getImage(self.parcellationDir, 'lh_ribbon'), 'left hemisphere ribbon'),
-                          (self.getImage(self.parcellationDir, 'tt5'), '5tt'),
-                          (self.getImage(self.parcellationDir, 'mask'), 'brain mask'),
-                          (self.getImage(self.parcellationDir, 'brodmann'), 'brodmann'))
+        return Images((self.getParcellationImage('anat', 'freesurfer'), 'high resolution'),
+                          (self.getUpsamplingImage('b0', 'upsample'), 'b0 upsampled'),
+                          (self.getParcellationImage('aparc_aseg'), 'parcellation'),
+                          (self.getParcellationImage('rh_ribbon'), 'right hemisphere ribbon'),
+                          (self.getParcellationImage('lh_ribbon'), 'left hemisphere ribbon'),
+                          (self.getParcellationImage('tt5'), '5tt'),
+                          (self.getParcellationImage('mask'), 'brain mask'),
+                          (self.getParcellationImage('brodmann'), 'brodmann'))
 
 
     def isDirty(self):
-        return Images((self.getImage(self.workingDir,'anat', 'resample'), 'anatomical resampled'),
-                  (self.getImage(self.workingDir,'aparc_aseg', 'resample'), 'parcellation atlas resample'),
-                  (self.getImage(self.workingDir,'aparc_aseg', 'register'), 'parcellation atlas register'),
-                  (self.getImage(self.workingDir, 'tt5', 'register'), '5tt image register'),
-                  (self.getImage(self.workingDir, 'mask', 'register'), 'brain mask register'),
-                  (self.getImage(self.workingDir, 'tt5', 'resample'), '5tt image resample'),
-                  (self.getImage(self.workingDir, 'mask', 'resample'), 'brain mask resample'),
-                  (self.getImage(self.workingDir, 'norm', 'resample'), 'brain  resample'),
-                  (self.getImage(self.workingDir, 'brodmann', 'resample'), 'brodmann atlas  resample'),
-                  (self.getImage(self.workingDir,'brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere atlas'),
-                  (self.getImage(self.workingDir,'brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere atlas'))
+        return Images((self.getImage('anat', 'resample'), 'anatomical resampled'),
+                  (self.getImage('aparc_aseg', 'resample'), 'parcellation atlas resample'),
+                  (self.getImage('aparc_aseg', 'register'), 'parcellation atlas register'),
+                  (self.getImage('tt5', 'register'), '5tt image register'),
+                  (self.getImage('mask', 'register'), 'brain mask register'),
+                  (self.getImage('tt5', 'resample'), '5tt image resample'),
+                  (self.getImage('mask', 'resample'), 'brain mask resample'),
+                  (self.getImage('norm', 'resample'), 'brain  resample'),
+                  (self.getImage('brodmann', 'resample'), 'brodmann atlas  resample'),
+                  (self.getImage('brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere atlas'),
+                  (self.getImage('brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere atlas'))
+
 
     def qaSupplier(self):
         """Create and supply images for the report generated by qa task
 
         """
         #Get images
-        b0 = self.getImage(self.dependDir, 'b0', 'upsample')
-        brainMask = self.getImage(self.workingDir, 'mask', 'resample')
-        aparcAseg = self.getImage(self.workingDir, 'aparc_aseg', 'resample')
-        brodmann = self.getImage(self.workingDir, 'brodmann', 'resample')
+        b0 = self.getUpsamplingImage('b0', 'upsample')
+        brainMask = self.getImage('mask', 'resample')
+        aparcAseg = self.getImage('aparc_aseg', 'resample')
+        brodmann = self.getImage('brodmann', 'resample')
 
         #Build qa names
         brainMaskPng = self.buildName(brainMask, None, 'png')

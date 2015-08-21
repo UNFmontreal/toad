@@ -18,12 +18,12 @@ class HardiDipy(GenericTask):
 
     def implement(self):
 
-        dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
-        mask = self.getImage(self.registrationDir, 'mask', 'resample')
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        mask = self.getRegistrationImage('mask', 'resample')
 
         #Look first if there is eddy b encoding files produces
-        bValsFile = self.getImage(self.dependDir, 'grad', None, 'bvals')
-        bVecsFile = self.getImage(self.dependDir, 'grad', None, 'bvecs')
+        bValsFile = self.getUpsamplingImage('grad', None, 'bvals')
+        bVecsFile = self.getUpsamplingImage('grad', None, 'bvecs')
         self.__produceMetrics(dwi, bValsFile, bVecsFile, mask)
 
 
@@ -89,13 +89,13 @@ class HardiDipy(GenericTask):
 
 
     def meetRequirement(self):
-        return Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
-                  (self.getImage(self.dependDir, 'grad', None, 'bvals'), "gradient value bvals encoding file"),
-                  (self.getImage(self.dependDir, 'grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
-                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'))
+        return Images((self.getUpsamplingImage('dwi', 'upsample'), "upsampled diffusion"),
+                  (self.getUpsamplingImage('grad', None, 'bvals'), "gradient value bvals encoding file"),
+                  (self.getUpsamplingImage('grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
+                  (self.getRegistrationImage('mask', 'resample'), 'brain  mask'))
 
 
     def isDirty(self):
-        return Images((self.getImage(self.workingDir, 'dwi', 'csd'), "constrained spherical deconvolution"),
-                  (self.getImage(self.workingDir,'dwi', 'gfa'), "generalised Fractional Anisotropy"),
-                  (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'))
+        return Images((self.getImage('dwi', 'csd'), "constrained spherical deconvolution"),
+                  (self.getImage('dwi', 'gfa'), "generalised Fractional Anisotropy"),
+                  (self.getImage('dwi', 'nufo'), 'nufo'))

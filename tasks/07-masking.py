@@ -17,13 +17,13 @@ class Masking(GenericTask):
 
 
     def implement(self):
-        aparcAsegRegister = self.getImage(self.dependDir,"aparc_aseg", "register")
-        aparcAsegResample = self.getImage(self.dependDir,"aparc_aseg", "resample")
-        maskRegister = self.getImage(self.dependDir,"mask", "register")
-        maskResample = self.getImage(self.dependDir,"mask", "resample")
+        aparcAsegRegister = self.getRegistrationImage("aparc_aseg", "register")
+        aparcAsegResample = self.getRegistrationImage("aparc_aseg", "resample")
+        maskRegister = self.getRegistrationImage("mask", "register")
+        maskResample = self.getRegistrationImage("mask", "resample")
 
-        tt5Register = self.getImage(self.dependDir,"tt5", "register")
-        tt5Resample = self.getImage(self.dependDir,"tt5", "resample")
+        tt5Register = self.getRegistrationImage("tt5", "register")
+        tt5Resample = self.getRegistrationImage("tt5", "resample")
         #Produces a mask image suitable for seeding streamlines from the grey matter - white matter interface
         seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 
@@ -160,31 +160,30 @@ class Masking(GenericTask):
 
 
     def meetRequirement(self):
-        return Images((self.getImage(self.dependDir,"aparc_aseg", "resample"), 'resampled parcellation atlas'),
-                    (self.getImage(self.dependDir,"aparc_aseg", "register"), 'register parcellation atlas'),
-                    (self.getImage(self.dependDir,'mask', 'resample'),  'brain extracted, resampled high resolution'),
-                    (self.getImage(self.dependDir,'mask', 'register'),  'brain extracted, register high resolution'),
-                    (self.getImage(self.dependDir,'tt5', 'resample'),  '5tt resample'),
-                    (self.getImage(self.dependDir,'tt5', 'register'),  '5tt register'))
+        return Images((self.getRegistrationImage("aparc_aseg", "resample"), 'resampled parcellation atlas'),
+                    (self.getRegistrationImage("aparc_aseg", "register"), 'register parcellation atlas'),
+                    (self.getRegistrationImage('mask', 'resample'),  'brain extracted, resampled high resolution'),
+                    (self.getRegistrationImage('mask', 'register'),  'brain extracted, register high resolution'),
+                    (self.getRegistrationImage('tt5', 'resample'),  '5tt resample'),
+                    (self.getRegistrationImage('tt5', 'register'),  '5tt register'))
 
     def isDirty(self):
-        images = Images((os.path.join(self.workingDir, 'FreeSurferColorLUT_ItkSnap.txt'), 'freesurfer color look up table'),
-                     (self.getImage(self.workingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg atlas'),
-                     (self.getImage(self.workingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg atlas'),
-                     (self.getImage(self.workingDir, "tt5", ["resample", "wm", "mask"]), 'resample white segmented mask'),
-                     (self.getImage(self.workingDir, "tt5", ["register", "5tt2gmwmi"]), 'grey matter, white matter interface'))
+        images = Images((self.getImage('aparc_aseg',['253','mask']), 'area 253 from aparc_aseg atlas'),
+                     (self.getImage('aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg atlas'),
+                     (self.getImage("tt5", ["resample", "wm", "mask"]), 'resample white segmented mask'),
+                     (self.getImage("tt5", ["register", "5tt2gmwmi"]), 'grey matter, white matter interface'))
 
         if self.get("start_seeds").strip() != "":
-            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract', 'mask']), 'high resolution, start, brain extracted mask'))
-            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'start', 'extract']), 'high resolution, start, brain extracted'))
+            images.append((self.getImage('aparc_aseg', ['resample', 'start', 'extract', 'mask']), 'high resolution, start, brain extracted mask'))
+            images.append((self.getImage('aparc_aseg', ['resample', 'start', 'extract']), 'high resolution, start, brain extracted'))
 
         if self.get("stop_seeds").strip() != "":
-            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract', 'mask']), 'high resolution, stop, brain extracted mask'))
-            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'stop', 'extract']), 'high resolution, stop, brain extracted'))
+            images.append((self.getImage('aparc_aseg', ['resample', 'stop', 'extract', 'mask']), 'high resolution, stop, brain extracted mask'))
+            images.append((self.getImage('aparc_aseg', ['resample', 'stop', 'extract']), 'high resolution, stop, brain extracted'))
 
         if self.get("exclude_seeds").strip() != "":
-            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract', 'mask']), 'high resolution, excluded, brain extracted, mask'))
-            images.append((self.getImage(self.workingDir, 'aparc_aseg', ['resample', 'exclude', 'extract']), 'high resolution, excluded, brain extracted'))
+            images.append((self.getImage('aparc_aseg', ['resample', 'exclude', 'extract', 'mask']), 'high resolution, excluded, brain extracted, mask'))
+            images.append((self.getImage('aparc_aseg', ['resample', 'exclude', 'extract']), 'high resolution, excluded, brain extracted'))
 
         return images
 
@@ -195,11 +194,11 @@ class Masking(GenericTask):
         qaImages = Images()
 
         #Get images
-        b0 = self.getImage(self.upsamplingDir, 'b0', 'upsample')
-        whiteMatter = self.getImage(self.workingDir, "tt5", ["resample", "wm", "mask"])
-        interfaceGmWm = self.getImage(self.workingDir, "tt5", ["register", "5tt2gmwmi"])
-        area253 = self.getImage(self.workingDir, 'aparc_aseg',['253','mask'])
-        area1024 = self.getImage(self.workingDir, 'aparc_aseg',['1024','mask'])
+        b0 = self.getUpsamplingImage('b0', 'upsample')
+        whiteMatter = self.getImage("tt5", ["resample", "wm", "mask"])
+        interfaceGmWm = self.getImage("tt5", ["register", "5tt2gmwmi"])
+        area253 = self.getImage('aparc_aseg',['253','mask'])
+        area1024 = self.getImage('aparc_aseg',['1024','mask'])
 
         #Build qa images
         tags = (

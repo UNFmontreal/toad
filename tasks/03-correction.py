@@ -19,19 +19,19 @@ class Correction(GenericTask):
 
 
     def implement(self):
-        dwi = self.getImage(self.dependDir, 'dwi')
-        b0AP= self.getImage(self.dependDir, 'b0_ap')
-        b0PA= self.getImage(self.dependDir, 'b0_pa')
-        bEnc=  self.getImage(self.dependDir, 'grad',  None, 'b')
-        bVals=  self.getImage(self.dependDir, 'grad',  None, 'bvals')
-        bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvecs')
-        norm=   self.getImage(self.parcellationDir, 'norm')
-        parcellationMask = self.getImage(self.parcellationDir, 'mask')
+        dwi = self.getPreparationImage('dwi')
+        b0AP= self.getPreparationImage('b0_ap')
+        b0PA= self.getPreparationImage('b0_pa')
+        bEnc=  self.getPreparationImage('grad',  None, 'b')
+        bVals=  self.getPreparationImage('grad',  None, 'bvals')
+        bVecs=  self.getPreparationImage('grad',  None, 'bvecs')
+        norm=   self.getParcellationImage('norm')
+        parcellationMask = self.getParcellationImage('mask')
 
         #fieldmap only
-        mag = self.getImage(self.dependDir, "mag")
-        phase = self.getImage(self.dependDir, "phase")
-        freesurferAnat = self.getImage(self.parcellationDir, 'anat', 'freesurfer')
+        mag = self.getPreparationImage("mag")
+        phase = self.getPreparationImage("phase")
+        freesurferAnat = self.getParcellationImage('anat', 'freesurfer')
 
 
         #extract b0 image from the dwi
@@ -95,7 +95,7 @@ class Correction(GenericTask):
 
 
 
-        eddyParameterFiles = self.getImage(self.workingDir, 'dwi', None, 'eddy_parameters')
+        eddyParameterFiles = self.getImage('dwi', None, 'eddy_parameters')
         if eddyParameterFiles:
             self.info("Apply eddy movement correction to gradient encodings directions")
             bEnc = mriutil.applyGradientCorrection(bEnc, eddyParameterFiles, self.buildName(outputImage, None, 'b'))
@@ -531,22 +531,22 @@ class Correction(GenericTask):
 
 
     def meetRequirement(self):
-        images = Images((self.getImage(self.dependDir, 'dwi'), 'diffusion weighted'),
-                        (self.getImage(self.parcellationDir, 'norm'), 'freesurfer normalize'),
-                        (self.getImage(self.parcellationDir, 'mask'), 'freesurfer mask'),
-                        (self.getImage(self.dependDir, 'grad', None, 'bvals'), 'gradient .bvals encoding file'),
-                        (self.getImage(self.dependDir, 'grad', None, 'bvecs'), 'gradient .bvecs encoding file'),
-                        (self.getImage(self.dependDir, 'grad', None, 'b'), 'gradient .b encoding file'))
+        images = Images((self.getPreparationImage('dwi'), 'diffusion weighted'),
+                        (self.getParcellationImage(self.parcellationDir, 'norm'), 'freesurfer normalize'),
+                        (self.getParcellationImage(self.parcellationDir, 'mask'), 'freesurfer mask'),
+                        (self.getPreparationImage('grad', None, 'bvals'), 'gradient .bvals encoding file'),
+                        (self.getPreparationImage('grad', None, 'bvecs'), 'gradient .bvecs encoding file'),
+                        (self.getPreparationImage('grad', None, 'b'), 'gradient .b encoding file'))
 
         #if fieldmap available
-        if Images(self.getImage(self.dependDir, "mag") , self.getImage(self.dependDir, "phase")).isAllImagesExists():
-            images.append((self.getImage(self.parcellationDir, 'anat', 'freesurfer'),"freesurfer anatomical"))
+        if Images(self.getPreparationImage("mag") , self.getPreparationImage("phase")).isAllImagesExists():
+            images.append((self.getParcellationImage('anat', 'freesurfer'),"freesurfer anatomical"))
 
         return images
 
 
     def isDirty(self):
-        return Images((self.getImage(self.workingDir, 'dwi', 'corrected'), 'diffusion weighted eddy corrected'))
+        return Images((self.getImage('dwi', 'corrected'), 'diffusion weighted eddy corrected'))
 
 
     def qaSupplier(self):
@@ -556,10 +556,10 @@ class Correction(GenericTask):
         qaImages = Images()
 
         #Information on distorsion correction
-        b0_ap = self.getImage(self.dependDir, 'b0_ap')
-        b0_pa = self.getImage(self.dependDir, 'b0_pa')
-        mag = self.getImage(self.dependDir, 'mag')
-        phase = self.getImage(self.dependDir, 'phase')
+        b0_ap = self.getPreparationImage('b0_ap')
+        b0_pa = self.getPreparationImage('b0_pa')
+        mag = self.getPreparationImage('mag')
+        phase = self.getPreparationImage('phase')
         information = ''
         if b0_ap and b0_pa:
             information = 'Distortion correction done with AP and PA images'
@@ -570,12 +570,12 @@ class Correction(GenericTask):
         qaImages.setInformation(information)
 
         #Get images
-        dwi = self.getImage(self.dependDir, 'dwi')
-        dwiCorrected = self.getImage(self.workingDir, 'dwi', 'corrected')
-        brainMask = self.getImage(self.workingDir, 'mask', 'corrected')
-        eddyParameterFiles = self.getImage(self.workingDir, 'dwi', None, 'eddy_parameters')
-        bVecs=  self.getImage(self.dependDir, 'grad',  None, 'bvecs')
-        bVecsCorrected = self.getImage(self.workingDir, 'grad',  None, 'bvecs')
+        dwi = self.getPreparationImage('dwi')
+        dwiCorrected = self.getImage('dwi', 'corrected')
+        brainMask = self.getImage('mask', 'corrected')
+        eddyParameterFiles = self.getImage('dwi', None, 'eddy_parameters')
+        bVecs=  self.getPreparationImage('grad',  None, 'bvecs')
+        bVecsCorrected = self.getImage('grad',  None, 'bvecs')
 
         #Build qa names
         dwiCorrectedGif = self.buildName(dwiCorrected, None, 'gif')
