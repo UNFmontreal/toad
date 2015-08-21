@@ -25,14 +25,20 @@ class QA(GenericTask):
 
         #Create menu links only for tasks with implemented QA
         menuHtml = ""
-        qaTasksList = [task.getName() for task in sorted(self.tasksAsReferences) if self.__isQaImplemented(task)]
-        for name in qaTasksList:
-            menuHtml +="\n<li><a id=\"{0}\" href=\"{0}.html\">{0}</a></li>".format(name)
+        menuLinkTemplate = "\n<li><a id=\"{0}\" href=\"{0}.html\">{0}</a></li>"
+        qaTasksList = []
+
+        for task in sorted(self.tasksAsReferences):
+            if "qaSupplier" in dir(task):
+                qaTasksList.append(task.getName())
+
+        for taskName in qaTasksList:
+            menuHtml += menuLinkTemplate.format(taskName)
 
         #Create temporary html for each task
         message = "Task is being processed. Refresh to check completion."
-        for name in qaTasksList:
-            htmlTaskFileName = "{}.html".format(name)
+        for taskName in qaTasksList:
+            htmlTaskFileName = "{}.html".format(taskName)
             if not os.path.exists(htmlTaskFileName):
                 tags = {
                     'subject':self.__subject.getName(),
@@ -60,18 +66,6 @@ class QA(GenericTask):
             }
         htmlCode = self.parseTemplate(tags, mainTemplate)
         util.createScript('index.html', htmlCode)
-
-
-    def __isQaImplemented(self, task):
-        """
-        Check if a task is not ignored AND qaSupplier method is implemented 
-        """
-        isQaSupplier = "qaSupplier" in dir(task)
-        try:
-            taskWillRun = not task.get(task.getName(), 'ignore')
-        except:
-            taskWillRun = True
-        return isQaSupplier and taskWillRun
 
 
     def meetRequirement(self, result=True):
