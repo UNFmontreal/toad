@@ -532,8 +532,8 @@ class Correction(GenericTask):
 
     def meetRequirement(self):
         images = Images((self.getPreparationImage('dwi'), 'diffusion weighted'),
-                        (self.getParcellationImage(self.parcellationDir, 'norm'), 'freesurfer normalize'),
-                        (self.getParcellationImage(self.parcellationDir, 'mask'), 'freesurfer mask'),
+                        (self.getParcellationImage('norm'), 'freesurfer normalize'),
+                        (self.getParcellationImage('mask'), 'freesurfer mask'),
                         (self.getPreparationImage('grad', None, 'bvals'), 'gradient .bvals encoding file'),
                         (self.getPreparationImage('grad', None, 'bvecs'), 'gradient .bvecs encoding file'),
                         (self.getPreparationImage('grad', None, 'b'), 'gradient .b encoding file'))
