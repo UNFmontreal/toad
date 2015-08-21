@@ -13,7 +13,7 @@ class Masking(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'registration', 'preparation', 'correction', 'qa')
+        GenericTask.__init__(self, subject, 'registration', 'preparation', 'upsampling', 'qa')
 
 
     def implement(self):
@@ -195,7 +195,7 @@ class Masking(GenericTask):
         qaImages = Images()
 
         #Get images
-        b0 = self.getImage(self.correctionDir, 'b0', 'upsample')
+        b0 = self.getImage(self.upsamplingDir, 'b0', 'upsample')
         whiteMatter = self.getImage(self.workingDir, "tt5", ["resample", "wm", "mask"])
         interfaceGmWm = self.getImage(self.workingDir, "tt5", ["register", "5tt2gmwmi"])
         area253 = self.getImage(self.workingDir, 'aparc_aseg',['253','mask'])
@@ -204,13 +204,13 @@ class Masking(GenericTask):
         #Build qa images
         tags = (
             (whiteMatter, 'resample white segmented mask'),
-            (interfaceGmWm, 'grey matter, white matter interface'),
+            #(interfaceGmWm, 'grey matter, white matter interface'),
             (area253, 'area 253 from aparc_aseg atlas'),
             (area1024, 'area 1024 from aparc_aseg atlas'),
             )
         for image, description in tags:
             qaImage = self.buildName(image, None, 'png')
             self.slicerPng(b0, qaImage, maskOverlay=image, boundaries=image)
-            qaImages.extend(Image((qaImage, description)))
+            qaImages.extend(Images((qaImage, description)))
 
         return qaImages
