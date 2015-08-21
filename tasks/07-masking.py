@@ -13,7 +13,7 @@ class Masking(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'registration', 'preparation', 'upsampling', 'qa')
+        GenericTask.__init__(self, subject, 'registration', 'upsampling', 'qa')
 
 
     def implement(self):
