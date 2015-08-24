@@ -227,10 +227,11 @@ class Qa(object):
         return target
 
 
-    def plotSigma(self, sigma, target):
+    def plotSigma(self, sigmaFile, target):
         """
         """
         matplotlib.pyplot.clf()
+        sigma = numpy.loadtxt(sigmaFile)
         y_pos = numpy.arange(len(sigma))
         sigmaMedian = numpy.median(sigma)
         matplotlib.pyplot.barh(y_pos, sigma)
