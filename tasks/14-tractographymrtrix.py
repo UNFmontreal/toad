@@ -14,18 +14,18 @@ class TractographyMrtrix(GenericTask):
 
     def implement(self):
 
-        tt5 = self.getImage(self.registrationDir, "tt5", "register")
-        seed_gmwmi = self.getImage(self.maskingDir, "tt5", ["register", "5tt2gmwmi"])
-        brodmann = self.getImage(self.registrationDir, "brodmann", "resample")
-        norm = self.getImage(self.registrationDir, "norm", "resample")
+        tt5 = self.getRegistrationImage("tt5", "register")
+        seed_gmwmi = self.getMaskingImage("tt5", ["register", "5tt2gmwmi"])
+        brodmann = self.getRegistrationImage("brodmann", "resample")
+        norm = self.getRegistrationImage("norm", "resample")
 
-        mask253 = self.getImage(self.maskingDir, 'aparc_aseg',['253','mask'])
-        mask1024= self.getImage(self.maskingDir, 'aparc_aseg',['1024','mask'])
+        mask253 = self.getMaskingImage('aparc_aseg', ['253', 'mask'])
+        mask1024= self.getMaskingImage('aparc_aseg', ['1024', 'mask'])
 
-        dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
 
-        bFile = self.getImage(self.dependDir, 'grad', None, 'b')
-        mask = self.getImage(self.registrationDir, 'mask', 'resample')
+        bFile = self.getUpsamplingImage('grad', None, 'b')
+        mask = self.getRegistrationImage('mask', 'resample')
          
         #tensor part
         tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
@@ -46,7 +46,7 @@ class TractographyMrtrix(GenericTask):
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
 
         #HARDI part
-        csd =  self.getImage(self.hardimrtrixDir,'dwi','csd')
+        csd =  self.getHardimrtrixImage('dwi','csd')
         hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
         hardiTckConnectome = self.__tck2connectome(hardiTck, brodmann, self.buildName(hardiTck, 'connectome', 'csv'))
         hardiTckConnectomeNormalize = self.__normalizeConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, 'normalize', 'csv'))
@@ -242,40 +242,40 @@ class TractographyMrtrix(GenericTask):
 
     def meetRequirement(self):
         #@TODO add brain mask and 5tt as requierement
-        return Images((self.getImage(self.dependDir,'dwi','upsample'), 'upsampled diffusion weighted'),
-                  (self.getImage(self.dependDir, 'grad', None, 'b'), '.b gradient encoding file'),
-                  (self.getImage(self.registrationDir, "mask", "resample"), 'mask resampled'),
-                  (self.getImage(self.registrationDir, "brodmann", "resample"), 'resampled brodmann area'),
-                  (self.getImage(self.registrationDir, "norm", "resample"), 'brain resampled'),
-                  (self.getImage(self.maskingDir, 'aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
-                  (self.getImage(self.registrationDir, "tt5", "resample"),'5tt resampled'),
-                  (self.getImage(self.maskingDir, 'aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
-                  (self.getImage(self.maskingDir, "tt5", ["register", "5tt2gmwmi"]), 'grey matter, white matter interface'))
+        return Images((self.getUpsamplingImage('dwi','upsample'), 'upsampled diffusion weighted'),
+                  (self.getUpsamplingImage('grad', None, 'b'), '.b gradient encoding file'),
+                  (self.getRegistrationImage("mask", "resample"), 'mask resampled'),
+                  (self.getRegistrationImage("brodmann", "resample"), 'resampled brodmann area'),
+                  (self.getRegistrationImage("norm", "resample"), 'brain resampled'),
+                  (self.getMaskingImage('aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
+                  (self.getRegistrationImage("tt5", "resample"),'5tt resampled'),
+                  (self.getMaskingImage('aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
+                  (self.getMaskingImage("tt5", ["register", "5tt2gmwmi"]), 'grey matter, white matter interface'))
 
 
 
     def isDirty(self):
 
-        return Images((self.getImage(self.workingDir, 'dwi', 'tensor_det', 'tck'), "deterministic tensor connectome matrix from a streamlines"),
-                  (self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome', 'normalize'], 'csv'), "normalize deterministic tensor connectome matrix from a streamlines csv"),
-                  (self.getImage(self.workingDir, 'dwi', 'tensor_prob', 'tck'), "probabilistic tensor connectome matrix from a streamlines"),
-                  (self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'connectome', 'normalize'], 'csv'), "normalize probabilistic tensor connectome matrix from a streamlines csv"),
-                  (self.getImage(self.workingDir, 'dwi', 'hardi_prob', 'tck'), "tckgen hardi probabilistic streamlines tractography"),
-                  (self.getImage(self.workingDir, 'dwi', 'tcksift', 'tck'), 'tcksift'),
-                  (self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome', 'normalize'], 'csv'), 'normalize connectome matrix from a tcksift csv'))
+        return Images((self.getImage('dwi', 'tensor_det', 'tck'), "deterministic tensor connectome matrix from a streamlines"),
+                  (self.getImage('dwi', ['tensor_det', 'connectome', 'normalize'], 'csv'), "normalize deterministic tensor connectome matrix from a streamlines csv"),
+                  (self.getImage('dwi', 'tensor_prob', 'tck'), "probabilistic tensor connectome matrix from a streamlines"),
+                  (self.getImage('dwi', ['tensor_prob', 'connectome', 'normalize'], 'csv'), "normalize probabilistic tensor connectome matrix from a streamlines csv"),
+                  (self.getImage('dwi', 'hardi_prob', 'tck'), "tckgen hardi probabilistic streamlines tractography"),
+                  (self.getImage('dwi', 'tcksift', 'tck'), 'tcksift'),
+                  (self.getImage('dwi', ['tcksift', 'connectome', 'normalize'], 'csv'), 'normalize connectome matrix from a tcksift csv'))
 
     """
     def qaSupplier(self):
 
 
-        tensorDetPng = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'roi'], 'png')
-        tensorDetPlot = self.getImage(self.workingDir, 'dwi', ['tensor_det', 'connectome', 'normalize'], 'png')
-        tensorProbPng = self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'roi'], 'png')
-        tensorProbPlot = self.getImage(self.workingDir, 'dwi', ['tensor_prob', 'connectome', 'normalize'], 'png')
-        hardiProbPng = self.getImage(self.workingDir, 'dwi', ['hardi_prob', 'roi'], 'png')
-        hardiProbPlot = self.getImage(self.workingDir, 'dwi', ['hardi_prob', 'connectome', 'normalize'], 'png')
-        tcksiftPng = self.getImage(self.workingDir, 'dwi', ['tcksift', 'roi'], 'png')
-        tcksiftPlot = self.getImage(self.workingDir, 'dwi', ['tcksift', 'connectome', 'normalize'], 'png')
+        tensorDetPng = self.getImage('dwi', ['tensor_det', 'roi'], 'png')
+        tensorDetPlot = self.getImage('dwi', ['tensor_det', 'connectome', 'normalize'], 'png')
+        tensorProbPng = self.getImage('dwi', ['tensor_prob', 'roi'], 'png')
+        tensorProbPlot = self.getImage('dwi', ['tensor_prob', 'connectome', 'normalize'], 'png')
+        hardiProbPng = self.getImage('dwi', ['hardi_prob', 'roi'], 'png')
+        hardiProbPlot = self.getImage('dwi', ['hardi_prob', 'connectome', 'normalize'], 'png')
+        tcksiftPng = self.getImage('dwi', ['tcksift', 'roi'], 'png')
+        tcksiftPlot = self.getImage('dwi', ['tcksift', 'connectome', 'normalize'], 'png')
 
         images = Images((tensorDetPng, 'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),
                        (tensorDetPlot,'normalize connectome matrix from a deterministic tensor streamlines'),

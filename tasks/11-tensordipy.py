@@ -19,11 +19,10 @@ class TensorDipy(GenericTask):
 
     def implement(self):
 
-        dwi = self.getImage(self.dependDir, 'dwi', 'upsample')
-        bValsFile = self.getImage(self.dependDir, 'grad', None, 'bvals')
-        bVecsFile = self.getImage(self.dependDir, 'grad', None, 'bvecs')
-        #mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
-        mask = self.getImage(self.registrationDir, 'mask', 'resample')
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        bValsFile = self.getUpsamplingImage('grad', None, 'bvals')
+        bVecsFile = self.getUpsamplingImage('grad', None, 'bvecs')
+        mask = self.getRegistrationImage('mask', 'resample')
 
         fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
 
@@ -69,23 +68,22 @@ class TensorDipy(GenericTask):
 
 
     def meetRequirement(self):
-        return Images((self.getImage(self.dependDir, 'dwi', 'upsample'), "upsampled diffusion"),
-                  (self.getImage(self.dependDir, 'grad', None, 'bvals'), "gradient value bvals encoding file"),
-                  (self.getImage(self.dependDir, 'grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
-                  #(self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate extended mask'),
-                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain  mask'))
+        return Images((self.getUpsamplingImage('dwi', 'upsample'), "upsampled diffusion"),
+                  (self.getUpsamplingImage('grad', None, 'bvals'), "gradient value bvals encoding file"),
+                  (self.getUpsamplingImage('grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
+                  (self.getRegistrationImage('mask', 'resample'), 'brain  mask'))
 
 
 
     def isDirty(self):
-        return Images((self.getImage(self.workingDir, "dwi", "tensor"), "dipy tensor"),
-                     (self.getImage(self.workingDir, 'dwi', 'v1'), "selected eigenvector 1"),
-                     (self.getImage(self.workingDir, 'dwi', 'v2'), "selected eigenvector 2"),
-                     (self.getImage(self.workingDir, 'dwi', 'v3'), "selected eigenvector 3"),
-                     (self.getImage(self.workingDir, 'dwi', 'fa'), "fractional anisotropy"),
-                     (self.getImage(self.workingDir, 'dwi', 'md'), "mean diffusivity MD"),
-                     (self.getImage(self.workingDir, 'dwi', 'ad'), "selected eigenvalue(s) AD"),
-                     (self.getImage(self.workingDir, 'dwi', 'rd'), "selected eigenvalue(s) RD"))
+        return Images((self.getImage("dwi", "tensor"), "dipy tensor"),
+                     (self.getImage('dwi', 'v1'), "selected eigenvector 1"),
+                     (self.getImage('dwi', 'v2'), "selected eigenvector 2"),
+                     (self.getImage('dwi', 'v3'), "selected eigenvector 3"),
+                     (self.getImage('dwi', 'fa'), "fractional anisotropy"),
+                     (self.getImage('dwi', 'md'), "mean diffusivity MD"),
+                     (self.getImage('dwi', 'ad'), "selected eigenvalue(s) AD"),
+                     (self.getImage('dwi', 'rd'), "selected eigenvalue(s) RD"))
                  #"apparent diffusion coefficient" : self.getImage(self.workingDir, 'dwi', 'adc')}
 
 
@@ -97,7 +95,7 @@ class TensorDipy(GenericTask):
         softwareName = 'dipy'
 
         #Get images
-        mask = self.getImage(self.registrationDir, 'mask', 'resample')
+        mask = self.getRegistrationImage('mask', 'resample')
 
         #Build qa images
         tags = (
@@ -108,7 +106,7 @@ class TensorDipy(GenericTask):
             )
 
         for postfix, description in tags:
-            image = self.getImage(self.workingDir, 'dwi', postfix)
+            image = self.getImage('dwi', postfix)
             if image:
                 qaImage = self.buildName(image, softwareName, 'png')
                 self.slicerPng(image, qaImage, boundaries=mask)

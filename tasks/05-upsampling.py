@@ -16,13 +16,14 @@ class Upsampling(GenericTask):
 
         dwi = self.__linkDwiImage()
 
-        bVals= self.getImage(self.correctionDir, 'grad', None, 'bvals')
-        bVecs= self.getImage(self.correctionDir, 'grad', None, 'bvecs')
-        bEnc = self.getImage(self.correctionDir, 'grad', None, 'benc')
+        bVals= self.getCorrectionImage('grad', None, 'bvals')
+        bVecs= self.getCorrectionImage('grad', None, 'bvecs')
+        bEnc = self.getCorrectionImage('grad', None, 'benc')
         if not bVals or not bVecs:
-            bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
-            bVecs= self.getImage(self.preparationDir, 'grad', None, 'bvecs')
-            bEnc= self.getImage(self.preparationDir, 'grad', None, 'benc')
+            bVals= self.getPreparationImage('grad', None, 'bvals')
+            bVecs= self.getPreparationImage('grad', None, 'bvecs')
+            bEnc= self.getPreparationImage('grad', None, 'benc')
+
         bVals = util.symlink(bVals, self.workingDir)
         bVecs = util.symlink(bVecs, self.workingDir)
         bEnc = util.symlink(bEnc, self.workingDir)
@@ -34,11 +35,11 @@ class Upsampling(GenericTask):
 
     def __linkDwiImage(self):
 
-        dwi = self.getImage(self.dependDir, 'dwi', 'denoise')
+        dwi = self.getDenoisingImage('dwi', 'denoise')
         if not dwi:
-            dwi = self.getImage(self.correctionDir, 'dwi', 'corrected')
+            dwi = self.getCorrectionImage('dwi', 'corrected')
         if not dwi:
-            dwi = self.getImage(self.preparationDir, 'dwi')
+            dwi = self.getPreparationImage('dwi')
         return util.symlink(dwi, self.workingDir)
 
 
@@ -67,9 +68,10 @@ class Upsampling(GenericTask):
     def meetRequirement(self, result=True):
 
         #@TODO add gradient files validation and correct this function
-        images = Images((self.getImage(self.dependDir, "dwi", 'denoise'), 'denoised'),
-                       (self.getImage(self.correctionDir, "dwi", 'corrected'), 'corrected'),
-                       (self.getImage(self.preparationDir, "dwi"), 'diffusion weighted'))
+        images = Images((self.getDenoisingImage("dwi", 'denoise'), 'denoised'),
+                       (self.getCorrectionImage("dwi", 'corrected'), 'corrected'),
+                       (self.getPreparationImage("dwi"), 'diffusion weighted'))
+
         if images.isNoImagesExists():
             self.warning("No proper dwi image found as requirement")
             result = False
@@ -78,5 +80,5 @@ class Upsampling(GenericTask):
 
 
     def isDirty(self):
-        return Images((self.getImage(self.workingDir, 'dwi', "upsample"), 'upsampled diffusion weighted'),
-                  (self.getImage(self.workingDir, 'b0', "upsample"), 'upsampled b0'))
+        return Images((self.getImage('dwi', "upsample"), 'upsampled diffusion weighted'),
+                  (self.getImage('b0', "upsample"), 'upsampled b0'))
