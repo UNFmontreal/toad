@@ -15,7 +15,7 @@ class TensorMrtrix(GenericTask):
 
         dwi = self.getUpsamplingImage('dwi','upsample')
         bFile = self.getUpsamplingImage('grad',  None, 'b')
-        mask = self.getRegistrationDirImage('mask', 'resample')
+        mask = self.getRegistrationImage('mask', 'resample')
 
 
         tensorsMrtrix = self.__produceTensors(dwi, bFile, mask)
