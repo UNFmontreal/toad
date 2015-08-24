@@ -31,8 +31,7 @@ class Results(GenericTask):
     def __copyMetrics(self, softwares, postfixs, method):
         for software in softwares:
             for postfix in postfixs:
-                #source = self.getImage(getattr(self, "{}{}Dir".format(method, software)), "dwi", postfix)
-                source = getattr(self, "get{}{}Image".format(method, software))(getattr(self, "{}{}Dir".format(method, software)), "dwi", postfix)
+                source = getattr(self, "get{}{}Image".format(method, software))("dwi", postfix)
                 target = self.buildName(self.subject.getName(), [software, postfix], 'nii.gz')
                 util.copy(source, self.workingDir, target)
 

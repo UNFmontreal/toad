@@ -109,14 +109,14 @@ class GenericTask(Logger, Load, Qa):
     def __getattr__(self, items):
 
         if items.startswith('get') and items.endswith('Image') and len(items) > len("getImage")+2:
-            taskName = items.strip("get").strip('Image').lower()
+            taskName = items[3:-5].lower()
             directory = getattr(self, "{}Dir".format(taskName))
             def wrapper(*args):
                 arguments = [self.config, directory] + list(args)
                 return util.getImage(*arguments)
             return wrapper
         else:
-            raise AttributeError()
+            return False
 
 
     def __implement(self):
