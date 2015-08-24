@@ -51,8 +51,8 @@ class Denoising(GenericTask):
             self.sigmaVector, sigma, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
             self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
             #wrote sigma values into a log file
-            with open(self.get("sigma_filename"),'w') as w:
-                w.write(self.sigmaVector)
+            #with open(self.get("sigma_filename"),'w') as w:
+            #    w.write(self.sigmaVector.tolist())
 
             denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
             nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
