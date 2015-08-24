@@ -17,12 +17,12 @@ class Snr(GenericTask):
 
 
     def implement(self):
-        dwiNative = self.getImage(self.preparationDir, 'dwi')
+        dwiNative = self.getPreparationImage('dwi')
 
         #Extract b0 from dwiNative
-        bVals= self.getImage(self.preparationDir, 'grad', None, 'bvals')
+        bVals= self.getPreparationImage('grad', None, 'bvals')
         if not bVals:
-            bVals= self.getImage(self.correctionDir, 'grad', None, 'bvals')
+            bVals= self.getCorrectionImage('grad', None, 'bvals')
         b0Basename = os.path.basename(dwiNative).replace(self.get('prefix', 'dwi'), self.get('prefix', 'b0'))
         b0 = os.path.join(self.workingDir, b0Basename)
         self.info(mriutil.extractFirstB0FromDwi(dwiNative, b0, bVals))
@@ -31,7 +31,7 @@ class Snr(GenericTask):
         #brainResample = self.getImage(self.registrationDir, 'anat', ['brain', 'resample'])
         #brainNative = self.__resampling(brainResample, b0)
 
-        maskBrain = self.getImage(self.registrationDir, 'mask', 'resample')
+        maskBrain = self.getRegistrationImage('mask', 'resample')
 
         #Noise mask computation
         #dwiNativeNoiseMask = self.__computeNoiseMask(brainNative)
@@ -39,7 +39,7 @@ class Snr(GenericTask):
         #Corpus Callosum mask computation
         #aparcAseg = self.getImage(self.registrationDir, 'aparc_aseg', 'resample')
         #self.info(mriutil.mrcalc(aparcAseg, '253', self.buildName('aparc_aseg', ['253', 'mask'], 'nii.gz')))
-        cCResample = self.getImage(self.maskingDir, 'aparc_aseg', ['253', 'mask'])
+        cCResample = self.getMaskingImage('aparc_aseg', ['253', 'mask'])
         dwiNativeCcMask = self.__resampling(cCResample, b0)
 
     #@DEBUG task correction may not have been run
@@ -115,15 +115,19 @@ class Snr(GenericTask):
         return output
 
 
+    def isIgnore(self):
+        return  self.get("ignore")
+
+
     def meetRequirement(self):
         """Validate if all requirements have been met prior to launch the task
 
         Returns:
             True if all requirement are meet, False otherwise
         """
-        return Images((self.getImage(self.preparationDir, 'dwi'), 'diffusion weighted'),
-                        (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain mask'),
-                        (self.getImage(self.maskingDir, 'aparc_aseg',['253','mask']), 'Corpus Callusum mask from masking task'))
+        return Images((self.getPreparationImage('dwi'), 'diffusion weighted'),
+                        (self.getRegistrationImage('mask', 'resample'), 'brain mask'),
+                        (self.getMaskingImage('aparc_aseg',['253','mask']), 'Corpus Callusum mask from masking task'))
 
 
     def isDirty(self):

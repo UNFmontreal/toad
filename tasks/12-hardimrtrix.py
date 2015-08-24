@@ -15,10 +15,10 @@ class HardiMrtrix(GenericTask):
     def implement(self):
 
         #@TODO produce "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
-        dwi = self.getImage(self.dependDir,'dwi', 'upsample')
-        bFile = self.getImage(self.dependDir, 'grad', None, 'b')
-        mask = self.getImage(self.registrationDir, 'mask', 'resample')
-        wmMask = self.getImage(self.maskingDir, 'tt5', ['resample','wm', 'mask'])
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        bFile = self.getUpsamplingImage('grad', None, 'b')
+        mask = self.getRegistrationImage('mask', 'resample')
+        wmMask = self.getMaskingImage('tt5', ['resample','wm', 'mask'])
 
         outputDwi2Response = self.__dwi2response(dwi, wmMask, bFile)
 
@@ -85,14 +85,14 @@ class HardiMrtrix(GenericTask):
 
 
     def meetRequirement(self):
-        return Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
-                  (self.getImage(self.dependDir, 'grad', None, 'b'), "gradient encoding b file"),
-                  (self.getImage(self.maskingDir, 'tt5', ['resample', 'wm', 'mask']), 'white matter segmented mask'),
-                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain mask'))
+        return Images((self.getUpsamplingImage('dwi','upsample'), 'diffusion weighted'),
+                  (self.getUpsamplingImage('grad', None, 'b'), "gradient encoding b file"),
+                  (self.getMaskingImage('tt5', ['resample', 'wm', 'mask']), 'white matter segmented mask'),
+                  (self.getRegistrationImage('mask', 'resample'), 'brain mask'))
 
 
     def isDirty(self):
-        return Images((self.getImage(self.workingDir, 'dwi', None, 'txt'), "response function estimation text file"),
-                  (self.getImage(self.workingDir, 'dwi', 'csd'), "constrained spherical deconvolution"),
-                  (self.getImage(self.workingDir,'dwi', 'nufo'), 'nufo'),
-                  (self.getImage(self.workingDir,'dwi', 'fixel_peak', 'msf'), 'fixel peak image'))
+        return Images((self.getImage('dwi', None, 'txt'), "response function estimation text file"),
+                  (self.getImage('dwi', 'csd'), "constrained spherical deconvolution"),
+                  (self.getImage('dwi', 'nufo'), 'nufo'),
+                  (self.getImage('dwi', 'fixel_peak', 'msf'), 'fixel peak image'))

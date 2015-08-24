@@ -27,7 +27,7 @@ class GenericTask(Logger, Load, Qa):
         Define, create and aliases a Working directory for the tasks.
 
         If more arguments have been supplied to generic tasks, GenericTask will create an alias
-        for each additionnal arg adding the suffix Dir to the name provided and then create  an alias 'dependDir'
+        for each additionnal arg adding the suffix Dir to the name provided
         on the first optionnal arg provided to __init__
 
         """
@@ -55,8 +55,6 @@ class GenericTask(Logger, Load, Qa):
                 if dependency == task.__name:
                     self.__dependenciesDirNames["{}Dir".format(dependency)] = task.workingDir
                     setattr(self, "{}Dir".format(dependency), task.workingDir)
-                    if index == 0:
-                        self.dependDir = task.workingDir
 
     def initializeTasksAsReferences(self, tasks):
         self.tasksAsReferences = tasks
@@ -105,6 +103,20 @@ class GenericTask(Logger, Load, Qa):
     def __hash__(self):
         """Called for operations on members of collections dictionnary. Should return an integer"""
         return (hash(self.__name)<<1) ^ hash(self.__order)
+
+
+
+    def __getattr__(self, items):
+
+        if items.startswith('get') and items.endswith('Image') and len(items) > len("getImage")+2:
+            taskName = items[3:-5].lower()
+            directory = getattr(self, "{}Dir".format(taskName))
+            def wrapper(*args):
+                arguments = [self.config, directory] + list(args)
+                return util.getImage(*arguments)
+            return wrapper
+        else:
+            return False
 
 
     def __implement(self):
@@ -423,13 +435,12 @@ class GenericTask(Logger, Load, Qa):
         self.launchCommand(cmd, stdout, stderr, timeout, nice)
 
 
-    def getImage(self, dir, prefix, postfix=None, ext="nii.gz"):
+    def getImage(self, prefix, postfix=None, ext="nii.gz"):
         """A simple utility function that return an mri image given certain criteria
 
         this is a wrapper over mriutil getImage function
 
         Args:
-            dir:     the directory where looking for the image
             prefix:  an expression that the filename should start with
             postfix: an expression that the filename should end with (excluding the extension)
             ext:     name of the extension of the filename. defaults: nii.gz
@@ -438,7 +449,9 @@ class GenericTask(Logger, Load, Qa):
             the relative filename if found, False otherwise
 
         """
-        return util.getImage(self.config, dir, prefix, postfix, ext)
+        return util.getImage(self.config, self.workingDir, prefix, postfix, ext)
+
+
 
 
     def buildName(self, source, postfix, ext=None, absolute = True):
