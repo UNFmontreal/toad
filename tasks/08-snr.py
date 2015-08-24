@@ -115,6 +115,10 @@ class Snr(GenericTask):
         return output
 
 
+    def isIgnore(self):
+        return  self.get("ignore")
+
+
     def meetRequirement(self):
         """Validate if all requirements have been met prior to launch the task
 
