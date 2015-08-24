@@ -20,15 +20,31 @@ The tutorial is also available as a PDF file:
 - [Tutorial (in french)](../../Toad_Tuto_fr.pdf)
 
 
+## Licence agreement
+
+
 ## The team
 
-- [**Simona Brambati**](mailto:simonabrambati@gmail.com): researcher and co-scientific leader of the project
-- [**Arnaud Boré**](mailto:arnaud.bore@gmail.com): developer and co-scientific leader of the project
-- [**Mathieu Desrosiers**](mailto:mathieu.desrosiers@criugm.qc.ca): main developer and maintainer of the project 
-- [**Christophe Bedetti**](mailto:christophe.bedetti@gmail.com): developer and leader of the quality assessment of the project
-- [**Guillaume Vallet**](mailto:gtvallet@gmail.com): in charge of the documentation and of the website 
-- [**Jeni Chen**](mailto:jen-i.chen@umontreal.ca): translation and documentation of the project
-- [**Basile Pinsard**](mailto:basile.pinsard@gmail.com): developer
+<img src="figs/JDoyon.jpg" alt="Julien Doyon" style="width: 50px;"/> [**Julien Doyon**](mailto:julien.doyon@umontreal.ca):  scientific director of the [UNF (Unité de Neuroimagerie Fonctionnelle)](www.unf-montreal.ca)
+
+<img src="figs/SBrambati.jpg" alt="Simona Brambati" style="width: 50px;"/> [**Simona Brambati**](mailto:simonabrambati@gmail.com): researcher and co-scientific leader of the project
+
+<img src="figs/ABore.jpg" alt="Arnaud Boré" style="width: 50px;"/> [**Arnaud Boré**](mailto:arnaud.bore@gmail.com): developer and co-scientific leader of the project
+
+<img src="figs/MDesrosiers.jpg" alt="Mathieu Desrosiers" style="width: 50px;"/> [**Mathieu Desrosiers**](mailto:mathieu.desrosiers@criugm.qc.ca): main developer and maintainer of the project
+
+<img src="figs/CBedetti.jpg" alt="Christophe Bedetti" style="width: 50px;"/> [**Christophe Bedetti**](mailto:christophe.bedetti@gmail.com): developer and leader of the quality assessment of the project 
+
+<img src="figs/BPinsard.jpg" alt="Basile Pinsard" style="width: 50px;"/> [**Basile Pinsard**](mailto:basile.pinsard@gmail.com): developer and scientific advisor
+
+<img src="figs/AHanganu.jpg" alt="Alexandru Hanganu" style="width: 50px;"/> [**Alexandru Hanganu**](mailto:julien.doyon@umontreal.ca): scientific advisor
+
+<img src="figs/GVallet.jpg" alt="Guillaume Vallet" style="width: 50px;"/>  [**Guillaume Vallet**](mailto:gtvallet@gmail.com): in charge of the documentation and of the website
+
+<img src="figs/JChen.jpg" alt="Jeni Chen" style="width: 50px;"/> [**Jeni Chen**](mailto:jen-i.chen@umontreal.ca): translation and documentation of the project
+
+
+## Words of the director
 
 
 ## References
