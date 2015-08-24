@@ -1,7 +1,7 @@
-# TOolkit d’Analyse de Diffusion (TOAD)
+# TOolkit of Analyse of Diffusion imaging (TOAD)
 
-Welcome to the English version of the documentation of [TOAD](toad.com).
-Sources files as well as installation’s instructionLes are available on [Github](www.github.com/toad).
+Welcome to the English version of the documentation of [TOAD](http://unf-montreal.ca/toad/).
+Sources files as well as installation’s instructionLes are available on [Github](https://github.com/UNFmontreal/toad).
 
 TOAD offers a pipeline to automatically preprocess diffusion imaging data (DTI).
 The different steps allow to:
@@ -18,6 +18,17 @@ The tutorial is also available as a PDF file:
 
 - [Tutorial (in english)](../../Toad_Tuto_en.pdf)
 - [Tutorial (in french)](../../Toad_Tuto_fr.pdf)
+
+
+## The team
+
+- [**Simona Brambati**](mailto:simonabrambati@gmail.com): researcher and co-scientific leader of the project
+- [**Arnaud Boré**](mailto:arnaud.bore@gmail.com): developer and co-scientific leader of the project
+- [**Mathieu Desrosiers**](mailto:mathieu.desrosiers@criugm.qc.ca): main developer and maintainer of the project 
+- [**Christophe Bedetti**](mailto:christophe.bedetti@gmail.com): developer and leader of the quality assessment of the project
+- [**Guillaume Vallet**](mailto:gtvallet@gmail.com): in charge of the documentation and of the website 
+- [**Jeni Chen**](mailto:jen-i.chen@umontreal.ca): translation and documentation of the project
+- [**Basile Pinsard**](mailto:basile.pinsard@gmail.com): developer
 
 
 ## References
