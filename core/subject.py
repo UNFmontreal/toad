@@ -8,8 +8,10 @@ __author__ = 'mathieu'
 class Subject(Lock, Validation):
 
 
-    def __init__(self, config):
+    def __init__(self, config, softwareVersions):
         """A valid individual who have the capability to run tasks.
+            This class have the responsability to write a document of the softwares and versions
+            into the log directory
 
         Must be validated as a prerequisite
 
@@ -24,7 +26,7 @@ class Subject(Lock, Validation):
         if not os.path.exists(self.__logDir):
             os.mkdir(self.__logDir)
         Lock.__init__(self, self.__logDir, self.__name)
-
+        self.__createSoftwareVersionXmlConfig(softwareVersions)
 
     def __repr__(self):
         return self.__name
@@ -39,6 +41,7 @@ class Subject(Lock, Validation):
         """
         return self.__name
 
+
     def getLogDir(self):
         """get the name of the log directory
 
@@ -48,12 +51,14 @@ class Subject(Lock, Validation):
         """
         return self.__logDir
 
+
     def removeLogDir(self):
         """Utility function that delete the subject log directory
 
         """
         if os.path.exists(self.__logDir):
             shutil.rmtree(self.__logDir)
+
 
     def getConfig(self):
         """Utility function that return the ConfigParser 
@@ -63,6 +68,7 @@ class Subject(Lock, Validation):
         """
         return self.__config
 
+
     def setConfigItem(self, section, item, value):
         """Utility function that register a value into the config parser
 
@@ -70,6 +76,7 @@ class Subject(Lock, Validation):
             the ConfigParser
         """
         self.__config.set(section, item, value)
+
 
     def getDir(self):
         """get the name of the subject directory
@@ -79,3 +86,14 @@ class Subject(Lock, Validation):
 
         """
         return self.__subjectDir
+
+
+    def __createSoftwareVersionXmlConfig(self, xmlDocument,  source = 'version.xml'):
+        """ wrote software versions into a source filename
+
+        Args:
+            xmlDocument: a minidom document
+            source: file name to write configuration into
+        """
+        with open(os.path.join(self.getLogDir(), source), 'a') as a:
+            xmlDocument.writexml(a)
