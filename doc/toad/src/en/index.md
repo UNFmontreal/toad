@@ -20,7 +20,7 @@ The tutorial is also available as a PDF file:
 - [Tutorial (in french)](../../Toad_Tuto_fr.pdf)
 
 
-## Licence agreement
+## License agreement
 
 
 ## The team
