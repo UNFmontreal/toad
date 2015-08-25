@@ -1,11 +1,12 @@
+from xml.parsers.expat import ExpatError
+from xml.dom import minidom
 from lock import Lock
-from validation import Validation
 import shutil
 import os
 
 __author__ = 'mathieu'
 
-class Subject(Lock, Validation):
+class Subject(Lock):
 
 
     def __init__(self, config, softwareVersions):
@@ -94,6 +95,25 @@ class Subject(Lock, Validation):
         Args:
             xmlDocument: a minidom document
             source: file name to write configuration into
+
+        Returns:
+            True if the operation is a success, False otherwise
         """
-        with open(os.path.join(self.getLogDir(), source), 'a') as a:
-            xmlDocument.writexml(a)
+
+        versionFile = os.path.join(self.getLogDir(), source)
+        if os.path.exists(versionFile):
+            try:
+                xml = minidom.parse(versionFile)
+                if len(xml.getElementsByTagName("toad")) == 1:
+                    if len(xmlDocument.getElementsByTagName("application")) != 1:
+                        return False
+                    xmlToad = xml.getElementsByTagName("toad")[0]
+                    xmlDocumentToad = xmlDocument.getElementsByTagName("application")[0]
+                    xmlToad.appendChild(xmlDocumentToad)
+                    xmlDocument = xmlToad
+            except ExpatError:
+                pass
+
+        with open(versionFile, 'w') as w:
+            xmlDocument.writexml(w)
+        return True
