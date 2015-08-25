@@ -3,8 +3,6 @@ from datetime import datetime
 import subprocess
 import traceback
 import shutil
-import glob
-import sys
 import os
 
 from logger import Logger

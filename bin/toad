@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from xml.dom import minidom
+import datetime
 import argparse
+import socket
 import imp
 import sys
 import os
@@ -13,7 +16,7 @@ __author__ = "Mathieu Desrosiers, Arnaud Bore and Christophe Bedetti"
 __copyright__ = "Copyright 2014, The Toad Project"
 __credits__ = ["Mathieu Desrosiers", "Arnaud Bore", "Christophe Bedetti", "Guillaume Vallet"]
 __license__ = "GPL"
-__version__ = "0.9"
+__version__ = "1.0"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Beta"
@@ -122,7 +125,6 @@ def __manageEnvironnement(logger, arguments):
         arguments.matlabIsAvailable = False if "mammouth" in serverName else True
         arguments.isVTKAvailable = False if "magma" in serverName else True
         logger.info("Configuration for {} server found".format(os.environ.get('TOADSERVER')))
-
     else:
         try:
             version = float(sys.version[0:3])
@@ -181,25 +183,51 @@ def __manageEnvironnement(logger, arguments):
 
 
 def __manageVersions(logger, arguments):
+    """Set and verify versions of packages and softwares that will be use during the pipeline
 
-    logger.info("Computer identification: {}".format(" ".join(os.uname())))
+    Args:
+        logger: the logger
+        arguments: an argument parser object
+
+    Return:
+        A minidom document which contain any usefull information about software versions
+
+    """
+    xmlDocument = minidom.Document()
+    rootXml = xmlDocument.createElement("toad")
 
     logger.info("Toad is running at version: {}".format(__version__))
-    logger.info("Python is running at version: {}".format(sys.version[0:6]))
+    rootXml.setAttribute("version", __version__)
+    rootXml.setAttribute("timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+    xmlDocument.appendChild(rootXml)
 
+
+    logger.info("Computer identification: {}".format(" ".join(os.uname())))
+    xmlServer = xmlDocument.createElement("server")
+    xmlServer.setAttribute("name", socket.gethostname())
+    xmlText = xmlDocument.createTextNode(" ".join(os.uname()))
+    xmlServer.appendChild(xmlText)
+    rootXml.appendChild(xmlServer)
+
+    xmlVersions = xmlDocument.createElement('versions')
+    logger.info("Python is running at version: {}".format(sys.version[0:6]))
     cmd = "fast"
     command, output, results = util.launchCommand(cmd)
     version = [line.replace("Part of FSL", "") for line in results.splitlines() if "build" in line].pop()
     logger.info("FSL is running at version: {}".format(version))
+    xmlVersions.appendChild(__createVersionTags(xmlDocument, "FSL", version))
 
     cmd = "cat  $FREESURFER_HOME/build-stamp.txt"
     command, version, errors = util.launchCommand(cmd)
-    logger.info("Freesurfer is running at version: {}".format(version.strip()))
+    version = version.strip()
+    logger.info("Freesurfer is running at version: {}".format(version))
+    xmlVersions.appendChild(__createVersionTags(xmlDocument, "Freesurfer", version))
 
     cmd = "tckgen -version"
     command, results, errors = util.launchCommand(cmd)
     version = [line.replace("tckgen", "").strip("== ") for line in results.splitlines() if "tckgen" in line].pop()
     logger.info("Mrtrix is running at version: {}".format(version))
+    xmlVersions.appendChild(__createVersionTags(xmlDocument, "Mrtrix", version))
 
 
     if arguments.matlabIsAvailable:
@@ -209,7 +237,9 @@ def __manageVersions(logger, arguments):
         messages=results.splitlines()
         for index, token in enumerate(messages):
             if "< M A T L A B (R) >" in token:
-                logger.info("Matlab is running at version: {}".format(messages[index+2].strip()))
+                version = messages[index+2].strip()
+                logger.info("Matlab is running at version: {}".format(version))
+                xmlVersions.appendChild(__createVersionTags(xmlDocument, "Matlab", version))
                 found = True
                 break
         if not found:
@@ -218,15 +248,30 @@ def __manageVersions(logger, arguments):
     cmd = "convert -version"
     command, results, errors = util.launchCommand(cmd)
     version = [line for line in results.splitlines() if "Version:" in line].pop().split()
-    logger.info("ImageMagick is running at version: {}".format(" ".join(version[2:6])))
+    version = " ".join(version[2:6])
+    logger.info("ImageMagick is running at version: {}".format(version))
+    xmlVersions.appendChild(__createVersionTags(xmlDocument, "ImageMagick", version))
 
     for package in __pythonPackages:
         if not "vtk" in package:
             module = __import__(package)
             logger.info("{} is at version: {}".format(package, module.__version__))
+            xmlVersions.appendChild(__createVersionTags(xmlDocument, package, module.__version__))
         elif arguments.isVTKAvailable:
             logger.info("{} is at version: {}".format(package, module.__version__))
-           
+            xmlVersions.appendChild(__createVersionTags(xmlDocument, package, module.__version__))
+
+    rootXml.appendChild(xmlVersions)
+    return xmlDocument
+
+
+def __createVersionTags(xmlDocument, software, description):
+    xmlVersion = xmlDocument.createElement('version')
+    xmlVersion.setAttribute("software", software)
+    xmlText = xmlDocument.createTextNode(description)
+    xmlVersion.appendChild(xmlText)
+    return xmlVersion
+
 
 if __name__ == '__main__':
 
@@ -240,11 +285,11 @@ if __name__ == '__main__':
     arguments = __manageEnvironnement(logger, arguments)
 
     #make sure to log versions before starting the pipeline
-    __manageVersions(logger, arguments)
+    xmlSoftwaresVersions = __manageVersions(logger, arguments)
 
     #define toad directory
     realPath = os.path.realpath(__file__)
     arguments.toadDir = os.path.dirname(realPath).replace("bin", "")
 
     #Launch the manager
-    result = subjectmanager.SubjectManager(arguments).run()
+    result = subjectmanager.SubjectManager(arguments, xmlSoftwaresVersions).run()

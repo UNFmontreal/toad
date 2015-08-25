@@ -14,15 +14,18 @@ __author__ = 'desmat'
 
 class SubjectManager(Logger, Config):
 
-    def __init__(self, arguments):
+    def __init__(self, arguments, xmlSoftwareVersions):
         """Schedule and execute pipeline tasks
 
         Args:
             arguments: command lines arguments specified by the user
+            xmlSoftwareVersions: a minidom xml structure containing versions of various softwares
+                                  that structure will be delegate to Subject class
 
         """
         self.arguments = arguments
         self.config = Config(self.arguments).getConfig()
+        self.softwareVersions = xmlSoftwareVersions
         Logger.__init__(self)
 
 
@@ -272,7 +275,7 @@ class SubjectManager(Logger, Config):
         for directory in directories:
             if Validation(directory, self.getLogger(), self.__copyConfig(directory)).isAToadSubject():
                 self.info("{} seem\'s a valid toad subject entry".format(directory))
-                subjects.append(Subject(self.__copyConfig(directory)))
+                subjects.append(Subject(self.__copyConfig(directory), self.softwareVersions))
         return subjects
 
 
