@@ -44,7 +44,14 @@ The tutorial is also available as a PDF file:
 <img src="figs/JChen.jpg" alt="Jeni Chen" style="width: 50px;"/> [**Jeni Chen**](mailto:jen-i.chen@umontreal.ca): translation and documentation of the project
 
 
-## Words of the director
+## Word from our director
+
+
+## Versions
+
+| Version     | Release date    | Changelog                       |
+| :---------- | :-------------: | :------------------------------ |
+| v01         | 2015-08-24      | First release                   |
 
 
 ## References

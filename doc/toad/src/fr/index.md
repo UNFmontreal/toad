@@ -48,9 +48,9 @@ Le tutoriel est également disponible au format PDF pour simplifier sa lecture :
 
 ## Versions
 
-Version     | Date de sortie  | Changements                     |
-:---------- | :-------------: | :------------------------------ |
-v01         | 2015-08-24      | 1ère version stable             |
+| Version     | Date de sortie  | Changements                     |
+| :---------- | :-------------: | :------------------------------ |
+| v01         | 2015-08-24      | 1ère version stable             |
 
 
 ## Références
