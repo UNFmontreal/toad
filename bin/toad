@@ -194,12 +194,15 @@ def __manageVersions(logger, arguments):
 
     """
     xmlDocument = minidom.Document()
-    rootXml = xmlDocument.createElement("toad")
 
+    toadXml = xmlDocument.createElement("toad")
+    xmlDocument.appendChild(toadXml)
+
+    rootXml = xmlDocument.createElement("application")
     logger.info("Toad is running at version: {}".format(__version__))
     rootXml.setAttribute("version", __version__)
     rootXml.setAttribute("timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
-    xmlDocument.appendChild(rootXml)
+    toadXml.appendChild(rootXml)
 
 
     logger.info("Computer identification: {}".format(" ".join(os.uname())))
