@@ -124,9 +124,8 @@ class Parcellation(GenericTask):
             
             import vtk
             from vtk.util import numpy_support
-            
-            
-            voxverts = nb.affines.apply_affine(np.linalg.inv(mat), vertices)
+
+            voxverts = nibabel.affines.apply_affine(numpy.linalg.inv(mat), vertices)
             points = vtk.vtkPoints()
             points.SetNumberOfPoints(len(voxverts))
             for i,pt in enumerate(voxverts):
@@ -151,7 +150,7 @@ class Parcellation(GenericTask):
                 info = vtk.vtkInformation()
                 whiteimg.SetPointDataActiveScalarInfo(info, vtk.VTK_UNSIGNED_CHAR, 1)
                     
-            ones = np.ones(np.prod(shape),dtype=np.uint8)
+            ones = numpy.ones(numpy.prod(shape), dtype=numpy.uint8)
             whiteimg.GetPointData().SetScalars(numpy_support.numpy_to_vtk(ones))
     
             pdtis = vtk.vtkPolyDataToImageStencil()
@@ -178,6 +177,7 @@ class Parcellation(GenericTask):
                 imgstenc.GetOutput().GetPointData().GetScalars()).reshape(shape).transpose(2,1,0)
             del pd,voxverts,whiteimg,pdtis,imgstenc
             return data
+
 
         def fill_hemis(lh_surf,rh_surf):
             vertices = numpy.vstack([lh_surf[0],rh_surf[0]])
