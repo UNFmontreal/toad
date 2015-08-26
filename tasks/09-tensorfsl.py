@@ -18,17 +18,17 @@ class TensorFsl(GenericTask):
 
         """
 
-        dwi = self.getImage(self.dependDir,'dwi', 'upsample')
-        bVals = self.getImage(self.dependDir, 'grad', None, 'bvals')
-        bVecs = self.getImage(self.dependDir, 'grad', None, 'bvecs')
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        bVals = self.getUpsamplingImage('grad', None, 'bvals')
+        bVecs = self.getUpsamplingImage('grad', None, 'bvecs')
         #mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
-        mask = self.getImage(self.registrationDir, 'mask', 'resample')
+        mask = self.getRegistrationImage('mask', 'resample')
 
         self.__produceTensors(dwi, bVecs, bVals, mask)
 
-        l1 = self.getImage(self.workingDir, 'dwi', 'l1')
-        l2 = self.getImage(self.workingDir, 'dwi', 'l2')
-        l3 = self.getImage(self.workingDir, 'dwi', 'l3')
+        l1 = self.getImage('dwi', 'l1')
+        l2 = self.getImage('dwi', 'l2')
+        l3 = self.getImage('dwi', 'l3')
 
         ad = self.buildName(dwi, 'ad')
         rd = self.buildName(dwi, 'rd')
@@ -75,25 +75,24 @@ class TensorFsl(GenericTask):
         """Validate if all requirements have been met prior to launch the task
 
         """
-        return Images((self.getImage(self.dependDir,'dwi','upsample'), 'diffusion weighted'),
-                  #(self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask']), 'ultimate mask'),
-                  (self.getImage(self.registrationDir, 'mask', 'resample'), 'brain mask'),
-                  (self.getImage(self.dependDir, 'grad', None, 'bvals'), '.bvals gradient encoding file'),
-                  (self.getImage(self.dependDir, 'grad', None, 'bvecs'), '.bvecs gradient encoding file'))
+        return Images((self.getUpsamplingImage('dwi','upsample'), 'diffusion weighted'),
+                  (self.getRegistrationImage('mask', 'resample'), 'brain mask'),
+                  (self.getUpsamplingImage('grad', None, 'bvals'), '.bvals gradient encoding file'),
+                  (self.getUpsamplingImage('grad', None, 'bvecs'), '.bvecs gradient encoding file'))
 
 
     def isDirty(self):
         """Validate if this tasks need to be submit for implementation
 
         """
-        return Images((self.getImage(self.workingDir, 'dwi', 'v1'), "1st eigenvector"),
-                      (self.getImage(self.workingDir, 'dwi', 'v2'), "2rd eigenvector"),
-                      (self.getImage(self.workingDir, 'dwi', 'v3'), "3rd eigenvector"),
-                      (self.getImage(self.workingDir, 'dwi', 'ad'), "selected eigenvalue(s) AD"),
-                      (self.getImage(self.workingDir, 'dwi', 'rd'), "selected eigenvalue(s) RD"),
-                      (self.getImage(self.workingDir, 'dwi', 'md'), "mean diffusivity"),
-                      (self.getImage(self.workingDir, 'dwi', 'fa'), "fractional anisotropy"),
-                      (self.getImage(self.workingDir, 'dwi', 'so'), "raw T2 signal with no weighting"))
+        return Images((self.getImage('dwi', 'v1'), "1st eigenvector"),
+                      (self.getImage('dwi', 'v2'), "2rd eigenvector"),
+                      (self.getImage('dwi', 'v3'), "3rd eigenvector"),
+                      (self.getImage('dwi', 'ad'), "selected eigenvalue(s) AD"),
+                      (self.getImage('dwi', 'rd'), "selected eigenvalue(s) RD"),
+                      (self.getImage('dwi', 'md'), "mean diffusivity"),
+                      (self.getImage('dwi', 'fa'), "fractional anisotropy"),
+                      (self.getImage('dwi', 'so'), "raw T2 signal with no weighting"))
 
 
     def qaSupplier(self):
@@ -104,7 +103,7 @@ class TensorFsl(GenericTask):
         softwareName = 'fsl'
 
         #Get images
-        mask = self.getImage(self.registrationDir, 'mask', 'resample')
+        mask = self.getRegistrationImage('mask', 'resample')
 
         #Build qa images
         tags = (
@@ -116,7 +115,7 @@ class TensorFsl(GenericTask):
             )
 
         for postfix, description in tags:
-            image = self.getImage(self.workingDir, 'dwi', postfix)
+            image = self.getImage('dwi', postfix)
             if image:
                 qaImage = self.buildName(image, softwareName, 'png')
                 self.slicerPng(image, qaImage, boundaries=mask)

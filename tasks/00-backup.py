@@ -18,23 +18,24 @@ class Backup(GenericTask):
 
 
     def implement(self):
+
         self.info("Build directories structure for subject: {}".format(os.path.basename(self.workingDir)))
         #@TODO add description to that struct
-        images = Images((self.getImage(self.subjectDir, 'anat'), ""),
-                       (self.getImage(self.subjectDir, 'dwi'), ""),
-                       (self.getImage(self.subjectDir, 'mag',), ""),
-                       (self.getImage(self.subjectDir, 'phase'), ""),
-                       (self.getImage(self.subjectDir, 'aparc_aseg'), ""),
-                       (self.getImage(self.subjectDir, 'anat', 'freesurfer'), ""),
-                       (self.getImage(self.subjectDir, 'lh_ribbon'), ""),
-                       (self.getImage(self.subjectDir, 'rh_ribbon'), ""),
-                       (self.getImage(self.subjectDir, 'brodmann'), ""),
-                       (self.getImage(self.subjectDir, 'b0_ap'), ""),
-                       (self.getImage(self.subjectDir, 'b0_pa'), ""),
-                       (self.getImage(self.subjectDir, 'grad', None, 'b'), ""),
-                       (self.getImage(self.subjectDir, 'grad', None, 'bvals'), ""),
-                       (self.getImage(self.subjectDir, 'grad', None, 'bvecs'), ""),
-                       (self.getImage(self.subjectDir, 'config', None, 'cfg'), ""))
+        images = Images((self.getSubjectImage('anat'), ""),
+                       (self.getSubjectImage('dwi'), ""),
+                       (self.getSubjectImage('mag',), ""),
+                       (self.getSubjectImage('phase'), ""),
+                       (self.getSubjectImage('aparc_aseg'), ""),
+                       (self.getSubjectImage('anat', 'freesurfer'), ""),
+                       (self.getSubjectImage('lh_ribbon'), ""),
+                       (self.getSubjectImage('rh_ribbon'), ""),
+                       (self.getSubjectImage('brodmann'), ""),
+                       (self.getSubjectImage('b0_ap'), ""),
+                       (self.getSubjectImage('b0_pa'), ""),
+                       (self.getSubjectImage('grad', None, 'b'), ""),
+                       (self.getSubjectImage('grad', None, 'bvals'), ""),
+                       (self.getSubjectImage('grad', None, 'bvecs'), ""),
+                       (self.getSubjectImage('config', None, 'cfg'), ""))
 
         for image, description in images.getData():
             if image:
@@ -47,12 +48,13 @@ class Backup(GenericTask):
                 self.info("{} seem\'s a valid freesurfer structure: moving it to {} directory".format(directory, self.workingDir))
                 shutil.move(directory, self.workingDir)
 
+
     def meetRequirement(self):
         return True
 
 
     def isDirty(self):
-        return Images((self.getImage(self.workingDir, 'dwi'),'high resolution'))
+        return Images((self.getImage('dwi'),'high resolution'))
 
 
     def cleanup(self):
