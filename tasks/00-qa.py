@@ -1,7 +1,5 @@
 import os
-import shutil
 from core.generictask import GenericTask
-from core.tasksmanager import TasksManager
 from lib.images import Images
 from lib import util
 

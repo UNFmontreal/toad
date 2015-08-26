@@ -3,7 +3,6 @@ import copy
 import os
 
 from tasksmanager import TasksManager
-from validation import Validation
 from subject import Subject
 from logger import Logger
 from config import Config
@@ -19,8 +18,8 @@ class SubjectManager(Logger, Config):
 
         Args:
             arguments: command lines arguments specified by the user
-            xmlSoftwareVersions: a minidom xml structure containing versions of various softwares
-                                  that structure will be delegate to Subject class
+            xmlSoftwareVersions: a minidom xml structure containing versions of various softwares.
+                                  this structure will be delegate to Subject class
 
         """
         self.arguments = arguments
@@ -37,40 +36,6 @@ class SubjectManager(Logger, Config):
          """
 
         return self.__class__.__name__.lower()
-
-
-    def __validateSubjects(self, subjects):
-        """Verify into a list of toad subjects the integrity and validity of each subject
-
-        Args:
-            subjects: a list of toad subjects
-
-        returns:
-            a list of valid subjects
-
-        """
-        validSubjects = []
-        if self.config.getboolean('arguments','validation'):
-            for subject in subjects:
-                if Validation(subject.getDir(), self.getLogger(), self.__copyConfig(subject.getDir())).validate():
-                    self.info("{} is a valid subject, adding it to the list.".format(subject))
-                    validSubjects.append(subject)
-                elif self.config.getboolean('arguments', 'prompt'):
-                        msg = "It seem\'m like {} is having an issue and will probably fail!".format(subject)
-                        if util.displayYesNoMessage(msg, "Would you like to remove it from the list (y or n)"):
-                            self.info("Removing subject {} from the submitting list\n".format(subject))
-                        else:
-                            self.warning("Keeping {} even if we found issues will probably make the pipeline failing\n"
-                            .format(subject))
-                            validSubjects.append(subject)
-                else:
-                    self.warning("Command prompt disabled, this submit will be submit anyway")
-                    validSubjects.append(subject)
-        else:
-            self.warning("Skipping validation have been requested, this is a unwise and dangerous decision")
-            validSubjects = subjects
-
-        return validSubjects
 
 
     def __processLocksSubjects(self, subjects):
@@ -168,7 +133,11 @@ class SubjectManager(Logger, Config):
                 try:
                     self.info("Starting subject {} at task {}".format(name, tasksmanager.getFirstRunnableTasks().getName()))
                     subject.lock()
+
+                    #log versions that will be use for the pipeline execution
+                    subject.createXmlSoftwareVersionConfig(self.softwareVersions)
                     tasksmanager.run()
+
                 finally:
                     subject.removeLock()
                     self.info("Pipeline finish at {}, have a nice day!".format(self.getTimestamp()))
@@ -180,6 +149,7 @@ class SubjectManager(Logger, Config):
 
     def __submitGridEngine(self, subject):
         """Submit execution of the subject into the grid engine
+           this function will wrap a toad call with proper parameters for submission into a Sun or Torque Grid Engine
 
         Args:
             subject:  a subject
@@ -273,26 +243,42 @@ class SubjectManager(Logger, Config):
         """
         subjects=[]
         for directory in directories:
-            if Validation(directory, self.getLogger(), self.__copyConfig(directory)).isAToadSubject():
+            subject = Subject(self.__copyConfig(directory))
+            if subject.isAToadSubject():
+                subject.activateLogDir()
                 self.info("{} seem\'s a valid toad subject entry".format(directory))
-                subjects.append(Subject(self.__copyConfig(directory), self.softwareVersions))
-        return subjects
+                if self.config.getboolean('arguments', 'validation'):
+                    if subject.isValidForPipeline():
+                        self.info("{} is a valid subject, adding it to the list.".format(subject))
+                        subjects.append(subject)
 
+                    elif self.config.getboolean('arguments', 'prompt'):
+                            msg = "It seem\'m like {} is having an issue and will probably fail!".format(subject)
+                            if util.displayYesNoMessage(msg, "Would you like to remove it from the list (y or n)"):
+                                self.info("Removing subject {} from the submitting list\n".format(subject))
+                            else:
+                                self.warning("Keeping {} even if we found issues will probably make the pipeline failing\n"
+                                .format(subject))
+                                subjects.append(subject)
+                    else:
+                        self.warning("Command prompt disabled, this submit will be submit anyway")
+                        subjects.append(subject)
+                else:
+                    self.warning("Skipping validation have been requested, this is a unwise and dangerous decision")
+                    subjects.append(subject)
+        return subjects
 
     def run(self):
         """Launch the pipeline
         """
 
-        #create the subjects
+        #create and validate subjects
         subjects = self.__subjectsFactory(self.__expandDirectories())
 
-        #Validate each subjects integrity
-        subjects = self.__validateSubjects(subjects)
-
-        #determine if subject that are locks
+        #determine if subject some subjects are currently process
         subjects = self.__processLocksSubjects(subjects)
 
-        #update into each subject how many subjects should be submit. This information is sensitive for load balancing the grid
+        #update each subject, set how many subjects will be submit. This information is sensitive for load balancing the grid
         for subject in subjects:
             subject.setConfigItem("general", "nb_subjects", str(len(subjects)))
 

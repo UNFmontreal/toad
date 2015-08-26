@@ -248,7 +248,7 @@ class TractographyMrtrix(GenericTask):
                   (self.getRegistrationImage("brodmann", "resample"), 'resampled brodmann area'),
                   (self.getRegistrationImage("norm", "resample"), 'brain resampled'),
                   (self.getMaskingImage('aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
-                  (self.getRegistrationImage("tt5", "resample"),'5tt resampled'),
+                  (self.getRegistrationImage("tt5", "register"),'5tt register'),
                   (self.getMaskingImage('aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
                   (self.getMaskingImage("tt5", ["register", "5tt2gmwmi"]), 'grey matter, white matter interface'))
 

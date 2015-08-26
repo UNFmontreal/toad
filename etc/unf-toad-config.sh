@@ -23,10 +23,10 @@ case "$HOSTNAME" in
     if [ -z "${BQMAMMOUTH}" ];
         then
             APPDIR=/usr/local
+            export TOADSERVER=local
             echo "Warning, Toad is meant to dedicated server"
             echo "Please contact mathieu.desrosiers@criugm.qc.ca for further information"
             echo "unknown server $HOSTNAME, will guess environment!"
-
         else
             export TOADSERVER=mammouth
             APPDIR=/netmount/ip01_home/desrosie/local
@@ -55,14 +55,12 @@ export MINC_LIB_DIR=$FREESURFER_HOME/mni/lib
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$FREESURFER_HOME/lib
 export PERL5LIB=$FREESURFER_HOME/mni/lib/perl5/5.8.5:$PERL5LIB
 
-
 # FSL Configuration
 FSLDIR=$APPDIR/fsl
 export FSLOUTPUTTYPE=NIFTI_GZ
 PATH=${FSLDIR}/bin:${PATH}
 . ${FSLDIR}/etc/fslconf/fsl.sh
 export FSLDIR PATH
-
 
 export PATH=$TOADDIR/bin:$APPDIR/matlab-8.0/bin:$APPDIR/mrtrix3/bin:$APPDIR/mrtrix3/scripts:$PATH
 export PATH=$FREESURFER_HOME/mni/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$PATH

@@ -96,32 +96,6 @@ class Parcellation(GenericTask):
 
             self.__convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)), target)
 
-    """
-    def __createBrodmannImage(self):
-
-            Create a brodmann area map
-
-        Returns:
-            A brodmann area images
-
-
-        brodmannTemplate = os.path.join(self.toadDir, "templates", "mri", self.get("templates_brodmann"))
-        target = self.get("brodmann")
-        self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
-        os.environ["SUBJECTS_DIR"] = self.workingDir
-
-        #@TODO remove all trace of mgz file
-        cmd = "mri_vol2vol --mov {} --targ $FREESURFER_HOME/subjects/fsaverage/mri/T1.mgz" \
-              " --o brodmann_fsaverage.mgz --regheader --interp nearest".format(brodmannTemplate)
-        self.launchCommand(cmd)
-
-        cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/{0}/mri/norm.mgz --targ brodmann_fsaverage.mgz --s {0} " \
-               " --m3z talairach.m3z --o {1} --interp nearest --inv-morph".format(self.id, target)
-        self.launchCommand(cmd)
-        return self.__convertAndRestride(target, target)
-    """
-
-
 
     def __create5ttImage(self, subdiv=4):
         """
@@ -291,7 +265,6 @@ class Parcellation(GenericTask):
         self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
         os.environ["SUBJECTS_DIR"] = self.workingDir
 
-        #@TODO remove all trace of mgz file
         cmd = "mri_vol2vol --mov {} --targ $FREESURFER_HOME/subjects/fsaverage/mri/T1.mgz" \
               " --o {} --regheader --interp nearest".format(template, tmpImage)
         self.launchCommand(cmd)
@@ -385,7 +358,6 @@ class Parcellation(GenericTask):
                 os.remove(source)
 
     def meetRequirement(self):
-
         return  Images((self.getPreparationImage('anat'), 'high resolution'))
 
 
