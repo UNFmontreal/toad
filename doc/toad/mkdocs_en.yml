@@ -35,3 +35,6 @@ pages:
     - '14-Tractography MRtrix': 'tasks/14-Tractographymrtrix.md'
     - '15-Tractography Dipy': 'tasks/15-Tractographydipy.md'
     - '16-Results': 'tasks/16-Results.md'
+- About:
+    - 'License agreement': 'about/license.md'
+    - 'Versions': 'about/versions.md'

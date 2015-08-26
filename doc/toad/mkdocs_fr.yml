@@ -8,8 +8,9 @@ site_dir: html/fr
 theme_dir: custom_theme
 use_directory_urls: false
 pages:
-- Home: 'index.md'
+- Accueil: 'index.md'
 - Tutoriel:
+    - '00-Avant de commencer': 'tuto/00-refs.md'
     - '01-Pré-requis': 'tuto/01-requirements.md'
     - '02-Récupération des données': 'tuto/02-getdata.md'
     - '03-TOAD': 'tuto/03-runtoad.md'
@@ -34,3 +35,6 @@ pages:
     - '14-Tractography MRtrix': 'tasks/14-Tractographymrtrix.md'
     - '15-Tractography Dipy': 'tasks/15-Tractographydipy.md'
     - '16-Results': 'tasks/16-Results.md'
+- À propos:
+    - 'Conditions d’utilisation': 'about/license.md'
+    - 'Versions': 'about/versions.md'
