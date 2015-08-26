@@ -25,7 +25,7 @@ Nous vous conseillons également de **consulter [cette page](tuto/00-refs.md)** 
 
 ## L’équipe
 
-<img src="figs/JDoyon.jpg" alt="Julien Doyon" style="width: 50px;"/> [**Julien Doyon**](mailto:julien.doyon@umontreal.ca) : directeur scientifique de l’[UNF (Unité de Neuroimagerie Fonctionnelle)](www.unf-montreal.ca) et promoteur de TOAD
+<img src="figs/JDoyon.jpg" alt="Julien Doyon" style="width: 50px;"/> [**Julien Doyon**](mailto:julien.doyon@umontreal.ca) : directeur scientifique de l’[UNF (Unité de Neuroimagerie Fonctionnelle)](www.unf-montreal.ca)
 
 <img src="figs/SBrambati.jpg" alt="Simona Brambati" style="width: 50px;"/> [**Simona Brambati**](mailto:simonabrambati@gmail.com) : chercheuse et responsable scientifique du projet
 
