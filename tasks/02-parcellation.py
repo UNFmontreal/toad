@@ -121,16 +121,17 @@ class Parcellation(GenericTask):
                 return verts, tris
 
         def surf_fill_vtk(vertices, polys, mat, shape):
-
+            
             import vtk
             from vtk.util import numpy_support
-
+            
+            
             voxverts = nb.affines.apply_affine(np.linalg.inv(mat), vertices)
             points = vtk.vtkPoints()
             points.SetNumberOfPoints(len(voxverts))
             for i,pt in enumerate(voxverts):
                 points.InsertPoint(i, pt)
-                
+
             tris  = vtk.vtkCellArray()
             for vert in polys:
                 tris.InsertNextCell(len(vert))
@@ -140,28 +141,37 @@ class Parcellation(GenericTask):
             pd = vtk.vtkPolyData()
             pd.SetPoints(points)
             pd.SetPolys(tris)
+            del points, tris
             
             whiteimg = vtk.vtkImageData()
             whiteimg.SetDimensions(shape)
-            whiteimg.SetScalarType(vtk.VTK_UNSIGNED_CHAR)
-            
+            if vtk.VTK_MAJOR_VERSION <= 5:
+                whiteimg.SetScalarType(vtk.VTK_UNSIGNED_CHAR)
+            else:
+                info = vtk.vtkInformation()
+                whiteimg.SetPointDataActiveScalarInfo(info, vtk.VTK_UNSIGNED_CHAR, 1)
+                    
             ones = np.ones(np.prod(shape),dtype=np.uint8)
             whiteimg.GetPointData().SetScalars(numpy_support.numpy_to_vtk(ones))
-            
+    
             pdtis = vtk.vtkPolyDataToImageStencil()
-            pdtis.SetInput(pd)
-            
-            pdtis.SetOutputWholeExtent = whiteimg.GetExtent()
-            pdtis.Update()
-            
-            imgstenc = vtk.vtkImageStencil()
-            imgstenc.SetInput(whiteimg)
             if vtk.VTK_MAJOR_VERSION <= 5:
+                pdtis.SetInput(pd)
+            else:
+                pdtis.SetInputData(pd)
+
+            pdtis.SetOutputWholeExtent(whiteimg.GetExtent())
+            pdtis.Update()
+
+            imgstenc = vtk.vtkImageStencil()
+            if vtk.VTK_MAJOR_VERSION <= 5:
+                imgstenc.SetInput(whiteimg)
                 imgstenc.SetStencil(pdtis.GetOutput())
             else:
+                imgstenc.SetInputData(whiteimg)
                 imgstenc.SetStencilConnection(pdtis.GetOutputPort())
-                imgstenc.SetBackgroundValue(0)
-
+            imgstenc.SetBackgroundValue(0)
+                
             imgstenc.Update()
     
             data = numpy_support.vtk_to_numpy(
