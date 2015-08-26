@@ -12,27 +12,24 @@ class Snr(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'preparation', 'correction', 'denoising', 'upsampling', 'registration', 'masking', 'qa')
-
+        GenericTask.__init__(self, subject, 'preparation', 'correction', 'denoising', 'masking', 'qa')
 
     def implement(self):
 
-        #Check if native dwi have an even number in z direction
-        dwiNative = self.getPreparationImage('dwi')
-        target = self.buildName(dwiNative, 'subset')
-        if dwiNative:
-            try:
-                zDims = int(mriutil.getMriDimensions(image)[2])
-                if zDims%2 == 1:
-                    mriutil.extractSubVolume(dwiNative, target, '+2',"0:{}".format(zDims-2), self.getNTreadsMrtrix())
-                else:
-                    util.symLink(dwiNative, target)
-            except ValueError:
-                util.symLink(dwiNative, target)
-
         #Noise mask computation
-        brainMaskResample = self.getRegistrationImage('mask', 'resample')
-        self.__computeNoiseMask(brainMaskResample)
+        brainMask = self.getCorrectionImage('mask', 'corrected')
+        noiseMask = self.__computeNoiseMask(brainMask)
+
+        #Voxel Size of native dwi
+        dwiNative = self.getPreparationImage('dwi')
+        voxelSize = mriutil.getMriVoxelSize(dwiNative)
+
+        #Corpus Callosum masks
+        ccMask = self.getMaskingImage('aparc_aseg', ['253','mask'])
+        ccMaskDownsample = self.buildName(ccMask, 'downsample')
+        cmdString = "mri_convert -voxsize {} --input_volume {} --output_volume {}"
+        cmd = cmdString.format(" ".join(voxelSize), ccMask, ccMaskDownsample)
+        self.launchCommand(cmd)
 
 
     def __computeNoiseMask(self, brain):
@@ -54,26 +51,26 @@ class Snr(GenericTask):
         snrPng = self.buildName(dwi, 'snr', 'png')
         histPng = self.buildName(dwi, 'hist', 'png')
         self.noiseAnalysis(dwi, noiseMask, ccMask, snrPng, histPng)
-        qaImages.append(
+        qaImages.extend(Images(
             (snrPng, '{} DWI image : SNR for each volume'.format(description)),
             (histPng, '{} DWI image : noise histogram'.format(description)),
-            )
+            ))
         return qaImages
 
 
     def meetRequirement(self):
         return Images(
             (self.getPreparationImage('dwi'), 'diffusion weighted'),
-            (self.getRegistrationImage('mask', 'resample'), 'brain mask'),
+            (self.getCorrectionImage('mask', 'corrected'), 'brain mask'),
             (self.getMaskingImage('aparc_aseg', ['253','mask']), 'Corpus Callusum mask from masking task'),
-            (self.getUpsamplingImage('b0', 'upsample'), 'B0 upsampled')
+            (self.getCorrectionImage('b0'), 'B0')
             )
 
 
     def isDirty(self):
         return Images(
-            (self.getImage('dwi', 'subset'), 'Native dwi'),
-            (self.getImage('dwi', 'noisemask'), 'Noise mask'),
+            (self.getImage('mask', ['corrected', 'noisemask']), 'Noise mask'),
+            (self.getImage('aparc_aseg', ['253', 'mask', 'downsample']), 'Corpus callosum downsample'),
             )
 
 
@@ -84,12 +81,12 @@ class Snr(GenericTask):
         qaImages = Images()
 
         #Get images
-        dwiNative = self.getImage('dwi', 'subset')
+        dwiNative = self.getPreparationImage('dwi')
         dwiCorrected = self.getCorrectionImage('dwi', 'corrected')
         dwiDenoised = self.getDenoisingImage('dwi', 'denoise')
-        dwiNoiseMask = self.getImage('dwi', 'noisemask')
-        dwiCcMask = self.getMaskingImage('aparc_aseg', ['253','mask'])
-        b0 = self.getUpsamplingImage('b0', 'upsample')
+        noiseMask = self.getImage('mask', ['corrected', 'noisemask'])
+        ccMask = self.getImage('aparc_aseg', ['253', 'mask', 'downsample'])
+        b0 = self.getCorrectionImage('b0')
 
         #Build qa images
         tags = (
@@ -99,10 +96,16 @@ class Snr(GenericTask):
             )
         for dwi, description in tags:
             if dwi:
-                qaImages = self.__noiseAnalysis(dwi, dwiNoiseMask, dwiCcMask, qaImages, description)
+                qaImages = self.__noiseAnalysis(dwi, noiseMask, ccMask, qaImages, description)
 
-        noiseMaskPng = self.buildName(dwiNoiseMask, None, 'png')
-        self.slicerPng(b0, noiseMaskPng, maskOverlay=dwiNoiseMask, boundaries=dwiNoiseMask)
-        qaImages.append((noiseMaskPng, 'Noise mask to compute SNR'))
+        #Build qa masks images
+        tags = (
+            (noiseMask, 'Noise mask'),
+            (ccMask, 'Corpus callosum mask'),
+            )
+        for mask, description in tags:
+            maskPng = self.buildName(mask, None, 'png')
+            self.slicerPng(b0, maskPng, maskOverlay=mask, boundaries=mask)
+            qaImages.extend(Images((maskPng, description)))
 
         return qaImages
