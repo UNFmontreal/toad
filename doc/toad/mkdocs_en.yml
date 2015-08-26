@@ -16,6 +16,7 @@ pages:
     - '03-TOAD': 'tuto/03-runtoad.md'
     - '04-Visualization': 'tuto/04-visualisation.md'
 - Tasks:
+    - 'Tasks overview': 'tasks/overview.md'
     - '00-Backup': 'tasks/00-Backup.md'
     - '00-Qa': 'tasks/00-Qa.md'
     - '01-Preparation': 'tasks/01-Preparation.md'
@@ -34,3 +35,6 @@ pages:
     - '14-Tractography MRtrix': 'tasks/14-Tractographymrtrix.md'
     - '15-Tractography Dipy': 'tasks/15-Tractographydipy.md'
     - '16-Results': 'tasks/16-Results.md'
+- About:
+    - 'License agreement': 'about/license.md'
+    - 'Versions': 'about/versions.md'
