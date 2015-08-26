@@ -26,7 +26,7 @@ class Subject(Logger, Lock, Validation):
         self.__subjectDir = self.__config.get('arguments', 'subjectDir')
         self.__name = os.path.basename(self.__subjectDir)
         self.__logDir = os.path.join(self.__subjectDir, self.__config.get('dir', 'log'))
-	#the subject logger must be call without file information during initialization
+        #the subject logger must be call without file information during initialization
         Logger.__init__(self)
         Lock.__init__(self, self.__logDir, self.__name)
         Validation.__init__(self, self.__subjectDir, self.__config)
@@ -64,7 +64,7 @@ class Subject(Logger, Lock, Validation):
         if not os.path.exists(self.__logDir):
             self.info("creating log dir {}".format(self.__logDir))
             os.mkdir(self.__logDir)
-	Logger.__init__(self, self.__logDir)
+        Logger.__init__(self, self.__logDir)
 
 
     def removeLogDir(self):

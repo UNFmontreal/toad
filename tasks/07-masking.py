@@ -150,7 +150,6 @@ class Masking(GenericTask):
         #Build qa images
         tags = (
             (whiteMatter, 'resample white segmented mask'),
-            #(interfaceGmWm, 'grey matter, white matter interface'),
             (area253, 'area 253 from aparc_aseg atlas'),
             (area1024, 'area 1024 from aparc_aseg atlas'),
             )

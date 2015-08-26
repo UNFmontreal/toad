@@ -1,4 +1,4 @@
-from lib import util, mriutil
+from lib import util
 from string import ascii_uppercase, digits
 from random import choice
 import os
@@ -10,7 +10,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot
 import mpl_toolkits.mplot3d
-import scipy.ndimage.morphology
 import dipy.segment.mask
 
 
