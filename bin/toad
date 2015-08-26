@@ -121,11 +121,7 @@ def __manageEnvironnement(logger, arguments):
     """
 
     serverName = os.environ.get('TOADSERVER')
-    if serverName is not None:
-        arguments.matlabIsAvailable = False if "mammouth" in serverName else True
-        arguments.isVTKAvailable = False if "magma" in serverName else True
-        logger.info("Configuration for {} server found".format(os.environ.get('TOADSERVER')))
-    else:
+    if serverName is "local" or serverName is None:
         try:
             version = float(sys.version[0:3])
             if version < 2.7:
@@ -179,6 +175,11 @@ def __manageEnvironnement(logger, arguments):
             logger.warning("No grid engine found. Pipeline will run locally", pause=True)
             arguments.local = True
 
+    else:
+        arguments.matlabIsAvailable = False if "mammouth" in serverName else True
+        arguments.isVTKAvailable = False if "magma" in serverName else True
+        logger.info("Configuration for {} server found".format(os.environ.get('TOADSERVER')))
+
     return arguments
 
 
@@ -204,10 +205,13 @@ def __manageVersions(logger, arguments):
     rootXml.setAttribute("timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
     toadXml.appendChild(rootXml)
 
-
     logger.info("Computer identification: {}".format(" ".join(os.uname())))
     xmlServer = xmlDocument.createElement("server")
-    xmlServer.setAttribute("name", socket.gethostname())
+    serverName = os.environ.get('TOADSERVER')
+    if serverName is None:
+        serverName = "local"
+    xmlServer.setAttribute("toadname", serverName)
+    xmlServer.setAttribute("hostname", socket.gethostname())
     xmlText = xmlDocument.createTextNode(" ".join(os.uname()))
     xmlServer.appendChild(xmlText)
     rootXml.appendChild(xmlServer)
@@ -284,7 +288,7 @@ if __name__ == '__main__':
     #parse arguments provide in command line
     arguments = __parseArguments()
 
-    #manage the environnement
+    #manage the environment
     arguments = __manageEnvironnement(logger, arguments)
 
     #make sure to log versions before starting the pipeline

@@ -1,4 +1,3 @@
-import socket
 import os
 
 __author__ = 'mathieu'

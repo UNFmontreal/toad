@@ -105,10 +105,25 @@ class GenericTask(Logger, Load, Qa):
 
 
     def __getattr__(self, items):
+        """A simple Generic function that wrap getImage
+            return an mri image given certain criteria
+            this is a wrapper over mriutil getImage function
 
-        if items.startswith('get') and items.endswith('Image') and len(items) > len("getImage")+2:
-            taskName = items[3:-5].lower()
-            directory = getattr(self, "{}Dir".format(taskName))
+        Args:
+            prefix:  an expression that the filename should start with
+            postfix: an expression that the filename should end with (excluding the extension)
+            ext:     name of the extension of the filename. defaults: nii.gz
+
+        Returns:
+            the relative filename if found, False otherwise
+
+        """
+        if items.startswith('get') and items.endswith('Image'):
+            if "getImage" in items:
+                directory = self.workingDir
+            else:
+                taskName = items[3:-5].lower()
+                directory = getattr(self, "{}Dir".format(taskName))
             def wrapper(*args):
                 arguments = [self.config, directory] + list(args)
                 return util.getImage(*arguments)
@@ -431,25 +446,6 @@ class GenericTask(Logger, Load, Qa):
         cmd = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "matlab.tpl"))
         self.info("Launching matlab command: {}".format(cmd))
         self.launchCommand(cmd, stdout, stderr, timeout, nice)
-
-
-    def getImage(self, prefix, postfix=None, ext="nii.gz"):
-        """A simple utility function that return an mri image given certain criteria
-
-        this is a wrapper over mriutil getImage function
-
-        Args:
-            prefix:  an expression that the filename should start with
-            postfix: an expression that the filename should end with (excluding the extension)
-            ext:     name of the extension of the filename. defaults: nii.gz
-
-        Returns:
-            the relative filename if found, False otherwise
-
-        """
-        return util.getImage(self.config, self.workingDir, prefix, postfix, ext)
-
-
 
 
     def buildName(self, source, postfix, ext=None, absolute = True):
