@@ -1,7 +1,7 @@
 # TOolkit d’Analyse de Diffusion (TOAD)
 
 Bienvenue sur la documentation en français de [TOAD](http://unf-montreal.ca/toad/).
-Les sources de TOAD, ainsi que les instructions d’installation sont diposnible sur [Github](https://github.com/UNFmontreal/toad).
+Les sources de TOAD, ainsi que les instructions d’installation sont disponible sur [Github](https://github.com/UNFmontreal/toad).
 
 TOAD offre une chaine de traitement automatisé des images de diffusion (DTI). 
 Les différentes étapes de traitement permettent :
