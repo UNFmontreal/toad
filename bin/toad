@@ -260,8 +260,8 @@ def __manageVersions(logger, arguments):
     xmlVersions.appendChild(__createVersionTags(xmlDocument, "ImageMagick", version))
 
     for package in __pythonPackages:
+        module = __import__(package)
         if not "vtk" in package:
-            module = __import__(package)
             logger.info("{} is at version: {}".format(package, module.__version__))
             xmlVersions.appendChild(__createVersionTags(xmlDocument, package, module.__version__))
 
