@@ -11,7 +11,7 @@ If you use TOAD, you must agree to the follow these rules:
 The code is available on [Github](https://github.com/UNFmontreal/toad) under the GPL v2 license.
 
 TOAD is a pipeline to automatically preprocess diffusion imaging data (DTI).
-Copyright (C) TOAD
+Copyright (C) 2015 TOAD
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
