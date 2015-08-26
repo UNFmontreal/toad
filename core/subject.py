@@ -1,4 +1,5 @@
 from core.validation import Validation
+from core.logger import Logger
 from xml.parsers.expat import ExpatError
 from xml.dom import minidom
 from lock import Lock
@@ -7,10 +8,10 @@ import os
 
 __author__ = 'mathieu'
 
-class Subject(Lock, Validation):
+class Subject(Logger, Lock, Validation):
 
 
-    def __init__(self, config, logger, softwareVersions):
+    def __init__(self, config):
         """A valid individual who have the capability to run tasks.
             This class have the responsability to write a document of the softwares and versions
             into the log directory
@@ -25,11 +26,10 @@ class Subject(Lock, Validation):
         self.__subjectDir = self.__config.get('arguments', 'subjectDir')
         self.__name = os.path.basename(self.__subjectDir)
         self.__logDir = os.path.join(self.__subjectDir, self.__config.get('dir', 'log'))
-        if not os.path.exists(self.__logDir):
-            os.mkdir(self.__logDir)
+	#the subject logger must be call without file information during initialization
+        Logger.__init__(self)
         Lock.__init__(self, self.__logDir, self.__name)
-        Validation.__init__(self, self.__subjectDir, logger, self.__config)
-        self.__createXmlSoftwareVersionConfig(softwareVersions)
+        Validation.__init__(self, self.__subjectDir, self.__config)
 
 
     def __repr__(self):
@@ -54,6 +54,17 @@ class Subject(Lock, Validation):
 
         """
         return self.__logDir
+    
+    def activateLogDir(self):
+        """ create the log directory and create the versions.xml file
+            The log dir should be avtivate only if this object is tested as a valid toad subjects
+            See Valifation.isAToadSubject()
+
+        """
+        if not os.path.exists(self.__logDir):
+            self.info("creating log dir {}".format(self.__logDir))
+            os.mkdir(self.__logDir)
+	Logger.__init__(self, self.__logDir)
 
 
     def removeLogDir(self):
@@ -92,8 +103,8 @@ class Subject(Lock, Validation):
         return self.__subjectDir
 
 
-    def __createXmlSoftwareVersionConfig(self, xmlDocument):
-        """ wrote software versions into a source filename
+    def createXmlSoftwareVersionConfig(self, xmlDocument):
+        """ Write software versions into a source filename
 
         Args:
             xmlDocument: a minidom document
@@ -108,13 +119,14 @@ class Subject(Lock, Validation):
                 xml = minidom.parse(versionFile)
                 if len(xml.getElementsByTagName("toad")) == 1:
                     if len(xmlDocument.getElementsByTagName("application")) != 1:
+                        self.warning("none or too many tag name application into the software version structure")
                         return False
                     xmlToad = xml.getElementsByTagName("toad")[0]
                     xmlDocumentToad = xmlDocument.getElementsByTagName("application")[0]
                     xmlToad.appendChild(xmlDocumentToad)
                     xmlDocument = xmlToad
             except ExpatError:
-                pass
+                self.warning('Cannot understand {} xml structure, I will overwrite it?'.format(versionFile))
 
         with open(versionFile, 'w') as w:
             xmlDocument.writexml(w)

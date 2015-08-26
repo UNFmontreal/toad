@@ -133,7 +133,11 @@ class SubjectManager(Logger, Config):
                 try:
                     self.info("Starting subject {} at task {}".format(name, tasksmanager.getFirstRunnableTasks().getName()))
                     subject.lock()
+
+                    #log versions that will be use for the pipeline execution
+                    subject.createXmlSoftwareVersionConfig(self.softwareVersions)
                     tasksmanager.run()
+
                 finally:
                     subject.removeLock()
                     self.info("Pipeline finish at {}, have a nice day!".format(self.getTimestamp()))
@@ -145,6 +149,7 @@ class SubjectManager(Logger, Config):
 
     def __submitGridEngine(self, subject):
         """Submit execution of the subject into the grid engine
+           this function will wrap a toad call with proper parameters for submission into a Sun or Torque Grid Engine
 
         Args:
             subject:  a subject
@@ -238,9 +243,9 @@ class SubjectManager(Logger, Config):
         """
         subjects=[]
         for directory in directories:
-
-            subject = Subject(self.__copyConfig(directory), self.getLogger(), self.softwareVersions)
+            subject = Subject(self.__copyConfig(directory))
             if subject.isAToadSubject():
+                subject.activateLogDir()
                 self.info("{} seem\'s a valid toad subject entry".format(directory))
                 if self.config.getboolean('arguments', 'validation'):
                     if subject.isValidForPipeline():
@@ -261,9 +266,7 @@ class SubjectManager(Logger, Config):
                 else:
                     self.warning("Skipping validation have been requested, this is a unwise and dangerous decision")
                     subjects.append(subject)
-
         return subjects
-
 
     def run(self):
         """Launch the pipeline
