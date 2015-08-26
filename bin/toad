@@ -204,7 +204,6 @@ def __manageVersions(logger, arguments):
     rootXml.setAttribute("timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
     toadXml.appendChild(rootXml)
 
-
     logger.info("Computer identification: {}".format(" ".join(os.uname())))
     xmlServer = xmlDocument.createElement("server")
     xmlServer.setAttribute("name", socket.gethostname())
@@ -284,7 +283,7 @@ if __name__ == '__main__':
     #parse arguments provide in command line
     arguments = __parseArguments()
 
-    #manage the environnement
+    #manage the environment
     arguments = __manageEnvironnement(logger, arguments)
 
     #make sure to log versions before starting the pipeline

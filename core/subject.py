@@ -1,3 +1,4 @@
+from core.validation import Validation
 from xml.parsers.expat import ExpatError
 from xml.dom import minidom
 from lock import Lock
@@ -6,10 +7,10 @@ import os
 
 __author__ = 'mathieu'
 
-class Subject(Lock):
+class Subject(Lock, Validation):
 
 
-    def __init__(self, config, softwareVersions):
+    def __init__(self, config, logger, softwareVersions):
         """A valid individual who have the capability to run tasks.
             This class have the responsability to write a document of the softwares and versions
             into the log directory
@@ -27,7 +28,9 @@ class Subject(Lock):
         if not os.path.exists(self.__logDir):
             os.mkdir(self.__logDir)
         Lock.__init__(self, self.__logDir, self.__name)
-        self.__createSoftwareVersionXmlConfig(softwareVersions)
+        Validation.__init__(self, self.__subjectDir, logger, self.__config)
+        self.__createXmlSoftwareVersionConfig(softwareVersions)
+
 
     def __repr__(self):
         return self.__name
@@ -89,7 +92,7 @@ class Subject(Lock):
         return self.__subjectDir
 
 
-    def __createSoftwareVersionXmlConfig(self, xmlDocument,  source = 'version.xml'):
+    def __createXmlSoftwareVersionConfig(self, xmlDocument):
         """ wrote software versions into a source filename
 
         Args:
@@ -99,8 +102,7 @@ class Subject(Lock):
         Returns:
             True if the operation is a success, False otherwise
         """
-
-        versionFile = os.path.join(self.getLogDir(), source)
+        versionFile = os.path.join(self.getLogDir(), self.__config.get('general', 'versions_file_name'))
         if os.path.exists(versionFile):
             try:
                 xml = minidom.parse(versionFile)

@@ -66,7 +66,7 @@ class Validation(object):
         return result
 
 
-    def validate(self):
+    def isValidForPipeline(self):
         """Execute validation for the working directory
 
         this function is usually call by the task manager
