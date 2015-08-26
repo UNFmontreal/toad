@@ -1,10 +1,10 @@
-# Registration
+# Upsampling
 ---
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | [Name of the task]                                    |
-|**Objectif**    | [Simple objectif]                                     |
+|**Goal**        | [Simple objective]                                    |
 |**Parameters**  | [Simple parameters or reference to the config section]|
 |**Time**        | [Estimate processing time in a local machine]         |
 |**Output**      | [File(s) created]                                     |
@@ -14,12 +14,12 @@
 [brief description]    
 
 
-## Objective
+## Goal
 
 [presentation of the objective of the method]
 
 
-## Requierements
+## Requirements
 
 [what files are needed to run the task]
 
@@ -53,7 +53,7 @@
 [Tool or function used with the reference to the official documentation]
 ```
 
-## Expected result(s)
+## Expected result(s) - Quality Assessment (QA)
 
 [what should be produced by TOAD, the expected output]
 
