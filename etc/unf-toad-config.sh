@@ -23,6 +23,7 @@ case "$HOSTNAME" in
     if [ -z "${BQMAMMOUTH}" ];
         then
             APPDIR=/usr/local
+            export TOADSERVER=local
             echo "Warning, Toad is meant to dedicated server"
             echo "Please contact mathieu.desrosiers@criugm.qc.ca for further information"
             echo "unknown server $HOSTNAME, will guess environment!"
