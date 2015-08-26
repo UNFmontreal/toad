@@ -1,7 +1,7 @@
 # TOolkit d’Analyse de Diffusion (TOAD)
 
 Bienvenue sur la documentation en français de [TOAD](http://unf-montreal.ca/toad/).
-Les sources de TOAD, ainsi que les instructions d’installation sont diposnible sur [Github](https://github.com/UNFmontreal/toad).
+Les sources de TOAD, ainsi que les instructions d’installation sont disponible sur [Github](https://github.com/UNFmontreal/toad).
 
 TOAD offre une chaine de traitement automatisé des images de diffusion (DTI). 
 Les différentes étapes de traitement permettent :
@@ -25,7 +25,7 @@ Nous vous conseillons également de **consulter [cette page](tuto/00-refs.md)** 
 
 ## L’équipe
 
-<img src="figs/JDoyon.jpg" alt="Julien Doyon" style="width: 50px;"/> [**Julien Doyon**](mailto:julien.doyon@umontreal.ca) : directeur scientifique de l’[UNF (Unité de Neuroimagerie Fonctionnelle)](www.unf-montreal.ca) et promoteur de TOAD
+<img src="figs/JDoyon.jpg" alt="Julien Doyon" style="width: 50px;"/> [**Julien Doyon**](mailto:julien.doyon@umontreal.ca) : directeur scientifique de l’[UNF (Unité de Neuroimagerie Fonctionnelle)](www.unf-montreal.ca)
 
 <img src="figs/SBrambati.jpg" alt="Simona Brambati" style="width: 50px;"/> [**Simona Brambati**](mailto:simonabrambati@gmail.com) : chercheuse et responsable scientifique du projet
 
