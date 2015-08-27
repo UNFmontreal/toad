@@ -1,7 +1,7 @@
 # Data retrieval and preparation 
 
 ## From the UNF web interface
-The easiest and most practical way to retrieve data acquired at the UNF is to use the platform available at the UNF website. This platform takes care of all that is necessary to prepare and reconstruct the images from the scanner into Dicom format to be ready for download. To access the site: either from **the website of the [Neuroimaging unit](http://www.unf-montreal.ca)** (Menu `Services` then `MRI Data Download`), or directly from ** [the platform of the unit](https://unf-montreal.ca)**
+The easiest and most practical way to retrieve data acquired at the Unité de Neuroimagerie Fonctionnelle (UNF) is to use the platform available at the UNF website. This platform takes care of all that is necessary to prepare and reconstruct the images from the scanner into Dicom format to be ready for download. To access the site: either from **the website of the [Neuroimaging unit](http://www.unf-montreal.ca)** (Menu `Services` then `MRI Data Download`), or directly from **[the download platform of the unit](https://unf-montreal.ca)**
 
 ![UNF homepage](../figs/unf_website_home.png)
 
@@ -88,7 +88,7 @@ The software will ask you a series of questions to specify which file correspond
 
 One of the strong features of `unf2toad` is its ability to manage multiple sessions/subjects simultaneously. It will first show you a list of sessions/subjects found within the downloaded data set. Subject ID followed by an asterisk * indicates the data from that subject have been converted. 
 
-![unf2toad en action](../figs/terminal_convert_subjects.png)
+![unf2toad in action](../figs/terminal_convert_subjects.png)
 
 When multiple sessions/subjects share the exact same data structure, `unf2toad` offers the option of applying the setting options chosen for the first subject to the subsequent sessions/subjects.
 
@@ -105,17 +105,19 @@ The analysis of diffusion data requires at least 3 types of images from each sub
 2. **diffusion images** (DWI) : white matter tracts (fibre extraction)
 3. **acquisition specifications for the diffusion images (the `b-files`):** specifications for the acquisition of diffusion data (intensity and directions) regrouped in one (*.b) or 2 (*.bval and *.bvec) files.
 
-Other kinds of data that can also be preprocessed in TOAD:
+Other kinds of data that can also be used by in TOAD:
 
-- **Eddy current** (Eddy Correction): Anterior-posterior and/or posterior-anterior gradient files
-- **field inhomogeneity** (fieldmap): ... [FIXME]
+- **geometric distortion/field inhomogeneity corrections**:
+    - diffusion image acquired in the reverse direction of the main DWI files,
+    - fieldmap image.
+- **output folder from Freesurfer processing**
 
 ### File format
 
-For simplicity`s sake, TOAD only accepts the following file formats:
+For simplicity’s sake, TOAD only accepts the following file formats:
 
 - neuroimaging: **NIfTI** (.nii) 
-- encoding:  regrouped format **MRTRIX (.b)** or separated by values and vectors **(.val and .vec)**.
+- encoding:  regrouped format **MRTRIX (.b)** or separated **FSL (.bval and .bvec)**.
 
 ### Data organization
 
@@ -136,13 +138,13 @@ If you have data that are already converted into NIfTI as well as the encoding f
 </pre>
     
 ***Attention:*** *in this case, it is your responsibility to ensure that all your files have been correctly converted, and that the encoding file complies with the usual standards (strides ...).
-If these data come from a Siemens scanner (as at the UNF), and if you still have the raw data, we strongly recommend to convert the data with the software `unf2toad` [see section Data conversion](# conversion)
+If these data come from a 3T Tim Trio Siemens MRI scanner (as at the UNF), and if you still have the raw data, we strongly recommend to convert the data with the software `unf2toad` [see section Data conversion](# conversion)
 
 
 ### File naming
 TOAD needs to identify which files correspond to which image. 
 To do so, TOAD uses the prefix that is common to the file name of each type of files. Similarly, all the anatomical images should start by the same prefix; by default TOAD looks for files that start with `anat`.
-For diffusion images, TOAD looks for files that start with `dwi` and for the encoding files, `b0`.
+For diffusion images, TOAD looks for files that start with `dwi` and for the encoding files files starting with `dwi` and with `.b` or `.bval` and `.bvec` as file extension.
 When the anterior-posterior or posterior-anterior files are available, TOAD looks for the prefix `b0_ap` and `b0_pa`.
 
 You are free to use any current naming system, as long as it is specified in your configuration file `config.cfg`.
