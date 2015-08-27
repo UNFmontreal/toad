@@ -1,14 +1,17 @@
+# -*- coding: utf-8 -*-
+import numpy
+import nibabel
 import dipy.core.gradients
 import dipy.reconst.dti
 import dipy.segment.mask
 import dipy.reconst.dti
-import numpy
-import nibabel
-
 from core.generictask import GenericTask
 from lib.images import Images
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class TensorDipy(GenericTask):
 

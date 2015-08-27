@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
 import ConfigParser
 import os
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
 
 
 class Config(object):

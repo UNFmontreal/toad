@@ -1,4 +1,4 @@
-from string import Template
+# -*- coding: utf-8 -*-
 import subprocess
 import datetime
 import signal
@@ -6,8 +6,11 @@ import shutil
 import time
 import glob
 import os
+from string import Template
 
-__author__ = 'mathieu'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
 
 
 def symlink(source, target):

@@ -1,7 +1,5 @@
 """A preset format, used as a starting point for developing a toad task
 
-*** Do not forget to specify#toad  -t <this file name and location> when you launch toad command line***
-
         Simply copy and rename this file:  cp xx-template yourtaskname.py into any folder.
             yourtaskname is any name at your convenience. you should keep the name must be lowercase
         Change the class name Template for Yourtaskname. Note the first letter of the name should be capitalized
@@ -9,12 +7,19 @@
         A directory called Yourtaskname will be create into the subject dir. A local variable self.workingDir will
         be initialize to that directory
 
+
+        Do not forget to specify the location and the file name (-t switch) when you launch toad***
+                #toad  -t <this file name and location>
+
+
         Args:
             subject: a Subject instance inherit by the subjectmanager.
 
 """
 from core.generictask import GenericTask
-__author__ = 'desmat'
+__author__ = "Your_name"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Your_name", "Mathieu Desrosiers"]
 
 
 class Template(GenericTask):

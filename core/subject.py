@@ -1,12 +1,17 @@
-from core.validation import Validation
-from core.logger import Logger
-from xml.parsers.expat import ExpatError
-from xml.dom import minidom
-from lock import Lock
+# -*- coding: utf-8 -*-
 import shutil
 import os
+from xml.parsers.expat import ExpatError
+from xml.dom import minidom
 
-__author__ = 'mathieu'
+from core.validation import Validation
+from core.logger import Logger
+from lock import Lock
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class Subject(Logger, Lock, Validation):
 

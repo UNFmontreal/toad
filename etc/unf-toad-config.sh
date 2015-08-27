@@ -1,6 +1,10 @@
-#Toad configuration file
-#Copyright 2014, The Toad Project
-#credits by Mathieu Desrosiers
+#Toad configuration source file
+#Copyright (C) 2014, TOAD
+#License GPL v2
+#Author Mathieu Desrosiers
+#Credits by Mathieu Desrosiers
+#Email mathieu.desrosiers@criugm.qc.ca
+
 #to be sourced by toad users, typically in .bash_profile or equivalent
 
 #define TOAD directory

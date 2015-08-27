@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import argparse, sys, os
-
+import os
+import sys
+import argparse
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from lib import arguments, mriutil
 
+
 __author__ = "Mathieu Desrosiers"
-__copyright__ = "Copyright 2014, The Toad Project"
+__copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
-__license__ = "GPL"
+__license__ = "GPL v2"
 __version__ = "0.1"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"

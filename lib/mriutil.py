@@ -1,8 +1,14 @@
+# -*- coding: utf-8 -*-
 import nibabel
 import random
 import numpy
 import util
 import os
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 def fslmaths(source1, target, operator="bin", source2=None):
     """Perform a mathematical operations using a second image or a numeric value

@@ -1,15 +1,17 @@
+# -*- coding: utf-8 -*-
 import glob
 import copy
 import os
-
 from tasksmanager import TasksManager
 from subject import Subject
 from logger import Logger
 from config import Config
 from lib import util
 
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
 
-__author__ = 'desmat'
 
 class SubjectManager(Logger, Config):
 
@@ -278,7 +280,7 @@ class SubjectManager(Logger, Config):
         #determine if subject some subjects are currently process
         subjects = self.__processLocksSubjects(subjects)
 
-        #update each subject, set how many subjects will be submit. This information is sensitive for load balancing the grid
+        #configure how many subjects will be submit. This information is sensitive for load balancing the grid
         for subject in subjects:
             subject.setConfigItem("general", "nb_subjects", str(len(subjects)))
 

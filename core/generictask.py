@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import timedelta
 from datetime import datetime
 import subprocess
@@ -5,14 +6,16 @@ import traceback
 import shutil
 import os
 
+from lib.images import Images
 from logger import Logger
 from load import Load
-from lib.images import Images
 from lib.qa import Qa
 from lib import util
 
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
 
 
 class GenericTask(Logger, Load, Qa):
@@ -264,6 +267,7 @@ class GenericTask(Logger, Load, Qa):
 
             self.logFooter("isDirty", result)
             return result
+
 
     def isDirty(self, result = False):
         """Validate if this tasks need to be submit for implementation

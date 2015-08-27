@@ -1,6 +1,4 @@
-from lib import util
-from string import ascii_uppercase, digits
-from random import choice
+# -*- coding: utf-8 -*-
 import os
 import shutil
 import functools
@@ -11,6 +9,13 @@ matplotlib.use('Agg')
 import matplotlib.pyplot
 import mpl_toolkits.mplot3d
 import dipy.segment.mask
+from lib import util
+from string import ascii_uppercase, digits
+from random import choice
+
+__author__ = "Christophe Bedetti"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Christophe Bedetti", "Mathieu Desrosiers"]
 
 
 class Qa(object):
@@ -255,6 +260,13 @@ class Qa(object):
 
         volumeNumber = dwiData.shape[3]
 
+        if dwiData.shape[2] != maskNoiseData.shape[2]:
+            zSliceShape = dwiData.shape[:2] + (1,)
+            zMaskNoise = numpy.zeros(zSliceShape, dtype=maskNoiseData.dtype)
+            zCc = numpy.zeros(zSliceShape, dtype=maskCcData.dtype)
+            maskNoiseData = numpy.concatenate((maskNoiseData, zMaskNoise), axis=2)
+            maskCcData = numpy.concatenate((maskCcData, zCc), axis=2)
+
         #Corpus Callossum masking
         dwiDataMaskCc = numpy.empty(dwiData.shape)
         maskCcData4d = numpy.tile(maskCcData,(volumeNumber,1,1,1))
@@ -311,7 +323,7 @@ class Qa(object):
             if imageLink:
                 path, filename =  os.path.split(imageLink)
                 classType = 'large_view'
-                if any(_ in filename for _ in ['_translations', '_rotations', '_vectors', '_sigma']):
+                if any(_ in filename for _ in ['_translations', '_rotations', '_vectors', '_sigma', '_hist', '_snr']):
                     classType = 'small_view'
                 shutil.copyfile(imageLink, os.path.join(imagesDir, filename))
                 relativeLink = os.path.join(self.config.get('qa', 'images_dir'), filename)

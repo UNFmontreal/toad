@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+import numpy
 from core.generictask import GenericTask
 from lib import mriutil
 from lib.images import Images
-import numpy
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class TractographyMrtrix(GenericTask):
 

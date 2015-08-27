@@ -2,7 +2,10 @@
 from core.generictask import GenericTask
 from lib.images import Images
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class TensorMrtrix(GenericTask):
 

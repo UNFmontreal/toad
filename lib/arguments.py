@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
 import argparse
 import sys
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class Parser(argparse.ArgumentParser):
     """ override the default behavior of the error method of argument parser
