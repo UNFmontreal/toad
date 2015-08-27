@@ -3,7 +3,6 @@ import numpy
 import scipy, scipy.ndimage
 import nibabel
 import random
-from tvtk.api import tvtk
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import util, mriutil
@@ -121,38 +120,62 @@ class Parcellation(GenericTask):
                 verts[:] = nibabel.affines.apply_affine(surf2world, verts)
                 return verts, tris
 
-        def surf_fill2(vertices, polys, mat, shape):
-            from tvtk.common import is_old_pipeline
+        def surf_fill_vtk(vertices, polys, mat, shape):
+            
+            import vtk
+            from vtk.util import numpy_support
+
             voxverts = nibabel.affines.apply_affine(numpy.linalg.inv(mat), vertices)
+            points = vtk.vtkPoints()
+            points.SetNumberOfPoints(len(voxverts))
+            for i,pt in enumerate(voxverts):
+                points.InsertPoint(i, pt)
 
-            pd = tvtk.PolyData(points=voxverts, polys=polys)
+            tris  = vtk.vtkCellArray()
+            for vert in polys:
+                tris.InsertNextCell(len(vert))
+                for v in vert:
+                    tris.InsertCellPoint(v)
 
-            if is_old_pipeline():
-                whiteimg = tvtk.ImageData(dimensions = shape, scalar_type = 'unsigned_char')
+            pd = vtk.vtkPolyData()
+            pd.SetPoints(points)
+            pd.SetPolys(tris)
+            del points, tris
+            
+            whiteimg = vtk.vtkImageData()
+            whiteimg.SetDimensions(shape)
+            if vtk.VTK_MAJOR_VERSION <= 5:
+                whiteimg.SetScalarType(vtk.VTK_UNSIGNED_CHAR)
             else:
-                whiteimg = tvtk.ImageData(dimensions = shape)
-            whiteimg.point_data.scalars = numpy.ones(numpy.prod(shape), dtype=numpy.uint8)
-
-            pdtis = tvtk.PolyDataToImageStencil()
-            if is_old_pipeline():
-                pdtis.input = pd
+                info = vtk.vtkInformation()
+                whiteimg.SetPointDataActiveScalarInfo(info, vtk.VTK_UNSIGNED_CHAR, 1)
+                    
+            ones = numpy.ones(numpy.prod(shape), dtype=numpy.uint8)
+            whiteimg.GetPointData().SetScalars(numpy_support.numpy_to_vtk(ones))
+    
+            pdtis = vtk.vtkPolyDataToImageStencil()
+            if vtk.VTK_MAJOR_VERSION <= 5:
+                pdtis.SetInput(pd)
             else:
-                pdtis.set_input_data(pd)
-                                                                             
-            pdtis.output_whole_extent = whiteimg.extent
-            pdtis.update()
+                pdtis.SetInputData(pd)
 
-            imgstenc = tvtk.ImageStencil()
-            if is_old_pipeline():
-                imgstenc.input = whiteimg
-                imgstenc.stencil = pdtis.output
+            pdtis.SetOutputWholeExtent(whiteimg.GetExtent())
+            pdtis.Update()
+
+            imgstenc = vtk.vtkImageStencil()
+            if vtk.VTK_MAJOR_VERSION <= 5:
+                imgstenc.SetInput(whiteimg)
+                imgstenc.SetStencil(pdtis.GetOutput())
             else:
-                imgstenc.set_input_data(whiteimg)
-            imgstenc.set_stencil_data(pdtis.output)
-            imgstenc.background_value = 0
-            imgstenc.update()
-
-            data = imgstenc.output.point_data.scalars.to_array().reshape(shape[::-1]).transpose(2,1,0)
+                imgstenc.SetInputData(whiteimg)
+                imgstenc.SetStencilConnection(pdtis.GetOutputPort())
+            imgstenc.SetBackgroundValue(0)
+                
+            imgstenc.Update()
+    
+            data = numpy_support.vtk_to_numpy(
+                imgstenc.GetOutput().GetPointData().GetScalars()).reshape(shape).transpose(2,1,0)
+            del pd,voxverts,whiteimg,pdtis,imgstenc
             return data
 
 
@@ -162,7 +185,7 @@ class Parcellation(GenericTask):
                               rh_surf[1]+lh_surf[0].shape[0]])
             mat = parc.affine.dot(numpy.diag([1/float(subdiv)]*3+[1]))
             shape = numpy.asarray(parc.shape)*subdiv
-            fill = surf_fill2(vertices, tris, mat, shape)
+            fill = surf_fill_vtk(vertices, tris, mat, shape)
             pve = reduce(
                 lambda x,y: x+fill[y[0]::subdiv,y[1]::subdiv,y[2]::subdiv],
                 numpy.mgrid[:subdiv,:subdiv,:subdiv].reshape(3,-1).T,0

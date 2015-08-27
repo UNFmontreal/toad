@@ -260,13 +260,14 @@ def __manageVersions(logger, arguments):
     xmlVersions.appendChild(__createVersionTags(xmlDocument, "ImageMagick", version))
 
     for package in __pythonPackages:
+        module = __import__(package)
         if not "vtk" in package:
-            module = __import__(package)
             logger.info("{} is at version: {}".format(package, module.__version__))
             xmlVersions.appendChild(__createVersionTags(xmlDocument, package, module.__version__))
+
         elif arguments.isVTKAvailable:
-            logger.info("{} is at version: {}".format(package, module.__version__))
-            xmlVersions.appendChild(__createVersionTags(xmlDocument, package, module.__version__))
+            logger.info("{} is at version: {}".format("vtk", module.vtkVersion.GetVTKVersion()))
+            xmlVersions.appendChild(__createVersionTags(xmlDocument, package, module.vtkVersion.GetVTKVersion()))
 
     rootXml.appendChild(xmlVersions)
     return xmlDocument
