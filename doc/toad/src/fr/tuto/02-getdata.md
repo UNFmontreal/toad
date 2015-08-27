@@ -2,9 +2,9 @@
 
 ## Depuis la plateforme de l’UNF
 
-La solution la plus simple et pratique pour la récupération des données de neuroimagerie acquises à l’UNF est d’utiliser la plateforme mise à disposition sur le site internet de l’unité.
+La solution la plus simple et pratique pour la récupération des données de neuroimagerie acquises à l’unité de neuroimagerie fonctionnelle (UNF) est d’utiliser la plateforme mise à disposition sur le site internet de l’UNF.
 Cette plateforme s’occupe de la préparation des données et de leur compression pour un téléchargement et partage simplifié.
-Elle est accessible soit depuis **le site internet de l‘[unité de neuroimagerie](http://www.unf-montreal.ca)** (Menu `Services` puis `Récupération des données IRM`), soit directement depuis **la [plateforme de l’unité](https://unf-montreal.ca)**
+Elle est accessible soit depuis **le site internet de l‘[unité de neuroimagerie](http://www.unf-montreal.ca)** (Menu `Services` puis `Récupération des données IRM`), soit directement depuis **la [plateforme de téléchargement](https://unf-montreal.ca)**.
 
 ![Page d’accueil de l’UNF](../figs/unf_website_home.png)
 
@@ -33,7 +33,7 @@ Le serveur vous demandera alors le mot de passe de votre compte UNF.
 
 ![Connexion SSH à Stark](../figs/terminal_ssh.png)
 
-Une fois connecté, naviguer dans votre répertoire de données :
+Une fois connecté, naviguez  dans votre répertoire de données :
 
 ~~~bash
 # Remplacer 'labname' par le nom du laboratoire 
@@ -51,7 +51,7 @@ mkdir project_name
 cd project_name
 ~~~
 
-Télécharger les données préparées par l’UNF :
+Téléchargement des données préparées par l’UNF :
 
 1. Retourner sur la page internet du site internet de l’UNF (si vous avez fermé votre navigateur, le lien est disponible pendant 7 jours dans la section `Services/Récupération des données IRM`)
 2. Dans l’encadré en bas à gauche de la fenêtre, vous trouverez le lien (en bleu) des données préparées (le nom donné auparavant, comme 'unf-data.tar.gz'). **Copier le lien préparé par le système (clic droit, `Copier le lien`/`Copy link location`)**, dans notre exemple `http://downloads.criugm.qc.ca/username/unf-data.tar.gz`
@@ -111,15 +111,18 @@ Les analyses de diffusion nécessitent la présence d’au moins trois types de 
 
 D’autres données peuvent servir à TOAD pour le traitement des données :
 
-- **courants de Foucault** (Eddy Correction) : fichiers des gradients antérieur-postérieur et/ou postérieur-antérieur
-- **inhomogénéité du champ** (fieldmap) : ... [FIXME]
+- **correction des distortions géométriques/inhonomogénéité du champs**: 
+    - une image acquise selon la direction inverse d’acquisition de la DWI initiale,
+    - une image du fieldmap.
+- **dossier de sortie suite au traitement Freesurfer**
 
 ### Format des fichiers
 
 Pour des raisons de simplicité, TOAD accepte seulement quelques formats :
 
 - neuroimagerie : **format NIfTI** (.nii) 
-- encodage :  format regroupé **MRTRIX (.b)** ou séparé en valeurs et vecteurs **(.val et .vec)**.
+- fichier de gradients :  format regroupé **MRTRIX (.b)** ou séparé FSL (**.bval et .bvec**).
+
 
 ### Organisation des données
 
@@ -140,8 +143,8 @@ Nous vous recommandons de regrouper les données de la façon suivante :
     |- ...  
 </pre>
     
-***Attention :*** *dans ce cas de figure, il est de votre responsabilité de vous assurer les données ont été correctement converties et que le fichier d’encodage respecte bien les normes habituelles (strides...). 
-Si ces données proviennent d’un scanner Siemens (comme à l’UNF), et si vous disposez encore des données brutes, nous recommandons fortement de reconvertir les données avec le logiciel `unf2toad` [voir section Conversion des données](#conversion)
+***Attention :*** dans ce cas de figure, il est de votre responsabilité de vous assurer les données ont été correctement converties et que le fichier d’encodage respecte bien les normes habituelles (strides...). 
+Si ces données proviennent d’un scanner Siemens 3T Tim Trio (comme à l’UNF), et si vous disposez encore des données brutes, nous recommandons fortement de reconvertir les données avec le logiciel `unf2toad` [voir section Conversion des données](#conversion)
 
 
 ### Nomemclature des fichiers
@@ -149,7 +152,7 @@ Si ces données proviennent d’un scanner Siemens (comme à l’UNF), et si vou
 TOAD doit identifier quels fichiers correspondent à quels types d’images. 
 Pour ce faire, TOAD se base sur des préfixes des noms des fichiers qui doivent être communs pour chaque type de fichiers.
 Ainsi, toutes les images anatomiques devront commencer par un même préfixe, par défaut TOAD cherchera des fichiers commençant par `anat`.
-Pour les images de diffusion, TOAD cherchera des fichiers commençant par `dwi` et pour l’encodage à `b0`. 
+Pour les images de diffusion, TOAD cherchera des fichiers commençant par `dwi` et pour l’encodage des gradients un fichier ayant pour préfixe `dwi` et comme extension `.b` (ou `.bvec` et `.bval`). 
 Lorsque les données antérieur/postérieur ou postérieur/antérieur sont disponibles, TOAD cherchera comme préfixe `b0_ap` et `b0_pa`.
 
 Vous êtes libre d’utiliser n’importe quelle nomenclature du moment qu’elle soit indiquée dans le fichier de configuration `config.cfg`. 
