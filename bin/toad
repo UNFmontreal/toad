@@ -177,7 +177,6 @@ def __manageEnvironnement(logger, arguments):
 
     else:
         arguments.matlabIsAvailable = False if "mammouth" in serverName else True
-        arguments.isVTKAvailable = False if "magma" in serverName else True
         logger.info("Configuration for {} server found".format(os.environ.get('TOADSERVER')))
 
     return arguments
