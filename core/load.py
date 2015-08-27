@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
 import os
 
-__author__ = 'mathieu'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
 
 
 class Load(object):

@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import util
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class Results(GenericTask):
 
@@ -22,11 +26,14 @@ class Results(GenericTask):
            util.copy(image, self.workingDir,  self.buildName(self.subject.getName(), postfix, 'nii.gz'))
 
         for extension in ['bvals', 'bvecs', 'benc']:
-            util.copy(self.getUpsamplingImage('grad', None, extension), self.workingDir, self.buildName(self.subject.getName(), None, extension))
+            util.copy(self.getUpsamplingImage('grad', None, extension),
+                      self.workingDir,
+                      self.buildName(self.subject.getName(), None, extension))
 
         self.__copyMetrics(['mrtrix', 'dipy', 'fsl'], ['fa','ad','rd','md'], 'tensor')
         self.__copyMetrics(['mrtrix', 'dipy'], ['nufo','csd','gfa'], 'hardi')
         self.__finished = True
+
 
     def __copyMetrics(self, softwares, postfixs, method):
         for software in softwares:
@@ -34,6 +41,7 @@ class Results(GenericTask):
                 source = getattr(self, "get{}{}Image".format(method, software))("dwi", postfix)
                 target = self.buildName(self.subject.getName(), [software, postfix], 'nii.gz')
                 util.copy(source, self.workingDir, target)
+
 
     def meetRequirement(self):
         images = Images((self.getUpsamplingImage('dwi'), 'diffusion weighted'),
@@ -47,6 +55,6 @@ class Results(GenericTask):
         #@TODO Add all metrics dependencies
         return images
 
+
     def isDirty(self):
-        #@TODO implement that
         return not self.__finished

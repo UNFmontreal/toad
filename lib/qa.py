@@ -1,6 +1,4 @@
-from lib import util
-from string import ascii_uppercase, digits
-from random import choice
+# -*- coding: utf-8 -*-
 import os
 import shutil
 import functools
@@ -11,6 +9,13 @@ matplotlib.use('Agg')
 import matplotlib.pyplot
 import mpl_toolkits.mplot3d
 import dipy.segment.mask
+from lib import util
+from string import ascii_uppercase, digits
+from random import choice
+
+__author__ = "Christophe Bedetti"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Christophe Bedetti", "Mathieu Desrosiers"]
 
 
 class Qa(object):

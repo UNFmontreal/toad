@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
+import os
 from core.generictask import GenericTask
 from lib.images import Images
-import os
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class TensorFsl(GenericTask):
 

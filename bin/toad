@@ -12,15 +12,17 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from core import subjectmanager, logger
 from lib import util, arguments
 
-__author__ = "Mathieu Desrosiers, Arnaud Bore and Christophe Bedetti"
-__copyright__ = "Copyright 2014, The Toad Project"
-__credits__ = ["Mathieu Desrosiers", "Arnaud Bore", "Christophe Bedetti", "Guillaume Vallet"]
-__license__ = "GPL"
+
+__author__ = "Mathieu Desrosiers, Arnaud Bore, and Christophe Bedetti"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers", "Arnaud Bore", "Christophe Bedetti", "Guillaume Vallet", "Basile Pinsard"]
+__license__ = "GPL v2"
 __version__ = "1.0"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
-__status__ = "Beta"
-#@TODO add tvtk dependencies
+__status__ = "Production"
+
+
 __pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib',  'vtk']
 
 def __parseArguments():

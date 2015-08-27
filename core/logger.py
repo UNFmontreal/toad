@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
 import datetime
 import sys
 import os
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class Logger(object):
 
@@ -10,7 +14,7 @@ class Logger(object):
         """Provide a simple, custom, logging capability for the toad pipeline.
 
         The purpose of this class is to provide a simple, custom, logging capability for the toad
-        pipeline. Thanks to late nipype who were reset the configuration before each call.
+        pipeline. Thanks to late nipype who were resetting the configuration before each call.
 
         Args
             path: the folder where the log file should be created
