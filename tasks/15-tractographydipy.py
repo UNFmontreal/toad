@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from core.generictask import GenericTask
 """
 from lib.images import Images
@@ -14,6 +15,12 @@ matplotlib.use('Agg')
 
 __author__ = 'desmat'
 """
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
+
 class TractographyDipy(GenericTask):
 
     def __init__(self, subject):
@@ -91,9 +98,8 @@ class TractographyDipy(GenericTask):
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, anatBrainResample , self.buildName(tckProbRoi, None, 'trk'))
 
         #create PNG
-        if self.get('general', 'vtk_available'):
-            mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
-            mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
 
         """
     """

@@ -1,27 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import warnings
-warnings.simplefilter('ignore')
-
-from nibabel.nicom import dicomwrappers
 import ConfigParser
+import warnings
 import argparse
 import math
 import sys
 import os
+
+from nibabel.nicom import dicomwrappers
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from lib import arguments
 
+
 __author__ = "Mathieu Desrosiers"
-__copyright__ = "Copyright 2014, The Toad Project"
+__copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
-__license__ = "GPL"
+__license__ = "GPL v2"
 __version__ = "0.2"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
-__status__ = "Development"
+__status__ = "Prototype"
 
+
+warnings.simplefilter('ignore')
 
 def parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.

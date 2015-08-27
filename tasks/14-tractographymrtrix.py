@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+import numpy
 from core.generictask import GenericTask
 from lib import mriutil
 from lib.images import Images
-import numpy
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class TractographyMrtrix(GenericTask):
 
@@ -65,11 +68,10 @@ class TractographyMrtrix(GenericTask):
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
 
         #create PNG
-        if self.get('general', 'vtk_available'):
-            mriutil.createVtkPng(tckDetRoiTrk, norm, mask253)
-            mriutil.createVtkPng(tckProbRoiTrk, norm, mask253)
-            mriutil.createVtkPng(tckgenRoiTrk, norm, mask253)
-            mriutil.createVtkPng(tcksiftRoiTrk, norm, mask253)
+        mriutil.createVtkPng(tckDetRoiTrk, norm, mask253)
+        mriutil.createVtkPng(tckProbRoiTrk, norm, mask253)
+        mriutil.createVtkPng(tckgenRoiTrk, norm, mask253)
+        mriutil.createVtkPng(tcksiftRoiTrk, norm, mask253)
 
 
     def __tckedit(self, source, roi, target, downsample= "2"):

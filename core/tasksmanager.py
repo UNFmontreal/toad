@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
 import functools
 import importlib
 import inspect
 import glob
 import sys
 import os
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class TasksManager(object):
 

@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-from lib import mriutil, util
 import os
+from lib import mriutil, util
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class Validation(object):
 
@@ -16,6 +21,9 @@ class Validation(object):
             Optionnaly, B0_Anterior-Posterior and/or B0_Posterior-Anterior image
             Optionnal aparc_aseg, freesurfer_anat
             only one T1,dwi, .b per subject
+
+        the task name 00-backup is a hardcoded and cannot be changed
+
 
         Args:
             workingDir: absolute path to the subject directory

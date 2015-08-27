@@ -1,13 +1,16 @@
+# -*- coding: utf-8 -*-
 import os
+import random
 import numpy
 import scipy, scipy.ndimage
 import nibabel
-import random
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import util, mriutil
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers", "Basile Pinsard"]
 
 
 class Parcellation(GenericTask):

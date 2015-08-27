@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
 import ConfigParser
 import os
+
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
 
 
 class Config(object):
@@ -99,11 +104,6 @@ class Config(object):
             config.set('general', 'matlab_available', 'True')
         else:
             config.set('general', 'matlab_available', 'False')
-
-        if arguments.isVTKAvailable:
-            config.set('general', 'vtk_available', 'True')
-        else:
-            config.set('general', 'vtk_available', 'False')
 
         return config
 

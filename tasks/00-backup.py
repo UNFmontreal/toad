@@ -1,12 +1,15 @@
-import shutil
-import glob
+# -*- coding: utf-8 -*-
 import os
-
+import glob
+import shutil
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import mriutil
 
-__author__ = 'desmat'
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+
 
 class Backup(GenericTask):
 
