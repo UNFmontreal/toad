@@ -1,6 +1,6 @@
 from core.generictask import GenericTask
 from lib.images import Images
-from lib import mriutil, util
+from lib import mriutil
 import os
 import nibabel
 import numpy
@@ -56,6 +56,10 @@ class Snr(GenericTask):
             (histPng, '{} DWI image : noise histogram'.format(description)),
             ))
         return qaImages
+
+
+    def isIgnore(self):
+        return  self.get("ignore")
 
 
     def meetRequirement(self):
