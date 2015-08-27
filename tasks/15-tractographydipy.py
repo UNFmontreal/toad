@@ -98,9 +98,8 @@ class TractographyDipy(GenericTask):
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, anatBrainResample , self.buildName(tckProbRoi, None, 'trk'))
 
         #create PNG
-        if self.get('general', 'vtk_available'):
-            mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
-            mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tckDetRoiTrk, anatBrainResample, mask253)
+        mriutil.createVtkPng(tckProbRoiTrk, anatBrainResample, mask253)
 
         """
     """

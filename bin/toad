@@ -22,9 +22,7 @@ __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Production"
 
-
 __pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib',  'vtk']
-
 def __parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.
 
@@ -108,7 +106,6 @@ def __parseArguments():
     args = parser.parse_args()
     args.subject = None
     args.matlabIsAvailable = None
-    args.isVTKAvailable = None
 
     return args
 
@@ -134,15 +131,8 @@ def __manageEnvironnement(logger, arguments):
         for package in __pythonPackages:
             try:
                 imp.find_module(package)
-                if package == 'vtk':
-                    arguments.isVTKAvailable = True
             except ImportError:
-                if package == 'vtk':
-                    __pythonPackages.remove('vtk')
-                    logger.warning("VTK not found, Please install vtk correctly", pause=True)
-                    arguments.isVTKAvailable = False
-                else:
-                    logger.error("Cannot find package {}. Have you source unf-toad-config.sh?".format(package))
+                    logger.error("Cannot find or missing package {}. Have you source unf-toad-config.sh?".format(package))
         try:
             os.environ["FREESURFER_HOME"]
         except KeyError:
@@ -199,43 +189,37 @@ def __manageVersions(logger, arguments):
 
     toadXml = xmlDocument.createElement("toad")
     xmlDocument.appendChild(toadXml)
-
     rootXml = xmlDocument.createElement("application")
     logger.info("Toad is running at version: {}".format(__version__))
-    rootXml.setAttribute("version", __version__)
     rootXml.setAttribute("timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
     toadXml.appendChild(rootXml)
 
     logger.info("Computer identification: {}".format(" ".join(os.uname())))
-    xmlServer = xmlDocument.createElement("server")
     serverName = os.environ.get('TOADSERVER')
     if serverName is None:
         serverName = "local"
-    xmlServer.setAttribute("toadname", serverName)
-    xmlServer.setAttribute("hostname", socket.gethostname())
-    xmlText = xmlDocument.createTextNode(" ".join(os.uname()))
-    xmlServer.appendChild(xmlText)
-    rootXml.appendChild(xmlServer)
 
-    xmlVersions = xmlDocument.createElement('versions')
+    rootXml.appendChild(__createServerTags(xmlDocument, socket.gethostname(), serverName, " ".join(os.uname())))
+    rootXml.appendChild(__createSoftwareTags(xmlDocument, "Toad", __version__))
+
     logger.info("Python is running at version: {}".format(sys.version[0:6]))
     cmd = "fast"
     command, output, results = util.launchCommand(cmd)
     version = [line.replace("Part of FSL", "") for line in results.splitlines() if "build" in line].pop()
     logger.info("FSL is running at version: {}".format(version))
-    xmlVersions.appendChild(__createVersionTags(xmlDocument, "FSL", version))
+    rootXml.appendChild(__createSoftwareTags(xmlDocument, "FSL", version))
 
     cmd = "cat  $FREESURFER_HOME/build-stamp.txt"
     command, version, errors = util.launchCommand(cmd)
     version = version.strip()
     logger.info("Freesurfer is running at version: {}".format(version))
-    xmlVersions.appendChild(__createVersionTags(xmlDocument, "Freesurfer", version))
+    rootXml.appendChild(__createSoftwareTags(xmlDocument, "Freesurfer", version))
 
     cmd = "tckgen -version"
     command, results, errors = util.launchCommand(cmd)
     version = [line.replace("tckgen", "").strip("== ") for line in results.splitlines() if "tckgen" in line].pop()
     logger.info("Mrtrix is running at version: {}".format(version))
-    xmlVersions.appendChild(__createVersionTags(xmlDocument, "Mrtrix", version))
+    rootXml.appendChild(__createSoftwareTags(xmlDocument, "Mrtrix", version))
 
 
     if arguments.matlabIsAvailable:
@@ -247,7 +231,7 @@ def __manageVersions(logger, arguments):
             if "< M A T L A B (R) >" in token:
                 version = messages[index+2].strip()
                 logger.info("Matlab is running at version: {}".format(version))
-                xmlVersions.appendChild(__createVersionTags(xmlDocument, "Matlab", version))
+                rootXml.appendChild(__createSoftwareTags(xmlDocument, "Matlab", version))
                 found = True
                 break
         if not found:
@@ -258,29 +242,38 @@ def __manageVersions(logger, arguments):
     version = [line for line in results.splitlines() if "Version:" in line].pop().split()
     version = " ".join(version[2:6])
     logger.info("ImageMagick is running at version: {}".format(version))
-    xmlVersions.appendChild(__createVersionTags(xmlDocument, "ImageMagick", version))
+    rootXml.appendChild(__createSoftwareTags(xmlDocument, "ImageMagick", version))
 
     for package in __pythonPackages:
         module = __import__(package)
         if not "vtk" in package:
             logger.info("{} is at version: {}".format(package, module.__version__))
-            xmlVersions.appendChild(__createVersionTags(xmlDocument, package, module.__version__))
+            rootXml.appendChild(__createSoftwareTags(xmlDocument, package, module.__version__))
 
-        elif arguments.isVTKAvailable:
+        else:
             logger.info("{} is at version: {}".format("vtk", module.vtkVersion.GetVTKVersion()))
-            xmlVersions.appendChild(__createVersionTags(xmlDocument, package, module.vtkVersion.GetVTKVersion()))
-
-    rootXml.appendChild(xmlVersions)
+            rootXml.appendChild(__createSoftwareTags(xmlDocument, package, module.vtkVersion.GetVTKVersion()))
     return xmlDocument
 
 
-def __createVersionTags(xmlDocument, software, description):
-    xmlVersion = xmlDocument.createElement('version')
-    xmlVersion.setAttribute("software", software)
-    xmlText = xmlDocument.createTextNode(description)
-    xmlVersion.appendChild(xmlText)
-    return xmlVersion
+def __createXmlTag(xmlDocument, name, text):
+    xmlTag = xmlDocument.createElement(name)
+    xmlText = xmlDocument.createTextNode(text)
+    xmlTag.appendChild(xmlText)
+    return xmlTag
 
+def __createSoftwareTags(xmlDocument, name, version):
+    xmlSoftware = xmlDocument.createElement('software')
+    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "name", name))
+    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "version", version))
+    return xmlSoftware
+
+def __createServerTags(xmlDocument, hostname, toadname, uname):
+    xmlSoftware = xmlDocument.createElement('software')
+    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "hostname", hostname))
+    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "toadname", toadname))
+    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "uname", uname))
+    return xmlSoftware
 
 if __name__ == '__main__':
 

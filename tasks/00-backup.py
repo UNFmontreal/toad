@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import shutil
-import glob
 import os
-
+import glob
+import shutil
 from core.generictask import GenericTask
 from lib.images import Images
 from lib import mriutil

@@ -105,11 +105,6 @@ class Config(object):
         else:
             config.set('general', 'matlab_available', 'False')
 
-        if arguments.isVTKAvailable:
-            config.set('general', 'vtk_available', 'True')
-        else:
-            config.set('general', 'vtk_available', 'False')
-
         return config
 
 
