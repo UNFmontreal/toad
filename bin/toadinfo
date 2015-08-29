@@ -7,9 +7,8 @@ import math
 import sys
 import os
 
-from nibabel.nicom import dicomwrappers
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from lib import arguments
+from lib import arguments, util
 
 
 __author__ = "Mathieu Desrosiers"
@@ -118,14 +117,12 @@ def __returnPhaseEncodingDirection(line):
     return 1
 
 
-def __getEchoSpacing(source, epiFactor, patFactor = 1, phaseResolution = 1, phaseOversampling = 1):
-
-    header=dicomwrappers.wrapper_from_file(source, force=True)
+def __getEchoSpacing(source, header, epiFactor, patFactor = 1, phaseResolution = 1, phaseOversampling = 1):
 
     try:
-        bpppe = header.csa_header['tags']['BandwidthPerPixelPhaseEncode']['items'][0]
-        echoSpacing = 1/(bpppe* epiFactor) *1000 *patFactor *phaseResolution *phaseOversampling
-        echoTime = header.get('EchoTime')
+        bpppe = float(header['0019,1028'])
+        echoSpacing = 1/(bpppe* epiFactor) *1000.0 *patFactor *phaseResolution *phaseOversampling
+        echoTime = header['EchoTime']
 
     except AttributeError:
         print "Cannot read csa header from ", source
@@ -133,6 +130,9 @@ def __getEchoSpacing(source, epiFactor, patFactor = 1, phaseResolution = 1, phas
 
         print "Some field(s) cannot be found in the header"
     except IndexError:
+        return (None,None)
+
+    except TypeError:
         return (None,None)
 
     return echoSpacing, echoTime
@@ -162,11 +162,39 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
        config.write(w)
 
 
+def find_between( s, first, last ):
+    try:
+        start = s.index( first ) + len( first )
+        end = s.index( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""
+
+
+def __wrapDcminfo(source):
+    header = {}
+    cmd = "dcminfo -all {}".format(source)
+    output = util.launchCommand(cmd)
+    if len(output) > 1:
+        for line in output[1].split('\n'):
+            if line.startswith("[DCM]"):
+                line = line.replace('[DCM]', "")
+                tokens = line.split()
+                if 'unknown' in tokens[5]:
+                    key = "{},{}".format(tokens[0], tokens[1])
+                else :
+                    key = tokens[5]
+                if "[" in line and "]" in line:
+                    header[key] = find_between(line, "[", "]").strip()
+    return header
+
 if __name__ == '__main__':
 
 
     #parse arguments provide in command line
     arguments = parseArguments()
+
+    header = __wrapDcminfo(arguments.dcmFile)
 
     #found information into the ASCCONV tags
     phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
@@ -174,7 +202,7 @@ if __name__ == '__main__':
     epiFactor = __getEpiFactor(arguments.dcmFile)
     phaseResolution = __getPhaseResolution(arguments.dcmFile)
     phaseOversampling = __getPhaseOversampling(arguments.dcmFile)
-    echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, epiFactor, patFactor, phaseResolution, phaseOversampling)
+    echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, header, epiFactor, patFactor, phaseResolution, phaseOversampling)
 
     if arguments.config and arguments.fieldmap:
         writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)
