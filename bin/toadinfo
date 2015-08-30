@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import ConfigParser
-import warnings
 import argparse
 import math
 import sys
@@ -15,13 +14,10 @@ __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 __license__ = "GPL v2"
-__version__ = "0.2"
+__version__ = "0.3.1"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Prototype"
-
-
-warnings.simplefilter('ignore')
 
 def parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.
@@ -49,7 +45,7 @@ def __getPhaseEncodingDirection(source):
         for line in f.readlines():
             if "sSliceArray.asSlice" in line and ".dInPlaneRot" in line:
                 return __returnPhaseEncodingDirection(line)
-            return 1
+    return 1
 
 
 def __getPatFactor(source):
@@ -103,10 +99,10 @@ def __returnPhaseEncodingDirection(line):
         return 1
 
     if value < tolerance and value > -tolerance:
-       return 1  #A>>P
+       return 1  #between -0.2 and 0.2  A>>P
 
     if (value > math.pi - tolerance) or (value < tolerance - math.pi):
-        return 0  #P>>A
+        return 0  #greater than  2.94  or smaller than -2.94  #P>>A
 
     if (value > (math.pi/2) - tolerance) and (value < (math.pi/2)+tolerance):
         return 2  #R>>L
@@ -129,10 +125,8 @@ def __getEchoSpacing(source, header, epiFactor, patFactor = 1, phaseResolution =
         return (None,None)
 
         print "Some field(s) cannot be found in the header"
-    except IndexError:
-        return (None,None)
 
-    except TypeError:
+    except (KeyError, IndexError, TypeError):
         return (None,None)
 
     return echoSpacing, echoTime
@@ -203,7 +197,6 @@ if __name__ == '__main__':
     phaseResolution = __getPhaseResolution(arguments.dcmFile)
     phaseOversampling = __getPhaseOversampling(arguments.dcmFile)
     echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, header, epiFactor, patFactor, phaseResolution, phaseOversampling)
-
     if arguments.config and arguments.fieldmap:
         writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)
     elif arguments.config and not arguments.fieldmap:

@@ -18,7 +18,7 @@ __author__ = "Guillaume Vallet, Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Guillaume Vallet", "Mathieu Desrosiers"]
 __license__ = "GNU v2"
-__version__ = "1.3"
+__version__ = "1.3.1"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Development"
@@ -294,6 +294,11 @@ class Unftoad(object):
             numberOfDicoms += len(dicoms)
             dicoms.extend(glob.glob("{}/*/*/*.dcm".format(rootDirectory)))
             dicoms = sorted(dicoms)
+
+            if not dicoms:
+                print "cannot find any dicom file"
+                sys.exit()
+
             sequences = []
             for dicom in dicoms:
                 sequence = Sequence()
