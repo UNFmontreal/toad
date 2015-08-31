@@ -1,14 +1,14 @@
 # TOolkit of Analyse of Diffusion imaging (TOAD)
 
 Welcome to the English version of the documentation of [TOAD](http://unf-montreal.ca/toad/).
-Sources files as well as installation’s instructionLes are available on [Github](https://github.com/UNFmontreal/toad).
+Sources files as well as installation’s instructions are available on [Github](https://github.com/UNFmontreal/toad).
 
-TOAD offers a pipeline to automatically preprocess diffusion imaging data (DTI).
+TOAD offers a pipeline to automatically preprocess diffusion imaging data (DWI/DTI).
 The different steps allow to:
 
 1. Clean the data
 2. Prepare the different masks to be used (white matter, grey matter...)
-3. Extract the main fibers
+3. Extract the main tracts
 4. Extract the main metrics (FA, MD...)
 
 **Please, read the [*License agreement*](about/license.md) section to know which conditions you are supposed to meet to use TOAD!**
@@ -20,7 +20,7 @@ The tutorial is also available as a PDF file:
 - [Tutorial (in english)](../../Toad_Tuto_en.pdf)
 - [Tutorial (in french)](../../Toad_Tuto_fr.pdf)
 
-We also recommand to **visit [this page](tuto/00-refs.md)** to better understand which analyses are used in TOAD.
+We also recommend to **visit [this page](tuto/00-refs.md)** to better understand which analyses are used in TOAD.
 
 
 ## The team
@@ -41,7 +41,7 @@ We also recommand to **visit [this page](tuto/00-refs.md)** to better understand
 
 <img src="figs/BPinsard.jpg" alt="Basile Pinsard" style="width: 50px;"/> [**Basile Pinsard**](mailto:basile.pinsard@gmail.com): developer and scientific advisor
 
-<img src="figs/AHanganu.jpg" alt="Alexandru Hanganu" style="width: 50px;"/> [**Alexandru Hanganu**](mailto:julien.doyon@umontreal.ca): scientific advisor
+<img src="figs/AHanganu.jpg" alt="Alexandru Hanganu" style="width: 50px;"/> [**Alexandru Hanganu**](mailto:hanganu.alexandru@gmail.com): scientific advisor
 
 
 ## Word from our director

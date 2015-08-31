@@ -20,38 +20,41 @@ Plusieurs participants peuvent être traités en parallèle sur les serveurs sel
 
 ### Traitement en cours
 
-Sur les serveurs de l’UNF, il est possible de savoir combien de sujets sont actuellement traités avec la commande `qstat`.
+Sur les serveurs de l’UNF, il est possible de savoir combien de sujets sont actuellement traités avec la commande `qstat -f`.
 
 Si vos données sont toujours en cours de traitement, vous devriez voir apparaître votre nom d’utilisateur associé au nom du sujet traité et au logiciel en cours d’utilisation (comme FreeSurfer). 
+
+En cours de traitement, vous pouvez visualiser le contrôle qualité des différentes étpaes au fur et à mesure de leur complétion en ouvrant le fichier `00-qa/index.html`. Voir aussi la section [00-QA](tasks/#00-qa).
 
 ### Post traitement
 
 Une fois le travail terminé, vous trouverez un ensemble de nouveaux dossiers dans chacun des répertoires sujets.
-*Pour rappel*, ce dossier est par défaut inclus dans le dossier initial de votre projet sous le nom de `toad_data` ou de celui que vous lui avez donné lors de la conversion des données par `unf2toad`.
+*Pour rappel*, ce dossier est par défaut inclus dans le dossier initial de votre projet sous le nom de `toad_data` ou de celui que vous lui avez spécifié lors de la conversion des données par `unf2toad`.
  
 Ces nouveaux dossiers contiennent l’ensemble des données, masques, et images produits par TOAD lors du traitement des données de diffusion.
 L’ensemble des dossiers pour chaque sujet devrait ressembler à peu près au tableau ci-dessous :
 
-|**Nom du dossier** | **Type de données**                                   |
-|-------------------|-------------------------------------------------------|
-|00-backup          | Données originales (Nifti)                            |
-|00-qa              | Quality Assessment - pages HTML de synthèse           |
-|01-preparation     | Réorientation des images si nécessaire                |
-|02-parcellation    | Parseg et Brodmann, gauche/droite (Freesurfer)        |
-|03-correction      | Correction mouvement, inhomgénéité du champs, etc.    |
-|04-denoising       | Débruitage des images                                 |
-|05-preprocessing   |                                                       |
-|06-registration    | Registration T1/DWI                                   |
-|07-masking         | Création des masques                                  |
-|08-snr             | Calcul du rapport signal sur bruit                    |
-|09-tensorfsl       | Calcul des tenseurs DTI (FSL)                         |
-|10-tensormrtrix    | Calcul des tenseurs DTI (MRTRIX)                      |
-|11-tensordipy      | Calcul des tenseurs DTI (Dipy)                        |
-|12-hardimrtrix     | Calcul du modèle HARDI (MRTRIX)                       |
-|13-hardidipy       | Calcul du modèle HARDI (Dipy)                         |
-|16-results         |                                                       |
-|99-logs            | Fichiers logs et erreurs                              |
-|-------------------|-------------------------------------------------------|      
+|**Nom du dossier**     | **Type de données**                                   |
+|-----------------------|-------------------------------------------------------|
+|00-backup              | Données originales (Nifti)                            |
+|00-qa                  | Quality Assessment - pages HTML de synthèse           |
+|01-preparation         | Réorientation des images si nécessaire                |
+|02-parcellation        | Parseg et Brodmann, gauche/droite (Freesurfer)        |
+|03-correction          | Correction mouvement, inhomgénéité du champs, etc.    |
+|04-denoising           | Débruitage des images                                 |
+|05-preprocessing       |                                                       |
+|06-registration        | Registration T1/DWI                                   |
+|07-masking             | Création des masques                                  |
+|08-snr                 | Calcul du rapport signal sur bruit                    |
+|09-tensorfsl           | Reconstruction des tenseurs (FSL)                     |
+|10-tensormrtrix        | Reconstruction des tenseurs (MRTRIX)                  |
+|11-tensordipy          | Reconstruction des tenseurs (Dipy)                    |
+|12-hardimrtrix         | Reconstruction HARDI (MRTRIX)                         |
+|13-hardidipy           | Reconstruction HARDI (Dipy)                           |
+|14-tractographymrtrix  | Reconstruction des faisceaux (MRTRIX)                 |
+|15-tractographydipy    | Reconstruction des faisceaux (Dipy)                   |
+|16-results             |                                                       |
+|99-logs                | Fichiers logs et erreurs                              |
 
 *Note :* Il est possible que cet arbre change avec les versions de TOAD. 
 De même, le choix de certains paramètres au lancement de TOAD ou l’absence de certains type de fichiers (comme les B0 AP/PA) font que certaines tâches ne seront pas lancées. 
