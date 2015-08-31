@@ -182,42 +182,50 @@ def __wrapDcminfo(source):
                     header[key] = find_between(line, "[", "]").strip()
     return header
 
+
 if __name__ == '__main__':
 
 
     #parse arguments provide in command line
     arguments = parseArguments()
 
-    header = __wrapDcminfo(arguments.dcmFile)
 
-    #found information into the ASCCONV tags
-    phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
-    patFactor = __getPatFactor(arguments.dcmFile)
-    epiFactor = __getEpiFactor(arguments.dcmFile)
-    phaseResolution = __getPhaseResolution(arguments.dcmFile)
-    phaseOversampling = __getPhaseOversampling(arguments.dcmFile)
-    echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, header, epiFactor, patFactor, phaseResolution, phaseOversampling)
-    if arguments.config and arguments.fieldmap:
-        writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)
-    elif arguments.config and not arguments.fieldmap:
-        writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing)
-    if phaseEncDir is not None:
-        if phaseEncDir==0:
-            print "\tPhase encoding: {}, P>>A".format(phaseEncDir)
-        elif phaseEncDir==1:
-            print "\tPhase encoding: {}, A>>P".format(phaseEncDir)
-        elif phaseEncDir==2:
-            print "\tPhase encoding: {}, R>>L".format(phaseEncDir)
-        elif phaseEncDir==3:
-            print "\tPhase encoding: {}, L>>R".format(phaseEncDir)
-        else:
-            print "Phase encoding:", phaseEncDir
+    try:
 
-    if epiFactor is not None:
-        print "\tEPIFactor: ", epiFactor
+        header = __wrapDcminfo(arguments.dcmFile)
 
-    if echoSpacing is not None:
-        print "\tEchoSpacing: ", echoSpacing, " ms"
+        #found information into the ASCCONV tags
+        phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
+        patFactor = __getPatFactor(arguments.dcmFile)
+        epiFactor = __getEpiFactor(arguments.dcmFile)
+        phaseResolution = __getPhaseResolution(arguments.dcmFile)
+        phaseOversampling = __getPhaseOversampling(arguments.dcmFile)
+        echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, header, epiFactor, patFactor, phaseResolution, phaseOversampling)
+        if arguments.config and arguments.fieldmap:
+            writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)
+        elif arguments.config and not arguments.fieldmap:
+            writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing)
+        if phaseEncDir is not None:
+            if phaseEncDir==0:
+                print "\tPhase encoding: {}, P>>A".format(phaseEncDir)
+            elif phaseEncDir==1:
+                print "\tPhase encoding: {}, A>>P".format(phaseEncDir)
+            elif phaseEncDir==2:
+                print "\tPhase encoding: {}, R>>L".format(phaseEncDir)
+            elif phaseEncDir==3:
+                print "\tPhase encoding: {}, L>>R".format(phaseEncDir)
+            else:
+                print "Phase encoding:", phaseEncDir
 
-    if echoTime is not None and arguments.fieldmap:
-        print "\tEchoTime: ", echoTime, " ms"
+        if epiFactor is not None:
+            print "\tEPIFactor: ", epiFactor
+
+        if echoSpacing is not None:
+            print "\tEchoSpacing: ", echoSpacing, " ms"
+
+        if echoTime is not None and arguments.fieldmap:
+            print "\tEchoTime: ", echoTime, " ms"
+
+    except OSError:
+        print "Error: unable to find dcminfo from mrtrix3. Have you source unf-toad-config.sh?"
+        sys.exit()

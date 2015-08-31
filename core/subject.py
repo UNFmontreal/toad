@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import shutil
 import os
+import xml.dom.minidom
 from xml.parsers.expat import ExpatError
-from xml.dom import minidom
 
 from core.validation import Validation
 from core.logger import Logger
@@ -108,7 +108,7 @@ class Subject(Logger, Lock, Validation):
         return self.__subjectDir
 
 
-    def createXmlSoftwareVersionConfig(self, xmlDocument):
+    def createXmlSoftwareVersionConfig(self, xmlData):
         """ Write software versions into a source filename
 
         Args:
@@ -118,21 +118,27 @@ class Subject(Logger, Lock, Validation):
         Returns:
             True if the operation is a success, False otherwise
         """
-        versionFile = os.path.join(self.getLogDir(), self.__config.get('general', 'versions_file_name'))
-        if os.path.exists(versionFile):
+        file = os.path.join(self.getLogDir(), self.__config.get('general', 'versions_file_name'))
+        if os.path.exists(file):
+            xmlDocument = xml.dom.minidom.Document()
             try:
-                xml = minidom.parse(versionFile)
-                if len(xml.getElementsByTagName("toad")) == 1:
-                    if len(xmlDocument.getElementsByTagName("application")) != 1:
+                xmlFromFile = xml.dom.minidom.parse(file)
+                if len(xmlFromFile.getElementsByTagName("toad")) == 1:
+                    if len(xmlData.getElementsByTagName("application")) != 1:
                         self.warning("none or too many tag name application into the software version structure")
                         return False
-                    xmlToad = xml.getElementsByTagName("toad")[0]
-                    xmlDocumentToad = xmlDocument.getElementsByTagName("application")[0]
-                    xmlToad.appendChild(xmlDocumentToad)
-                    xmlDocument = xmlToad
-            except ExpatError:
-                self.warning('Cannot understand {} xml structure, I will overwrite it?'.format(versionFile))
 
-        with open(versionFile, 'w') as w:
+                    xmlToadTagFromFile = xmlFromFile.getElementsByTagName("toad")[0]
+                    xmlApplicationTagFromData = xmlData.getElementsByTagName("application")[0]
+                    xmlToadTagFromFile.appendChild(xmlApplicationTagFromData)
+                    xmlDocument.appendChild(xmlToadTagFromFile)
+
+            except ExpatError:
+                self.warning('Cannot understand {} xml structure, I will overwrite it?'.format(file))
+        else:
+            xmlDocument = xmlData
+
+        with open(file, 'w') as w:
             xmlDocument.writexml(w)
+
         return True
