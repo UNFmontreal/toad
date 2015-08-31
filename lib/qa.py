@@ -312,8 +312,9 @@ class Qa(object):
         Args:
            images : an Images object
         """
-        mainTemplate = os.path.join(self.qaDir, self.get('qa', 'subject_template'))
+        mainTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.main.tpl')
         tableTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.table.tpl')
+        subjectName = self.subject.getName()
         taskInfo = images.getInformation()
         imagesDir = os.path.join(self.qaDir, self.config.get('qa', 'images_dir'))
         tablesCode = ''
@@ -337,7 +338,11 @@ class Qa(object):
                 tags = {'imageLink':'', 'legend':legend}
                 tablesCode += self.parseTemplate(tags, tableTemplate)
 
-        tags = {'taskInfo':taskInfo,'parseHtmlTables':tablesCode}
+        tags = {
+            'subject':subjectName,
+            'taskInfo':taskInfo,
+            'parseHtmlTables':tablesCode,
+            }
         htmlCode = self.parseTemplate(tags, mainTemplate)
 
         htmlFile = os.path.join(self.qaDir,'{}.html'.format(self.getName()))
