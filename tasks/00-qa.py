@@ -12,7 +12,7 @@ __credits__ = ["Christophe Bedetti","Mathieu Desrosiers"]
 class QA(GenericTask):
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject)
+        GenericTask.__init__(self, subject, 'backup')
         self.setCleanupBeforeImplement(False)
         self.__subject = subject
 
@@ -24,46 +24,24 @@ class QA(GenericTask):
         if not os.path.exists(imagesDir):
             os.makedirs(imagesDir)
 
-        #Create menu links only for tasks with implemented QA
-        menuHtml = ""
-        menuLinkTemplate = "\n<li><a id=\"{0}\" href=\"{0}.html\">{0}</a></li>"
-        qaTasksList = []
+        #Copy style.css
+        styleTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.style.tpl')
+        util.copy(styleTemplate, self.workingDir, 'style.css')
 
-        for task in sorted(self.tasksAsReferences):
-            if "qaSupplier" in dir(task):
-                qaTasksList.append(task.getName())
-
-        for taskName in qaTasksList:
-            menuHtml += menuLinkTemplate.format(taskName)
-
-        #Create temporary html for each task
-        message = "Task is being processed. Refresh to check completion."
-        for taskName in qaTasksList:
-            htmlTaskFileName = "{}.html".format(taskName)
-            if not os.path.exists(htmlTaskFileName):
-                tags = {
-                    'subject':self.__subject.getName(),
-                    'menuHtml':menuHtml,
-                    'taskInfo':'',
-                    'parseHtmlTables':message,
-                    }
-                htmlCode = self.parseTemplate(tags, mainTemplate)
-                util.createScript(htmlTaskFileName, htmlCode)
-
-        #Create template specific to the subject
-        tags = {
-            'subject':self.__subject.getName(),
-            'menuHtml':menuHtml,
-            }
-        htmlCode = self.parseTemplate(tags, mainTemplate)
-        util.createScript(self.get('qa', 'subject_template'), htmlCode)
+        #Create menu.html only for tasks with implemented QA
+        menuTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.menu.tpl')
+        util.copy(menuTemplate, self.workingDir, 'menu.html')
 
         #Create index.html
+        listDir = os.listdir(self.backupDir)
+        listDirHtml = 'Input files:<ul>'
+        for f in listDir:
+            listDirHtml += '<li>{}</li>\n'.format(f)
+        listDirHtml += '</ul>'
         tags = {
             'subject':self.__subject.getName(),
-            'menuHtml':menuHtml,
             'taskInfo':'',
-            'parseHtmlTables':'',
+            'parseHtmlTables':listDirHtml,
             }
         htmlCode = self.parseTemplate(tags, mainTemplate)
         util.createScript('index.html', htmlCode)
@@ -80,4 +58,4 @@ class QA(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        return Images((os.path.join(self.workingDir, 'index.html'), 'QA index.html'))
+        return True#Images((os.path.join(self.workingDir, 'index.html'), 'QA index.html'))
