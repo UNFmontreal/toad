@@ -143,9 +143,9 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
 
     if phaseEncDir is not None:
         if phaseEncDir == 0:
-            phaseEncDirText = "0  # A>>P"
+            phaseEncDirText = "0  # P>>A"
         elif  phaseEncDir == 1:
-            phaseEncDirText = "1  # P>>A"
+            phaseEncDirText = "1  # A>>P"
         elif  phaseEncDir == 2:
             phaseEncDirText = "2  # R>>L"
         elif  phaseEncDir == 3:
