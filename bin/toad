@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from xml.dom import minidom
 import datetime
 import argparse
 import socket
 import imp
 import sys
+import xml
 import os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
@@ -23,6 +23,9 @@ __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Production"
 
 __pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib',  'vtk']
+__pythonPackages = ['numpy', 'scipy', 'nibabel', 'dipy', 'matplotlib']
+
+
 def __parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.
 
@@ -185,7 +188,7 @@ def __manageVersions(logger, arguments):
         A minidom document which contain any usefull information about software versions
 
     """
-    xmlDocument = minidom.Document()
+    xmlDocument = xml.dom.minidom.Document()
 
     toadXml = xmlDocument.createElement("toad")
     xmlDocument.appendChild(toadXml)
@@ -274,6 +277,7 @@ def __createServerTags(xmlDocument, hostname, toadname, uname):
     xmlSoftware.appendChild(__createXmlTag(xmlDocument, "toadname", toadname))
     xmlSoftware.appendChild(__createXmlTag(xmlDocument, "uname", uname))
     return xmlSoftware
+
 
 if __name__ == '__main__':
 

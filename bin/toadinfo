@@ -1,28 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import ConfigParser
-import warnings
 import argparse
 import math
 import sys
 import os
 
-from nibabel.nicom import dicomwrappers
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from lib import arguments
+from lib import arguments, util
 
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 __license__ = "GPL v2"
-__version__ = "0.2"
+__version__ = "0.3.1"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Prototype"
-
-
-warnings.simplefilter('ignore')
 
 def parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.
@@ -50,7 +45,7 @@ def __getPhaseEncodingDirection(source):
         for line in f.readlines():
             if "sSliceArray.asSlice" in line and ".dInPlaneRot" in line:
                 return __returnPhaseEncodingDirection(line)
-            return 1
+    return 1
 
 
 def __getPatFactor(source):
@@ -104,10 +99,10 @@ def __returnPhaseEncodingDirection(line):
         return 1
 
     if value < tolerance and value > -tolerance:
-       return 1  #A>>P
+       return 1  #between -0.2 and 0.2  A>>P
 
     if (value > math.pi - tolerance) or (value < tolerance - math.pi):
-        return 0  #P>>A
+        return 0  #greater than  2.94  or smaller than -2.94  #P>>A
 
     if (value > (math.pi/2) - tolerance) and (value < (math.pi/2)+tolerance):
         return 2  #R>>L
@@ -118,21 +113,20 @@ def __returnPhaseEncodingDirection(line):
     return 1
 
 
-def __getEchoSpacing(source, epiFactor, patFactor = 1, phaseResolution = 1, phaseOversampling = 1):
-
-    header=dicomwrappers.wrapper_from_file(source, force=True)
+def __getEchoSpacing(source, header, epiFactor, patFactor = 1, phaseResolution = 1, phaseOversampling = 1):
 
     try:
-        bpppe = header.csa_header['tags']['BandwidthPerPixelPhaseEncode']['items'][0]
-        echoSpacing = 1/(bpppe* epiFactor) *1000 *patFactor *phaseResolution *phaseOversampling
-        echoTime = header.get('EchoTime')
+        bpppe = float(header['0019,1028'])
+        echoSpacing = 1/(bpppe* epiFactor) *1000.0 *patFactor *phaseResolution *phaseOversampling
+        echoTime = header['EchoTime']
 
     except AttributeError:
         print "Cannot read csa header from ", source
         return (None,None)
 
         print "Some field(s) cannot be found in the header"
-    except IndexError:
+
+    except (KeyError, IndexError, TypeError):
         return (None,None)
 
     return echoSpacing, echoTime
@@ -162,41 +156,76 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
        config.write(w)
 
 
+def find_between( s, first, last ):
+    try:
+        start = s.index( first ) + len( first )
+        end = s.index( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""
+
+
+def __wrapDcminfo(source):
+    header = {}
+    cmd = "dcminfo -all {}".format(source)
+    output = util.launchCommand(cmd)
+    if len(output) > 1:
+        for line in output[1].split('\n'):
+            if line.startswith("[DCM]"):
+                line = line.replace('[DCM]', "")
+                tokens = line.split()
+                if 'unknown' in tokens[5]:
+                    key = "{},{}".format(tokens[0], tokens[1])
+                else :
+                    key = tokens[5]
+                if "[" in line and "]" in line:
+                    header[key] = find_between(line, "[", "]").strip()
+    return header
+
+
 if __name__ == '__main__':
 
 
     #parse arguments provide in command line
     arguments = parseArguments()
 
-    #found information into the ASCCONV tags
-    phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
-    patFactor = __getPatFactor(arguments.dcmFile)
-    epiFactor = __getEpiFactor(arguments.dcmFile)
-    phaseResolution = __getPhaseResolution(arguments.dcmFile)
-    phaseOversampling = __getPhaseOversampling(arguments.dcmFile)
-    echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, epiFactor, patFactor, phaseResolution, phaseOversampling)
 
-    if arguments.config and arguments.fieldmap:
-        writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)
-    elif arguments.config and not arguments.fieldmap:
-        writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing)
-    if phaseEncDir is not None:
-        if phaseEncDir==0:
-            print "\tPhase encoding: {}, P>>A".format(phaseEncDir)
-        elif phaseEncDir==1:
-            print "\tPhase encoding: {}, A>>P".format(phaseEncDir)
-        elif phaseEncDir==2:
-            print "\tPhase encoding: {}, R>>L".format(phaseEncDir)
-        elif phaseEncDir==3:
-            print "\tPhase encoding: {}, L>>R".format(phaseEncDir)
-        else:
-            print "Phase encoding:", phaseEncDir
+    try:
 
-    if epiFactor is not None:
-        print "\tEPIFactor: ", epiFactor
+        header = __wrapDcminfo(arguments.dcmFile)
 
-    if echoSpacing is not None:
-        print "\tEchoSpacing: ", echoSpacing, " ms"
+        #found information into the ASCCONV tags
+        phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
+        patFactor = __getPatFactor(arguments.dcmFile)
+        epiFactor = __getEpiFactor(arguments.dcmFile)
+        phaseResolution = __getPhaseResolution(arguments.dcmFile)
+        phaseOversampling = __getPhaseOversampling(arguments.dcmFile)
+        echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, header, epiFactor, patFactor, phaseResolution, phaseOversampling)
+        if arguments.config and arguments.fieldmap:
+            writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)
+        elif arguments.config and not arguments.fieldmap:
+            writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing)
+        if phaseEncDir is not None:
+            if phaseEncDir==0:
+                print "\tPhase encoding: {}, P>>A".format(phaseEncDir)
+            elif phaseEncDir==1:
+                print "\tPhase encoding: {}, A>>P".format(phaseEncDir)
+            elif phaseEncDir==2:
+                print "\tPhase encoding: {}, R>>L".format(phaseEncDir)
+            elif phaseEncDir==3:
+                print "\tPhase encoding: {}, L>>R".format(phaseEncDir)
+            else:
+                print "Phase encoding:", phaseEncDir
 
-    if echoTime is not None and arguments.fieldmap:
-        print "\tEchoTime: ", echoTime, " ms"
+        if epiFactor is not None:
+            print "\tEPIFactor: ", epiFactor
+
+        if echoSpacing is not None:
+            print "\tEchoSpacing: ", echoSpacing, " ms"
+
+        if echoTime is not None and arguments.fieldmap:
+            print "\tEchoTime: ", echoTime, " ms"
+
+    except OSError:
+        print "Error: unable to find dcminfo from mrtrix3. Have you source unf-toad-config.sh?"
+        sys.exit()
