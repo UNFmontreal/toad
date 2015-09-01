@@ -270,7 +270,7 @@ def __createSoftwareTags(xmlDocument, name, version):
     return xmlSoftware
 
 def __createServerTags(xmlDocument, hostname, toadname, uname):
-    xmlSoftware = xmlDocument.createElement('software')
+    xmlSoftware = xmlDocument.createElement('server')
     xmlSoftware.appendChild(__createXmlTag(xmlDocument, "hostname", hostname))
     xmlSoftware.appendChild(__createXmlTag(xmlDocument, "toadname", toadname))
     xmlSoftware.appendChild(__createXmlTag(xmlDocument, "uname", uname))
