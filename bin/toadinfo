@@ -142,17 +142,7 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
 
 
     if phaseEncDir is not None:
-        if phaseEncDir == 0:
-            phaseEncDirText = "0  # P>>A"
-        elif  phaseEncDir == 1:
-            phaseEncDirText = "1  # A>>P"
-        elif  phaseEncDir == 2:
-            phaseEncDirText = "2  # R>>L"
-        elif  phaseEncDir == 3:
-            phaseEncDirText = "3  # L>>R"
-        else:
-            phaseEncDirText = "{}".format(phaseEncDir)
-        config.set("correction", "phase_enc_dir", phaseEncDirText)
+        config.set("correction", "phase_enc_dir", phaseEncDir)
     if epiFactor is not None:
         config.set("correction", "epi_factor", epiFactor)
     if echoSpacing is not None:
