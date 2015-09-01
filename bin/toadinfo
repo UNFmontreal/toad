@@ -140,6 +140,7 @@ def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
     if not config.has_section("correction"):
         config.add_section("correction")
 
+
     if phaseEncDir is not None:
         config.set("correction", "phase_enc_dir", phaseEncDir)
     if epiFactor is not None:
