@@ -5,9 +5,9 @@ import argparse
 import socket
 import imp
 import sys
-import xml
 import os
 
+import xml.dom.minidom
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from core import logger
 from lib import util, arguments
