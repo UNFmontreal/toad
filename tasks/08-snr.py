@@ -31,8 +31,8 @@ class Snr(GenericTask):
         #Corpus Callosum masks
         ccMask = self.getMaskingImage('aparc_aseg', ['253','mask'])
         ccMaskDownsample = self.buildName(ccMask, 'downsample')
-        cmdString = "mri_convert -voxsize {} --input_volume {} --output_volume {}"
-        cmd = cmdString.format(" ".join(voxelSize), ccMask, ccMaskDownsample)
+        cmdString = "mri_convert -voxsize {} -rl {} --input_volume {} --output_volume {}"
+        cmd = cmdString.format(" ".join(voxelSize), brainMask, ccMask, ccMaskDownsample)
         self.launchCommand(cmd)
 
 
@@ -71,7 +71,7 @@ class Snr(GenericTask):
             (self.getPreparationImage('dwi'), 'diffusion weighted'),
             (self.getCorrectionImage('mask', 'corrected'), 'brain mask'),
             (self.getMaskingImage('aparc_aseg', ['253','mask']), 'Corpus Callusum mask from masking task'),
-            (self.getCorrectionImage('b0'), 'B0')
+            (self.getCorrectionImage('b0', 'corrected'), 'B0')
             )
 
 
@@ -94,7 +94,7 @@ class Snr(GenericTask):
         dwiDenoised = self.getDenoisingImage('dwi', 'denoise')
         noiseMask = self.getImage('mask', ['corrected', 'noisemask'])
         ccMask = self.getImage('aparc_aseg', ['253', 'mask', 'downsample'])
-        b0 = self.getCorrectionImage('b0')
+        b0 = self.getCorrectionImage('b0', 'corrected')
 
         #Build qa images
         tags = (
