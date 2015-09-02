@@ -45,14 +45,13 @@ class Correction(GenericTask):
         self.__validateSizeAndDimension(dwi, b0, b0AP, b0PA)
 
         #Generate a missing b0 image if we could. --> 0 = P>>A, 1 = A>>P
-        if self.get("phase_enc_dir") == "0" and b0PA and b0AP is False:
-            b0AP = b0
-
-        if self.get("phase_enc_dir") == "1" and b0AP and b0PA is False :
+        if self.get("phase_enc_dir") == "0" and b0AP and b0PA is False:
             b0PA = b0
 
-        [dwi, b0, b0AP, b0PA] = self.__oddEvenNumberOfSlices(dwi, b0, b0AP, b0PA)
+        if self.get("phase_enc_dir") == "1" and b0PA and b0AP is False :
+            b0AP = b0
 
+        [dwi, b0, b0AP, b0PA] = self.__oddEvenNumberOfSlices(dwi, b0, b0AP, b0PA)
 
         if b0AP is False or b0PA is False:
             topupBaseName = None
@@ -65,14 +64,12 @@ class Correction(GenericTask):
 
             elif self.get("phase_enc_dir") == "1":
                 concatenateB0Image = self.__concatenateB0(b0AP, b0PA, self.buildName("b0ap_b0pa", None, "nii.gz" ))
-
             #create the acquisition parameter file
             acqpTopup = self.__createAcquisitionParameterFile('topup')
 
             #Lauch topup on concatenate B0 image
             [topupBaseName, topupImage] = self.__topup(concatenateB0Image, acqpTopup, self.get('b02b0_filename'))
             b0Image = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
-
 
         self.info("create a suitable mask for the dwi")
         extraArgs = ""
@@ -187,6 +184,7 @@ class Correction(GenericTask):
 
         """
         try:
+            print "phaseEncDir=", self.get('phase_enc_dir')
             phaseEncDir = int(self.get('phase_enc_dir'))
         except ValueError:
             self.error("Cannot determine the phase encoding direction")

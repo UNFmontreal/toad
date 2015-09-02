@@ -133,15 +133,29 @@ def __getEchoSpacing(source, header, epiFactor, patFactor = 1, phaseResolution =
 
 
 def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
-    config = ConfigParser.ConfigParser()
+    config = ConfigParser.ConfigParser(allow_no_value = True)
     if os.path.exists(source):
         config.read(source)
 
     if not config.has_section("correction"):
         config.add_section("correction")
 
+
     if phaseEncDir is not None:
+
+        if phaseEncDir == 0:
+            config.set("correction", "#The phase encoding is from posterior to anterior")
+        elif  phaseEncDir == 1:
+            config.set("correction", "#The phase encoding is from anterior to Posterior")
+        elif  phaseEncDir == 2:
+            config.set("correction", "#The phase encoding is from right to left")
+        elif  phaseEncDir == 3:
+            config.set("correction", "#The phase encoding is from left to right")
+        else:
+            config.set("correction", "#Phase encoding direction: unknown")
         config.set("correction", "phase_enc_dir", phaseEncDir)
+
+
     if epiFactor is not None:
         config.set("correction", "epi_factor", epiFactor)
     if echoSpacing is not None:
