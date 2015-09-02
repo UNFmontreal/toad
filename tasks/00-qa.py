@@ -33,11 +33,14 @@ class QA(GenericTask):
         util.copy(menuTemplate, self.workingDir, 'menu.html')
 
         #Create index.html
+        listDirHtml = ''
+        """
         listDir = os.listdir(self.backupDir)
         listDirHtml = 'Input files:<ul>'
         for f in listDir:
             listDirHtml += '<li>{}</li>\n'.format(f)
         listDirHtml += '</ul>'
+        """
         tags = {
             'subject':self.__subject.getName(),
             'taskInfo':'',
