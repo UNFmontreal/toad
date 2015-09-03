@@ -110,9 +110,10 @@ class Correction(GenericTask):
 
 
         #proceed with fieldmap if provided
-        if mag and phase and (not self.__topupCorrection):
-            outputImage = self.__computeFieldmap(outputImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
-            self.__fieldmapCorrection = True
+        if mag and phase:
+            if not self.__topupCorrection or self.get("force_fieldmap"):
+                outputImage = self.__computeFieldmap(outputImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
+                self.__fieldmapCorrection = True
 
 
         #produce a valid b0 and mask for QA
