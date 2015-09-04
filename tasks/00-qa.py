@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
-from core.generictask import GenericTask
+
+from core.toad.generictask import GenericTask
 from lib.images import Images
 from lib import util
+
 
 __author__ = "Christophe Bedetti"
 __copyright__ = "Copyright (C) 2014, TOAD"

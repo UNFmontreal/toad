@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from core.generictask import GenericTask
+from core.toad.generictask import GenericTask
 """
 from lib.images import Images
 import nibabel, numpy

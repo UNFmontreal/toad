@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import datetime
 import argparse
-import socket
 import imp
 import sys
 import os
 
 import xml.dom.minidom
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from core import logger
-from lib import util, arguments
+from core.toad import logger
+from lib import util, xmlhelper, arguments
 
 
 __author__ = "Mathieu Desrosiers, Arnaud Bore, and Christophe Bedetti"
@@ -186,41 +185,28 @@ def __manageVersions(logger, arguments):
         A minidom document which contain any usefull information about software versions
 
     """
-    xmlDocument = xml.dom.minidom.Document()
 
-    toadXml = xmlDocument.createElement("toad")
-    xmlDocument.appendChild(toadXml)
-    rootXml = xmlDocument.createElement("application")
+
+    arrayOfSoftwareVersion = []
+
     logger.info("Toad is running at version: {}".format(__version__))
-    rootXml.setAttribute("timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
-    toadXml.appendChild(rootXml)
-
     logger.info("Computer identification: {}".format(" ".join(os.uname())))
-    serverName = os.environ.get('TOADSERVER')
-    if serverName is None:
-        serverName = "local"
-
-    rootXml.appendChild(__createServerTags(xmlDocument, socket.gethostname(), serverName, " ".join(os.uname())))
-    rootXml.appendChild(__createSoftwareTags(xmlDocument, "Toad", __version__))
 
     logger.info("Python is running at version: {}".format(sys.version[0:6]))
-    cmd = "fast"
-    command, output, results = util.launchCommand(cmd)
+    command, output, results = util.launchCommand("fast")
     version = [line.replace("Part of FSL", "") for line in results.splitlines() if "build" in line].pop()
     logger.info("FSL is running at version: {}".format(version))
-    rootXml.appendChild(__createSoftwareTags(xmlDocument, "FSL", version))
+    arrayOfSoftwareVersion.append(('FSL', version))
 
-    cmd = "cat  $FREESURFER_HOME/build-stamp.txt"
-    command, version, errors = util.launchCommand(cmd)
+    command, version, errors = util.launchCommand("cat  $FREESURFER_HOME/build-stamp.txt")
     version = version.strip()
     logger.info("Freesurfer is running at version: {}".format(version))
-    rootXml.appendChild(__createSoftwareTags(xmlDocument, "Freesurfer", version))
+    arrayOfSoftwareVersion.append(('Freesurfer', version))
 
-    cmd = "tckgen -version"
-    command, results, errors = util.launchCommand(cmd)
+    command, results, errors = util.launchCommand("tckgen -version")
     version = [line.replace("tckgen", "").strip("== ") for line in results.splitlines() if "tckgen" in line].pop()
     logger.info("Mrtrix is running at version: {}".format(version))
-    rootXml.appendChild(__createSoftwareTags(xmlDocument, "Mrtrix", version))
+    arrayOfSoftwareVersion.append(('Mrtrix', version))
 
 
     if arguments.matlabIsAvailable:
@@ -232,7 +218,7 @@ def __manageVersions(logger, arguments):
             if "< M A T L A B (R) >" in token:
                 version = messages[index+2].strip()
                 logger.info("Matlab is running at version: {}".format(version))
-                rootXml.appendChild(__createSoftwareTags(xmlDocument, "Matlab", version))
+                arrayOfSoftwareVersion.append(('Matlab', version))
                 found = True
                 break
         if not found:
@@ -243,39 +229,19 @@ def __manageVersions(logger, arguments):
     version = [line for line in results.splitlines() if "Version:" in line].pop().split()
     version = " ".join(version[2:6])
     logger.info("ImageMagick is running at version: {}".format(version))
-    rootXml.appendChild(__createSoftwareTags(xmlDocument, "ImageMagick", version))
+    arrayOfSoftwareVersion.append(('ImageMagick', version))
 
     for package in __pythonPackages:
         module = __import__(package)
         if not "vtk" in package:
             logger.info("{} is at version: {}".format(package, module.__version__))
-            rootXml.appendChild(__createSoftwareTags(xmlDocument, package, module.__version__))
+            arrayOfSoftwareVersion.append((package,  module.__version__))
 
         else:
             logger.info("{} is at version: {}".format("vtk", module.vtkVersion.GetVTKVersion()))
-            rootXml.appendChild(__createSoftwareTags(xmlDocument, package, module.vtkVersion.GetVTKVersion()))
-    return xmlDocument
+            arrayOfSoftwareVersion.append((package,  module.vtkVersion.GetVTKVersion()))
 
-
-def __createXmlTag(xmlDocument, name, text):
-    xmlTag = xmlDocument.createElement(name)
-    xmlText = xmlDocument.createTextNode(text)
-    xmlTag.appendChild(xmlText)
-    return xmlTag
-
-def __createSoftwareTags(xmlDocument, name, version):
-    xmlSoftware = xmlDocument.createElement('software')
-    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "name", name))
-    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "version", version))
-    return xmlSoftware
-
-def __createServerTags(xmlDocument, hostname, toadname, uname):
-    xmlSoftware = xmlDocument.createElement('server')
-    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "hostname", hostname))
-    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "toadname", toadname))
-    xmlSoftware.appendChild(__createXmlTag(xmlDocument, "uname", uname))
-    return xmlSoftware
-
+    return xmlhelper.createApplicationTags(arrayOfSoftwareVersion)
 
 if __name__ == '__main__':
 
@@ -296,5 +262,5 @@ if __name__ == '__main__':
     arguments.toadDir = os.path.dirname(realPath).replace("bin", "")
 
     #Launch the manager
-    from core import subjectmanager
+    from core.toad import subjectmanager
     result = subjectmanager.SubjectManager(arguments, xmlSoftwaresVersions).run()

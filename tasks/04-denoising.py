@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
+
 import numpy
 import nibabel
 import dipy.denoise.nlmeans
 import dipy.denoise.noise_estimate
-from core.generictask import GenericTask
+
+from core.toad.generictask import GenericTask
 from lib.images import Images
 from lib import util, mriutil
+
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"

@@ -16,7 +16,7 @@
             subject: a Subject instance inherit by the subjectmanager.
 
 """
-from core.generictask import GenericTask
+from core.toad.generictask import GenericTask
 __author__ = "Your_name"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Your_name", "Mathieu Desrosiers"]

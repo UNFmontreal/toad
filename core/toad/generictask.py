@@ -7,7 +7,7 @@ import shutil
 import os
 
 from lib.images import Images
-from logger import Logger
+from core.toad.logger import Logger
 from load import Load
 from lib.qa import Qa
 from lib import util
