@@ -11,7 +11,7 @@ class TensorMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking', 'qa')
 
 
     def implement(self):

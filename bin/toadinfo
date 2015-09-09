@@ -31,7 +31,6 @@ def parseArguments():
 
          """)
     parser.add_argument("dcmFile", help="A SIEMENS DICOM imges")
-
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Write output into a config.cfg file or create a new one if it doesn't exist")
     parser.add_argument("-f","--fieldmap", help="Add a section for fieldmap into the config file", action="store_true")
@@ -123,7 +122,6 @@ def __getEchoSpacing(source, header, epiFactor, patFactor = 1, phaseResolution =
     except AttributeError:
         print "Cannot read csa header from ", source
         return (None,None)
-
         print "Some field(s) cannot be found in the header"
 
     except (KeyError, IndexError, TypeError):
@@ -205,7 +203,6 @@ if __name__ == '__main__':
 
 
     try:
-
         header = __wrapDcminfo(arguments.dcmFile)
 
         #found information into the ASCCONV tags
@@ -215,6 +212,7 @@ if __name__ == '__main__':
         phaseResolution = __getPhaseResolution(arguments.dcmFile)
         phaseOversampling = __getPhaseOversampling(arguments.dcmFile)
         echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, header, epiFactor, patFactor, phaseResolution, phaseOversampling)
+
         if arguments.config and arguments.fieldmap:
             writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)
         elif arguments.config and not arguments.fieldmap:

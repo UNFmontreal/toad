@@ -4,8 +4,7 @@ import argparse
 import imp
 import sys
 import os
-
-import xml.dom.minidom
+from xml.dom import minidom
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from core.toad import logger
@@ -77,7 +76,7 @@ def __parseArguments():
         Check whether it CROAK like a toad and WALK like a toad. It is not uncommon to find a warty skinned frog that isn\'t a toad.
         """)
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the subjects, wildcard * ? are accepted")
-    parser.add_argument("-c", "--config", nargs='+',metavar=('filename'), required=False,
+    parser.add_argument("-c", "--config", metavar=('filename'), required=False, action='append',
                             help="Specify the location of an alternative the config.cfg file")
     parser.add_argument("-d","--debug", help="Add additionnal information during the pipeline execution",
                             action="store_true")
@@ -85,7 +84,7 @@ def __parseArguments():
     parser.add_argument("-s","--skipValidation", help="Skip the initial validation process (not recommended)",
                             action="store_true")
 
-    parser.add_argument("-t", "--task", nargs='+',metavar=('task_file_name'), required=False,
+    parser.add_argument("-t", "--task",  metavar=('task_file_name'), required=False, action='append',
                             help="Specify a custom task to be submit")
 
     parser.add_argument("-b", "--stopBeforeTask", nargs='?',metavar=('task_name'), required=False,
@@ -187,26 +186,28 @@ def __manageVersions(logger, arguments):
     """
 
 
-    arrayOfSoftwareVersion = []
-
+    xmlDocument = minidom.Document()
+    softwaresTag = xmlDocument.createElement("softwares")
     logger.info("Toad is running at version: {}".format(__version__))
-    logger.info("Computer identification: {}".format(" ".join(os.uname())))
+    softwaresTag.appendChild(xmlhelper.createSoftwareNameVersionTag('Toad', __version__))
 
+    logger.info("Computer identification: {}".format(" ".join(os.uname())))
     logger.info("Python is running at version: {}".format(sys.version[0:6]))
+    softwaresTag.appendChild(xmlhelper.createSoftwareNameVersionTag('Python', sys.version[0:6]))
+
     command, output, results = util.launchCommand("fast")
     version = [line.replace("Part of FSL", "") for line in results.splitlines() if "build" in line].pop()
     logger.info("FSL is running at version: {}".format(version))
-    arrayOfSoftwareVersion.append(('FSL', version))
-
+    softwaresTag.appendChild(xmlhelper.createSoftwareNameVersionTag('FSL', version))
     command, version, errors = util.launchCommand("cat  $FREESURFER_HOME/build-stamp.txt")
     version = version.strip()
     logger.info("Freesurfer is running at version: {}".format(version))
-    arrayOfSoftwareVersion.append(('Freesurfer', version))
+    softwaresTag.appendChild(xmlhelper.createSoftwareNameVersionTag('Freesurfer', version))
 
     command, results, errors = util.launchCommand("tckgen -version")
     version = [line.replace("tckgen", "").strip("== ") for line in results.splitlines() if "tckgen" in line].pop()
     logger.info("Mrtrix is running at version: {}".format(version))
-    arrayOfSoftwareVersion.append(('Mrtrix', version))
+    softwaresTag.appendChild(xmlhelper.createSoftwareNameVersionTag('Mrtrix', version))
 
 
     if arguments.matlabIsAvailable:
@@ -218,7 +219,7 @@ def __manageVersions(logger, arguments):
             if "< M A T L A B (R) >" in token:
                 version = messages[index+2].strip()
                 logger.info("Matlab is running at version: {}".format(version))
-                arrayOfSoftwareVersion.append(('Matlab', version))
+                softwaresTag.appendChild(xmlhelper.createSoftwareNameVersionTag('Matlab', version))
                 found = True
                 break
         if not found:
@@ -229,19 +230,18 @@ def __manageVersions(logger, arguments):
     version = [line for line in results.splitlines() if "Version:" in line].pop().split()
     version = " ".join(version[2:6])
     logger.info("ImageMagick is running at version: {}".format(version))
-    arrayOfSoftwareVersion.append(('ImageMagick', version))
+    softwaresTag.appendChild(xmlhelper.createSoftwareNameVersionTag('ImageMagick', version))
 
     for package in __pythonPackages:
         module = __import__(package)
         if not "vtk" in package:
             logger.info("{} is at version: {}".format(package, module.__version__))
-            arrayOfSoftwareVersion.append((package,  module.__version__))
+            softwaresTag.appendChild(xmlhelper.createSoftwareNameVersionTag(package,  module.__version__))
 
         else:
             logger.info("{} is at version: {}".format("vtk", module.vtkVersion.GetVTKVersion()))
-            arrayOfSoftwareVersion.append((package,  module.vtkVersion.GetVTKVersion()))
-
-    return xmlhelper.createApplicationTags(arrayOfSoftwareVersion)
+            softwaresTag.appendChild(xmlhelper.createSoftwareNameVersionTag("vtk", module.vtkVersion.GetVTKVersion()))
+    return softwaresTag
 
 if __name__ == '__main__':
 

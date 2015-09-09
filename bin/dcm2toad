@@ -5,7 +5,6 @@ import sys
 import argparse
 import ConfigParser
 from xml.dom import minidom
-from xml.parsers.expat import ExpatError
 from collections import OrderedDict
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
@@ -21,9 +20,6 @@ __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Development"
 
-#@TODO maybe read toad/etc/config.cfg if it make sense
-#@convertMagnitude
-
 
 class Dcm2Toad(object):
 
@@ -36,14 +32,15 @@ class Dcm2Toad(object):
 
 
     def __init__(self):
-        self.__arrayOfSoftwareVersion = self.__validateToadDependencies()
+        self.__softwaresXmlTags = self.__validateToadDependencies()
         self.__arguments = self.__parseArguments()
         if self.__arguments.fieldmap:
             self.__initialPrefixs.extend(self.__fieldmap)
         self.__mriSessions = self.__initializeMRISessions()
         self.__effectivePrefixs = self.__initializeEffectivePrefixs()
         self.__outputDirectory = self.__initializeOutputDirectory()
-        self.__versionXmlFile = self.__initializeVersionXmlFile()
+        self.__xmlFilename = os.path.join(self.__outputDirectory, ".unf2toad.xml")
+        self.__initializeSessionFromXmlFile()
 
 
     def __parseArguments(self):
@@ -56,7 +53,7 @@ class Dcm2Toad(object):
                                          description ="""\n
              """)
         parser.add_argument("sources", nargs='+', help="A list or a single UNF mri session. wilcard *, ? are accepted")
-        parser.add_argument("-c", "--config", nargs='?', metavar=('filename'), required=False,
+        parser.add_argument("-c", "--config",  metavar=('filename'), required=False, action='append',
                                 help="Specify the location of an optionnal the config.cfg as input. Default: etc/config.cfg")
         parser.add_argument("-f","--fieldmap", help="Ask for fieldmap (magnitude and phase) during the conversion", action="store_true")
         parser.add_argument("-i","--ignoreArchive", help="Do not open archive to search for MRI sessions.", action="store_true")
@@ -87,14 +84,29 @@ class Dcm2Toad(object):
             directory = os.path.abspath(self.__arguments.dirName)
         if not os.path.exists(directory):
             os.makedirs(directory)
-        return directory
+        self.__arguments.dirName = directory
+        return self.__arguments.dirName
 
-
-    def getMriSession(self, key):
+    def getMriSessions(self, key):
         if isinstance(key, sessionmri.SessionMRI):
             for session in self.__mriSessions:
                 if session == key:
                     return session
+
+
+    def setChecked(self, sessionToCheck):
+        for index, session in enumerate(self.__mriSessions):
+            if session == sessionToCheck:
+                session.setChecked(True)
+                self.__mriSessions[index] = session
+
+
+    def getComparableSessions(self, aSession):
+        sessions = []
+        for session in self.__mriSessions:
+            if session.isComparable(aSession):
+                sessions.append(session)
+        return sessions
 
 
     def __initializeMRISessions(self, directories = None, archiveName = None):
@@ -130,57 +142,23 @@ class Dcm2Toad(object):
         return sessions
 
 
-    def __initializeVersionXmlFile(self):
+    def __initializeSessionFromXmlFile(self):
         """Update sessions from attribute comming from an xml document.
 
         Args:
             xmlDocument: A minidom Document
-
         """
-        versionXmlFilename = os.path.join(self.__outputDirectory, ".unf2toad.xml")
-        #@TODO implement that -->file = os.path.join(self.getLogDir(), self.__config.get('general', 'versions_file_name'))
 
-        #@CREATE createOrParseXmlFile
-        print "versionXmlFilename=",versionXmlFilename
-        if os.path.isfile(versionXmlFilename):
-            try:
-                xmlDocument = minidom.parse(versionXmlFilename)
-                if len(xmlDocument.getElementsByTagName("unftoad")) == 1:
-                    unftoadTag = xmlDocument.getElementsByTagName("unftoad")[0]
-                    xmlDocument.appendChild(unftoadTag)
-            except ExpatError:
-                self.warning('Cannot understand {} xml structure, I will overwrite it?'.format(file))
-
-        else:
-            xmlDocument = minidom.Document()
-            unftoadXml = xmlDocument.createElement("unftoad")
-            xmlDocument.appendChild(unftoadXml)
-
-        unftoadXml.appendChild(xmlhelper.createApplicationTags(self.__arrayOfSoftwareVersion))
-
-        if os.path.exists(os.path.dirname(versionXmlFilename)):
-            with open(versionXmlFilename, 'w') as w:
-                print xmlDocument.toprettyxml()
-                xmlDocument.writexml(w)
-
-
-        for session in self.__mriSessions:
-            print session
-
-        #print xmlDocument.toprettyxml()
-        sys.exit()
-
-
-        """
-        for sessionTag in sessionsTags:
-            xmlSession = sessionmri.SessionMri()
-            for index, session in enumerate(self.__mriSessions):
-                if session.hasSessionName(xmlSession):
-                    session.checked(True)
-
-            session = self.__getSesionsByName(xmlSession.firstChild.data)
-            self.__markSessionAsSelected(session)
-        """
+        applicationTags = xmlhelper.getNewestApplicationTag(self.__xmlFilename)
+        if applicationTags is not None:
+            sessionTags = applicationTags.getElementsByTagName("session")
+            if len(sessionTags) > 0:
+                for sessionTag in sessionTags:
+                    directory = sessionTag.getElementsByTagName("directory")[0].childNodes[0].data
+                    for index, session in enumerate(self.__mriSessions):
+                        if session.getDirectory() == directory:
+                            session.setChecked(True)
+                            self.__mriSessions[index] = session
 
 
     def __initializeEffectivePrefixs(self):
@@ -192,8 +170,10 @@ class Dcm2Toad(object):
         configFiles = []
         configFiles.append(os.path.dirname(os.path.realpath(__file__)).replace("bin", "etc/config.cfg"))
         if self.__arguments.config:
-            if os.path.isfile(self.__arguments.config):
-                configFiles.append(self.__arguments.config)
+            print "self.__arguments.config =", self.__arguments.config
+            for configFile in self.__arguments.config:
+                if os.path.isfile(configFile):
+                    configFiles.append(configFile)
 
         for configFile in configFiles:
             config.read(configFile)
@@ -207,7 +187,22 @@ class Dcm2Toad(object):
         return effectivePrefixs
 
 
-    def definedCustomPrefixs(self, session):
+    def writeXml(self):
+
+        xmlDocument = minidom.Document()
+        unftoadTag = xmlhelper.createOrParseXmlDocument(self.__xmlFilename)
+        applicationTag = xmlhelper.createApplicationTags(self.__softwaresXmlTags)
+        unftoadTag.appendChild(applicationTag)
+        sessionsTag = xmlDocument.createElement("sessions")
+        applicationTag.appendChild(sessionsTag)
+        for session in self.__mriSessions:
+            if session.isChecked():
+                sessionsTag.appendChild(xmlhelper.createSessionNameDirectoryTag(session.getName(), session.getDirectory()))
+        with open(self.__xmlFilename, 'w') as w:
+            unftoadTag.writexml(w)
+
+
+    def updateEffectivePrefixValues(self, dummySession):
         """ Utility function that ask users if they want to change images prefix
 
         Args:
@@ -221,13 +216,13 @@ class Dcm2Toad(object):
             self.__printQuestion("Whould you like to change default prefix at the beginning of the filename? Actual are ...\n\n")
             message = ""
             for index, prefix in enumerate(self.__effectivePrefixs):
-                if session.hasPrefix(prefix):
+                if dummySession.hasPrefix(prefix):
                     message+= "\t{} will be prefix: {} \n".format(prefix.getName(), prefix.getValue())
 
             if util.displayYesNoMessage(message, "Change prefix (y or n)? Default n :", "no"):
                 self.__printQuestion()
                 for index, prefix in enumerate(self.__effectivePrefixs):
-                    if session.hasPrefix(prefix):
+                    if dummySession.hasPrefix(prefix):
                         message = "Enter new prefix for {} image. Default {} :".format(prefix.getDescription(), prefix.getValue())
                         input = raw_input(message)
                         if input.strip(" ") != "":
@@ -236,10 +231,10 @@ class Dcm2Toad(object):
                             else:
                                 prefix.setValue("{}".format(input))
                             self.__effectivePrefixs[index] = prefix
+
             else:
                 break
-
-        session.updatePrefixIntoConfigParser()
+        return dummySession
 
 
     def __validateToadDependencies(self):
@@ -252,8 +247,9 @@ class Dcm2Toad(object):
                 -the first element of the tuple contain the name of the software test
                 -the second element of the tuple contain the version of the software test
         """
+        xmlDocument = minidom.Document()
+        softwaresTags = xmlDocument.createElement("softwares")
 
-        arrayOfNameVersion =[]
         if util.which("toadinfo") is None:
             print "toadinfo not found. Have you source unf-toad-config.sh?"
             sys.exit()
@@ -262,15 +258,16 @@ class Dcm2Toad(object):
             print "mrconvert not found. Have you source unf-toad-config.sh?"
             sys.exit()
 
-        arrayOfNameVersion.append(('unf2toad', __version__))
+        softwaresTags.appendChild(xmlhelper.createSoftwareNameVersionTag('dcm2toad', __version__))
         version = util.launchCommand("mrconvert --version")[1].split()
         if len(version) > 2:
             version = version[2]
-            arrayOfNameVersion.append(('mrconvert', version))
-        version = util.launchCommand("toadinfo --version")[2].replace('toadinfo', "").strip()
-        arrayOfNameVersion.append(('toadinfo', version))
+            softwaresTags.appendChild(xmlhelper.createSoftwareNameVersionTag('mrconvert', version))
 
-        return arrayOfNameVersion
+        version = util.launchCommand("toadinfo --version")[2].replace('toadinfo', "").strip()
+        softwaresTags.appendChild(xmlhelper.createSoftwareNameVersionTag('toadinfo', version))
+
+        return softwaresTags
 
 
     def selectASessions(self, question):
@@ -285,18 +282,19 @@ class Dcm2Toad(object):
         if len(self.__mriSessions) == 1:
             #return a copy, not the original object
             return sessionmri.SessionMRI(self.__mriSessions[0])
+
         while True:
             self.__printQuestion(question)
             print(" 0.  None or exit")
             for index, session in enumerate(self.__mriSessions):
-                #if session.isConvert:
-                #    print("{:2d}.  {} *".format(index+1, session.name))
-                #else:
-                #    print("{:2d}.  {}".format(index+1, session.name))
+
+                message = "{:2d}.* {}" if session.isChecked() else "{:2d}.  {}"
+                message = message.format(index+1, session.getName())
+
                 if session.isFromArchive():
-                    print("{:2d}.  {}  from {}".format(index+1, session.getName(), os.path.basename(session.getArchiveName())))
-                else:
-                    print("{:2d}.  {}".format(index+1, session.getName()))
+                    message +="  from {}".format(os.path.basename(session.getArchiveName()))
+                print message
+
             choice = raw_input("Enter your choice [0-"+str(len(self.__mriSessions))+"]: Default None [0] :")
             if choice.strip(" ") == "":
                 choice = 0
@@ -304,6 +302,7 @@ class Dcm2Toad(object):
                 break
             else:
                 print("Invalid choice, please enter a valid number")
+
         if int(choice) != 0:
             #return a copy, not the original object
             return sessionmri.SessionMRI(self.__mriSessions[int(choice)-1])
@@ -354,6 +353,7 @@ class Dcm2Toad(object):
                     break
             except ValueError:
                     pass
+
         for index, value in menu.iteritems():
             if str(index) == choice:
                 value.setPrefix(prefix)
@@ -363,10 +363,17 @@ class Dcm2Toad(object):
 
     def selectSequences(self, mriSession):
         for index, prefix in enumerate(self.__effectivePrefixs):
-            sequence = self.selectASequences(self.getMriSession(mriSession), prefix, "Please select the {} image\n".format(prefix.getDescription()))
+            sequence = self.selectASequences(self.getMriSessions(mriSession), prefix, "Please select the {} image\n".format(prefix.getDescription()))
             if sequence:
                 mriSession.appendSequence(sequence)
         return mriSession
+
+
+    def askToConvertComparableSessions(self, sessions):
+        message = "Warning: thoses subjects seem\'s to share exactly the same layout?:\n\n    {} "\
+            .format(",\n    ".join([session.getName() for session in sessions]))
+        self.__printQuestion()
+        return util.displayYesNoMessage(message, "\nConvert them all at the same time (y or n)? Default y :", "yes")
 
 
     def __printQuestion(self, question=None):
@@ -380,7 +387,7 @@ class Dcm2Toad(object):
             print question
 
 
-    def updateName(self, session):
+    def updateName(self, sessionOrSessions):
         """Ask user to define a new name for each sessions submit for conversion
 
         Args:
@@ -388,17 +395,45 @@ class Dcm2Toad(object):
 
         """
         self.__printQuestion()
-        answer = raw_input("Please enter a subject name for {0}? Defaults {0}:".format(session.getName()))
-        if answer.strip(" ") != "":
-            session.setName(answer)
-        return session
+        def __changeSessionName(session):
+            answer = raw_input("Please enter a subject name for {0}? Defaults {0}:".format(session.getName()))
+            if answer.strip(" ") != "":
+                session.setName(answer)
+            return session
+
+        if isinstance(sessionOrSessions, sessionmri.SessionMRI):
+            return __changeSessionName(sessionOrSessions)
+        else:
+            sessions = []
+            for session in sessionOrSessions:
+                sessions.append(__changeSessionName(session))
+            return sessions
+
 
 if __name__ == '__main__':
 
+    #@TODO test optionnal config file location
+    #@TODO reshuffle none siemens none unf dicoms
+
     interface = Dcm2Toad()
-    choosedMriSession = interface.selectASessions("Please choose a session to convert")
-    choosedMriSession = interface.selectSequences(choosedMriSession)
-    interface.definedCustomPrefixs(choosedMriSession)
-    choosedMriSession = interface.updateName(choosedMriSession)
-    #converter = converter.Converter(interface.getArguments(), interface.getOutputDirectory())
-    #converter.convert(choosedMriSession)
+    converter = converter.Converter(interface.getArguments())
+
+    while(True):
+
+        copyOfChooseSession = interface.selectASessions("Please choose a session to convert")
+        comparableSessions = interface.getComparableSessions(copyOfChooseSession)
+        copyOfChooseSession = interface.selectSequences(copyOfChooseSession)
+        interface.updateEffectivePrefixValues(copyOfChooseSession)
+
+        if len(comparableSessions) > 1 and interface.askToConvertComparableSessions(comparableSessions):
+            comparableSessions = interface.updateName(comparableSessions)
+            for session in comparableSessions:
+                copyOfComparableSession = session.filterSequencesAndPrefixByASelectedSession(copyOfChooseSession)
+                converter.convert(copyOfComparableSession)
+                interface.setChecked(session)
+        else:
+            copyOfChooseSession = interface.updateName(copyOfChooseSession)
+            converter.convert(copyOfChooseSession)
+            interface.setChecked(copyOfChooseSession)
+
+        interface.writeXml()

@@ -2,7 +2,6 @@
 
 import os
 import glob
-import ConfigParser
 import sequencemri
 
 __author__ = "Mathieu Desrosiers"
@@ -16,15 +15,15 @@ class SessionMRI(object):
             self.__directory = directoryOrMriSession.getDirectory()
             self.__name = directoryOrMriSession.getName()
             self.__archiveName = directoryOrMriSession.getArchiveName()
+            self.__comparable = directoryOrMriSession.getComparable()
         else:
             self.__directory = directoryOrMriSession
             self.__name = os.path.basename(self.__directory)
             self.__archiveName = archiveName
+            self.__comparable = None
 
-        self.__configParser = ConfigParser.ConfigParser()
         self.__checked = False
         self.__sequences = []
-
 
     def __eq__(self, other):
         return self.__directory == other.__directory
@@ -51,6 +50,12 @@ class SessionMRI(object):
     def setChecked(self, check):
         self.__checked = check
 
+    def isComparable(self, other):
+        return self.__comparable == other.getComparable()
+
+    def getComparable(self):
+        return self.__comparable
+
     def getName(self):
         return self.__name
 
@@ -66,11 +71,20 @@ class SessionMRI(object):
     def getArchiveName(self):
         return self.__archiveName
 
-    def getConfigParser(self):
-        return self.__configParser
-
     def getSequences(self):
         return self.__sequences
+
+    def hasSequence(self, aSequence):
+        for sequence in self.__sequences:
+            if sequence == aSequence:
+                return True
+        return False
+
+    def getSequence(self, aSequence):
+        for sequence in self.__sequences:
+            if sequence == aSequence:
+                return sequence
+        return None
 
     def appendSequence(self, sequence):
         self.__sequences.append(sequence)
@@ -101,29 +115,27 @@ class SessionMRI(object):
         for directory in directories:
             fullPath = os.path.join(self.__directory, directory)
             if len(glob.glob("{}/*.dcm".format(fullPath))) > 0:
-                self.__sequences.append(sequencemri.SequenceMRI(name = directory , directory = fullPath))
+                self.__sequences.append(sequencemri.SequenceMRI(name = directory ,
+                                                                directory = fullPath,
+                                                                nbImages = len(glob.glob("{}/*.dcm".format(fullPath)))))
             elif len(glob.glob("{}/echo_*/*.dcm".format(fullPath))) > 0:
                 #this is a multi echoes sequence"
                 echoesDirectories = os.listdir(fullPath)
                 for echoesDirectory in echoesDirectories:
                     fullEchoesPath = os.path.join(fullPath, echoesDirectory)
                     if len(glob.glob("{}/*.dcm".format(fullEchoesPath))) > 0:
-                        self.__sequences.append(sequencemri.SequenceMRI(name = os.path.join(directory, echoesDirectory), directory = fullEchoesPath))
+                        self.__sequences.append(sequencemri.SequenceMRI(name = os.path.join(directory, echoesDirectory),
+                                                                        directory = fullEchoesPath,
+                                                                        nbImages = len(glob.glob("{}/*.dcm".format(fullEchoesPath)))))
+
+        self.__comparable = "".join([sequence.getComparable() for sequence in self.__sequences])
 
 
-    def updatePrefixIntoConfigParser(self):
-        """ write images prefix into a config file
-
-        Args:
-            configFile: a config file
-            prefixs: a structure containing prefixs
-
-        """
-        if not self.__configParser.has_section('prefix'):
-            self.__configParser.add_section('prefix')
-
-        for sequence in self.getSequences():
-            prefix = sequence.getPrefix()
-            name = prefix.getName()
-            value= prefix.getValue()
-            self.__configParser.set('prefix', name, value)
+    def filterSequencesAndPrefixByASelectedSession(self, aSession):
+        session = type(self)(self)
+        for aSequence in aSession.getSequences():
+            if self.hasSequence(aSequence):
+                sequence = self.getSequence(aSequence)
+                sequence.setPrefix(aSequence.getPrefix())
+                session.appendSequence(sequence)
+        return session

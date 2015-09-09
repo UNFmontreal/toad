@@ -33,7 +33,7 @@ class GenericTask(Logger, Load, Qa):
 
         """
 
-        self.__order = None
+        self.__order = self.initializeTasksOrder()
         self.__name = self.__class__.__name__.lower()
         self.__moduleName = self.__class__.__module__.split(".")[-1]
         self.__cleanupBeforeImplement = True
@@ -51,6 +51,7 @@ class GenericTask(Logger, Load, Qa):
         for arg in args:
             self.dependencies.append(arg)
 
+
     def initializeDependenciesDirectories(self, tasks):
         for index, dependency in enumerate(self.dependencies):
             for task in tasks:
@@ -58,8 +59,28 @@ class GenericTask(Logger, Load, Qa):
                     self.__dependenciesDirNames["{}Dir".format(dependency)] = task.workingDir
                     setattr(self, "{}Dir".format(dependency), task.workingDir)
 
+
     def initializeTasksAsReferences(self, tasks):
         self.tasksAsReferences = tasks
+
+
+    def initializeTasksOrder(self):
+        """if the task file name contain the prefix xx- who xx represent an integer. Use that value as a weight
+            to establish priority during for qa generation
+
+        Return
+            order: a weight that will be take into account during tasks sorting
+        """
+        order = None
+        module = self.__class__.__module__.split('-')
+
+        if len(module) >1:
+            try:
+                order = int(module[0])
+            except ValueError:
+                pass
+        return order
+
 
     def getOrder(self):
         """return the order of execution of this subclasses

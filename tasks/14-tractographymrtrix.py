@@ -121,8 +121,8 @@ class TractographyMrtrix(GenericTask):
         """
         self.info("Starting tckgen creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
-        cmd = "tckgen {} {}  -mask {} -act {} -seed_gmwmi {} -number {} -algorithm {} -nthreads {} -quiet"\
-            .format(source, tmp, mask,  act, seed_gmwmi, self.get('number_tracks'), algorithm, self.getNTreadsMrtrix())
+        cmd = "tckgen {} {}  -mask {} -act {} -seed_gmwmi {} -number {} -algorithm {} -downsample {} -nthreads {} -quiet"\
+            .format(source, tmp, mask,  act, seed_gmwmi, self.get('number_tracks'), algorithm, self.get('downsample'), self.getNTreadsMrtrix())
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)
@@ -157,8 +157,8 @@ class TractographyMrtrix(GenericTask):
 
         self.info("Starting tckgen creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
-        cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} -algorithm {} -backtrack -nthreads {} -quiet"\
-            .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'number_tracks'), algorithm, self.getNTreadsMrtrix())
+        cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} -algorithm {} -backtrack -downsample {} -nthreads {} -quiet"\
+            .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'number_tracks'), algorithm, self.get('downsample'), self.getNTreadsMrtrix())
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)

@@ -115,7 +115,6 @@ class TasksManager(object):
                 tasks.append(task)
             else:
                 print "File {} do not appear as a valid task file".format(taskFile)
-
         for task in tasks:
             task.initializeDependenciesDirectories(tasks)
         return tasks
@@ -135,6 +134,8 @@ class TasksManager(object):
         """
         def __isDefined(clazz, method):
             return method in vars(clazz.__class__) and inspect.isroutine(vars(clazz.__class__)[method])
+
+
         [directory, fileName] = os.path.split(taskFile)
         [package, ext] = os.path.splitext(os.path.basename(fileName))
         if ext == ".py":
@@ -185,26 +186,28 @@ class TasksManager(object):
         #resolve all dependencies
         graphOfDependencies = self.__resolveDependencies(tasks)
 
-        #flatten dependencies graph to obtain a list
-        dependencies = []
-        for dependency in graphOfDependencies:
-            dependencies.extend(sorted(dependency))
+        orderedTasksList = []
+        for sameLevelSet in graphOfDependencies:
+            sameLevelList =  list(sameLevelSet)
+            orderedTasksList.extend(sorted(sameLevelList,
+                                           key=lambda task: task.getOrder() if task.getOrder() is not None else 100))
 
-        #reorder the the tasks with current values
-        for i in range(0, len(dependencies)):
-            dependencies[i].setOrder(i)
+        #reorder tasks list
+        for index, task in enumerate(orderedTasksList):
+            task.setOrder(index)
+            orderedTasksList[index] = task
 
         #determine all impacts the dirty tasks could have
-        for dirtyTask in self.__getDirtyTasks(dependencies):
-            workflow += self.__getWorkflow(dirtyTask, dependencies)
+        for dirtyTask in self.__getDirtyTasks(orderedTasksList):
+            workflow += self.__getWorkflow(dirtyTask, orderedTasksList)
 
-        #remove duplicate and sort
         tasks = sorted(set(workflow))
 
         for task in tasks:
             task.initializeTasksAsReferences(tasks)
 
         return tasks
+
 
     def __getWorkflow(self, source, tasks):
         """
@@ -239,8 +242,6 @@ class TasksManager(object):
                         flaggedTasks.append(task)
 
         return sorted(set(flaggedTasks))
-
-
 
 
     def __getDirtyTasks(self, tasks):
@@ -308,6 +309,7 @@ class TasksManager(object):
             dictionnaries = {value: (dependency - ordered)
                     for value, dependency in dictionnaries.items()
                         if value not in ordered}
+
         if len(dictionnaries) != 0:
             raise ValueError('Found a cycling dependencies that exist among: {}'.format(', '.join(repr(value) for value in dictionnaries.items())))
 
@@ -325,12 +327,8 @@ class TasksManager(object):
         tasksDictionnaries = {}
         numericalDictionnaries = {}
         tasksGraph = []
-        order = 0
-
-        for task in tasks:
-            task.setOrder(order)
-            tasksDictionnaries[task] = order
-            order+=1
+        for index, task in enumerate(tasks):
+            tasksDictionnaries[task] = index
 
         for task, order in tasksDictionnaries.iteritems():
             dependenciesSet = set()
@@ -340,7 +338,7 @@ class TasksManager(object):
                         dependenciesSet |= {tasksDictionnaries[task]}
             numericalDictionnaries[order] = dependenciesSet
 
-        for sets in  list(self.__sortGraph(numericalDictionnaries)):
+        for sets in list(self.__sortGraph(numericalDictionnaries)):
             aSet = set()
             for order in sets:
                 aSet.add(tasks[order])

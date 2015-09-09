@@ -7,11 +7,14 @@ __credits__ = ["Mathieu Desrosiers"]
 
 class SequenceMRI(object):
 
-    def __init__(self, name, directory):
+    def __init__(self, name, directory, nbImages):
         self.__name = name
         self.__directory = directory
+        self.__nbImages = nbImages
         self.__prefix = None
 
+    def __eq__(self, other):
+        return self.getName() == other.getName()
 
     def __str__(self):
         return self.__repr__()
@@ -33,3 +36,6 @@ class SequenceMRI(object):
 
     def setPrefix(self, prefix):
         self.__prefix = prefix
+
+    def getComparable(self):
+        return "{}{}".format(self.__name, self.__nbImages)

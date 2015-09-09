@@ -2,13 +2,11 @@
 import shutil
 import os
 import xml.dom.minidom
-from xml.parsers.expat import ExpatError
 
 from core.toad.validation import Validation
 from logger import Logger
+from lib import xmlhelper
 from lock import Lock
-
-
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
@@ -109,7 +107,7 @@ class Subject(Logger, Lock, Validation):
         return self.__subjectDir
 
 
-    def createXmlSoftwareVersionConfig(self, xmlApplicationTags):
+    def createXmlSoftwareVersionConfig(self, xmlSoftwaresTags):
         """ Write software versions into a source filename
 
         Args:
@@ -119,18 +117,9 @@ class Subject(Logger, Lock, Validation):
         Returns:
             True if the operation is a success, False otherwise
         """
-        file = os.path.join(self.getLogDir(), self.__config.get('general', 'versions_file_name'))
-        if os.path.exists(file):
-            xmlDocument = xml.dom.minidom.parse(file)
-            if len(xmlDocument.getElementsByTagName("toad")) == 1:
-                xmlToadTag = xmlDocument.getElementsByTagName("toad")[0]
-                xmlDocument.appendChild(xmlToadTag)
-                xmlToadTag.appendChild(xmlApplicationTags)
-        else:
-            xmlDocument = xml.dom.minidom.Document()
-            xmlToadTag = xmlDocument.createElement("toad")
-            xmlDocument.appendChild(xmlToadTag)
-            xmlToadTag.appendChild(xmlApplicationTags)
-        with open(file, 'w') as w:
-            xmlDocument.writexml(w)
+        xmlFilename = os.path.join(self .getLogDir(), self.__config.get('general', 'versions_file_name'))
+        xmlToadTag = xmlhelper.createOrParseXmlDocument(xmlFilename)
+        xmlToadTag.appendChild(xmlhelper.createApplicationTags(xmlSoftwaresTags))
+        with open(xmlFilename, 'w') as w:
+            xmlToadTag.writexml(w)
         return True
