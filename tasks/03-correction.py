@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 import math
+
 import matplotlib
-from core.generictask import GenericTask
+
+from core.toad.generictask import GenericTask
 from lib.images import Images
 from lib import util, mriutil
+
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -111,8 +114,10 @@ class Correction(GenericTask):
 
         #proceed with fieldmap if provided
         if mag and phase:
+            #@TODO retirer le switch self.get("force_fieldmap")
             if not self.__topupCorrection or self.get("force_fieldmap"):
-                outputImage = self.__computeFieldmap(outputImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
+                eddyCorrectionImage = self.__correctionEddy2(dwi, mask, None, indexFile, acqpEddy, bVecs, bVals)
+                outputImage = self.__computeFieldmap(eddyCorrectionImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
                 self.__fieldmapCorrection = True
 
 
@@ -190,7 +195,6 @@ class Correction(GenericTask):
 
         """
         try:
-            print "phaseEncDir=", self.get('phase_enc_dir')
             phaseEncDir = int(self.get('phase_enc_dir'))
         except ValueError:
             self.error("Cannot determine the phase encoding direction")

@@ -1,0 +1,439 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import os
+import sys
+import argparse
+import ConfigParser
+from xml.dom import minidom
+from collections import OrderedDict
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+from lib import util, arguments, xmlhelper
+from core.dcm2toad import *
+
+__author__ = "Guillaume Vallet, Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Guillaume Vallet", "Mathieu Desrosiers"]
+__license__ = "GPL v2"
+__version__ = "0.1"
+__maintainer__ = "Mathieu Desrosiers"
+__email__ = "mathieu.desrosiers@criugm.qc.ca"
+__status__ = "Development"
+
+
+class Dcm2Toad(object):
+
+    __initialPrefixs = [prefix.Prefix('anat', "Anatomical (T1--MPRAGE)", 'anat_'),
+                                    prefix.Prefix('dwi', "Diffusion weighted image (DWI - DTI)", 'dwi_'),
+                                    prefix.Prefix('b0_ap', "B0 AP (anterior -> posterior)", 'b0_ap_'),
+                                    prefix.Prefix('b0_pa', "B0 PA (posterior -> anterior)", 'b0_pa_')]
+
+    __fieldmap =[prefix.Prefix('mag', "Magnitude fieldmap", 'mag_'), prefix.Prefix('phase', "Phase fieldmap",'phase_')]
+
+
+    def __init__(self):
+        self.__softwaresXmlTags = self.__validateToadDependencies()
+        self.__arguments = self.__parseArguments()
+        if self.__arguments.fieldmap:
+            self.__initialPrefixs.extend(self.__fieldmap)
+        self.__mriSessions = self.__initializeMRISessions()
+        self.__effectivePrefixs = self.__initializeEffectivePrefixs()
+        self.__outputDirectory = self.__initializeOutputDirectory()
+        self.__xmlFilename = os.path.join(self.__outputDirectory, ".unf2toad.xml")
+        self.__initializeSessionFromXmlFile()
+
+
+    def __parseArguments(self):
+        """Prepare and parse user friendly command line arguments for sys.argv.
+
+        Returns:
+            a args stucture containing command lines arguments
+        """
+        parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                         description ="""\n
+             """)
+        parser.add_argument("sources", nargs='+', help="A list or a single UNF mri session. wilcard *, ? are accepted")
+        parser.add_argument("-c", "--config",  metavar=('filename'), required=False, action='append',
+                                help="Specify the location of an optionnal the config.cfg as input. Default: etc/config.cfg")
+        parser.add_argument("-f","--fieldmap", help="Ask for fieldmap (magnitude and phase) during the conversion", action="store_true")
+        parser.add_argument("-i","--ignoreArchive", help="Do not open archive to search for MRI sessions.", action="store_true")
+        parser.add_argument("-n","--noConfig", help="Do not produce a config.cfg file during conversion", action="store_true")
+        parser.add_argument("-s","--noStride", help="Keep original stride orientation.", action="store_true")
+        parser.add_argument("-d", "--dirName", nargs='?', metavar=('dirname'), required=False,
+                            help="Specify a directory name for the destination. Default: toad_data")
+        #parser.add_argument("-m","--multipleDWI", metavar=('N'), type=int,
+        #                    help="concatenate multiple dwi images from a same session. "
+        #                         "N is the number of dwi image to concatenate."
+        #                         "Only mrtrix .b encoding file will be produce", required=False)
+        parser.add_argument('-v', '--version', action='version', version="%(prog)s ({})".format(__version__))
+        args = parser.parse_args()
+        return args
+
+
+    def getArguments(self):
+        return self.__arguments
+
+
+    def getOutputDirectory(self):
+        return self.__outputDirectory
+
+
+    def __initializeOutputDirectory(self):
+        directory = "toad_data"
+        if self.__arguments.dirName:
+            directory = os.path.abspath(self.__arguments.dirName)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        self.__arguments.dirName = directory
+        return self.__arguments.dirName
+
+    def getMriSessions(self, key):
+        if isinstance(key, sessionmri.SessionMRI):
+            for session in self.__mriSessions:
+                if session == key:
+                    return session
+
+
+    def setChecked(self, sessionToCheck):
+        for index, session in enumerate(self.__mriSessions):
+            if session == sessionToCheck:
+                session.setChecked(True)
+                self.__mriSessions[index] = session
+
+
+    def getComparableSessions(self, aSession):
+        sessions = []
+        for session in self.__mriSessions:
+            if session.isComparable(aSession):
+                sessions.append(session)
+        return sessions
+
+
+    def __initializeMRISessions(self, directories = None, archiveName = None):
+        sessions = []
+        if directories is None:
+            directories = self.__arguments.sources
+        elif type(directories) is str:
+            directories = [directories]
+
+        for directory in directories:
+            for root, dirs, files in os.walk(directory):
+
+                for file in files:
+                    absoluteFile = os.path.abspath(os.path.join(root, file))
+                    if not self.__arguments.ignoreArchive:
+                        archiver = unarchiver.Unarchiver(absoluteFile)
+                        if archiver.isArchive():
+                            temporaryDirectory = archiver.unArchive()
+                            sessions.extend(self.__initializeMRISessions(temporaryDirectory, archiver.getFileName()))
+
+                session = sessionmri.SessionMRI(os.path.abspath(root), archiveName)
+                if session.isUnfSession() and (session not in sessions):
+                    session.initializeMRISequences()
+                    sessions.append(session)
+
+                for dir in dirs:
+                    fullpath = os.path.join(root, dir)
+                    session = sessionmri.SessionMRI(os.path.abspath(fullpath), archiveName)
+                    if session.isUnfSession() and (session not in sessions):
+                        session.initializeMRISequences()
+                        sessions.append(session)
+
+        return sessions
+
+
+    def __initializeSessionFromXmlFile(self):
+        """Update sessions from attribute comming from an xml document.
+
+        Args:
+            xmlDocument: A minidom Document
+        """
+
+        applicationTags = xmlhelper.getNewestApplicationTag(self.__xmlFilename)
+        if applicationTags is not None:
+            sessionTags = applicationTags.getElementsByTagName("session")
+            if len(sessionTags) > 0:
+                for sessionTag in sessionTags:
+                    directory = sessionTag.getElementsByTagName("directory")[0].childNodes[0].data
+                    for index, session in enumerate(self.__mriSessions):
+                        if session.getDirectory() == directory:
+                            session.setChecked(True)
+                            self.__mriSessions[index] = session
+
+
+    def __initializeEffectivePrefixs(self):
+        """read various config file to initialize prefix"""
+        """Extract most defaults prefixs value from various config files.
+        """
+        effectivePrefixs=[]
+        config = ConfigParser.ConfigParser()
+        configFiles = []
+        configFiles.append(os.path.dirname(os.path.realpath(__file__)).replace("bin", "etc/config.cfg"))
+        if self.__arguments.config:
+            print "self.__arguments.config =", self.__arguments.config
+            for configFile in self.__arguments.config:
+                if os.path.isfile(configFile):
+                    configFiles.append(configFile)
+
+        for configFile in configFiles:
+            config.read(configFile)
+
+        for index, prefix in enumerate(self.__initialPrefixs):
+            configValue = config.get('prefix', prefix.getName())
+            if configValue != prefix.getValue():
+                prefix.setValue(configValue)
+
+            effectivePrefixs.append(prefix)
+        return effectivePrefixs
+
+
+    def writeXml(self):
+
+        xmlDocument = minidom.Document()
+        unftoadTag = xmlhelper.createOrParseXmlDocument(self.__xmlFilename)
+        applicationTag = xmlhelper.createApplicationTags(self.__softwaresXmlTags)
+        unftoadTag.appendChild(applicationTag)
+        sessionsTag = xmlDocument.createElement("sessions")
+        applicationTag.appendChild(sessionsTag)
+        for session in self.__mriSessions:
+            if session.isChecked():
+                sessionsTag.appendChild(xmlhelper.createSessionNameDirectoryTag(session.getName(), session.getDirectory()))
+        with open(self.__xmlFilename, 'w') as w:
+            unftoadTag.writexml(w)
+
+
+    def updateEffectivePrefixValues(self, dummySession):
+        """ Utility function that ask users if they want to change images prefix
+
+        Args:
+            sequences: a dictionnary that contain sequences
+
+        Returns:
+            True if a user what to alter default image prefix name, False otherwise
+
+        """
+        while True:
+            self.__printQuestion("Whould you like to change default prefix at the beginning of the filename? Actual are ...\n\n")
+            message = ""
+            for index, prefix in enumerate(self.__effectivePrefixs):
+                if dummySession.hasPrefix(prefix):
+                    message+= "\t{} will be prefix: {} \n".format(prefix.getName(), prefix.getValue())
+
+            if util.displayYesNoMessage(message, "Change prefix (y or n)? Default n :", "no"):
+                self.__printQuestion()
+                for index, prefix in enumerate(self.__effectivePrefixs):
+                    if dummySession.hasPrefix(prefix):
+                        message = "Enter new prefix for {} image. Default {} :".format(prefix.getDescription(), prefix.getValue())
+                        input = raw_input(message)
+                        if input.strip(" ") != "":
+                            if not input.strip(" ").endswith('_'):
+                                prefix.setValue("{}_".format(input))
+                            else:
+                                prefix.setValue("{}".format(input))
+                            self.__effectivePrefixs[index] = prefix
+
+            else:
+                break
+        return dummySession
+
+
+    def __validateToadDependencies(self):
+        """verify environments variables and lib importations for prior utilisation
+            program will exit if those conditions are not meet
+
+        Returns:
+
+            A list of 2 elements tuples.
+                -the first element of the tuple contain the name of the software test
+                -the second element of the tuple contain the version of the software test
+        """
+        xmlDocument = minidom.Document()
+        softwaresTags = xmlDocument.createElement("softwares")
+
+        if util.which("toadinfo") is None:
+            print "toadinfo not found. Have you source unf-toad-config.sh?"
+            sys.exit()
+
+        elif util.which("mrconvert") is None:
+            print "mrconvert not found. Have you source unf-toad-config.sh?"
+            sys.exit()
+
+        softwaresTags.appendChild(xmlhelper.createSoftwareNameVersionTag('dcm2toad', __version__))
+        version = util.launchCommand("mrconvert --version")[1].split()
+        if len(version) > 2:
+            version = version[2]
+            softwaresTags.appendChild(xmlhelper.createSoftwareNameVersionTag('mrconvert', version))
+
+        version = util.launchCommand("toadinfo --version")[2].replace('toadinfo', "").strip()
+        softwaresTags.appendChild(xmlhelper.createSoftwareNameVersionTag('toadinfo', version))
+
+        return softwaresTags
+
+
+    def selectASessions(self, question):
+        """Ask user to choose a session from a list of session
+
+        Args:
+            question: a string to prompt in the interface
+
+        Returns:
+            the session selected by the user
+        """
+        if len(self.__mriSessions) == 1:
+            #return a copy, not the original object
+            return sessionmri.SessionMRI(self.__mriSessions[0])
+
+        while True:
+            self.__printQuestion(question)
+            print(" 0.  None or exit")
+            for index, session in enumerate(self.__mriSessions):
+
+                message = "{:2d}.* {}" if session.isChecked() else "{:2d}.  {}"
+                message = message.format(index+1, session.getName())
+
+                if session.isFromArchive():
+                    message +="  from {}".format(os.path.basename(session.getArchiveName()))
+                print message
+
+            choice = raw_input("Enter your choice [0-"+str(len(self.__mriSessions))+"]: Default None [0] :")
+            if choice.strip(" ") == "":
+                choice = 0
+            if int(choice) == 0 or 0 <= int(choice)-1 <= len(self.__mriSessions)-1:
+                break
+            else:
+                print("Invalid choice, please enter a valid number")
+
+        if int(choice) != 0:
+            #return a copy, not the original object
+            return sessionmri.SessionMRI(self.__mriSessions[int(choice)-1])
+        else:
+            sys.exit()
+
+
+    def selectASequences(self, mriSession, prefix, question):
+        """Ask user to choose a sequences from a session
+
+        Args:
+            mriSession: an SessionMri object
+            prefix:    a prefix
+            question: a string to prompt in the interface
+
+        Returns:
+            the sequence selected by the user
+        """
+        defaults = (0, None)
+        menu = OrderedDict([defaults])
+        sequences = mriSession.getSequences()
+        for index, mriSequence in enumerate(sequences):
+            menu[index+1]= mriSequence
+
+        while True:
+            self.__printQuestion(question)
+            for index, mriSequence in menu.iteritems():
+                tokens = " "
+                #@TODO uncomment automaticaly found a prefix that match
+                #try:
+                #    if self.__patterns[prefix].isFound(sequence.sequence):
+                #        defaults = (sequence.sequence, sequences.keys().index(index)+1)
+                #        tokens = "X"
+                #except KeyError:
+                #    pass
+                if index == 0:
+                    print "{:2d}.   None".format(0)
+                else:
+                    print "{:2d}.{}  {}".format(index, tokens, mriSequence.getName())
+            message = "Enter your choice [0-{}]: Default ({}) [{}] :".format(len(menu)-1, defaults[1], defaults[0])
+            choice = raw_input(message)
+            if choice.strip(" ") == "":
+                choice = str(defaults[0])
+            try:
+                if choice == "0":
+                    return None
+                elif 0 <= int(choice)-1 <= len(sequences)-1:
+                    break
+            except ValueError:
+                    pass
+
+        for index, value in menu.iteritems():
+            if str(index) == choice:
+                value.setPrefix(prefix)
+                return value
+        return False
+
+
+    def selectSequences(self, mriSession):
+        for index, prefix in enumerate(self.__effectivePrefixs):
+            sequence = self.selectASequences(self.getMriSessions(mriSession), prefix, "Please select the {} image\n".format(prefix.getDescription()))
+            if sequence:
+                mriSession.appendSequence(sequence)
+        return mriSession
+
+
+    def askToConvertComparableSessions(self, sessions):
+        message = "Warning: thoses subjects seem\'s to share exactly the same layout?:\n\n    {} "\
+            .format(",\n    ".join([session.getName() for session in sessions]))
+        self.__printQuestion()
+        return util.displayYesNoMessage(message, "\nConvert them all at the same time (y or n)? Default y :", "yes")
+
+
+    def __printQuestion(self, question=None):
+        """Print user friendly message into prompts
+        Args:
+            question: a string to print into the command prompt
+        """
+        os.system("clear")
+        print("\n\n"+45*"-")
+        if question is not None:
+            print question
+
+
+    def updateName(self, sessionOrSessions):
+        """Ask user to define a new name for each sessions submit for conversion
+
+        Args:
+            sessions: a list a session to rename
+
+        """
+        self.__printQuestion()
+        def __changeSessionName(session):
+            answer = raw_input("Please enter a subject name for {0}? Defaults {0}:".format(session.getName()))
+            if answer.strip(" ") != "":
+                session.setName(answer)
+            return session
+
+        if isinstance(sessionOrSessions, sessionmri.SessionMRI):
+            return __changeSessionName(sessionOrSessions)
+        else:
+            sessions = []
+            for session in sessionOrSessions:
+                sessions.append(__changeSessionName(session))
+            return sessions
+
+
+if __name__ == '__main__':
+
+    #@TODO test optionnal config file location
+    #@TODO reshuffle none siemens none unf dicoms
+
+    interface = Dcm2Toad()
+    converter = converter.Converter(interface.getArguments())
+
+    while(True):
+
+        copyOfChooseSession = interface.selectASessions("Please choose a session to convert")
+        comparableSessions = interface.getComparableSessions(copyOfChooseSession)
+        copyOfChooseSession = interface.selectSequences(copyOfChooseSession)
+        interface.updateEffectivePrefixValues(copyOfChooseSession)
+
+        if len(comparableSessions) > 1 and interface.askToConvertComparableSessions(comparableSessions):
+            comparableSessions = interface.updateName(comparableSessions)
+            for session in comparableSessions:
+                copyOfComparableSession = session.filterSequencesAndPrefixByASelectedSession(copyOfChooseSession)
+                converter.convert(copyOfComparableSession)
+                interface.setChecked(session)
+        else:
+            copyOfChooseSession = interface.updateName(copyOfChooseSession)
+            converter.convert(copyOfChooseSession)
+            interface.setChecked(copyOfChooseSession)
+
+        interface.writeXml()

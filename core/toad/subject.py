@@ -2,12 +2,11 @@
 import shutil
 import os
 import xml.dom.minidom
-from xml.parsers.expat import ExpatError
 
-from core.validation import Validation
-from core.logger import Logger
+from core.toad.validation import Validation
+from logger import Logger
+from lib import xmlhelper
 from lock import Lock
-
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
@@ -108,7 +107,7 @@ class Subject(Logger, Lock, Validation):
         return self.__subjectDir
 
 
-    def createXmlSoftwareVersionConfig(self, xmlData):
+    def createXmlSoftwareVersionConfig(self, xmlSoftwaresTags):
         """ Write software versions into a source filename
 
         Args:
@@ -118,27 +117,9 @@ class Subject(Logger, Lock, Validation):
         Returns:
             True if the operation is a success, False otherwise
         """
-        file = os.path.join(self.getLogDir(), self.__config.get('general', 'versions_file_name'))
-        if os.path.exists(file):
-            xmlDocument = xml.dom.minidom.Document()
-            try:
-                xmlFromFile = xml.dom.minidom.parse(file)
-                if len(xmlFromFile.getElementsByTagName("toad")) == 1:
-                    if len(xmlData.getElementsByTagName("application")) != 1:
-                        self.warning("none or too many tag name application into the software version structure")
-                        return False
-
-                    xmlToadTagFromFile = xmlFromFile.getElementsByTagName("toad")[0]
-                    xmlApplicationTagFromData = xmlData.getElementsByTagName("application")[0]
-                    xmlToadTagFromFile.appendChild(xmlApplicationTagFromData)
-                    xmlDocument.appendChild(xmlToadTagFromFile)
-
-            except ExpatError:
-                self.warning('Cannot understand {} xml structure, I will overwrite it?'.format(file))
-        else:
-            xmlDocument = xmlData
-
-        with open(file, 'w') as w:
-            xmlDocument.writexml(w)
-
+        xmlFilename = os.path.join(self .getLogDir(), self.__config.get('general', 'versions_file_name'))
+        xmlToadTag = xmlhelper.createOrParseXmlDocument(xmlFilename)
+        xmlToadTag.appendChild(xmlhelper.createApplicationTags(xmlSoftwaresTags))
+        with open(xmlFilename, 'w') as w:
+            xmlToadTag.writexml(w)
         return True

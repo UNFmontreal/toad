@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from core.generictask import GenericTask
+from core.toad.generictask import GenericTask
 from lib.images import Images
 from lib import util
 
@@ -12,7 +12,7 @@ class Results(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'tensormrtrix', 'tensordipy', 'tensorfsl', 'hardidipy','hardimrtrix')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'tensormrtrix', 'tensordipy', 'tensorfsl', 'hardidipy', 'hardimrtrix')
         self.__finished = False
 
     def implement(self):

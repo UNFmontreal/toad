@@ -2,11 +2,13 @@
 import glob
 import copy
 import os
-from tasksmanager import TasksManager
+
+from core.toad.tasksmanager import TasksManager
 from subject import Subject
 from logger import Logger
 from config import Config
 from lib import util
+
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"

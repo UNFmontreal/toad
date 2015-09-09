@@ -4,8 +4,10 @@ import nibabel
 import dipy
 import dipy.direction
 import dipy.reconst.csdeconv
-from core.generictask import GenericTask
+
+from core.toad.generictask import GenericTask
 from lib.images import Images
+
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -16,7 +18,7 @@ class HardiDipy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking', 'qa')
 
 
     def implement(self):

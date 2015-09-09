@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from core.generictask import GenericTask
+from core.toad.generictask import GenericTask
 from lib.images import Images
 
 __author__ = "Mathieu Desrosiers"
@@ -11,7 +11,7 @@ class TensorMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking', 'qa')
 
 
     def implement(self):
