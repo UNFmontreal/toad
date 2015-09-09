@@ -21,6 +21,8 @@ class Correction(GenericTask):
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preparation', 'parcellation', 'qa')
+        self.__topupCorrection = False
+        self.__fieldmapCorrection = False
 
 
     def implement(self):
@@ -73,6 +75,8 @@ class Correction(GenericTask):
             #Lauch topup on concatenate B0 image
             [topupBaseName, topupImage] = self.__topup(concatenateB0Image, acqpTopup, self.get('b02b0_filename'))
             b0Image = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
+            self.__topupCorrection = True
+
 
         self.info("create a suitable mask for the dwi")
         extraArgs = ""
@@ -110,7 +114,9 @@ class Correction(GenericTask):
 
         #proceed with fieldmap if provided
         if mag and phase:
-           outputImage = self.__computeFieldmap(outputImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
+            if not self.__topupCorrection or self.get("force_fieldmap"):
+                outputImage = self.__computeFieldmap(outputImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
+                self.__fieldmapCorrection = True
 
 
         #produce a valid b0 and mask for QA
@@ -559,17 +565,13 @@ class Correction(GenericTask):
         qaImages = Images()
 
         #Information on distorsion correction
-        b0_ap = self.getPreparationImage('b0_ap')
-        b0_pa = self.getPreparationImage('b0_pa')
-        mag = self.getPreparationImage('mag')
-        phase = self.getPreparationImage('phase')
-        information = ''
-        if b0_ap and b0_pa:
-            information = 'Distortion correction done with AP and PA images'
-        elif mag and phase:
-            information = 'Distorsion correction done with fieldmap images'
+        information = 'Eddy has run '
+        if self.__topupCorrection:
+            information = 'and distortion correction done with AP and PA images'
+        elif self.__fieldmapCorrection:
+            information = 'and distorsion correction done with fieldmap images'
         else:
-            information = 'No distortion correction done'
+            information = 'with no distortion correction'
         qaImages.setInformation(information)
 
         #Get images

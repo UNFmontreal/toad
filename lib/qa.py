@@ -9,6 +9,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot
 import mpl_toolkits.mplot3d
 import dipy.segment.mask
+import dipy.reconst.dti
+import dipy.data
+import dipy.viz.fvtk
 from lib import util
 from string import ascii_uppercase, digits
 from random import choice
@@ -305,8 +308,48 @@ class Qa(object):
         matplotlib.pyplot.savefig(targetHist)
         matplotlib.pyplot.close()
         matplotlib.rcdefaults()
-    
-    
+
+
+    def tensorPng(self, fit, cc, ellipsoidsPng):
+        """
+        """
+        ccImage = nibabel.load(cc)
+        ccData = ccImage.get_data()
+        fa = dipy.reconst.dti.fractional_anisotropy(fit.evals)
+        rgbData = dipy.reconst.dti.color_fa(fa, fit.evecs)
+
+        #Showbox
+        brainBox = dipy.segment.mask.bounding_box(rgbData)
+        brainBox = numpy.array(brainBox)
+        ccBox = dipy.segment.mask.bounding_box(ccData)
+        ccBox = numpy.array(ccBox)
+
+        brainCenter = numpy.floor(numpy.mean(brainBox, 0))
+        ccCenter = numpy.floor(numpy.mean(ccBox, 0))
+
+        shift = numpy.subtract(brainBox[1], brainBox[0]) / 6
+
+        xmin = ccCenter[0] - shift[0]
+        xmax = ccCenter[0] + shift[0]
+        ymin = ccCenter[1]
+        ymax = ccCenter[1] + 1
+        zmin = ccCenter[2] - shift[0]
+        zmax = ccCenter[2] + shift[0]
+
+        evals = fit.evals[xmin:xmax, ymin:ymax, zmin:zmax]
+        evecs = fit.evecs[xmin:xmax, ymin:ymax, zmin:zmax]
+        cfa = rgbData[xmin:xmax, ymin:ymax, zmin:zmax]
+        cfa /= cfa.max()
+        cfa *= 2
+
+        sphere = dipy.data.get_sphere('symmetric724')
+        ren = dipy.viz.fvtk.ren()
+        dipy.viz.fvtk.add(ren, dipy.viz.fvtk.tensor(evals, evecs, cfa, sphere))
+        dipy.viz.fvtk.camera(ren, pos=(0,1,0), focal=(0,0,0), viewup=(0,0,1), verbose=False)
+        dipy.viz.fvtk.record(ren, n_frames=1, out_path=ellipsoidsPng, size=(600, 600))
+        dipy.viz.fvtk.clear(ren)
+
+
     def createQaReport(self, images):
         """create html report for a task with qaSupplier implemented
         Args:
@@ -324,7 +367,7 @@ class Qa(object):
             if imageLink:
                 path, filename =  os.path.split(imageLink)
                 classType = 'large_view'
-                if any(_ in filename for _ in ['_translations', '_rotations', '_vectors', '_sigma', '_hist', '_snr']):
+                if any(_ in filename for _ in ['_translations', '_rotations', '_vectors', '_sigma', '_hist', '_snr', '_ellipsoids']):
                     classType = 'small_view'
                 shutil.copyfile(imageLink, os.path.join(imagesDir, filename))
                 relativeLink = os.path.join(self.config.get('qa', 'images_dir'), filename)

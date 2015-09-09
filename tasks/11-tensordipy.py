@@ -19,17 +19,17 @@ class TensorDipy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking', 'qa')
+        self.__fit = None
 
 
     def implement(self):
-
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         bValsFile = self.getUpsamplingImage('grad', None, 'bvals')
         bVecsFile = self.getUpsamplingImage('grad', None, 'bvecs')
         mask = self.getRegistrationImage('mask', 'resample')
 
-        fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
+        self.__fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
 
 
     def __produceTensors(self, source, bValsFile, bVecsFile, mask):
@@ -99,11 +99,19 @@ class TensorDipy(GenericTask):
         qaImages = Images()
         softwareName = 'dipy'
 
+        #Produce tensor ellipsoids png image
+        rgb = self.getImage('dwi', ['tensor', 'rgb'])
+        cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
+        ellipsoidsPng = self.buildName(rgb, 'ellipsoids', 'png')
+        self.tensorPng(self.__fit, cc, ellipsoidsPng)
+        qaImages.extend(Images((ellipsoidsPng, 'Tensor ellipsoids in a part of the CC')))
+
         #Get images
         mask = self.getRegistrationImage('mask', 'resample')
 
         #Build qa images
         tags = (
+            #(['tensor', 'rgb'], 'RGB map'),
             ('fa', 'Fractional anisotropy'),
             ('ad', 'Axial Diffusivity'),
             ('md', 'Mean Diffusivity'),
