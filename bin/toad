@@ -38,7 +38,7 @@ def __parseArguments():
         An input directory must have the following structure
 
              |-input---\\
-             |         |- t1_001.nii
+             |         |- anat_001.nii
              |         |- dwi_001.nii
              |         |- dwi_001.b ou (dwi_001.bvals et dwi_001.bvecs)
              |         |-(optionnal) b0ap_001.nii
@@ -55,8 +55,7 @@ def __parseArguments():
               |- 00-qa
               |- 01-preparation
               |- 02-parcellation
-              |- 03-eddy
-              |- 04-denoising
+              |- 03-correction
               |- 05-preprocessing
               |- 06-registration
               |- 07-masking
