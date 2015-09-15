@@ -70,31 +70,31 @@ Vos données sont maintenant prêtes à être converties pour TOAD ([voir sectio
 
 **ATTENTION**
 
-TOAD propose son propre outil de conversion des données DICOM au format NIfTI, `unf2toad`. 
+TOAD propose son propre outil de conversion des données DICOM au format NIfTI, `dcm2toad`.
 Il est **très vivement recommandé** de l’utiliser, car cet outil permet *non seulement* de convertir vos données, mais *également* de préparer un fichier de configuration pour TOAD.
 Ce fichier tient compte d’informations existantes uniquement dans les données brutes et qui seront perdues par tout autre logiciel de conversion !
 
-La décompression et la conversion des données sont automatiquement effectuées par `unf2toad`.
-Différentes options sont possibles (voir l’aide `unf2toad -h`), dont la possibilité de spécifier le nom du répertoire dans lequel ajouter les fichiers convertis. 
-Par défaut, `unf2toad` crée un nouveau répertoire `toad_data` dans lequel il placera les sessions/sujets convertis.
+La décompression et la conversion des données sont automatiquement effectuées par `dcm2toad`.
+Différentes options sont possibles (voir l’aide `dcm2toad -h`), dont la possibilité de spécifier le nom du répertoire dans lequel ajouter les fichiers convertis.
+Par défaut, `dcm2toad` crée un nouveau répertoire `toad_data` dans lequel il placera les sessions/sujets convertis.
 
 ~~~bash
 # Remplacer 'unf-data.tar.gz' par le nom de votre archive
-unf2toad unf-data.tar.gz
+dcm2toad unf-data.tar.gz
 
 # Pour spécifier un répertoire cible, ici 'DWI'
-unf2toad -d DWI unf-data.tar.gz
+dcm2toad -d DWI unf-data.tar.gz
 ~~~
 
 Le logiciel vous posera une série de questions pour préciser quel dossier correspond à quel type d’images (anatomique, diffusions, etc.), indiquer le code du participant, etc.
 
-Une des forces d’`unf2toad` est de pouvoir gérer de multiples sessions/sujets à la fois. 
+Une des forces d’`dcm2toad` est de pouvoir gérer de multiples sessions/sujets à la fois.
 Ainsi, le logiciel vous indiquera tout d’abord une liste des sessions/sujets détectés au sein de l’archive.
 Une `*` qui suit le code du sujet indique que le sujet a déjà été converti.
 
-![unf2toad en action](../figs/terminal_convert_subjects.png)
+![dcm2toad en action](../figs/terminal_convert_subjects.png)
 
-Lorsque plusieurs sessions/sujets partagent l’exacte même structure de données, `unf2toad` vous proposera d’appliquer à la chaine les choix faits pour le premier sujet de la série.
+Lorsque plusieurs sessions/sujets partagent l’exacte même structure de données, `dcm2toad` vous proposera d’appliquer à la chaine les choix faits pour le premier sujet de la série.
 
 <!-- FIXME Add screenshot identical type -->
 

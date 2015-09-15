@@ -29,7 +29,7 @@ En cours de traitement, vous pouvez visualiser le contrôle qualité des différ
 ### Post traitement
 
 Une fois le travail terminé, vous trouverez un ensemble de nouveaux dossiers dans chacun des répertoires sujets.
-*Pour rappel*, ce dossier est par défaut inclus dans le dossier initial de votre projet sous le nom de `toad_data` ou de celui que vous lui avez spécifié lors de la conversion des données par `unf2toad`.
+*Pour rappel*, ce dossier est par défaut inclus dans le dossier initial de votre projet sous le nom de `toad_data` ou de celui que vous lui avez spécifié lors de la conversion des données par `dcm2toad`.
  
 Ces nouveaux dossiers contiennent l’ensemble des données, masques, et images produits par TOAD lors du traitement des données de diffusion.
 L’ensemble des dossiers pour chaque sujet devrait ressembler à peu près au tableau ci-dessous :
