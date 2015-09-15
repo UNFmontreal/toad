@@ -66,31 +66,31 @@ Your data are now being downloaded and will be ready to be converted by TOAD int
 
 ### <a name=conversion></a>Data conversion
 **ATTENTION**
-TOAD uses its own file conversion tool `unf2toad` to convert DICOM images into NIfTI.
+TOAD uses its own file conversion tool `dcm2toad` to convert DICOM images into NIfTI.
 It is **strongly recommended** to use this tool for file conversion, because not only can it convert your data, it also generates a configuration file for TOAD. 
 This file contains all existing information that is unique in the raw data which is lost upon conversion when using other softwares.
 
-`unf2toad` automatically unzips and converts your data. 
+`dcm2toad` automatically unzips and converts your data.
 Different options are available (see help by typing `unf2tad -h`). 
-By default, `unf2toad` creates a new directory called `toad_data` where it stores all the converted files from each subject/session.
+By default, `dcm2toad` creates a new directory called `toad_data` where it stores all the converted files from each subject/session.
 
 ~~~bash
 # Replace 'unf-data.tar.gz' by the name of your data
 #   (downloaded from the UNF site)
-unf2toad unf-data.tar.gz
+dcm2toad unf-data.tar.gz
 
 # To specify a target directory into which the converted files are written
 #   for example `DWI`
-unf2toad -d DWI unf-data.tar.gz
+dcm2toad -d DWI unf-data.tar.gz
 ~~~
 
 The software will ask you a series of questions to specify which file corresponds to which type of image (anatomical, diffusion, etc.), and to indicate the study/project ID. 
 
-One of the strong features of `unf2toad` is its ability to manage multiple sessions/subjects simultaneously. It will first show you a list of sessions/subjects found within the downloaded data set. Subject ID followed by an asterisk * indicates the data from that subject have been converted. 
+One of the strong features of `dcm2toad` is its ability to manage multiple sessions/subjects simultaneously. It will first show you a list of sessions/subjects found within the downloaded data set. Subject ID followed by an asterisk * indicates the data from that subject have been converted.
 
-![unf2toad in action](../figs/terminal_convert_subjects.png)
+![dcm2toad in action](../figs/terminal_convert_subjects.png)
 
-When multiple sessions/subjects share the exact same data structure, `unf2toad` offers the option of applying the setting options chosen for the first subject to the subsequent sessions/subjects.
+When multiple sessions/subjects share the exact same data structure, `dcm2toad` offers the option of applying the setting options chosen for the first subject to the subsequent sessions/subjects.
 
 <!-- FIXME Add screenshot identical type -->
 
@@ -138,7 +138,7 @@ If you have data that are already converted into NIfTI as well as the encoding f
 </pre>
     
 ***Attention:*** *in this case, it is your responsibility to ensure that all your files have been correctly converted, and that the encoding file complies with the usual standards (strides ...).
-If these data come from a 3T Tim Trio Siemens MRI scanner (as at the UNF), and if you still have the raw data, we strongly recommend to convert the data with the software `unf2toad` [see section Data conversion](# conversion)
+If these data come from a 3T Tim Trio Siemens MRI scanner (as at the UNF), and if you still have the raw data, we strongly recommend to convert the data with the software `dcm2toad` [see section Data conversion](# conversion)
 
 
 ### File naming

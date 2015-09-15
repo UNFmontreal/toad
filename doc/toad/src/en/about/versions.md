@@ -11,4 +11,4 @@
 
 - Stable structure of the pipeline
 - First version of the documentation (tutorial)
-- Creation of the tool `UNF2Toad` to convert raw data from a Siemens MRI scanner 3T TIM Trio into optimized Nifti for TOAD
+- Creation of the tool `dcm2Toad` to convert raw data from a Siemens MRI scanner 3T TIM Trio into optimized Nifti for TOAD

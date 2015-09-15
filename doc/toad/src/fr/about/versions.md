@@ -11,4 +11,4 @@
 
 - Structure finalisée du pipeline
 - Première version de la documentation (tutoriel)
-- Création de l’outil `UNF2Toad` pour convertir les données brutes d’un scanner IRM Siemens Tim Trio 3T au format Nifti optimisé pour TOAD
+- Création de l’outil `dcm2toad` pour convertir les données brutes d’un scanner IRM Siemens Tim Trio 3T au format Nifti optimisé pour TOAD
