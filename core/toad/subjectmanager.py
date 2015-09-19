@@ -159,16 +159,16 @@ class SubjectManager(Logger, Config):
             subject:  a subject
 
         """
-        if subject.getConfig().get('general', 'server') in ['magma' , 'stark']:
+        if subject.getConfig().get('general', 'server') in ['magma', 'stark']:
             notify = " -notify "
         else:
             notify = ""
 
         extraFlags = ""
 
-        if ((subject.getConfig().getboolean('tractographymrtrix', 'ignore') is False) or
-            (subject.getConfig().getboolean('tractographydipy', 'ignore') is False)):
-            extraFlags += " --tractography "
+        if ((subject.getConfig().getboolean('tractographymrtrix', 'ignore') is True) or
+            (subject.getConfig().getboolean('tractographydipy', 'ignore') is True)):
+            extraFlags += " --noTractography "
 
         wallTime = ""
         if subject.getConfig().get('general', 'server') in ['mammouth']:

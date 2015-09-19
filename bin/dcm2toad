@@ -15,7 +15,7 @@ __author__ = "Guillaume Vallet, Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Guillaume Vallet", "Mathieu Desrosiers"]
 __license__ = "GPL v2"
-__version__ = "0.1"
+__version__ = "0.2.0"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Development"
@@ -86,6 +86,7 @@ class Dcm2Toad(object):
             os.makedirs(directory)
         self.__arguments.dirName = directory
         return self.__arguments.dirName
+
 
     def getMriSessions(self, key):
         if isinstance(key, sessionmri.SessionMRI):
@@ -231,7 +232,6 @@ class Dcm2Toad(object):
                             else:
                                 prefix.setValue("{}".format(input))
                             self.__effectivePrefixs[index] = prefix
-
             else:
                 break
         return dummySession
@@ -263,9 +263,6 @@ class Dcm2Toad(object):
         if len(version) > 2:
             version = version[2]
             softwaresTags.appendChild(xmlhelper.createSoftwareNameVersionTag('mrconvert', version))
-
-        version = util.launchCommand("toadinfo --version")[2].replace('toadinfo', "").strip()
-        softwaresTags.appendChild(xmlhelper.createSoftwareNameVersionTag('toadinfo', version))
 
         return softwaresTags
 

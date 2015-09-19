@@ -87,9 +87,9 @@ class Config(object):
         if arguments.queue:
             config.set('general', 'sge_queue', arguments.queue)
 
-        if arguments.tractography:
-            config.set('tractographymrtrix', 'ignore', 'False')
-            config.set('tractographydipy', 'ignore', 'False')
+        if arguments.noTractography:
+            config.set('tractographymrtrix', 'ignore', 'True')
+            config.set('tractographydipy', 'ignore', 'True')
 
         #Should be safe to overwrite value base on command line arguments here
         if arguments.emergency:
