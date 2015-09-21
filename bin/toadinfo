@@ -38,7 +38,6 @@ if __name__ == '__main__':
 
     arguments = parseArguments()
     toadinfo = Toadinfo(arguments.dicomFile)
-    siemensHeader = toadinfo.getSiemensHeader()
 
     if arguments.config:
         toadinfo.writeToadConfig(arguments.config)

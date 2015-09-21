@@ -3,4 +3,4 @@ __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 
-__all__=[ "toadinfo"]
+__all__=["dicom", "toadinfo"]
