@@ -143,13 +143,13 @@ class Denoising(GenericTask):
         sigmaVector = numpy.zeros(data.shape[2], dtype=numpy.float32)
         maskNoise = numpy.zeros(data.shape[:-1], dtype=numpy.bool)
 
-
-        for idx in range(data.shape[2]):
-            sigmaMatrix[:, :, idx], maskNoise[:, :, idx] = dipy.denoise.noise_estimate.piesno(data[:, :, idx],
-                                                                                         N=numberArrayCoil,
-                                                                                         return_mask=True)
-            sigmaVector[idx] = sigmaMatrix[0,0,idx,0]
-        return sigmaVector, numpy.median(sigmaVector), maskNoise
+        sigmaMatrix, maskNoise = dipy.denoise.noise_estimate.piesno(data, N=numberArrayCoil, return_mask=True)
+        #for idx in range(data.shape[2]):
+        #    sigmaMatrix[:, :, idx], maskNoise[:, :, idx] = dipy.denoise.noise_estimate.piesno(data[:, :, idx],
+                                                                                         #N=numberArrayCoil,
+                                                                                         #return_mask=True)
+        #    sigmaVector[idx] = sigmaMatrix[0,0,idx,0]
+        return sigmaVector, sigmaMatrix, maskNoise
 
 
     def isIgnore(self):

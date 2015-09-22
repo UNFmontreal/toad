@@ -275,10 +275,11 @@ class Dcm2Toad(object):
 
         Returns:
             the session selected by the user
+            A true flag if more than 1 sessions exists
         """
         if len(self.__mriSessions) == 1:
             #return a copy, not the original object
-            return sessionmri.SessionMRI(self.__mriSessions[0])
+            return sessionmri.SessionMRI(self.__mriSessions[0]), True
 
         while True:
             self.__printQuestion(question)
@@ -302,7 +303,7 @@ class Dcm2Toad(object):
 
         if int(choice) != 0:
             #return a copy, not the original object
-            return sessionmri.SessionMRI(self.__mriSessions[int(choice)-1])
+            return sessionmri.SessionMRI(self.__mriSessions[int(choice)-1]), False
         else:
             sys.exit()
 
@@ -416,8 +417,7 @@ if __name__ == '__main__':
     converter = converter.Converter(interface.getArguments())
 
     while(True):
-
-        copyOfChooseSession = interface.selectASessions("Please choose a session to convert")
+        copyOfChooseSession, exitAfterConversion = interface.selectASessions("Please choose a session to convert")
         comparableSessions = interface.getComparableSessions(copyOfChooseSession)
         copyOfChooseSession = interface.selectSequences(copyOfChooseSession)
         interface.updateEffectivePrefixValues(copyOfChooseSession)
@@ -434,3 +434,6 @@ if __name__ == '__main__':
             interface.setChecked(copyOfChooseSession)
 
         interface.writeXml()
+
+        if exitAfterConversion:
+            break
