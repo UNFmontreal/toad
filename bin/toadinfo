@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import ConfigParser
 import argparse
-import math
 import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from lib import arguments, util
-
+from core.toadinfo.toadinfo import Toadinfo
+from lib import arguments
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 __license__ = "GPL v2"
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Prototype"
@@ -22,222 +20,26 @@ __status__ = "Prototype"
 def parseArguments():
     """Prepare and parse user friendly command line arguments for sys.argv.
 
-
     Returns:
         a args stucture containing command lines arguments
     """
     parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description ="""\n
-
          """)
-    parser.add_argument("dcmFile", help="A SIEMENS DICOM imges")
+    parser.add_argument("dicomFile", help="A SIEMENS DICOM imges")
     parser.add_argument("-c", "--config", nargs='?',metavar=('filename'), required=False,
                             help="Write output into a config.cfg file or create a new one if it doesn't exist")
-    parser.add_argument("-f","--fieldmap", help="Add a section for fieldmap into the config file", action="store_true")
     parser.add_argument('-v', '--version', action='version', version="%(prog)s ({})".format(__version__))
     args = parser.parse_args()
     return args
 
-
-def __getPhaseEncodingDirection(source):
-    with open(source, 'r') as f:
-        for line in f.readlines():
-            if "sSliceArray.asSlice" in line and ".dInPlaneRot" in line:
-                return __returnPhaseEncodingDirection(line)
-    return 1
-
-
-def __getPatFactor(source):
-    with open(source, 'r') as f:
-        for line in f.readlines():
-            if "sPat.lAccelFactPE" in line:
-                try:
-                    return float(line.split("=")[-1].strip())
-                except ValueError:
-                    return 1
-    return 1
-
-
-def __getEpiFactor(source):
-    with open(source, 'r') as f:
-        for line in f.readlines():
-            if "sKSpace.lPhaseEncodingLines" in line:
-                try:
-                    return int(line.split("=")[-1].strip())
-                except ValueError:
-                    return 1
-    return 1
-
-def __getPhaseResolution(source):
-    with open(source, 'r') as f:
-        for line in f.readlines():
-            if "sKSpace.dPhaseResolution" in line:
-                try:
-                    return int(line.split("=")[-1].strip())
-                except ValueError:
-                    return 1
-    return 1
-
-def __getPhaseOversampling(source):
-    with open(source, 'r') as f:
-        for line in f.readlines():
-            if "sKSpace.dPhaseOversamplingForDialog" in line:
-                try:
-                    return int(line.split("=")[-1].strip())
-                except ValueError:
-                    return 1
-    return 1
-
-def __returnPhaseEncodingDirection(line):
-
-    tolerance = 0.2
-
-    try:
-        value = float(line.split("=")[-1].strip())
-    except ValueError:
-        return 1
-
-    if value < tolerance and value > -tolerance:
-       return 1  #between -0.2 and 0.2  A>>P
-
-    if (value > math.pi - tolerance) or (value < tolerance - math.pi):
-        return 0  #greater than  2.94  or smaller than -2.94  #P>>A
-
-    if (value > (math.pi/2) - tolerance) and (value < (math.pi/2)+tolerance):
-        return 2  #R>>L
-
-    if (value < math.copysign((math.pi/2)-tolerance,-0.0)) and (value > math.copysign((math.pi/2)+tolerance, -0.0)):
-         return 3  #L>>R
-
-    return 1
-
-
-def __getEchoSpacing(source, header, epiFactor, patFactor = 1, phaseResolution = 1, phaseOversampling = 1):
-
-    try:
-        bpppe = float(header['0019,1028'])
-        echoSpacing = 1/(bpppe* epiFactor) *1000.0 *patFactor *phaseResolution *phaseOversampling
-        echoTime = header['EchoTime']
-
-    except AttributeError:
-        print "Cannot read csa header from ", source
-        return (None,None)
-        print "Some field(s) cannot be found in the header"
-
-    except (KeyError, IndexError, TypeError):
-        return (None,None)
-
-    return echoSpacing, echoTime
-
-
-def writeConfig(source, phaseEncDir, epiFactor, echoSpacing, echoTime = None):
-    config = ConfigParser.ConfigParser(allow_no_value = True)
-    if os.path.exists(source):
-        config.read(source)
-
-    if not config.has_section("correction"):
-        config.add_section("correction")
-
-
-    if phaseEncDir is not None:
-
-        if phaseEncDir == 0:
-            config.set("correction", "#The phase encoding is from posterior to anterior")
-        elif  phaseEncDir == 1:
-            config.set("correction", "#The phase encoding is from anterior to Posterior")
-        elif  phaseEncDir == 2:
-            config.set("correction", "#The phase encoding is from right to left")
-        elif  phaseEncDir == 3:
-            config.set("correction", "#The phase encoding is from left to right")
-        else:
-            config.set("correction", "#Phase encoding direction: unknown")
-        config.set("correction", "phase_enc_dir", phaseEncDir)
-
-
-    if epiFactor is not None:
-        config.set("correction", "epi_factor", epiFactor)
-    if echoSpacing is not None:
-        config.set("correction", "echo_spacing", echoSpacing)
-
-    if echoTime is not None:
-        if not config.has_section("correction"):
-            config.add_section("correction")
-        config.set("correction", "echo_time_dwi", echoTime)
-
-    with open(source, 'w') as w:
-       config.write(w)
-
-
-def find_between( s, first, last ):
-    try:
-        start = s.index( first ) + len( first )
-        end = s.index( last, start )
-        return s[start:end]
-    except ValueError:
-        return ""
-
-
-def __wrapDcminfo(source):
-    header = {}
-    cmd = "dcminfo -all {}".format(source)
-    output = util.launchCommand(cmd)
-    if len(output) > 1:
-        for line in output[1].split('\n'):
-            if line.startswith("[DCM]"):
-                line = line.replace('[DCM]', "")
-                tokens = line.split()
-                if 'unknown' in tokens[5]:
-                    key = "{},{}".format(tokens[0], tokens[1])
-                else :
-                    key = tokens[5]
-                if "[" in line and "]" in line:
-                    header[key] = find_between(line, "[", "]").strip()
-    return header
-
-
 if __name__ == '__main__':
 
 
-    #parse arguments provide in command line
     arguments = parseArguments()
+    toadinfo = Toadinfo(arguments.dicomFile)
 
+    if arguments.config:
+        toadinfo.writeToadConfig(arguments.config)
 
-    try:
-        header = __wrapDcminfo(arguments.dcmFile)
-
-        #found information into the ASCCONV tags
-        phaseEncDir = __getPhaseEncodingDirection(arguments.dcmFile)
-        patFactor = __getPatFactor(arguments.dcmFile)
-        epiFactor = __getEpiFactor(arguments.dcmFile)
-        phaseResolution = __getPhaseResolution(arguments.dcmFile)
-        phaseOversampling = __getPhaseOversampling(arguments.dcmFile)
-        echoSpacing, echoTime = __getEchoSpacing(arguments.dcmFile, header, epiFactor, patFactor, phaseResolution, phaseOversampling)
-
-        if arguments.config and arguments.fieldmap:
-            writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing, echoTime)
-        elif arguments.config and not arguments.fieldmap:
-            writeConfig(arguments.config, phaseEncDir, epiFactor, echoSpacing)
-        if phaseEncDir is not None:
-            if phaseEncDir==0:
-                print "\tPhase encoding: {}, P>>A".format(phaseEncDir)
-            elif phaseEncDir==1:
-                print "\tPhase encoding: {}, A>>P".format(phaseEncDir)
-            elif phaseEncDir==2:
-                print "\tPhase encoding: {}, R>>L".format(phaseEncDir)
-            elif phaseEncDir==3:
-                print "\tPhase encoding: {}, L>>R".format(phaseEncDir)
-            else:
-                print "Phase encoding:", phaseEncDir
-
-        if epiFactor is not None:
-            print "\tEPIFactor: ", epiFactor
-
-        if echoSpacing is not None:
-            print "\tEchoSpacing: ", echoSpacing, " ms"
-
-        if echoTime is not None and arguments.fieldmap:
-            print "\tEchoTime: ", echoTime, " ms"
-
-    except OSError:
-        print "Error: unable to find dcminfo from mrtrix3. Have you source unf-toad-config.sh?"
-        sys.exit()
+    print toadinfo

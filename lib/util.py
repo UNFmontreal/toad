@@ -5,6 +5,7 @@ import signal
 import shutil
 import time
 import glob
+import re
 import os
 from string import Template
 
@@ -420,3 +421,15 @@ def displayContinueQuitRemoveMessage(msg):
             return "n"
         elif choice.lower() == 'r':
             return "r"
+
+def slugify(s):
+    """stolen code from Dolph Mathews """
+    s = s.lower()
+    for c in [' ', '-', '.', '/']:
+        s = s.replace(c, '_')
+    s = re.sub('\W', '', s)
+    s = s.replace('_', ' ')
+    s = re.sub('\s+', ' ', s)
+    s = s.strip()
+    s = s.replace(' ', '_')
+    return s

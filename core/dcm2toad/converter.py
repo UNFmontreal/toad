@@ -6,6 +6,7 @@ import ConfigParser
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from lib import util
+from core.toadinfo.toadinfo import Toadinfo
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -15,6 +16,7 @@ __credits__ = ["Mathieu Desrosiers"]
 class Converter(object):
 
     def __init__(self, arguments):
+        self.__arguments = arguments
         self.__arguments = arguments
         self.__configParser = ConfigParser.ConfigParser()
         self.__configFilename = None
@@ -73,10 +75,8 @@ class Converter(object):
         if not self.__arguments.noConfig:
             dicoms = glob.glob("{}/*.dcm".format(sequence.getDirectory()))
             if len(dicoms) > 0:
-                cmd = "toadinfo {} -c {}".format(dicoms.pop(), self.__configFilename)
-                if self.__arguments.fieldmap:
-                    cmd += " --fieldmap "
-                print cmd
+                toadinfo = Toadinfo(dicoms.pop())
+                toadinfo.writeToadConfig( self.__configFilename)
                 util.launchCommand(cmd)
 
 

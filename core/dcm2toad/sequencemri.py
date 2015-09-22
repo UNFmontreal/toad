@@ -4,6 +4,7 @@ __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 
+#A Sequence may contain dicoms images, but may also contains only metadata for speed purpose
 
 class SequenceMRI(object):
 
