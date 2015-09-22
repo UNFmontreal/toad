@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -30,7 +31,7 @@ class SequenceMRI(object):
         return self.__name
 
     def getDirectory(self):
-        return self.__directory
+        return "'{}'".format(self.__directory.replace("'", "'\\''"))
 
     def getPrefix(self):
         return self.__prefix

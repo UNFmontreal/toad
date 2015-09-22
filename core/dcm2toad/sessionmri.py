@@ -7,29 +7,6 @@ __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 
-class Session(object):
-    def __init__(self, name):
-        self.__name = name
-        self.__sequences = {}
-
-    def appendDicom(self, dicom):
-        if self.__sequences.has_key(dicom.getSequenceName()):
-            sequence = self.__sequences[dicom.getSequenceName()]
-        else:
-            sequence = Sequence(dicom.getSequenceName())
-        sequence.append(dicom)
-        self.__sequences[dicom.getSequenceName()] = sequence
-
-    def getName(self):
-        return self.__name
-    def getSequences(self):
-        return self.__sequences
-    def __repr__(self):
-        cmd = ""
-        for sequence in self.__sequences:
-            cmd += "{}\n".format(sequence)
-        return cmd
-
 
 class SessionMRI(object):
     def __init__(self, directoryOrMriSession, archiveName = None):
