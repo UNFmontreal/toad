@@ -322,7 +322,6 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
 
     if absolute:
         targetName = os.path.join(target, targetName)
-
     return "'{}'".format(targetName)
 
 

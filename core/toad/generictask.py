@@ -521,7 +521,7 @@ class GenericTask(Logger, Load, Qa):
             a file name that contain the postfix and the current working directory
         """
         absoluteBuildName = util.buildName(self.config, self.workingDir, source, postfix, ext, absolute)
-        return os.path.basename(absoluteBuildName)
+        return os.path.basename(absoluteBuildName.replace("'",""))
 
 
     def uncompressImage(self, source):

@@ -24,7 +24,10 @@ class Preparation(GenericTask):
         bEncs = self.getBackupImage('grad', None, 'b')
         bVals = self.getBackupImage('grad', None, 'bvals')
         bVecs = self.getBackupImage('grad', None, 'bvecs')
+
+
         (bEncs, bVecs, bVals) = self.__produceEncodingFiles(bEncs, bVecs, bVals, dwi)
+
         expectedLayout = self.get('stride_orientation')
         if not mriutil.isDataStridesOrientationExpected(dwi, expectedLayout) \
                 and self.get("force_realign_strides"):
@@ -69,7 +72,9 @@ class Preparation(GenericTask):
         else:
             self.info("Linking {} to {}".format(bEncs, util.symlink(bEncs, self.workingDir)))
 
+
         if not bVecs or not bVals:
+
             self.info(mriutil.mrtrixToFslEncoding(dwi,
                                                     bEncs,
                                                     self.buildName(dwi, None, "bvecs"),
