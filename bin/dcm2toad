@@ -23,12 +23,12 @@ __status__ = "Development"
 
 class Dcm2Toad(object):
 
-    __initialPrefixs = [prefix.Prefix('anat', "Anatomical (T1--MPRAGE)", 'anat_'),
-                                    prefix.Prefix('dwi', "Diffusion weighted image (DWI - DTI)", 'dwi_'),
-                                    prefix.Prefix('b0_ap', "B0 AP (anterior -> posterior)", 'b0_ap_'),
-                                    prefix.Prefix('b0_pa', "B0 PA (posterior -> anterior)", 'b0_pa_')]
+    __initialPrefixs = [prefix.Prefix('anat', "Anatomical (T1--MPRAGE)", 'anat'),
+                                    prefix.Prefix('dwi', "Diffusion weighted image (DWI - DTI)", 'dwi'),
+                                    prefix.Prefix('b0_ap', "B0 AP (anterior -> posterior)", 'b0_ap'),
+                                    prefix.Prefix('b0_pa', "B0 PA (posterior -> anterior)", 'b0_pa')]
 
-    __fieldmap =[prefix.Prefix('mag', "Magnitude fieldmap", 'mag_'), prefix.Prefix('phase', "Phase fieldmap",'phase_')]
+    __fieldmap =[prefix.Prefix('mag', "Magnitude fieldmap", 'mag'), prefix.Prefix('phase', "Phase fieldmap", 'phase')]
 
 
     def __init__(self):
@@ -119,7 +119,6 @@ class Dcm2Toad(object):
 
         for directory in directories:
             for root, dirs, files in os.walk(directory):
-
                 for file in files:
                     absoluteFile = os.path.abspath(os.path.join(root, file))
                     if not self.__arguments.ignoreArchive:
@@ -171,7 +170,6 @@ class Dcm2Toad(object):
         configFiles = []
         configFiles.append(os.path.dirname(os.path.realpath(__file__)).replace("bin", "etc/config.cfg"))
         if self.__arguments.config:
-            print "self.__arguments.config =", self.__arguments.config
             for configFile in self.__arguments.config:
                 if os.path.isfile(configFile):
                     configFiles.append(configFile)
@@ -227,10 +225,7 @@ class Dcm2Toad(object):
                         message = "Enter new prefix for {} image. Default {} :".format(prefix.getDescription(), prefix.getValue())
                         input = raw_input(message)
                         if input.strip(" ") != "":
-                            if not input.strip(" ").endswith('_'):
-                                prefix.setValue("{}_".format(input))
-                            else:
-                                prefix.setValue("{}".format(input))
+                            prefix.setValue(input)
                             self.__effectivePrefixs[index] = prefix
             else:
                 break

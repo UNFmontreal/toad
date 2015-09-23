@@ -289,8 +289,8 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
         parts = os.path.basename(source).split(os.extsep)
         targetName = parts.pop(0)
 
-    #add postfix to taeget name 
-    if (postfix is not None) and postfix !='':
+    #add postfix to target name
+    if (postfix is not None) and postfix.strip(" ") != "":
         if type(postfix) is list:
             for item in postfix:
                 if config.has_option('postfix', item):
@@ -317,12 +317,13 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
         if extension.find('.') != 0:
             extension = ".{}".format(extension)
 
-    if extension.strip() !=  ".":
-        targetName+=extension
+    if extension.strip() != ".":
+        targetName += extension
 
     if absolute:
         targetName = os.path.join(target, targetName)
-    return targetName
+
+    return "'{}'".format(targetName)
 
 
 def getFileWithParents(source, levels=1):

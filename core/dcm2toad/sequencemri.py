@@ -31,7 +31,10 @@ class SequenceMRI(object):
         return self.__name
 
     def getDirectory(self):
-        return "'{}'".format(self.__directory.replace("'", "'\\''"))
+        return self.__directory
+
+    def getEscapedDirectory(self):
+        return "'{}'".format(self.__directory)
 
     def getPrefix(self):
         return self.__prefix

@@ -21,6 +21,8 @@ class Converter(object):
         self.__configParser = ConfigParser.ConfigParser()
         self.__configFilename = None
 
+    def __buildFilename(self, target, prefixValue, sessionName, extension = ".nii.gz"):
+        return "'{}/{}{}{}'".format(target, prefixValue, sessionName, extension)
 
     def convert(self, session):
         """Single entry point to convert any mri sequences
@@ -46,8 +48,9 @@ class Converter(object):
 
 
     def __convert(self, sequence, session, target):
-        filename = "{}/{}{}".format(target, sequence.getPrefix().getValue(), session.getName())
-        cmd = "mrconvert {0} {1}.nii.gz -force ".format(sequence.getDirectory(), filename)
+        filename = util.buildName(self.__configParser, target, sequence.getPrefix().getValue(), session.getName(), 'nii.gz')
+
+        cmd = "mrconvert {0} {1} -force ".format(sequence.getEscapedDirectory(), filename)
         if not self.__arguments.noStride:
             cmd += " -stride 1,2,3 "
 
@@ -64,9 +67,14 @@ class Converter(object):
             prefix_subjectName.nii.gz
 
         """
-        filename = "{}/{}{}".format(target, sequence.getPrefix().getValue(), session.getName())
-        cmd = "mrconvert {0} {1}.nii.gz -force -export_grad_mrtrix {1}.b -export_grad_fsl {1}.bvecs {1}.bvals"\
-            .format(sequence.getDirectory(), filename)
+        dwi = util.buildName(self.__configParser, target, sequence.getPrefix().getValue(), session.getName(),'nii.gz')
+        bEnc = util.buildName(self.__configParser, target, dwi, None, "b")
+        bvals = util.buildName(self.__configParser, target, dwi, None, "bvals")
+        bvecs = util.buildName(self.__configParser, target, dwi, None, "bvecs")
+
+        cmd = "mrconvert {} {} -force -export_grad_mrtrix {} -export_grad_fsl {} {}"\
+            .format(sequence.getEscapedDirectory(), dwi, bEnc, bvecs, bvals)
+
         if not self.__arguments.noStride:
             cmd += " -stride 1,2,3,4 "
         print cmd
@@ -122,8 +130,8 @@ class Converter(object):
         except IndexError:
             return
 
-        filename = "{}/{}{}".format(target, sequence.getPrefix().getValue(), session.getName())
-        cmd = "mrconvert {0} {1}.nii.gz -force ".format(sequence.getDirectory(), filename)
+        filename = util.buildName(self.__configParser, target, sequence.getPrefix().getValue(), session.getName(), 'nii.gz')
+        cmd = "mrconvert {0} {1} -force ".format(sequence.getEscapedDirectory(), filename)
         if not self.__arguments.noStride:
             cmd += " -stride 1,2,3 "
         print cmd
@@ -141,6 +149,8 @@ class Converter(object):
             name = sequence.getPrefix().getName()
             value = sequence.getPrefix().getValue()
             self.__configParser.set('prefix', name,  value)
+            if name == 'dwi':
+                self.__configParser.set('prefix', 'grad',  value)
 
         with open(self.__configFilename, 'a') as a:
             self.__configParser.write(a)

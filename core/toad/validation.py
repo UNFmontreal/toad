@@ -53,6 +53,7 @@ class Validation(object):
                 self.info("{} directory exists, assuming validation have already done before".format(self.backupDir))
                 result = True
         else:
+
             if not (util.getImage(self.config, self.workingDir, 'anat') or
                         util.getImage(self.config, self.workingDir, 'anat', None, 'nii')):
                 self.warning("No high resolution image found into {} directory".format(self.workingDir))
@@ -63,9 +64,9 @@ class Validation(object):
                 self.warning("No diffusion weight image found into {} directory".format(self.workingDir))
                 result = False
 
-            if (not util.getImage(self.config, self.workingDir,'grad', None, 'b')) and \
-                    (not util.getImage(self.config, self.workingDir,'grad', None, 'bvals') or not
-                    util.getImage(self.config, self.workingDir,'grad', None, 'bvecs')):
+            if (not util.getImage(self.config, self.workingDir, 'grad', None, 'b')) and \
+                    (not util.getImage(self.config, self.workingDir, 'grad', None, 'bvals') or not
+                    util.getImage(self.config, self.workingDir, 'grad', None, 'bvecs')):
                 self.warning("No valid .b encoding or (.bvals, .bvecs) files found in directory: {}".format(self.workingDir))
                 result = False
 
