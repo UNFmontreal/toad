@@ -290,7 +290,7 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
         targetName = parts.pop(0)
 
     #add postfix to target name
-    if (postfix is not None) and postfix.strip(" ") != "":
+    if (postfix is not None) and postfix != "":
         if type(postfix) is list:
             for item in postfix:
                 if config.has_option('postfix', item):
