@@ -32,8 +32,8 @@ class Masking(GenericTask):
         seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 
         #create a area 253 mask and a 1014 mask
-        self.info(mriutil.mrcalc(aparcAsegResample, '253', self.buildName('aparc_aseg', ['253','mask'], 'nii.gz')))
-        self.info(mriutil.mrcalc(aparcAsegResample, '1024', self.buildName('aparc_aseg', ['1024','mask'],'nii.gz')))
+        self.info(mriutil.mrcalc(aparcAsegResample, '253', self.buildName('aparc_aseg', ['253', 'mask'], 'nii.gz')))
+        self.info(mriutil.mrcalc(aparcAsegResample, '1024', self.buildName('aparc_aseg', ['1024', 'mask'],'nii.gz')))
 
         #produce optionnal mask
         if self.get("start_seeds").strip():

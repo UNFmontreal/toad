@@ -1,4 +1,4 @@
-# TOAD <br/> (Toolkit of Analyse of Diffusion imaging)
+# TOAD <br/> (Toolkit of Analysis in Diffusion imaging)
 
 **Organization:** Unité Fonctionnelle de Neuroimagerie ([UNF](http://www.unf-montreal.ca)), Centre de recherche de l’institut Universitaire de Gériatrie de Montréal ([CRIUGM](http://criugm.qc.ca/))
 

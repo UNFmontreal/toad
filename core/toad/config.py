@@ -90,6 +90,9 @@ class Config(object):
         if arguments.noTractography:
             config.set('tractographymrtrix', 'ignore', 'True')
             config.set('tractographydipy', 'ignore', 'True')
+            config.set('arguments', 'tractography', 'False')
+        else:
+            config.set('arguments', 'tractography', 'True')
 
         #Should be safe to overwrite value base on command line arguments here
         if arguments.emergency:

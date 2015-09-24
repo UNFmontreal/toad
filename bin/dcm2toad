@@ -11,6 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from lib import util, arguments, xmlhelper
 from core.dcm2toad import *
 
+
 __author__ = "Guillaume Vallet, Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Guillaume Vallet", "Mathieu Desrosiers"]
@@ -23,12 +24,12 @@ __status__ = "Development"
 
 class Dcm2Toad(object):
 
-    __initialPrefixs = [prefix.Prefix('anat', "Anatomical (T1--MPRAGE)", 'anat_'),
-                                    prefix.Prefix('dwi', "Diffusion weighted image (DWI - DTI)", 'dwi_'),
-                                    prefix.Prefix('b0_ap', "B0 AP (anterior -> posterior)", 'b0_ap_'),
-                                    prefix.Prefix('b0_pa', "B0 PA (posterior -> anterior)", 'b0_pa_')]
+    __initialPrefixs = [prefix.Prefix('anat', "Anatomical (T1--MPRAGE)", 'anat'),
+                                    prefix.Prefix('dwi', "Diffusion weighted image (DWI - DTI)", 'dwi'),
+                                    prefix.Prefix('b0_ap', "B0 AP (anterior -> posterior)", 'b0_ap'),
+                                    prefix.Prefix('b0_pa', "B0 PA (posterior -> anterior)", 'b0_pa')]
 
-    __fieldmap =[prefix.Prefix('mag', "Magnitude fieldmap", 'mag_'), prefix.Prefix('phase', "Phase fieldmap",'phase_')]
+    __fieldmap =[prefix.Prefix('mag', "Magnitude fieldmap", 'mag'), prefix.Prefix('phase', "Phase fieldmap", 'phase')]
 
 
     def __init__(self):
@@ -119,7 +120,6 @@ class Dcm2Toad(object):
 
         for directory in directories:
             for root, dirs, files in os.walk(directory):
-
                 for file in files:
                     absoluteFile = os.path.abspath(os.path.join(root, file))
                     if not self.__arguments.ignoreArchive:
@@ -171,7 +171,6 @@ class Dcm2Toad(object):
         configFiles = []
         configFiles.append(os.path.dirname(os.path.realpath(__file__)).replace("bin", "etc/config.cfg"))
         if self.__arguments.config:
-            print "self.__arguments.config =", self.__arguments.config
             for configFile in self.__arguments.config:
                 if os.path.isfile(configFile):
                     configFiles.append(configFile)
@@ -225,12 +224,9 @@ class Dcm2Toad(object):
                 for index, prefix in enumerate(self.__effectivePrefixs):
                     if dummySession.hasPrefix(prefix):
                         message = "Enter new prefix for {} image. Default {} :".format(prefix.getDescription(), prefix.getValue())
-                        input = raw_input(message)
+                        input = util.rawInput(message)
                         if input.strip(" ") != "":
-                            if not input.strip(" ").endswith('_'):
-                                prefix.setValue("{}_".format(input))
-                            else:
-                                prefix.setValue("{}".format(input))
+                            prefix.setValue(input)
                             self.__effectivePrefixs[index] = prefix
             else:
                 break
@@ -293,7 +289,7 @@ class Dcm2Toad(object):
                     message +="  from {}".format(os.path.basename(session.getArchiveName()))
                 print message
 
-            choice = raw_input("Enter your choice [0-"+str(len(self.__mriSessions))+"]: Default None [0] :")
+            choice = util.rawInput("Enter your choice [0-"+str(len(self.__mriSessions))+"]: Default None [0] :")
             if choice.strip(" ") == "":
                 choice = 0
             if int(choice) == 0 or 0 <= int(choice)-1 <= len(self.__mriSessions)-1:
@@ -312,7 +308,7 @@ class Dcm2Toad(object):
         """Ask user to choose a sequences from a session
 
         Args:
-            mriSession: an SessionMri object
+            mriSession: an SessionMri objects
             prefix:    a prefix
             question: a string to prompt in the interface
 
@@ -341,7 +337,7 @@ class Dcm2Toad(object):
                 else:
                     print "{:2d}.{}  {}".format(index, tokens, mriSequence.getName())
             message = "Enter your choice [0-{}]: Default ({}) [{}] :".format(len(menu)-1, defaults[1], defaults[0])
-            choice = raw_input(message)
+            choice = util.rawInput(message)
             if choice.strip(" ") == "":
                 choice = str(defaults[0])
             try:
@@ -394,7 +390,7 @@ class Dcm2Toad(object):
         """
         self.__printQuestion()
         def __changeSessionName(session):
-            answer = raw_input("Please enter a subject name for {0}? Defaults {0}:".format(session.getName()))
+            answer = util.rawInput("Please enter a subject name for {0}? Defaults {0}:".format(session.getName()))
             if answer.strip(" ") != "":
                 session.setName(answer)
             return session

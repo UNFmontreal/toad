@@ -166,8 +166,7 @@ class SubjectManager(Logger, Config):
 
         extraFlags = ""
 
-        if ((subject.getConfig().getboolean('tractographymrtrix', 'ignore') is True) or
-            (subject.getConfig().getboolean('tractographydipy', 'ignore') is True)):
+        if not subject.getConfig().getboolean('arguments', 'tractography'):
             extraFlags += " --noTractography "
 
         wallTime = ""
