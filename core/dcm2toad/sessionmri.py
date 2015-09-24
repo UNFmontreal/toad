@@ -22,7 +22,7 @@ class SessionMRI(object):
             self.__comparable = None
 
         self.__checked = False
-        self.__sequences = []
+        self.__sequences = {}
 
     def __eq__(self, other):
         return self.__directory == other.__directory
@@ -71,25 +71,30 @@ class SessionMRI(object):
         return self.__archiveName
 
     def getSequences(self):
-        return self.__sequences
+        keys = self.__sequences.keys()
+        keys.sort()
+        orderer = []
+        for key in keys:
+            orderer.append(self.__sequences[key])
+        return orderer
+
+    def getSequence(self, aSequence):
+        key = aSequence.getName()
+        if self.__sequences.has_key(key):
+            return self.__sequences[key]
+        return None
 
     def hasSequence(self, aSequence):
-        for sequence in self.__sequences:
+        for name, sequence in self.__sequences.iteritems():
             if sequence == aSequence:
                 return True
         return False
 
-    def getSequence(self, aSequence):
-        for sequence in self.__sequences:
-            if sequence == aSequence:
-                return sequence
-        return None
-
     def appendSequence(self, sequence):
-        self.__sequences.append(sequence)
+        self.__sequences[sequence.getName()]= sequence
 
     def hasPrefix(self, prefix):
-        for sequence in  self.__sequences:
+        for name, sequence in  self.__sequences.iteritems():
             if sequence.getPrefix() == prefix:
                 return True
         return False
@@ -112,9 +117,9 @@ class SessionMRI(object):
         for directory in directories:
             fullPath = os.path.join(self.__directory, directory)
             if len(glob.glob("{}/*.dcm".format(fullPath))) > 0:
-                self.__sequences.append(sequencemri.SequenceMRI(name = directory,
+                self.__sequences[directory]= sequencemri.SequenceMRI(name = directory,
                                                                 directory = fullPath,
-                                                                nbImages = len(glob.glob("{}/*.dcm".format(fullPath)))))
+                                                                nbImages = len(glob.glob("{}/*.dcm".format(fullPath))))
 
             elif len(glob.glob("{}/echo_*/*.dcm".format(fullPath))) > 0:
                 #this is a multi echoes sequence"
@@ -122,11 +127,12 @@ class SessionMRI(object):
                 for echoesDirectory in echoesDirectories:
                     fullEchoesPath = os.path.join(fullPath, echoesDirectory)
                     if len(glob.glob("{}/*.dcm".format(fullEchoesPath))) > 0:
-                        self.__sequences.append(sequencemri.SequenceMRI(name = os.path.join(directory, echoesDirectory),
+                        name = os.path.join(directory, echoesDirectory)
+                        self.__sequences[name] = sequencemri.SequenceMRI(name = os.path.join(directory, echoesDirectory),
                                                                         directory = fullEchoesPath,
-                                                                        nbImages = len(glob.glob("{}/*.dcm".format(fullEchoesPath)))))
+                                                                        nbImages = len(glob.glob("{}/*.dcm".format(fullEchoesPath))))
 
-        self.__comparable = "".join([sequence.getComparable() for sequence in self.__sequences])
+        self.__comparable = "".join([sequence.getComparable() for name , sequence in self.__sequences.iteritems()])
 
 
     def filterSequencesAndPrefixByASelectedSession(self, aSession):
