@@ -10,7 +10,6 @@ from collections import OrderedDict
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from lib import util, arguments, xmlhelper
 from core.dcm2toad import *
-import termios
 
 
 __author__ = "Guillaume Vallet, Mathieu Desrosiers"
@@ -225,7 +224,7 @@ class Dcm2Toad(object):
                 for index, prefix in enumerate(self.__effectivePrefixs):
                     if dummySession.hasPrefix(prefix):
                         message = "Enter new prefix for {} image. Default {} :".format(prefix.getDescription(), prefix.getValue())
-                        input = self.rawInput(message)
+                        input = util.rawInput(message)
                         if input.strip(" ") != "":
                             prefix.setValue(input)
                             self.__effectivePrefixs[index] = prefix
@@ -290,7 +289,7 @@ class Dcm2Toad(object):
                     message +="  from {}".format(os.path.basename(session.getArchiveName()))
                 print message
 
-            choice = self.rawInput("Enter your choice [0-"+str(len(self.__mriSessions))+"]: Default None [0] :")
+            choice = util.rawInput("Enter your choice [0-"+str(len(self.__mriSessions))+"]: Default None [0] :")
             if choice.strip(" ") == "":
                 choice = 0
             if int(choice) == 0 or 0 <= int(choice)-1 <= len(self.__mriSessions)-1:
@@ -338,7 +337,7 @@ class Dcm2Toad(object):
                 else:
                     print "{:2d}.{}  {}".format(index, tokens, mriSequence.getName())
             message = "Enter your choice [0-{}]: Default ({}) [{}] :".format(len(menu)-1, defaults[1], defaults[0])
-            choice = self.rawInput(message)
+            choice = util.rawInput(message)
             if choice.strip(" ") == "":
                 choice = str(defaults[0])
             try:
@@ -391,7 +390,7 @@ class Dcm2Toad(object):
         """
         self.__printQuestion()
         def __changeSessionName(session):
-            answer = self.rawInput("Please enter a subject name for {0}? Defaults {0}:".format(session.getName()))
+            answer = util.rawInput("Please enter a subject name for {0}? Defaults {0}:".format(session.getName()))
             if answer.strip(" ") != "":
                 session.setName(answer)
             return session
@@ -403,11 +402,6 @@ class Dcm2Toad(object):
             for session in sessionOrSessions:
                 sessions.append(__changeSessionName(session))
             return sessions
-
-    def rawInput(self, message):
-        sys.stdout.flush();
-        termios.tcflush(sys.stdin, termios.TCIOFLUSH)
-        return raw_input(message)
 
 
 if __name__ == '__main__':

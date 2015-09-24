@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import subprocess
 import datetime
+import termios
 import signal
 import shutil
 import time
 import glob
+import sys
 import re
 import os
 from string import Template
@@ -389,7 +391,7 @@ def displayYesNoMessage(msg, question = "Continue? (y or n)", default = None):
     """
     print msg
     while True:
-        choice = raw_input(question)
+        choice = rawInput(question)
         if choice.strip() == "" and default is not None:
             if default == 'yes':
                 return True
@@ -414,7 +416,7 @@ def displayContinueQuitRemoveMessage(msg):
     """
     print msg
     while True:
-        choice = raw_input("Continue? (y, n or r)")
+        choice = rawInput("Continue? (y, n or r)")
         if choice.lower() == 'y':
             return "y"
         elif choice.lower() == 'n':
@@ -433,3 +435,17 @@ def slugify(s):
     s = s.strip()
     s = s.replace(' ', '_')
     return s
+
+
+def rawInput(message):
+    """ Utility that clear the buffer before , reads a line from input
+
+    Args:
+        a string that represent a message to write into the standard output
+
+    Returns:
+         a line read from input
+    """
+    sys.stdout.flush();
+    termios.tcflush(sys.stdin, termios.TCIOFLUSH)
+    return raw_input(message)

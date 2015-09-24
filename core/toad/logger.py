@@ -3,6 +3,8 @@ import datetime
 import sys
 import os
 
+from lib import util
+
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
@@ -136,7 +138,7 @@ class Logger(object):
         """
         self.__log(message, 'DEBUG')
         if pause:
-            raw_input("Press Enter to continue...")
+            util.rawInput("Press Enter to continue...")
 
 
     def warning(self, message, pause = False):
@@ -148,7 +150,7 @@ class Logger(object):
         """
         self.__log(message, 'WARNING')
         if pause:
-            raw_input("Press Enter to continue...")
+            util.rawInput("Press Enter to continue...")
 
 
     def error(self, message):
