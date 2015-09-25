@@ -3,11 +3,16 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
+|**Name**        | Preparation                                           |
+|**Goal**        | Create missing files                                  |
+|                | Check image's orientation                             |
+|**Parameters**  | Diffusion and anatomical images                       |
+|                | Gradient encoding file                                |
 |**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
+|**Output**      | Re-oriented files                                     |
+|                | Creation of the missing files                         |
+|                | Creation of the missing files                         |
+|                | Creation of pictures for the QA
 
 #
 
@@ -19,14 +24,12 @@
 [presentation of the objective of the method]
 
 
-## Requirements
-
-[what files are needed to run the task]
+## Minimal requirements
 
 
-## Parameters
-
-[what are the parameters used in the following steps -- see parameters in the table]
+- Diffusion images (dwi)
+- Anatommical images (anat)
+- Gradient vector (b or bvec and bval)
 
 
 ## Implementation
@@ -35,19 +38,19 @@
 [If only one step, do not add the subtitle step 1]
 ```
 
-### [1- Step 1 name]
+### [1- Produce encoding directions]
 
 ```
 [Tool or function used with the reference to the official documentation]
 ```
 
-### [2- Step 2 name]
+### [2- Force re-orientation]
 
 ```
 [Tool or function used with the reference to the official documentation]
 ```
 
-### [3- Step 3 name]
+### [3- Check Freesurfer folder if exist]
 
 ```
 [Tool or function used with the reference to the official documentation]
