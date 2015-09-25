@@ -8,7 +8,7 @@
 |                | Check image's orientation                             |
 |**Parameters**  | Diffusion and anatomical images                       |
 |                | Gradient encoding file                                |
-|**Time**        | [Estimate processing time in a local machine]         |
+|**Time**        | N/A                                                   |
 |**Output**      | Re-oriented files                                     |
 |                | Missing gradients files                               |
 |                | Pictures for the QA  (png and gif)                    |
@@ -40,19 +40,20 @@ Preparation step makes sure that every files needed for TOAD is provided.
 ### 1- Produce encoding directions
 
 ```
-function: __produceEncodingFiles
+function: __produceEncodingFiles(bEncs, bVecs, bVals, dwi)
 ```
 
 ### 2- Force re-orientation
 
 ```
-function: __stride4DImage and mriutil.stride3DImage
+function: __stride4DImage(dwi, bEncs, bVecs, bVals, expectedLayout)
+function: mriutil.stride3DImage(image, self.buildName(image, "stride"), expectedLayout))
 ```
 
 ### 3- Check Freesurfer folder if exist
 
 ```
-function: mriutil.isAfreesurferStructure
+function: mriutil.isAfreesurferStructure(directory)
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
