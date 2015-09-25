@@ -18,8 +18,8 @@ Correction step creates dwi corrected for motion. If a fielmap or two b0 with op
 
 ## Minimal Requirements
 
-dwi images
-gradient encoding direction
+- dwi images
+- Gradient encoding direction
 
 ## Optimal Requirements
 
