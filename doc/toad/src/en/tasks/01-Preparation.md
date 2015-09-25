@@ -37,26 +37,22 @@ Preparation step makes sure that every files needed for TOAD is provided.
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
-```
-
 ### 1- Produce encoding directions
 
 ```
-[Tool or function used with the reference to the official documentation]
+function: __produceEncodingFiles
 ```
 
 ### 2- Force re-orientation
 
 ```
-[Tool or function used with the reference to the official documentation]
+function: __stride4DImage and mriutil.stride3DImage
 ```
 
 ### 3- Check Freesurfer folder if exist
 
 ```
-[Tool or function used with the reference to the official documentation]
+function: mriutil.isAfreesurferStructure
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
