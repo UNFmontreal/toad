@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 import subprocess
 import datetime
-import termios
 import signal
 import shutil
 import time
 import glob
-import sys
 import re
 import os
 from string import Template
@@ -447,6 +445,6 @@ def rawInput(message):
     Returns:
          a line read from input
     """
-    sys.stdout.flush();
-    termios.tcflush(sys.stdin, termios.TCIOFLUSH)
+    #sys.stdout.flush();
+    #termios.tcflush(sys.stdin, termios.TCIOFLUSH)
     return raw_input(message)
