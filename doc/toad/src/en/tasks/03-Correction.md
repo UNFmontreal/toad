@@ -3,58 +3,68 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
+|**Name**        | Correction                                            |
+|**Goal**        | Motion and distortion correction of dwi images        |
+|**Parameters**  | Diffusion and gradient encoding direction <br> Two b0 with opposite PE (phase encoding direction) <br> Fieldmap (phase and magnitude)|
+|**Time**        | N/A                                                   |
+|**Output**      | dwi corrected <br> gradient encoding direction corrected|
 
 #
 
-[brief description]    
-
-
 ## Goal
 
-[presentation of the objective of the method]
+Correction step creates dwi corrected for motion. If a fielmap or two b0 with opposite PE are provided correction step wil use this information to corerct for geometrical distortion.
 
 
-## Requirements
+## Minimal Requirements
 
-[what files are needed to run the task]
+dwi images
+gradient encoding direction
 
+## Optimal Requirements
+
+- dwi images <br>
+- gradient encoding direction <br><br>
+- Two b0 with opposite PE (highly recommended) <br>
+or <br>
+- fieldmap (phase and magnitude images)  <br>
 
 ## Parameters
 
-[what are the parameters used in the following steps -- see parameters in the table]
-
-
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
+### 1- With two b0s PE (highly recommended)
+
+```{.python}
+function: self.__createAcquisitionParameterFile('topup')
+function: self.__createAcquisitionParameterFile('eddy')
+function: self.__correctionEddy2(dwi, mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
 ```
 
-### [1- Step 1 name]
+### 2- With fieldmap images (phase and magnitude)
 
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [2- Step 2 name]
-
-```
-[Tool or function used with the reference to the official documentation]
+```{.python}
+function: self.__createAcquisitionParameterFile('eddy')
+function: self.__correctionEddy2(dwi, mask, None, indexFile, acqpEddy, bVecs, bVals)
+function: self.__computeFieldmap(eddyCorrectionImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
 ```
 
-### [3- Step 3 name]
+### 3- Without fieldmaps or b0s (with opposite PE)
 
-```
-[Tool or function used with the reference to the official documentation]
+```{.python}
+function: self.__createAcquisitionParameterFile('eddy')
+function: self.__correctionEddy2(dwi, mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+- Motion and geometric distortion dwi corrected
+- Gradient encoding direction corrected
+- Creation of a gif of dwi before and after correction step
+- Creation of a gif of gradient encoding direction before and after correction
+ 
+
+
+
 
 
