@@ -21,7 +21,7 @@ anat image
 
 ## Implementation
 
-### 1- Run reconAll from Freesurfer [ref: <a href="http://freesurfer.net/fswiki" target="_blank">Freesurfer]</a>]
+### 1- Run reconAll from Freesurfer [ref: <a href="http://freesurfer.net/fswiki" target="_blank">Freesurfer</a>]
 
 ```{.python}
 function self.__submitReconAll(anat)
