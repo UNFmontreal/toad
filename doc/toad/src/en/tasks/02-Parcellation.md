@@ -7,7 +7,7 @@
 |**Goal**        | Run Freesurfer pipeline                                |
 |**Parameters**  | anat image                                            |
 |**Time**        | N/A                                                   |
-|**Output**      | - anat from Freesurfer <br> - Aparc_aseg segmentation <br> - Mask from aparc_aseg file <br> - lh_ribbon and rh_ribbon <br> - 5tt image (5 tissus type)|
+|**Output**      | - anat from Freesurfer <br> - Aparc_aseg segmentation <br> - Mask from aparc_aseg file <br> - lh_ribbon and rh_ribbon <br> - 5tt image (five-tissue-type)|
 
 #
 
