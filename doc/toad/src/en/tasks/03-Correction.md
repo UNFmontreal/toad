@@ -29,8 +29,6 @@ gradient encoding direction
 or <br>
 - fieldmap (phase and magnitude images)  <br>
 
-## Parameters
-
 ## Implementation
 
 ### 1- With two b0s PE (highly recommended)
