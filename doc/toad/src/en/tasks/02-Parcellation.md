@@ -38,6 +38,8 @@ function self.__convertFeesurferImageIntoNifti(anat)
 ```{.python}
 function self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
 function self.__createImageFromAtlas("template_buckner", self.get("buckner"))
+function self.__createImageFromAtlas("template_brodmann", self.get("brodmann"))
+function self.__createImageFromAtlas("template_choi", self.get("choi"))
 function self.__create5ttImage()
 ```
 
