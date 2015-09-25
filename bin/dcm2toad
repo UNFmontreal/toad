@@ -40,7 +40,7 @@ class Dcm2Toad(object):
         self.__mriSessions = self.__initializeMRISessions()
         self.__effectivePrefixs = self.__initializeEffectivePrefixs()
         self.__outputDirectory = self.__initializeOutputDirectory()
-        self.__xmlFilename = os.path.join(self.__outputDirectory, ".unf2toad.xml")
+        self.__xmlFilename = os.path.join(self.__outputDirectory, ".dcm2toad.xml")
         self.__initializeSessionFromXmlFile()
 
 
