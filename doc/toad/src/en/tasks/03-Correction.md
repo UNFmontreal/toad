@@ -27,7 +27,7 @@ gradient encoding direction
 - gradient encoding direction <br><br>
 - Two b0 with opposite PE (highly recommended) <br>
 or <br>
-- fieldmap (phase and magnitude images)  <br>
+- Fieldmap (phase and magnitude images)  <br>
 
 ## Implementation
 
