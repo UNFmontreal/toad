@@ -1,4 +1,4 @@
-# TOolkit of Analyse of Diffusion imaging (TOAD)
+# TOolkit of Analysis in Diffusion imaging (TOAD)
 
 Welcome to the English version of the documentation of [TOAD](http://unf-montreal.ca/toad/).
 Sources files as well as installation’s instructions are available on [Github](https://github.com/UNFmontreal/toad).
