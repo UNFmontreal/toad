@@ -223,6 +223,45 @@ class Validation(object):
                 self.warning("Remove this subject from the list?")
                 return False
 
+        if self.config.get('denoising', 'algorithm') == "nlmeans"  and \
+            self.config.get('denoising', 'number_array_coil') == "32":
+
+            if self.config.getboolean('general', 'matlab_available'):
+                msg = "We wont be able to run algorithm NLMEANS on 32 coils channel images for denoising.\n" \
+                "Whould you like to use LPCA instead? Otherwise, no denoising will be applied."
+
+                if util.displayYesNoMessage(msg, 'use LPCA instead? (y or n)'):
+                    self.config.set('denoising', 'algorithm','lpca')
+                    self.warning("LPCA have been set")
+                else:
+                    if util.displayYesNoMessage("No denoising will be applied."):
+                        self.config.set('denoising', 'ignore','true')
+                        self.warning("No denoising will be use?")
+                    else:
+                        self.warning("Remove this subject from the list?")
+                        return False
+            else:
+
+                msg = "We won\'t be able to run algorithm NLMEANS on 32 coils channel images for denoising.\n" \
+                "No denoising will be applied."
+                if util.displayYesNoMessage(msg):
+                    self.config.set('denoising', 'ignore','true')
+                    self.warning("No denoising will be use?")
+                else:
+                    self.warning("Remove this subject from the list?")
+                    return False
+
+        if not self.config.getboolean('tractographymrtrix', 'ignore'):
+            downsampled = self.config.getint('tractographymrtrix', 'downsample')
+            if downsampled > 2:
+
+                msg = "due to storage restriction streamlines were downsampled.\n"\
+                    "Even if there is no difference in structural connectivity you should be carefull " \
+                    "if you want to compute metrics along streamlines.\n" \
+                    "You may change downsample value into tractographymrtrix section of config.cfg file"
+
+                self.warning(msg, True)
+
         return True
 
 

@@ -40,7 +40,7 @@ class Dcm2Toad(object):
         self.__mriSessions = self.__initializeMRISessions()
         self.__effectivePrefixs = self.__initializeEffectivePrefixs()
         self.__outputDirectory = self.__initializeOutputDirectory()
-        self.__xmlFilename = os.path.join(self.__outputDirectory, ".unf2toad.xml")
+        self.__xmlFilename = os.path.join(self.__outputDirectory, ".dcm2toad.xml")
         self.__initializeSessionFromXmlFile()
 
 
@@ -111,22 +111,32 @@ class Dcm2Toad(object):
         return sessions
 
 
+
+
+
     def __initializeMRISessions(self, directories = None, archiveName = None):
+
+        def __processIfArchive():
+            if not self.__arguments.ignoreArchive:
+                archiver = unarchiver.Unarchiver(absoluteFile)
+                if archiver.isArchive():
+                    temporaryDirectory = archiver.unArchive()
+                    sessions.extend(self.__initializeMRISessions(temporaryDirectory, archiver.getFileName()))
+
         sessions = []
         if directories is None:
             directories = self.__arguments.sources
         elif type(directories) is str:
             directories = [directories]
-
         for directory in directories:
+            if os.path.isfile(directory):
+                absoluteFile = os.path.abspath(directory)
+                __processIfArchive()
+
             for root, dirs, files in os.walk(directory):
                 for file in files:
                     absoluteFile = os.path.abspath(os.path.join(root, file))
-                    if not self.__arguments.ignoreArchive:
-                        archiver = unarchiver.Unarchiver(absoluteFile)
-                        if archiver.isArchive():
-                            temporaryDirectory = archiver.unArchive()
-                            sessions.extend(self.__initializeMRISessions(temporaryDirectory, archiver.getFileName()))
+                    __processIfArchive()
 
                 session = sessionmri.SessionMRI(os.path.abspath(root), archiveName)
                 if session.isUnfSession() and (session not in sessions):
