@@ -447,6 +447,6 @@ def rawInput(message):
     Returns:
          a line read from input
     """
-    sys.stdout.flush();
+    sys.stdout.flush()
     termios.tcflush(sys.stdin, termios.TCIOFLUSH)
     return raw_input(message)
