@@ -251,17 +251,6 @@ class Validation(object):
                     self.warning("Remove this subject from the list?")
                     return False
 
-        if not self.config.getboolean('tractographymrtrix', 'ignore'):
-            downsampled = self.config.getint('tractographymrtrix', 'downsample')
-            if downsampled > 2:
-
-                msg = "due to storage restriction streamlines were downsampled.\n"\
-                    "Even if there is no difference in structural connectivity you should be carefull " \
-                    "if you want to compute metrics along streamlines.\n" \
-                    "You may change downsample value into tractographymrtrix section of config.cfg file"
-
-                self.warning(msg, True)
-
         return True
 
 
