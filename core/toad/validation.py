@@ -228,30 +228,17 @@ class Validation(object):
             if self.config.get('denoising', 'algorithm') == "nlmeans"  and \
                 self.config.get('denoising', 'number_array_coil') == "32":
 
+                msg = "NLMEANS algorithm is not yet implemented for 32 coils channels images.\n" \
+
                 if self.config.getboolean('general', 'matlab_available'):
-                    msg = "We wont be able to run algorithm NLMEANS on 32 coils channel images for denoising.\n" \
-                    "Whould you like to use LPCA instead? Otherwise, no denoising will be applied."
+                    msg += "set algorithm to lpca or aonlm into [denoising] section of your config.cfg.\nOtherwise " \
 
-                    if util.displayYesNoMessage(msg, 'use LPCA instead? (y or n)'):
-                        self.config.set('denoising', 'algorithm','lpca')
-                        self.warning("LPCA have been set")
-                    else:
-                        if util.displayYesNoMessage("No denoising will be applied."):
-                            self.config.set('denoising', 'ignore','true')
-                            self.warning("No denoising will be use?")
-                        else:
-                            self.warning("Remove this subject from the list?")
-                            return False
-                else:
+                msg += "set ignore: False  into [denoising] section of your config.cfg.\n" \
+                        "This subject will probably failed"
 
-                    msg = "We won\'t be able to run algorithm NLMEANS on 32 coils channel images for denoising.\n" \
-                    "No denoising will be applied."
-                    if util.displayYesNoMessage(msg):
-                        self.config.set('denoising', 'ignore','true')
-                        self.warning("No denoising will be use?")
-                    else:
-                        self.warning("Remove this subject from the list?")
-                        return False
+                if not util.displayYesNoMessage(msg, "Continue anyway? (y or n)"):
+                    self.warning("Remove this subject from the list?")
+                    return False
 
         return True
 
