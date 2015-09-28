@@ -128,7 +128,7 @@ class Config(object):
         First read master config file: etc/config.cfg
         Second, Process .toad.cfg in the user home directory
         Third, Look if there is a config file into the root of the study
-        Fouth, Process any users input file enter as the command line option -c
+        Fourth, Process any users input file enter as the command line option -c
 
 
         Args:
@@ -151,5 +151,6 @@ class Config(object):
         if arguments.config:
             for config in arguments.config:
                 if os.path.isfile(config):
-                    configFiles.append(config)
+                    configFiles.append(os.path.abspath(config))
+
         return configFiles
