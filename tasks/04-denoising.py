@@ -23,6 +23,7 @@ class Denoising(GenericTask):
         GenericTask.__init__(self, subject, 'correction', 'preparation', 'parcellation', 'qa')
         self.matlabWarning = False
         self.sigmaVector = None
+        self.algorithm = None
 
 
     def implement(self):
@@ -49,6 +50,7 @@ class Denoising(GenericTask):
         target = self.buildName(dwi, "denoise")
 
         if self.get("algorithm") == "nlmeans":
+            self.algorithm = "nlmeans"
 
             dwiImage = nibabel.load(dwi)
             dwiData  = dwiImage.get_data()
@@ -109,8 +111,10 @@ class Denoising(GenericTask):
                'nbthreads': self.getNTreadsDenoise()}
 
         if self.get("algorithm") == "aonlm":
+            self.algorithm = "aonlm"
             template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "denoise_aonlm.tpl"))
         else:
+            self.algorithm = "lpca"
             template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "denoise_lpca.tpl"))
 
         util.createScript(scriptName, template)
@@ -178,12 +182,11 @@ class Denoising(GenericTask):
 
         """
         qaImages = Images()
-        algorithm = self.get("algorithm")
 
         #Information on denoising algorithm
-        information = 'Algorithm {} is set'.format(algorithm)
+        information = 'Algorithm {} is set'.format(self.algorithm)
         if self.matlabWarning:
-            information += ' but matlab is not available on this server'
+            information = "Algorithm aonlm or lpca is set but matlab is not available for this server. Please configure matlab or set denoising algorithm to nlmeans or none"
         qaImages.setInformation(information)
 
         #Get images
