@@ -365,6 +365,46 @@ class Qa(object):
         dipy.viz.fvtk.clear(ren)
 
 
+    def createVtkPng(source, anatomical, roi):
+        target = source.replace(".trk", ".png")
+        roiImage= nibabel.load(roi)
+        anatomicalImage = nibabel.load(anatomical)
+
+        sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
+        try:
+            sourceActor = dipy.viz.fvtk.streamtube(sourceImage, line_colors(sourceImage))
+            roiActor = dipy.viz.fvtk.contour(roiImage.get_data(), levels=[1], colors=[(1., 1., 0.)], opacities=[1.])
+            anatomicalActor = dipy.viz.fvtk.slicer(
+                anatomicalImage.get_data(),
+                voxsz=(1.0, 1.0, 1.0),
+                plane_i=None,
+                plane_j=None,
+                plane_k=[65],
+                outline=False)
+        except ValueError:
+            return False
+
+        sourceActor.RotateX(-70)
+        sourceActor.RotateY(2.5)
+        sourceActor.RotateZ(185)
+
+        roiActor.RotateX(-70)
+        roiActor.RotateY(2.5)
+        roiActor.RotateZ(185)
+
+        anatomicalActor.RotateX(-70)
+        anatomicalActor.RotateY(2.5)
+        anatomicalActor.RotateZ(185)
+
+        ren = dipy.viz.fvtk.ren()
+        dipy.viz.fvtk.add(ren, sourceActor)
+        dipy.viz.fvtk.add(ren, roiActor)
+        dipy.viz.fvtk.add(ren, anatomicalActor)
+        dipy.viz.fvtk.camera(ren, pos=(0,0,1), focal=(0,0,0), viewup=(0,1,0), verbose=False)
+        dipy.viz.fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
+        return target
+
+
     def createQaReport(self, images):
         """create html report for a task with qaSupplier implemented
         Args:
