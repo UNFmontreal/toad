@@ -24,7 +24,7 @@ Resolution of the anatomic
 
 ## Implementation
 
-### [1- Step 1 name]
+### 1- Upsampling
 
 ```
 function: dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
