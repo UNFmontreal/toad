@@ -3,58 +3,57 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
+|**Name**        | Parcellation                                          |
+|**Goal**        | Run Freesurfer pipeline                                |
+|**Parameters**  | anat image                                            |
+|**Time**        | N/A                                                   |
+|**Output**      | - anat from Freesurfer <br> - Aparc_aseg segmentation <br> - Mask from aparc_aseg file <br> - lh_ribbon and rh_ribbon <br> - 5tt image (five-tissue-type)|
 
 #
 
-[brief description]    
-
-
 ## Goal
 
-[presentation of the objective of the method]
-
+Parcellation step create from Freesurfer pipeline different masks.
 
 ## Requirements
 
-[what files are needed to run the task]
-
-
-## Parameters
-
-[what are the parameters used in the following steps -- see parameters in the table]
-
+anat image
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
+### 1- Run reconAll from Freesurfer [ref: <a href="http://freesurfer.net/fswiki" target="_blank">Freesurfer</a>]
+
+```{.python}
+function self.__submitReconAll(anat)
 ```
 
-### [1- Step 1 name]
+### 2- Conversion
 
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [2- Step 2 name]
-
-```
-[Tool or function used with the reference to the official documentation]
+```{.python}
+function self.__convertFeesurferImageIntoNifti(anat)
 ```
 
-### [3- Step 3 name]
+### 3- Creation of masks from Freesurfer atlases
 
+```{.python}
+function self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
+function self.__createImageFromAtlas("template_buckner", self.get("buckner"))
+function self.__createImageFromAtlas("template_brodmann", self.get("brodmann"))
+function self.__createImageFromAtlas("template_choi", self.get("choi"))
+function self.__create5ttImage()
 ```
-[Tool or function used with the reference to the official documentation]
+
+### 4- Re-orientation
+
+```{.python}
+function self.__convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)), target)
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+- anat, norm, rh_ribbon and lh_ribbon mgz images will be converted into nifti format from Freesurfer pipeline.
+- Brodmann, Choi and Buckner atlases will be created.
+- A mask of the brain will be computed using aparc_aseg.
+- 5tt map will be computed using lh.white, rh.white, lh.pial and rh.pial from Freesurfer.
 
 
