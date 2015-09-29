@@ -23,7 +23,7 @@ __credits__ = ["Christophe Bedetti", "Mathieu Desrosiers"]
 
 class Qa(object):
 
-    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, grid=False, isData=False):
+    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, grid=False, isData=False, textData=None):
         """Utility method to slice a 3d image
         Args:
             source : background image
@@ -87,7 +87,10 @@ class Qa(object):
                 ax.set_axisbelow(True)
             else:
                 ax.set_axis_off()
-    
+
+        if textData != None:
+            fig.text(0, 0, textData, verticalalignment='bottom', horizontalalignment='left', color='red', fontsize=width/30)
+
         matplotlib.pyplot.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.001)
         fig.savefig(target, facecolor='black')
         matplotlib.pyplot.close()
@@ -143,9 +146,11 @@ class Qa(object):
             vmax=numpy.percentile(imageData1, 99)
 
         imageList = []
-        for num, image in enumerate([imageData1, imageData2]):
+        for num, imageData in enumerate(([imageData1, 'before'], [imageData2, 'after'])):
+            image = imageData[0]
+            textData = imageData[1]
             output = gifId + '{0:04}.png'.format(num)
-            self.slicerPng(image[:,:,:,2], output, vmax=vmax, isData=True, boundaries=boundaries)
+            self.slicerPng(image[:,:,:,2], output, vmax=vmax, isData=True, boundaries=boundaries, textData=textData)
             imageList.append(output)
 
         self.__imageList2Gif(imageList, target, gifSpeed)
