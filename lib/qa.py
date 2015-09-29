@@ -315,16 +315,16 @@ class Qa(object):
         matplotlib.rcdefaults()
 
 
-    def tensorPng(self, fit, cc, ellipsoidsPng):
+    def reconstructionPng(self, data, mask, cc, targetPng, model=None):
         """
         """
+        #Showbox
+        maskImage = nibabel.load(mask)
+        maskData = maskImage.get_data()
         ccImage = nibabel.load(cc)
         ccData = ccImage.get_data()
-        fa = dipy.reconst.dti.fractional_anisotropy(fit.evals)
-        rgbData = dipy.reconst.dti.color_fa(fa, fit.evecs)
 
-        #Showbox
-        brainBox = dipy.segment.mask.bounding_box(rgbData)
+        brainBox = dipy.segment.mask.bounding_box(maskData)
         brainBox = numpy.array(brainBox)
         ccBox = dipy.segment.mask.bounding_box(ccData)
         ccBox = numpy.array(ccBox)
@@ -341,17 +341,27 @@ class Qa(object):
         zmin = ccCenter[2] - shift[0]
         zmax = ccCenter[2] + shift[0]
 
-        evals = fit.evals[xmin:xmax, ymin:ymax, zmin:zmax]
-        evecs = fit.evecs[xmin:xmax, ymin:ymax, zmin:zmax]
-        cfa = rgbData[xmin:xmax, ymin:ymax, zmin:zmax]
-        cfa /= cfa.max()
-        cfa *= 2
-
+        #Visualization
         sphere = dipy.data.get_sphere('symmetric724')
         ren = dipy.viz.fvtk.ren()
-        dipy.viz.fvtk.add(ren, dipy.viz.fvtk.tensor(evals, evecs, cfa, sphere))
+
+        if model = 'tensor':
+            fa = dipy.reconst.dti.fractional_anisotropy(data.evals)
+            rgbData = dipy.reconst.dti.color_fa(fa, data.evecs)
+            evals = data.evals[xmin:xmax, ymin:ymax, zmin:zmax]
+            evecs = data.evecs[xmin:xmax, ymin:ymax, zmin:zmax]
+            cfa = rgbData[xmin:xmax, ymin:ymax, zmin:zmax]
+            cfa /= cfa.max()
+            cfa *= 2
+            dipy.viz.fvtk.add(ren, dipy.viz.fvtk.tensor(evals, evecs, cfa, sphere))
+        elif model = 'hardi':
+            data_small = data['dwiData'][xmin:xmax, ymin:ymax, zmin:zmax]
+            csdodfs = data['csdModel'].fit(data_small).odf(sphere)
+            csdodfs = numpy.clip(csdodfs, 0, numpy.max(csdodfs, -1)[..., None])
+            dipy.viz.fvtk.add(ren, dipy.viz.fvtk.sphere_funcs(csdodfs, sphere, colormap='jet'))
+
         dipy.viz.fvtk.camera(ren, pos=(0,1,0), focal=(0,0,0), viewup=(0,0,1), verbose=False)
-        dipy.viz.fvtk.record(ren, n_frames=1, out_path=ellipsoidsPng, size=(600, 600))
+        dipy.viz.fvtk.record(ren, n_frames=1, out_path=targetPng, size=(1200, 1200))
         dipy.viz.fvtk.clear(ren)
 
 
