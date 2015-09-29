@@ -3,58 +3,35 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
-
-#
-
-[brief description]    
-
+|**Name**        | Upsampling                                            |
+|**Goal**        | Upsampling of the dwi                                 |
+|**Parameters**  | Diffusion images (dwi)                                |
+|**Time**        | N/A                                                   |
+|**Output**      | Diffusion upsampled images                            |
 
 ## Goal
 
-[presentation of the objective of the method]
+Upsampling task creates diffusion images upsampled to anatomical images resolution
 
 
 ## Requirements
 
-[what files are needed to run the task]
-
+Diffusion images (dwi)
 
 ## Parameters
 
-[what are the parameters used in the following steps -- see parameters in the table]
-
+Resolution of the anatomic
 
 ## Implementation
-
-```
-[If only one step, do not add the subtitle step 1]
-```
 
 ### [1- Step 1 name]
 
 ```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [2- Step 2 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [3- Step 3 name]
-
-```
-[Tool or function used with the reference to the official documentation]
+function: dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
-
+- Diffusion weigthed images upsampled
+- Creation of a png of dwi and a png of the b0 
 
