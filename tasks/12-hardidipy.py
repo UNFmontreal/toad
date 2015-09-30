@@ -130,7 +130,7 @@ class HardiDipy(GenericTask):
         odfsPng = self.buildName(dwi, 'odfs_hardi', 'png')
         data = {'dwiData':self.__dwiData, 'csdModel':self.__csdModel}
         self.reconstructionPng(data, mask, cc, odfsPng, model='hardi')
-        qaImages.extend(Images((ellipsoidsPng, 'Hardi ODFs in a part of the CC')))
+        qaImages.extend(Images((odfsPng, 'Hardi ODFs in a part of the CC')))
 
         #Build qa images
         tags = (

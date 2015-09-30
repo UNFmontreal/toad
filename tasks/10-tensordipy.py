@@ -105,7 +105,7 @@ class TensorDipy(GenericTask):
         #Produce tensor ellipsoids png image
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
-        ellipsoidsPng = self.buildName(rgb, 'ellipsoids_tensor', 'png')
+        ellipsoidsPng = self.buildName(dwi, 'ellipsoids_tensor', 'png')
         self.reconstructionPng(self.__fit, mask, cc, ellipsoidsPng, model='tensor')
         qaImages.extend(Images((ellipsoidsPng, 'Tensor ellipsoids in a part of the CC')))
 

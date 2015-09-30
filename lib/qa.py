@@ -12,6 +12,7 @@ import dipy.segment.mask
 import dipy.reconst.dti
 import dipy.data
 import dipy.viz.fvtk
+import dipy.viz.colormap
 from lib import util
 from string import ascii_uppercase, digits
 from random import choice
@@ -345,7 +346,7 @@ class Qa(object):
         sphere = dipy.data.get_sphere('symmetric724')
         ren = dipy.viz.fvtk.ren()
 
-        if model = 'tensor':
+        if model == 'tensor':
             fa = dipy.reconst.dti.fractional_anisotropy(data.evals)
             rgbData = dipy.reconst.dti.color_fa(fa, data.evecs)
             evals = data.evals[xmin:xmax, ymin:ymax, zmin:zmax]
@@ -354,7 +355,7 @@ class Qa(object):
             cfa /= cfa.max()
             cfa *= 2
             dipy.viz.fvtk.add(ren, dipy.viz.fvtk.tensor(evals, evecs, cfa, sphere))
-        elif model = 'hardi':
+        elif model == 'hardi':
             data_small = data['dwiData'][xmin:xmax, ymin:ymax, zmin:zmax]
             csdodfs = data['csdModel'].fit(data_small).odf(sphere)
             csdodfs = numpy.clip(csdodfs, 0, numpy.max(csdodfs, -1)[..., None])
@@ -365,14 +366,14 @@ class Qa(object):
         dipy.viz.fvtk.clear(ren)
 
 
-    def createVtkPng(source, anatomical, roi):
+    def createVtkPng(self, source, anatomical, roi):
         target = source.replace(".trk", ".png")
         roiImage= nibabel.load(roi)
         anatomicalImage = nibabel.load(anatomical)
 
         sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
         try:
-            sourceActor = dipy.viz.fvtk.streamtube(sourceImage, line_colors(sourceImage))
+            sourceActor = dipy.viz.fvtk.streamtube(sourceImage, dipy.viz.colormap.line_colors(sourceImage))
             roiActor = dipy.viz.fvtk.contour(roiImage.get_data(), levels=[1], colors=[(1., 1., 0.)], opacities=[1.])
             anatomicalActor = dipy.viz.fvtk.slicer(
                 anatomicalImage.get_data(),

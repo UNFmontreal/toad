@@ -185,8 +185,26 @@ class Denoising(GenericTask):
 
         #Information on denoising algorithm
         information = 'Algorithm {} is set'.format(self.algorithm)
+
+        if self.config.get('denoising', 'algorithm') == "nlmeans"  and \
+            self.config.get('denoising', 'number_array_coil') == "32":
+
+            information = "NLMEANS algorithm is not yet implemented for 32 " \
+                "coils channels images. "
+
+            if self.config.getboolean('general', 'matlab_available'):
+                information += "set algorithm to lpca or aonlm into " \
+                    "[denoising] section of your config.cfg. Otherwise " \
+
+            information += "set ignore: True into [denoising] section of " \
+                "your config.cfg."
+
         if self.matlabWarning:
-            information = "Algorithm aonlm or lpca is set but matlab is not available for this server. Please configure matlab or set denoising algorithm to nlmeans or none"
+            information = "Algorithm aonlm or lpca is set but matlab is not " \
+                "available for this server. Please configure matlab or set " \
+                "ignore: True into [denoising] section of your config.cfg."
+                qaImages.extend(Images((False, 'Denoised diffusion image')))
+
         qaImages.setInformation(information)
 
         #Get images
