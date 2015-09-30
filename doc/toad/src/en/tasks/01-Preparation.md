@@ -22,7 +22,7 @@ Preparation step makes sure that every files needed for TOAD is provided.
 - Anatommical images (anat)
 - Gradient vector (b or bvec and bval)
 
-## Maximal requirements
+## Optimal requirements
 
 - Diffusion images (dwi)
 - Anatommical images (anat)
