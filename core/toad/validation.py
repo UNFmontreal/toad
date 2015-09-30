@@ -233,7 +233,7 @@ class Validation(object):
                 if self.config.getboolean('general', 'matlab_available'):
                     msg += "set algorithm to lpca or aonlm into [denoising] section of your config.cfg.\nOtherwise " \
 
-                msg += "set ignore: False  into [denoising] section of your config.cfg.\n" \
+                msg += "set ignore: True into [denoising] section of your config.cfg.\n" \
                         "This subject will probably failed"
 
                 if not util.displayYesNoMessage(msg, "Continue anyway? (y or n)"):

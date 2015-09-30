@@ -568,11 +568,11 @@ class Correction(GenericTask):
         #Information on distorsion correction
         information = 'Eddy has run '
         if self.__topupCorrection:
-            information = 'and distortion correction done with AP and PA images'
+            information += 'and distortion correction done with AP and PA images'
         elif self.__fieldmapCorrection:
-            information = 'and distorsion correction done with fieldmap images'
+            information += 'and distorsion correction done with fieldmap images'
         else:
-            information = 'with no distortion correction'
+            information += 'with no distortion correction'
         qaImages.setInformation(information)
 
         #Get images
