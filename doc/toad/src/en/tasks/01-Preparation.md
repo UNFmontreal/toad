@@ -3,58 +3,58 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
+|**Name**        | Preparation                                           |
+|**Goal**        | Create missing gradient files <br> Check image's orientation|
+|**Parameters**  | Diffusion and anatomical images <br> Gradient encoding file|
+|**Time**        | N/A                                                   |
+|**Output**      | Re-oriented files <br> Missing gradients files <br> Pictures for the QA (png and gif)|
 
 #
 
-[brief description]    
-
-
 ## Goal
 
-[presentation of the objective of the method]
+Preparation step makes sure that every files needed for TOAD is provided.
+
+## Minimal requirements
 
 
-## Requirements
+- Diffusion images (dwi)
+- Anatommical images (anat)
+- Gradient vector (b or bvec and bval)
 
-[what files are needed to run the task]
+## Maximal requirements
 
-
-## Parameters
-
-[what are the parameters used in the following steps -- see parameters in the table]
-
+- Diffusion images (dwi)
+- Anatommical images (anat)
+- Gradient vector (b, bvec and bval)
+- Freesurfer folder
+- Fieldmap (magnitude and phase) 
+- Two b0 with an opposite phase encoding direction (b0_ap, b0_pa)
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
+### 1- Produce encoding directions
+
+```{.python}
+function: __produceEncodingFiles(bEncs, bVecs, bVals, dwi)
 ```
 
-### [1- Step 1 name]
+### 2- Force re-orientation
 
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [2- Step 2 name]
-
-```
-[Tool or function used with the reference to the official documentation]
+```{.python}
+function: __stride4DImage(dwi, bEncs, bVecs, bVals, expectedLayout)
+function: mriutil.stride3DImage(image, self.buildName(image, "stride"), expectedLayout))
 ```
 
-### [3- Step 3 name]
+### 3- Check Freesurfer folder if exist
 
-```
-[Tool or function used with the reference to the official documentation]
+```{.python}
+function: mriutil.isAfreesurferStructure(directory)
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
-
-
+- Gradient missing files will be created.<br>
+- Every files provided will be re-oriented.<br>
+- The preparation step will create a png of the anatomic image and a gif from the dwi.<br>
+- Finally, if b0_ap, b0_pa, magnitude or phase images exist preparation steps will create a png for the QA

@@ -3,58 +3,41 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
+|**Name**        | Masking                                               |
+|**Goal**        | Creation of masks from atlases                        |
+|**Parameters**  | - aparc_aseg (resample, register) <br> - mask (resample, register) <br> - 5tt (resample, register)|
+|**Time**        | N/A         |
+|**Output**      | - Seed grey/white matter interface <br> - White matter mask <br> - Mask from aparc_aseg (253 and 1024) |
 
 #
 
-[brief description]    
-
-
 ## Goal
 
-[presentation of the objective of the method]
-
+Creation of masks from aparc_aseg and 5tt maps
 
 ## Requirements
 
-[what files are needed to run the task]
-
-
-## Parameters
-
-[what are the parameters used in the following steps -- see parameters in the table]
+- Mask (resampled, registered)
+- Aparc_Aseg (resampled, registered)
+- 5tt mask (resampled, registered)
 
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
-```
-
-### [1- Step 1 name]
+### 1- Creation of specific masks for tractography
 
 ```
-[Tool or function used with the reference to the official documentation]
+seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
+whiteMatterAct = self.__extractWhiteMatterFrom5tt(tt5Resample)
 ```
 
-### [2- Step 2 name]
+### 2- Creation of specific masks using apar_aseg
 
 ```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [3- Step 3 name]
-
-```
-[Tool or function used with the reference to the official documentation]
+self.info(mriutil.mrcalc(aparcAsegResample, '253', self.buildName('aparc_aseg', ['253', 'mask'], 'nii.gz')))
+self.info(mriutil.mrcalc(aparcAsegResample, '1024', self.buildName('aparc_aseg', ['1024', 'mask'],'nii.gz')))
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
-
-
+- PNG of the white matter

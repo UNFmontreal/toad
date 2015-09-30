@@ -203,7 +203,6 @@ class Denoising(GenericTask):
             information = "Algorithm aonlm or lpca is set but matlab is not " \
                 "available for this server. Please configure matlab or set " \
                 "ignore: True into [denoising] section of your config.cfg."
-                qaImages.extend(Images((False, 'Denoised diffusion image')))
 
         qaImages.setInformation(information)
 
