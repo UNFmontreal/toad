@@ -3,11 +3,11 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
+|**Name**        | Backup                                                |
+|**Goal**        | Archiving initial dataset                             |
 |**Parameters**  | [Simple parameters or reference to the config section]|
 |**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
+|**Output**      | None                                                  |
 
 #
 
