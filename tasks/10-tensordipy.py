@@ -99,15 +99,15 @@ class TensorDipy(GenericTask):
         qaImages = Images()
         softwareName = 'dipy'
 
-        #Produce tensor ellipsoids png image
-        rgb = self.getImage('dwi', ['tensor', 'rgb'])
-        cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
-        ellipsoidsPng = self.buildName(rgb, 'ellipsoids', 'png')
-        self.tensorPng(self.__fit, cc, ellipsoidsPng)
-        qaImages.extend(Images((ellipsoidsPng, 'Tensor ellipsoids in a part of the CC')))
-
-        #Get images
+        #mask image
         mask = self.getRegistrationImage('mask', 'resample')
+
+        #Produce tensor ellipsoids png image
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
+        ellipsoidsPng = self.buildName(dwi, 'ellipsoids_tensor', 'png')
+        self.reconstructionPng(self.__fit, mask, cc, ellipsoidsPng, model='tensor')
+        qaImages.extend(Images((ellipsoidsPng, 'Tensor ellipsoids in a part of the CC')))
 
         #Build qa images
         tags = (
