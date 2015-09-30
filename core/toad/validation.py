@@ -226,7 +226,8 @@ class Validation(object):
                     return False
 
             if self.config.get('denoising', 'algorithm') == "nlmeans"  and \
-                self.config.get('denoising', 'number_array_coil') == "32":
+                self.config.get('denoising', 'number_array_coil') == "32" and \
+                    not self.config.getboolean('denoising', 'ignore'):
 
                 msg = "NLMEANS algorithm is not yet implemented for 32 coils channels images.\n" \
 
