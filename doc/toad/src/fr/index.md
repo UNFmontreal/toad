@@ -1,3 +1,5 @@
+<img src="figs/toad_highres.jpg" alt="Toad logo" style="width: 450px;"/>
+
 # TOolkit d’Analyse de Diffusion (TOAD)
 
 Bienvenue sur la documentation en français de [TOAD](http://unf-montreal.ca/toad/).
