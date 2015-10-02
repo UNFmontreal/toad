@@ -1,3 +1,5 @@
+<img src="figs/toad_highres.jpg" alt="Toad logo" style="width: 450px;"/>
+
 # TOolkit of Analysis in Diffusion imaging (TOAD)
 
 Welcome to the English version of the documentation of [TOAD](http://unf-montreal.ca/toad/).
