@@ -5,26 +5,26 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Correction                                            |
 |**Goal**        | Motion and distortion correction of dwi images        |
-|**Parameters**  | Diffusion and gradient encoding direction <br> Two b0 with opposite PE (phase encoding direction) <br> Fieldmap (phase and magnitude)|
+|**Parameters**  | Diffusion-weighted images <br>  Diffusion-weighted gradient scheme <br> Two b0s with opposite PE (phase encoding direction) <br> Fieldmap (phase and magnitude)|
 |**Time**        | N/A                                                   |
-|**Output**      | dwi corrected <br> gradient encoding direction corrected|
+|**Output**      | Diffusion-weighted images corrected <br> Diffusion-weighted gradient scheme corrected|
 
 #
 
 ## Goal
 
-Correction step creates dwi corrected for motion. If a fielmap or two b0 with opposite PE are provided correction step wil use this information to corerct for geometrical distortion.
+Correction step creates Diffusion-weighted images (DWI) corrected for motion. If a fielmap or two b0 with opposite PE are provided correction step wil use this information to corerct for geometrical distortion.
 
 
 ## Minimal Requirements
 
-- dwi images
-- Gradient encoding direction
+- Diffusion-weighted images (DWI)
+- Diffusion-weighted gradient scheme (.b or bvec bvals)
 
 ## Optimal Requirements
 
-- dwi images <br>
-- gradient encoding direction <br><br>
+- Diffusion-weighted images (DWI) <br>
+- Diffusion-weighted gradient scheme (.b or bvec bvals) <br>
 - Two b0 with opposite PE (highly recommended) <br>
 or <br>
 - Fieldmap (phase and magnitude images)  <br>
@@ -56,10 +56,10 @@ function: self.__correctionEddy2(dwi, mask, topupBaseName, indexFile, acqpEddy, 
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Motion and geometric distortion dwi corrected
-- Gradient encoding direction corrected
+- Motion and geometric distortion DWI corrected
+- Diffusion-weighted gradient scheme corrected
 - Creation of a gif of dwi before and after correction step
-- Creation of a gif of gradient encoding direction before and after correction
+- Creation of a gif of diffusion-weighted gradient scheme before and after correction
  
 
 
