@@ -17,7 +17,7 @@ Parcellation step create from Freesurfer pipeline different masks.
 
 ## Requirements
 
-- Anatomical image
+- Anatomical image (anat)
 
 ## Implementation
 
