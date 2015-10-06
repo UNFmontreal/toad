@@ -18,14 +18,14 @@ Correction step creates Diffusion-weighted images (DWI) corrected for motion. If
 
 ## Minimal Requirements
 
-- Diffusion-weighted images (DWI)
-- Diffusion-weighted gradient scheme (.b or bvec bvals)
+- Diffusion-weigthed images (dwi)
+- Diffusion-weighted gradient scheme (b or bvec and bval)
 
 ## Optimal Requirements
 
-- Diffusion-weighted images (DWI) <br>
-- Diffusion-weighted gradient scheme (.b or bvec bvals) <br>
-- Two b0 with opposite PE (highly recommended) <br>
+- Diffusion-weigthed images (dwi)
+- Diffusion-weighted gradient scheme (b or bvec and bval)
+- Two b0s with opposite PE (highly recommended)
 or <br>
 - Fieldmap (phase and magnitude images)  <br>
 
