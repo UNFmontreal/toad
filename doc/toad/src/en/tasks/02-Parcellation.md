@@ -5,9 +5,9 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Parcellation                                          |
 |**Goal**        | Run Freesurfer pipeline                                |
-|**Parameters**  | anat image                                            |
+|**Parameters**  | Anatomical image                                            |
 |**Time**        | N/A                                                   |
-|**Output**      | - anat from Freesurfer <br> - Aparc_aseg segmentation <br> - Mask from aparc_aseg file <br> - lh_ribbon and rh_ribbon <br> - 5tt image (five-tissue-type)|
+|**Output**      | - Anatomical from Freesurfer <br> - Aparc_aseg segmentation <br> - Mask from aparc_aseg file <br> - lh_ribbon and rh_ribbon <br> - 5tt image (five-tissue-type)|
 
 #
 
@@ -17,7 +17,7 @@ Parcellation step create from Freesurfer pipeline different masks.
 
 ## Requirements
 
-anat image
+- Anatomical image
 
 ## Implementation
 
@@ -51,7 +51,7 @@ function self.__convertAndRestride(self.__findImageInDirectory(source, os.path.j
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- anat, norm, rh_ribbon and lh_ribbon mgz images will be converted into nifti format from Freesurfer pipeline.
+- Anatomical, norm, rh_ribbon and lh_ribbon mgz images will be converted into nifti format from Freesurfer pipeline.
 - Brodmann, Choi and Buckner atlases will be created.
 - A mask of the brain will be computed using aparc_aseg.
 - 5tt map will be computed using lh.white, rh.white, lh.pial and rh.pial from Freesurfer.
