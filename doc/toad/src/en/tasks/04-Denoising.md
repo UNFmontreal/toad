@@ -4,24 +4,24 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | Denoising                                             |
-|**Goal**        | Apply a denoising algorithm on diffusion images (dwi) |
-|**Parameters**  | dwi, gradient encoding directions, sigma <br> algorithm choice |
+|**Goal**        | Apply a denoising algorithm on Diffusion-weighted images |
+|**Parameters**  | Diffusion-weighted images <br> Diffusion-weighted gradient scheme (b or bvec and bval) <br> Sigma <br> Algorithm choice |
 |**Time**        | N/A                                                   |
-|**Output**      | Diffusion images denoised                             |
+|**Output**      | Diffusion-weighted images denoised                             |
 
 ## Goal
 
-Denoising step denoises DWI depending on the algorithm choosen.
+Denoising step denoises diffusion-weighted images (DWI) depending on the algorithm choosen.
 
 ## Requirements
 
-- Diffusion images (dwi)
-- Gradient encoding direction (optional)
+- Diffusion-weigthed images (dwi)
+- Diffusion-weighted gradient scheme (b or bvec and bval)
 
 ## Parameters
 
-If NLMEANS algorithm is choosen we need to compute the sigma relative to diffusion images.
-
+If NLMEANS algorithm is choosen we need to compute the sigma relative to diffusion images using piesno algorithm.
+For 32 coils channel acquisition from UNF we compute the standard deviation of the noise in DWI as sigma.
 
 ## Implementation
 
@@ -53,7 +53,8 @@ function: self.__launchMatlabExecution(scriptName)
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+- Diffusion-weigthed images corrected
+- A gif before/after to see the differences in DWI
 
 ## References
 
