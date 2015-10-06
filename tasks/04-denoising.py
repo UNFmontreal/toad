@@ -50,16 +50,24 @@ class Denoising(GenericTask):
         target = self.buildName(dwi, "denoise")
 
         if self.get("algorithm") == "nlmeans":
-            self.algorithm = "nlmeans"
 
+            self.algorithm = "nlmeans"
             dwiImage = nibabel.load(dwi)
             dwiData  = dwiImage.get_data()
-            self.sigmaVector, sigma, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
-            self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
 
-            denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
+            if self.get('number_array_coil') == "32":
+                correctionMask = self.getCorrectionImage('mask', 'corrected')
+                sigma = numpy.std(dwiData[~correctionMask])
+                noiseMask = mriutil.computeNoiseMask(correctionMask, self.buildName(correctionMask, 'noisemask'))
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, noiseMask)
+
+            else:
+                self.sigmaVector, sigma, noiseMask = self.__computeSigmaAndNoiseMask(dwiData)
+                self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
+
             nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
-            nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.float32),
+            nibabel.save(nibabel.Nifti1Image(noiseMask.astype(numpy.float32),
                                              dwiImage.get_affine()), self.buildName(target, "noise_mask"))
 
         elif self.get('general', 'matlab_available'):
@@ -143,16 +151,11 @@ class Denoising(GenericTask):
             numberArrayCoil = int(self.get("number_array_coil"))
         except ValueError:
             numberArrayCoil = 1
-        sigmaMatrix = numpy.zeros_like(data, dtype=numpy.float32)
+        #sigmaMatrix = numpy.zeros_like(data, dtype=numpy.float32)
         sigmaVector = numpy.zeros(data.shape[2], dtype=numpy.float32)
-        maskNoise = numpy.zeros(data.shape[:-1], dtype=numpy.bool)
+        #maskNoise = numpy.zeros(data.shape[:-1], dtype=numpy.bool)
 
         sigmaMatrix, maskNoise = dipy.denoise.noise_estimate.piesno(data, N=numberArrayCoil, return_mask=True)
-        #for idx in range(data.shape[2]):
-        #    sigmaMatrix[:, :, idx], maskNoise[:, :, idx] = dipy.denoise.noise_estimate.piesno(data[:, :, idx],
-                                                                                         #N=numberArrayCoil,
-                                                                                         #return_mask=True)
-        #    sigmaVector[idx] = sigmaMatrix[0,0,idx,0]
         return sigmaVector, sigmaMatrix, maskNoise
 
 
@@ -203,8 +206,7 @@ class Denoising(GenericTask):
             information = "Algorithm aonlm or lpca is set but matlab is not " \
                 "available for this server. Please configure matlab or set " \
                 "ignore: True into [denoising] section of your config.cfg."
-                qaImages.extend(Images((False, 'Denoised diffusion image')))
-
+        qaImages.extend(Images((False, 'Denoised diffusion image')))
         qaImages.setInformation(information)
 
         #Get images
@@ -225,7 +227,7 @@ class Denoising(GenericTask):
                 (dwiCompareGif, 'Before and after denoising'),
                 ))
 
-            if algorithm == "nlmeans":
+            if self.algorithm == "nlmeans":
                 sigmaPng = self.buildName(dwiDenoised, 'sigma', 'png')
                 noiseMaskPng = self.buildName(noiseMask, None, 'png')
                 self.plotSigma(self.sigmaVector, sigmaPng)
