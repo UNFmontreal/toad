@@ -19,13 +19,13 @@ Preparation step makes sure that every files needed for TOAD is provided.
 
 
 - Diffusion-weighted images (dwi)
-- Anatomical images (anat)
+- Anatomical image (anat)
 - Diffusion-weighted gradient scheme (b or bvec and bval)
 
 ## Optimal requirements
 
 - Diffusion-weigthed images (dwi)
-- Anatomical images (anat)
+- Anatomical image (anat)
 - Diffusion-weighted gradient scheme (b or bvec and bval)
 - Freesurfer folder
 - Fieldmap (magnitude and phase) 
