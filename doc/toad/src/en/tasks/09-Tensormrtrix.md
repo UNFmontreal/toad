@@ -15,8 +15,8 @@ Tensorfsl step reconstruct tensors from diffusion-weigthed images and extract te
 
 ## Default paramaters
 
-- Method used to fit the tensor: non-linear <br>
-- Strength of the regularisation term on the magnitude of the tensor elements: 5000
+- Method used to fit the tensor: non-linear (check MRtrix default parameters)<br>
+- Strength of the regularisation term on the magnitude of the tensor elements: 5000 (check MRtrix default parameters)
 
 ## Requirements
 
