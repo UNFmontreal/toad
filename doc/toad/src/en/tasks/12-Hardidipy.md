@@ -3,58 +3,53 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
-
-#
-
-[brief description]    
-
+|**Name**        | Hardidipy                                    |
+|**Goal**        | Perform constrain spherical deconvolution using Dipy  |
+|**Parameters**  | Diffusion-weigthed images (dwi) <br> Diffusion-weighted gradient scheme (b or bvec and bval)|
+|**Time**        | N/A        |
+|**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
 
 ## Goal
 
-[presentation of the objective of the method]
-
+Hardidipy step reconstruct fiber orientation distribution (fod) using non-negativity constrained spherical deconvolution (csd) from diffusion-weigthed images (dwi). [ref: <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Dipy</a>]
 
 ## Requirements
 
-[what files are needed to run the task]
-
-
-## Parameters
-
-[what are the parameters used in the following steps -- see parameters in the table]
-
+- Diffusion-weigthed images (dwi)
+- Diffusion-weighted gradient scheme (bvec and bval)
+- Mask of the brain (optional)
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
+### 1- Get response from a single population fiber
+
+```{.python}
+function: response, ratio = dipy.reconst.csdeconv.auto_response(gradientTable, dwiData, roi_radius=10, fa_thr=0.7)
 ```
 
-### [1- Step 1 name]
+### 2- Perform spherical deconvolution
 
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [2- Step 2 name]
-
-```
-[Tool or function used with the reference to the official documentation]
+```{.python}
+function: csdModel = dipy.reconst.csdeconv.ConstrainedSphericalDeconvModel(gradientTable, response)
 ```
 
-### [3- Step 3 name]
+### 3- Extract general fractional anisotropy (gfa) and number of fibers orientations (nufo)
 
-```
-[Tool or function used with the reference to the official documentation]
+```{.python}
+function: gfa = csdPeaks.gfa
+function: csdCoeff = csdPeaks.shm_coeff
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+- Creation of the fiber orientation distribution (fod) and number of fibers orientations (nufo)
+- PNG of the number of fibers orientations (nufo)
 
+## References
 
+Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage*.
+
+## Highly suggested readings
+
+- <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Dipy example</a>
+- References
