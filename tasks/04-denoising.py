@@ -54,12 +54,14 @@ class Denoising(GenericTask):
             self.algorithm = "nlmeans"
             dwiImage = nibabel.load(dwi)
             dwiData  = dwiImage.get_data()
-
             if self.get('number_array_coil') == "32":
                 correctionMask = self.getCorrectionImage('mask', 'corrected')
-                sigma = numpy.std(dwiData[~correctionMask])
                 noiseMask = mriutil.computeNoiseMask(correctionMask, self.buildName(correctionMask, 'noisemask'))
-                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma, noiseMask)
+                noiseMaskImage = nibabel.load(noiseMask)
+                noiseMaskData  = noiseMaskImage.get_data()
+                sigma = numpy.std(dwiData[noiseMaskData > 0])
+                self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
 
             else:
                 self.sigmaVector, sigma, noiseMask = self.__computeSigmaAndNoiseMask(dwiData)
