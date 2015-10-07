@@ -1,12 +1,14 @@
 site_name: 'Documentation TOAD'
 theme: readthedocs
-site_url: http://www.unf-montral.ca/
+site_url: http://www.unf-montral.ca/toad
 repo_url: https://github.com/UNFmontreal/toad
 site_description: 'Documentation de TOAD (Toolkit d’analyse des données de diffusion)' 
 docs_dir: src/fr/
 site_dir: html/fr
 theme_dir: custom_theme
 use_directory_urls: false
+site_favicon: figs/toad.ico
+copyright: © TOAD 2015
 pages:
 - Accueil: 'index.md'
 - Tutoriel:
@@ -26,14 +28,14 @@ pages:
     - '05-Upsampling': 'tasks/05-Upsampling.md'
     - '06-Registration': 'tasks/06-Registration.md'
     - '07-Masking': 'tasks/07-Masking.md'
-    - '08-Tensors FSL': 'tasks/09-Tensorfsl.md'
-    - '09-Tensors MRtrix': 'tasks/10-Tensormrtrix.md'
-    - '10-Tensors Dipy': 'tasks/11-Tensordipy.md'
-    - '11-Hardi MRtrix': 'tasks/12-Hardimrtrix.md'
-    - '12-Hardi Dipy': 'tasks/13-Hardidipy.md'
-    - '13-Tractography MRtrix': 'tasks/14-Tractographymrtrix.md'
-    - '14-Tractography Dipy': 'tasks/15-Tractographydipy.md'
-    - '15-Signal-noise ratio': 'tasks/08-Snr.md'
+    - '08-Tensors FSL': 'tasks/08-Tensorfsl.md'
+    - '09-Tensors MRtrix': 'tasks/09-Tensormrtrix.md'
+    - '10-Tensors Dipy': 'tasks/10-Tensordipy.md'
+    - '11-Hardi MRtrix': 'tasks/11-Hardimrtrix.md'
+    - '12-Hardi Dipy': 'tasks/12-Hardidipy.md'
+    - '13-Tractography MRtrix': 'tasks/13-Tractographymrtrix.md'
+    - '14-Tractography Dipy': 'tasks/14-Tractographydipy.md'
+    - '15-Signal-noise ratio': 'tasks/15-Snr.md'
     - '16-Results': 'tasks/16-Results.md'
 - À propos:
     - 'Conditions d’utilisation': 'about/license.md'
