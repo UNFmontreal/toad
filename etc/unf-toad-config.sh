@@ -23,6 +23,13 @@ case "$HOSTNAME" in
         export LD_LIBRARY_PATH=/usr/local/vtk/lib
         export SGEQUEUE='toad.q'
     ;;
+    sati | physnum)
+        export TOADSERVER=$HOSTNAME
+        APPDIR=/usr/local
+        export PATH=/usr/local/python-toad/bin:/usr/local/c3d/bin:/usr/local/itksnap/bin:/usr/local/fibernavigator/bin:$PATH
+        export LD_LIBRARY_PATH=/usr/local/vtk/lib
+        export SGEQUEUE='toad.q'
+    ;;
     *)
     if [ -z "${BQMAMMOUTH}" ];
         then
@@ -68,4 +75,3 @@ export FSLDIR PATH
 
 export PATH=$TOADDIR/bin:$APPDIR/matlab-8.0/bin:$APPDIR/mrtrix3/bin:$APPDIR/mrtrix3/scripts:$PATH
 export PATH=$FREESURFER_HOME/mni/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$PATH
-#:/usr/local/c3d/bin:/usr/local/itksnap/bin:/usr/local/fibernavigator/bin:$PATH
