@@ -11,7 +11,7 @@
 
 ## Goal
 
-Tensorfsl step reconstruct tensors from diffusion-weigthed images and extract tensor metrics such as fractional anisotropy (fa) or mean diffusivity (md). This step uses dtfit command line from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor" target="_blank">MRtrix</a>]
+Tensormrtrix step reconstruct tensors from diffusion-weigthed images and extract tensor metrics such as fractional anisotropy (fa) or mean diffusivity (md). This step uses dtfit command line from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor" target="_blank">MRtrix</a>]
 
 ## Default paramaters
 
