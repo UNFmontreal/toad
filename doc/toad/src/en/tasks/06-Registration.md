@@ -4,24 +4,26 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | Registration                                          |
-|**Goal**        | Registration of the anat on dwi                       |
-|**Parameters**  | |
+|**Goal**        | Registration of the anatomical on diffusion-weighted images |
+|**Parameters**  | Diffusion-weigthed images <br> Anatomical image |
 |**Time**        | N/A                                                   |
-|**Output**      | - Anat (resample) <br> - 5tt (resampled, registered) <br> - norm (resampled, registered) <br> - mask (resampled, registered) <br> - aparc_aseg (resampled, registered) <br> - left, right ribbon (resampled, registered)|
+|**Output**      | - Anatomical images (resample) <br> - 5tt (resampled, registered) <br> - norm (resampled, registered) <br> - mask (resampled, registered) <br> - aparc_aseg (resampled, registered) <br> - left, right ribbon (resampled, registered)|
 
 #
 
 ## Goal
 
-Registration task overlay anatomical and atlases on diffusion images. 
+Registration task overlay anatomical image and atlases on diffusion-weigthed images. 
 
 ## Requirements
 
-- Diffusion weighted images
+- Diffusion-weigthed images (dwi)
+- Anatomical image (anat)
+- 5tt, norm, mask, aparc_aseg and left right ribbon from parcellation step (Freesurfer pipeline) 
 
 ## Parameters
 
-If anatomical and diffusion images were acquired during the same acquisition session we use -usesqform -dof 6
+If anatomical and diffusion-weigthed images were acquired during the same acquisition session we use -usesqform -dof 6
 
 ## Implementation
 
@@ -65,6 +67,7 @@ function: self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+- PNG of the B0 overlayed by brain mask and its boundaries
+- PNG of the B0 overlayed by aparc_aseg file and by the boundaries of the brain mask
 
 
