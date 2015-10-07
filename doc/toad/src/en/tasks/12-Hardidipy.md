@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Hardidipy                                    |
 |**Goal**        | Perform constrain spherical deconvolution using Dipy  |
-|**Parameters**  | Diffusion-weigthed images (dwi) <br> Diffusion-weighted gradient scheme (b or bvec and bval)|
+|**Parameters**  | Diffusion-weigthed images (dwi) <br> Diffusion-weighted gradient scheme (bvec and bval)|
 |**Time**        | N/A        |
 |**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
 
