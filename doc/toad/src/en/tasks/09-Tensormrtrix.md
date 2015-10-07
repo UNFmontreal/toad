@@ -35,12 +35,9 @@ function: cmd = "dwi2tensor {} {} -grad {} -nthreads {} -quiet ".format(source, 
 ### 2- Creation of metrics from tensor
 
 ```{.python}
-function: cmd1 = "tensor2metric {} -adc {} -fa {} -num 1 -vector {} -value {} -modulate {} -nthreads {} -quiet "\
-.format(source, adc, fa, vector, adImage , modulate, self.getNTreadsMrtrix())
-function: cmd2 = "tensor2metric {} -num 2 -value {} -modulate {} -nthreads {} -quiet "\
-.format(source, value2, modulate, self.getNTreadsMrtrix())
-function: cmd3 = "tensor2metric {} -num 3 -value {} -modulate {} -nthreads {} -quiet "\
-.format(source, value3, modulate, self.getNTreadsMrtrix())
+function: cmd1 = "tensor2metric {} -adc {} -fa {} -num 1 -vector {} -value {} -modulate {} -nthreads {} -quiet ".format(source, adc, fa, vector, adImage , modulate, self.getNTreadsMrtrix())
+function: cmd2 = "tensor2metric {} -num 2 -value {} -modulate {} -nthreads {} -quiet ".format(source, value2, modulate, self.getNTreadsMrtrix())
+function: cmd3 = "tensor2metric {} -num 3 -value {} -modulate {} -nthreads {} -quiet ".format(source, value3, modulate, self.getNTreadsMrtrix())
 
 cmd = "mrmath {} {} mean {} -nthreads {} -quiet ".format(value2, value3, rdImage, self.getNTreadsMrtrix())
 cmd = "mrmath {} {} {} mean {} -nthreads {} -quiet ".format(adImage, value2, value3, mdImage, self.getNTreadsMrtrix())
