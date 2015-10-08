@@ -25,9 +25,8 @@ For 32 coils channel acquisition from UNF we compute the standard deviation of t
 
 ## Implementation
 
-```
 If denoising algorithm is set to None this step will be skipped
-```
+
 
 ### 1- denoising algorithm: nlmeans
 
