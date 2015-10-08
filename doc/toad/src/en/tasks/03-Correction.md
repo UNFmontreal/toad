@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Correction                                            |
 |**Goal**        | Motion and distortion correction of dwi images        |
-|**Parameters**  | Diffusion-weighted images <br>  Diffusion-weighted gradient scheme <br> Two b0s with opposite PE (phase encoding direction) <br> Fieldmap (phase and magnitude)|
+|**Config file** | `phase_enc_dir` <br />`echo_spacing`<br />`b02b0_filename`<br />`acqp_topup`<br />`acqp_eddy` <br />`index_filename` <br />`topup_results_base_name` <br />`topup_results_output` <br /> |
 |**Time**        | N/A                                                   |
 |**Output**      | Diffusion-weighted images corrected <br> Diffusion-weighted gradient scheme corrected|
 
@@ -13,7 +13,8 @@
 
 ## Goal
 
-Correction step creates Diffusion-weighted images (DWI) corrected for motion. If a fielmap or two b0 with opposite PE are provided correction step wil use this information to corerct for geometrical distortion.
+The correction step creates diffusion-weighted images (DWI) corrected for motion. 
+If a fielmap or two b0 with opposite PE are provided, the correction step will use them to corerct for geometrical distortion as well.
 
 
 ## Minimal Requirements
@@ -26,8 +27,8 @@ Correction step creates Diffusion-weighted images (DWI) corrected for motion. If
 - Diffusion-weigthed images (dwi)
 - Diffusion-weighted gradient scheme (b or bvec and bval)
 - Two b0s with opposite PE (highly recommended)
-or <br>
-- Fieldmap (phase and magnitude images)  <br>
+or
+- Fieldmap (phase and magnitude images)
 
 ## Implementation
 
