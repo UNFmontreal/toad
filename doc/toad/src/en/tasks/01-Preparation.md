@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Preparation                                           |
 |**Goal**        | Create missing diffusion-weighted gradient scheme files <br> Check image's orientation|
-|**Parameters**  | Diffusion-weigthed and anatomical images <br> Diffusion-weighted gradient scheme files|
+|**Config file** | `stride_orientation` <br />`force_realign_strides`    |
 |**Time**        | N/A                                                   |
 |**Output**      | Re-oriented files <br> Missing gradients scheme files <br> Pictures for the QA (png and gif)|
 
@@ -13,10 +13,9 @@
 
 ## Goal
 
-Preparation step makes sure that every files needed for TOAD is provided.
+The preparation step ensures that all files required by TOAD are correctly provided.
 
 ## Minimal requirements
-
 
 - Diffusion-weighted images (dwi)
 - Anatomical image (anat)
@@ -29,7 +28,16 @@ Preparation step makes sure that every files needed for TOAD is provided.
 - Diffusion-weighted gradient scheme (b or bvec and bval)
 - Freesurfer folder
 - Fieldmap (magnitude and phase) 
-- Two b0s with an opposite phase encoding direction (b0_ap, b0_pa)
+- Two b0s with opposite phase encoding directions (b0_ap, b0_pa)
+
+## Config file parameters
+
+[what are the options in the config file -- see parameters in the table]
+#It is strongly suggest that the axes of your data should be order and directed in 1,2,3 layout
+#If the images provides are in a different referential, we could flip them for the purpose of the pipeline
+#stride_orientation should be 3 values comma separated
+stride_orientation: 1,2,3
+force_realign_strides: True
 
 ## Implementation
 
@@ -54,7 +62,7 @@ function: mriutil.isAfreesurferStructure(directory)
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Diffusion-weighted gradient schemes missing files will be created.<br>
-- Every files provided will be re-oriented.<br>
-- The preparation step will create a png of the anatomic image and a gif from the dwi.<br>
-- Finally, if b0_ap, b0_pa, magnitude or phase images exist preparation steps will create a png for the QA
+- Diffusion-weighted gradient schemes missing files will be created.  
+- Every files provided will be re-oriented.  
+- The preparation step will create an image (png) of the anatomic image and a gif from the dwi.  
+- Finally, if b0_ap, b0_pa, magnitude or phase images exist, the preparation step will create an image (png) to be used in the QA
