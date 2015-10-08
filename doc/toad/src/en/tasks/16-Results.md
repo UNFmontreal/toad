@@ -3,58 +3,37 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
-
-#
-
-[brief description]    
-
+|**Name**        | results                                    |
+|**Goal**        | Copy every useful files                                    |
+|**Time**        | N/A         |
+|**Output**      | None                                     |
 
 ## Goal
 
-[presentation of the objective of the method]
-
+Results step has been created to copy every files in their final version of the pipeline. Due to storage restriction we won't copy them.
 
 ## Requirements
 
-[what files are needed to run the task]
-
-
-## Parameters
-
-[what are the parameters used in the following steps -- see parameters in the table]
-
+- Diffusion-weigthed images (dwi) <br>
+- Diffusion-weighted gradient scheme (b or bvec and bval) <br>
+- Anatomical image resampled (anat)
+- Mask image resampled
+- Atlases image resampled
+- Tensors and their metrics (fa, ad, rd, md)
+- Constrained spherical deconvolution and their metrics (gfa, nufo)
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
-```
-
-### [1- Step 1 name]
+### 1- Copy
 
 ```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [2- Step 2 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [3- Step 3 name]
-
-```
-[Tool or function used with the reference to the official documentation]
+function: util.copy(image, self.workingDir,  self.buildName(self.subject.getName(), postfix, 'nii.gz'))
+function: self.__copyMetrics(['mrtrix', 'dipy', 'fsl'], ['fa','ad','rd','md'], 'tensor')
+function: self.__copyMetrics(['mrtrix', 'dipy'], ['nufo','csd','gfa'], 'hardi')
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+No QA page will be created since you have everything you need in the previous steps.
 
 
