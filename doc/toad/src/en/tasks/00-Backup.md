@@ -5,13 +5,11 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Backup                                                |
 |**Goal**        | Archiving initial dataset                             |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
+|**Parameters**  | Copy every files in the subject folder|
+|**Time**        | N/A         |
 |**Output**      | None                                                  |
 
-#
 
-[brief description]    
 
 
 ## Goal
@@ -31,26 +29,12 @@
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
-```
+
 
 ### [1- Step 1 name]
 
 ```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [2- Step 2 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [3- Step 3 name]
-
-```
-[Tool or function used with the reference to the official documentation]
+function: 
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
