@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Backup                                                |
 |**Goal**        | Archiving initial dataset                             |
-|**Config file** | `stride_orientation` <br />`force_realign_strides`    |
+|**Config file** | N/A                                                   |
 |**Time**        | N/A                                                   |
 |**Output**      | None                                                  |
 
@@ -18,11 +18,6 @@
 ## Requirements
 
 [what files are needed to run the task]
-
-
-## Config file parameters
-
-[what are the options in the config file -- see parameters in the table]
 
 
 ## Implementation
