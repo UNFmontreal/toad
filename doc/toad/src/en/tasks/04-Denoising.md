@@ -4,7 +4,7 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | Denoising                                             |
-|**Goal**        | Apply a denoising algorithm on Diffusion-weighted images |
+|**Goal**        | Apply a denoising algorithm on diffusion-weighted images |
 |**Parameters**  | Diffusion-weighted images <br> Diffusion-weighted gradient scheme (b or bvec and bval) <br> Sigma <br> Algorithm choice |
 |**Time**        | N/A                                                   |
 |**Output**      | Diffusion-weighted images denoised                             |
