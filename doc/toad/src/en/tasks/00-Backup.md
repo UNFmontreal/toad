@@ -5,11 +5,9 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Backup                                                |
 |**Goal**        | Archiving initial dataset                             |
-|**Parameters**  | Copy every files in the subject folder|
-|**Time**        | N/A         |
+|**Config file** | `stride_orientation` <br />`force_realign_strides`    |
+|**Time**        | N/A                                                   |
 |**Output**      | None                                                  |
-
-
 
 
 ## Goal
@@ -22,9 +20,9 @@
 [what files are needed to run the task]
 
 
-## Parameters
+## Config file parameters
 
-[what are the parameters used in the following steps -- see parameters in the table]
+[what are the options in the config file -- see parameters in the table]
 
 
 ## Implementation
