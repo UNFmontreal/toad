@@ -57,8 +57,8 @@ function: self.__launchMatlabExecution(scriptName)
 
 ## References
 
-[Coupe2008]	P. Coupe, P. Yger, S. Prima, P. Hellier, C. Kervrann, C. Barillot, “An Optimized Blockwise Non Local Means Denoising Filter for 3D Magnetic Resonance Images”, IEEE Transactions on Medical Imaging, 27(4):425-441, 2008.
+Coupe, P., Yger, P., Prima, S., Hellier, P., Kervrann, C., & Barillot, C. (2008). An Optimized Blockwise Nonlocal Means Denoising Filter for 3-D Magnetic Resonance Images. *IEEE Transactions on Medical Imaging, 27(4), 425-441*. Retrieved from http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=2881565&tool=pmcentrez&rendertype=abstract
 
-J. V. Manjon, P. Coupé, L. Concha, A. Buades, D. L. Collins, M. Robles. Diffusion Weighted Image Denoising using overcomplete Local PCA. PLoS ONE 8(9): e73021. doi:10.1371/journal.pone.0073021. 
+Manjón, J. V., Coupé, P., Concha, L., Buades, A., Collins, D. L., & Robles, M. (2013). Diffusion weighted image denoising using overcomplete local PCA. *PloS one, 8(9), e73021*. Retrieved from http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=3760829&tool=pmcentrez&rendertype=abstract
 
-José Manjón, Pierrick Coupé, Luis Martí-Bonmatí, D Louis Collins, Montserrat Robles. Adaptive non-local means denoising of MR images with spatially varying noise levels.. Journal of Magnetic Resonance Imaging, Wiley-Blackwell, 2010, 31 (1), pp.192-203.
+Manjón, J. V., Coupé, P., Martí-Bonmatí, L., Collins, D. L., & Robles, M. (2010). Adaptive non-local means denoising of MR images with spatially varying noise levels. *Journal of magnetic resonance imaging : JMRI, 31(1), 192-203*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/20027588
