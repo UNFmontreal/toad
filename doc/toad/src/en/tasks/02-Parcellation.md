@@ -47,7 +47,7 @@ function: self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask')
 function: self.__create5ttImage()
 ```
 
-- [mri_vol2vol]
+- [mri_vol2vol]()
 
 ### 4- Re-orientation
 
