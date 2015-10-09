@@ -9,9 +9,12 @@
 |**Time**        | N/A        |
 |**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
 
+#
+
 ## Goal
 
-Hardimrtrix step reconstruct fiber orientation distribution (fod) using non-negativity constrained spherical deconvolution (csd) from diffusion-weigthed images (dwi). This step uses dwi2fod command line from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix</a>]
+The hardimrtrix step reconstructs fiber orientation distribution (fod) using non-negativity constrained spherical deconvolution (csd) from diffusion-weigthed images (dwi). 
+This step uses the `dwi2fod` command from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix</a>]
 
 ## Default paramaters
 
@@ -33,28 +36,28 @@ Ignore hardimrtrix task: **not recommended**
 
 ### 1- Get response from a single population fiber
 
-- [dwi2response](https://github.com/MRtrix3/mrtrix3/wiki/dwi2response)
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2response" target="_blank">dwi2response</a>
 
 ### 2- Perform spherical deconvolution
 
-- [dwi2fod](https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod)
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">dwi2fod</a>
 
 ### 3- Extract fixelPeaks and number of fiber orientation map 
 
-- [fod2fixel](https://github.com/MRtrix3/mrtrix3/wiki/fod2fixel)
-- [fixel2voxel](https://github.com/MRtrix3/mrtrix3/wiki/fixel2voxel)
-
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/fod2fixel" target="_blank">fod2fixel</a>
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/fixel2voxel" target="_blank">fixel2voxel</a>
 
 ## Expected result(s) - Quality Assessment (QA)
 
 - Creation of the fiber orientation distribution (fod) and metrics (nufo, peaks)
-- PNG of the number of fibers orientations (nufo)
+- Produce an image (png) of the number of fibers orientations (nufo)
 
 ## References
 
-### Scientific articles
-
-Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage*.
-
 ### Associated documentation
-- [MRtrix dwi2fod](https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod)
+
+<a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix dwi2fod</a>
+
+### Articles
+
+- Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage, 35(4)*, 1459-1472. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/17379540" target="_blank">Link to the article</a>]
