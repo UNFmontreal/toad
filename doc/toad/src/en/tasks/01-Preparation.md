@@ -33,11 +33,13 @@ The preparation step ensures that all files required by TOAD are correctly provi
 ## Config file parameters
 
 [what are the options in the config file -- see parameters in the table]
-#It is strongly suggest that the axes of your data should be order and directed in 1,2,3 layout
-#If the images provides are in a different referential, we could flip them for the purpose of the pipeline
-#stride_orientation should be 3 values comma separated
-stride_orientation: 1,2,3
-force_realign_strides: True
+
+If force_realign_strides is set to True, preparation task will for the images provided to flip them so they respect stride_orientation option
+
+- force_realign_strides: True
+- stride_orientation: 1,2,3
+
+**Warning**: It is strongly suggested that the axes of your data should be order and directed in 1,2,3 layout
 
 ## Implementation
 
