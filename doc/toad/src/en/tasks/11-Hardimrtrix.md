@@ -3,10 +3,10 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | hardimrtrix                                    |
+|**Name**        | hardimrtrix                                           |
 |**Goal**        | Perform constrain spherical deconvolution using MRtrix dwi2fod |
-|**Parameters**  | `ignore`|
-|**Time**        | N/A        |
+|**Config file** | `ignore`                                              |
+|**Time**        | N/A                                                   |
 |**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
 
 #
