@@ -9,9 +9,12 @@
 |**Time**        | N/A        |
 |**Output**      | Tensor image <br> Fractional anisotropy (fa) <br> Mean diffusivity (md) <br> Axial diffusivity (ad) <br> Radial diffusivity (rd) <br> 1st, 2nd and 3rd eigenvector (v1, v2 and v3) <br> 1st, 2nd and 3rd value (l1, l2 and l3) |
 
+#
+
 ## Goal
 
-Tensordipy step reconstruct tensors from diffusion-weigthed images and extract tensor metrics such as fractional anisotropy (fa) or mean diffusivity (md). This step uses dtfit command line from dipy [ref: <a href="http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti" target="_blank">dipy</a>]
+The tensordipy step reconstructs tensors from diffusion-weigthed images and extracts tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD).
+This step uses the `dtfit` command line from dipy [ref: <a href="http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti" target="_blank">dipy</a>]
 
 ## Requirements
 
@@ -28,19 +31,21 @@ Ignore tensordipy task: **not recommended**
 
 ### 1- Reconstruction of the tensor
 
-[MRtrix reconst_dti](http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti)
+<a href="http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti" target="_blank">Dipy reconst_dti</a>
 
 ## Expected result(s) - Quality Assessment (QA)
 
 - Creation of the tensor and metrics
-- PNG of principal metrics (fa. ad, rd and md)
+- Produce an image (png) for each metric (fa. ad, rd and md)
 
 ## References
 
-### Scientific articles
-
-Basser, P. J., Mattiello, J., & LeBihan, D. (1994). MR diffusion tensor spectroscopy and imaging. *Biophysical journal, 66(1)*, 259-67. Retrieved from http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=1275686&tool=pmcentrez&rendertype=abstract
-
 ### Associated documentation
 
-[reconst_dti](http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti)
+<a href="http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti" target="_blank">Dipy reconst_dti</a>
+
+### Articles
+
+- Basser, P. J., Mattiello, J., & LeBihan, D. (1994). MR diffusion tensor spectroscopy and imaging. *Biophysical journal, 66(1)*, 259-267. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=1275686&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>] 
+
+
