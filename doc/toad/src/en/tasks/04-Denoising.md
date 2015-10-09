@@ -44,13 +44,11 @@ If denoising algorithm is set to None this step will be skipped
 
 ### 1- denoising algorithm: nlmeans
 
-```R
-function: denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
-```
+- [nlmeans](http://nipy.org/dipy/examples_built/denoise_nlmeans.html#example-denoise-nlmeans)
 
 ### 2- denoising algorithm: lpca
 
-```R
+```{.python}
 function: self.get("algorithm") = "lpca"
 function: scriptName = self.__createMatlabScript(dwiUncompress, tmp)
 function: self.__launchMatlabExecution(scriptName)
@@ -58,7 +56,7 @@ function: self.__launchMatlabExecution(scriptName)
 
 ### 3- denoising algorithm: aonlm
 
-```R
+```{.python}
 function: self.get("algorithm") = "aonlm"
 function: scriptName = self.__createMatlabScript(dwiUncompress, tmp)
 function: self.__launchMatlabExecution(scriptName)
