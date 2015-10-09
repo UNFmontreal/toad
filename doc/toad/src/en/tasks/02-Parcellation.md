@@ -105,6 +105,6 @@ function: self.__create5ttImage()
 
 ## References
 
-### Websites
+### Associated documentation
 
 - <a name="wikiFS"></a>[FreeSurfer Wiki](http://freesurfer.net/fswiki)
