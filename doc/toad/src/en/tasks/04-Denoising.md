@@ -23,9 +23,6 @@ Denoising step denoises diffusion-weighted images (DWI) depending on the algorit
 Algorithm chosen for denoising the dwi {lpca, aonlm, nlmeans}
 - `algorithm: nlmeans`
 
-# undocumented: not for nlmeans
-beta: 1
-
 Noise model, { 1 for rician noise model and 0 for gaussian noise model}
 - `rician: 1`
 
