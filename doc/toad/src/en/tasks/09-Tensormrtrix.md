@@ -50,3 +50,7 @@ Ignore tensormrtrix task: not recommended
 
 ### Scientific articles
 - Basser, P. J., Mattiello, J., & LeBihan, D. (1994). MR diffusion tensor spectroscopy and imaging. *Biophysical journal, 66(1)*, 259-67. [[Link to the article](http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=1275686&tool=pmcentrez&rendertype=abstract)]
+
+### Associated documentation
+
+- [MRtrix dwi2tensor](https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor)
