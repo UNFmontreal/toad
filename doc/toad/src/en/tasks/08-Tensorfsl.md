@@ -31,7 +31,7 @@ Ignore tensorfsl task: not recommended
 
 ### 1- Reconstruction of the tensor
 
-- [dtifit](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/fdt/UserGuide#DTIFIT)
+- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/fdt/UserGuide#DTIFIT" target="_blank">FSL dtifit</a>
 
 ### 2- Creation of the radial diffusivity
 
@@ -49,10 +49,10 @@ function: self.__mean(l2, l3, rd)
 
 ### Associated documentation
 
-- [FSL wiki](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT)
+- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT" target="_blank">FSL wiki</a>
 
-### Scientific articles
+### Articles
 
-- Smith, S. M., Jenkinson, M., Woolrich, M. W., Beckmann, C. F., Behrens, T. E. J., Johansen-Berg, H., Bannister, P. R., et al. (2004). Advances in functional and structural MR image analysis and implementation as FSL. *NeuroImage, 23 Suppl 1, S208-19*. [[Link to the article](http://www.sciencedirect.com/science/article/pii/S1053811904003933)]
+- Smith, S. M., Jenkinson, M., Woolrich, M. W., Beckmann, C. F., Behrens, T. E. J., Johansen-Berg, H., Bannister, P. R., et al. (2004). Advances in functional and structural MR image analysis and implementation as FSL. *NeuroImage, 23 Suppl 1, S208-19*. [<a href="http://www.sciencedirect.com/science/article/pii/S1053811904003933" target="_blank">Link to the article</a>]
 
 
