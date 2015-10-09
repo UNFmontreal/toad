@@ -86,13 +86,10 @@ It creates PNG of the structural connectomes.
 
 > Calamante, F., Smith, R. E., Tournier, J.-D., Raffelt, D., & Connelly, A. (2015). Quantification of voxel-wise total fibre density: Investigating the problems associated with track-count mapping. *NeuroImage, 117, 284-93*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/26037054
 
-### Web documentation
+### Associated documentation
 
-- MRtrix wiki<br>
--- <a href="https://github.com/MRtrix3/mrtrix3/wiki/tckgen" target="_blank">MRtrix tckgen</a> <br>
--- <a href="https://github.com/MRtrix3/mrtrix3/wiki/tcksift" target="_blank">MRtrix tcksift</a> <br>
--- <a href="https://github.com/MRtrix3/mrtrix3/wiki/tck2connectome" target="_blank">MRtrix tck2connectome</a> <br>
-
-- MRtrix workflows<br>
--- <a href="https://github.com/MRtrix3/mrtrix3/wiki/Anatomically-Constrained-Tractography-(ACT)" target="_blank">Anatomical constrained tractography</a> <br>
--- <a href="https://github.com/MRtrix3/mrtrix3/wiki/SIFT" target="_blank">SIFT</a> <br>
+- [MRtrix tckgen](https://github.com/MRtrix3/mrtrix3/wiki/tcksift)
+- [MRtrix tcksift](https://github.com/MRtrix3/mrtrix3/wiki/tcksift)
+- [MRtrix tck2connectome](https://github.com/MRtrix3/mrtrix3/wiki/tck2connectome)
+- [MRtrix workflow ACT](https://github.com/MRtrix3/mrtrix3/wiki/Anatomically-Constrained-Tractography-(ACT))
+- [MRtrix workflow SIFT](https://github.com/MRtrix3/mrtrix3/wiki/SIFT)
