@@ -29,7 +29,7 @@ Remove extra files
 
 ### 1- Upsampling
 
-[mri_convert](https://github.com/MRtrix3/mrtrix3/wiki/mrconvert)
+<a href="https://github.com/MRtrix3/mrtrix3/wiki/mrconvert" target="_blank">mri_convert</a>
 
 ## Expected result(s) - Quality Assessment (QA)
 
