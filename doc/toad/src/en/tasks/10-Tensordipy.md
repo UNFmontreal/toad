@@ -21,7 +21,7 @@ Tensordipy step reconstruct tensors from diffusion-weigthed images and extract t
 
 ## Config file
 
-Ignore tensordipy task: *not recommended*
+Ignore tensordipy task: **not recommended**
 - `ignore: False`
 
 ## Implementation
