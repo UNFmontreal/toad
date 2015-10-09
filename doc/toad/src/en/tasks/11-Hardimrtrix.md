@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | hardimrtrix                                    |
 |**Goal**        | Perform constrain spherical deconvolution using MRtrix dwi2fod |
-|**Parameters**  | Diffusion-weigthed images (dwi) <br> Diffusion-weighted gradient scheme (b or bvec and bval)|
+|**Parameters**  | `ignore`|
 |**Time**        | N/A        |
 |**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
 
@@ -17,6 +17,12 @@ Hardimrtrix step reconstruct fiber orientation distribution (fod) using non-nega
 
 We provide default parameters as they are suggested in <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix wiki</a>
 
+## Config file
+
+Ignore hardimrtrix task: **not recommended**
+- `ignore: False`
+
+
 ## Requirements
 
 - Diffusion-weigthed images (dwi)
@@ -27,24 +33,17 @@ We provide default parameters as they are suggested in <a href="https://github.c
 
 ### 1- Get response from a single population fiber
 
-```{.python}
-function: outputDwi2Response = self.__dwi2response(dwi, wmMask, bFile)
-```
+- [dwi2response](https://github.com/MRtrix3/mrtrix3/wiki/dwi2response)
 
 ### 2- Perform spherical deconvolution
 
-```{.python}
-function: self.__dwi2csd(dwi, outputDwi2Response, mask, bFile, self.buildName(dwi, "csd"))
-```
+- [dwi2fod](https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod)
 
 ### 3- Extract fixelPeaks and number of fiber orientation map 
-- ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/fod2fixel" target="_blank">MRtrix fod2fixel</a>
-- ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/fixel2voxel" target="_blank">MRtrix fixel2voxel</a>
 
-```{.python}
-function: fixelPeak = self.__csd2fixelPeak(csdImage, mask, self.buildName(dwi, "fixel_peak", 'msf'))
-function: self.__fixelPeak2nufo(fixelPeak, mask, self.buildName(dwi, 'nufo'))
-```
+- [fod2fixel](https://github.com/MRtrix3/mrtrix3/wiki/fod2fixel)
+- [fixel2voxel](https://github.com/MRtrix3/mrtrix3/wiki/fixel2voxel)
+
 
 ## Expected result(s) - Quality Assessment (QA)
 
