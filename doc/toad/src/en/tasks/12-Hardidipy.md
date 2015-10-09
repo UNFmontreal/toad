@@ -51,7 +51,7 @@ function: csdCoeff = csdPeaks.shm_coeff
 
 ## References
 
-### Web documentation
+### Associated documentation
 
 - <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Dipy example</a>
 
