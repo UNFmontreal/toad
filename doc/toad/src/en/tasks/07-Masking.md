@@ -39,7 +39,7 @@ exclude_seeds =
 
 ### 1- Creation of specific masks for tractography
 
-```python
+```{.python}
 function: seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 whiteMatterAct = self.__extractWhiteMatterFrom5tt(tt5Resample)
@@ -47,7 +47,7 @@ whiteMatterAct = self.__extractWhiteMatterFrom5tt(tt5Resample)
 
 ### 2- Creation of specific masks using apar_aseg
 
-```python
+```{.python}
 self.info(mriutil.mrcalc(aparcAsegResample, '253', self.buildName('aparc_aseg', ['253', 'mask'], 'nii.gz')))
 self.info(mriutil.mrcalc(aparcAsegResample, '1024', self.buildName('aparc_aseg', ['1024', 'mask'],'nii.gz')))
 ```
