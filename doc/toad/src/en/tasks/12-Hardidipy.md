@@ -37,7 +37,7 @@ Ignore hardidipy task: not recommended
 
 ### 2- Perform spherical deconvolution
 
--<a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Nipy reconst_csd</a>
+- <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Nipy reconst_csd</a>
 
 ### 3- Extract general fractional anisotropy (gfa) and number of fibers orientations (nufo)
 
