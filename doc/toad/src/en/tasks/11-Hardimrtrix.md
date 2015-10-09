@@ -17,7 +17,7 @@ Hardimrtrix step reconstruct fiber orientation distribution (fod) using non-nega
 
 We provide default parameters as they are suggested in <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix wiki</a>
 
-## Config file
+## Config file parameters
 
 Ignore hardimrtrix task: **not recommended**
 - `ignore: False`
