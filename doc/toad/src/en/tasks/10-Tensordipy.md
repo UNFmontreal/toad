@@ -28,7 +28,7 @@ Ignore tensordipy task: **not recommended**
 
 ### 1- Reconstruction of the tensor
 
-[reconst_dti](http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti)
+[MRtrix reconst_dti](http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti)
 
 ## Expected result(s) - Quality Assessment (QA)
 
