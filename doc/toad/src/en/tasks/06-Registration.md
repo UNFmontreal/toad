@@ -44,7 +44,7 @@ Remove extra files
 
 ### 3- Registration
 
-[mrtransform](https://github.com/MRtrix3/mrtrix3/wiki/mrtransform)
+- [mrtransform](https://github.com/MRtrix3/mrtrix3/wiki/mrtransform)
 
 ## Expected result(s) - Quality Assessment (QA)
 
