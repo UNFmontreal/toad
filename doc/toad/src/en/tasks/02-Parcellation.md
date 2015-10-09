@@ -34,11 +34,11 @@ Remove extra files<br />
 
 ### 1- Run reconAll from Freesurfer [ref: [freesurferwiki](#wikiFS)]
 
-- [recon-all](https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all) (on anat)
+- <a href="https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all" target="_blank">recon-all</a> (on anat)
 
 ### 2- Conversion
 
-- [mrconvert](https://github.com/MRtrix3/mrtrix3/wiki/mrconvert) (all needed files from freesurfer)
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/mrconvert" target="_blank">mrconvert</a> (all needed files from freesurfer)
 
 ### 3- Creation of masks from Freesurfer atlases
 
@@ -51,7 +51,7 @@ function: self.__create5ttImage()
 
 ### 4- Re-orientation
 
-- [mrconvert](https://github.com/MRtrix3/mrtrix3/wiki/mrconvert) (all needed files from freesurfer)
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/mrconvert" target="_blank">mrconvert</a> (all needed files from freesurfer)
 
 ## Expected result(s) - Quality Assessment (QA)
 
