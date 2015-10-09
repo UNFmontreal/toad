@@ -53,4 +53,4 @@ Ignore tensormrtrix task: not recommended
 
 ### Associated documentation
 
-- [MRtrix dwi2tensor](https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor){:target="_blank"}
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor" target="_blank">MRtrix dwi2tensor</a>
