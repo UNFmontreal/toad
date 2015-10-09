@@ -3,10 +3,10 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | tensordipy                                   |
-|**Goal**        | Reconstruction of the tensor using dipy |
-|**Parameters**  | `ignore`|
-|**Time**        | N/A        |
+|**Name**        | tensordipy                                            |
+|**Goal**        | Reconstruction of the tensor using dipy               |
+|**Config file** | `ignore`                                              |
+|**Time**        | N/A                                                   |
 |**Output**      | Tensor image <br> Fractional anisotropy (fa) <br> Mean diffusivity (md) <br> Axial diffusivity (ad) <br> Radial diffusivity (rd) <br> 1st, 2nd and 3rd eigenvector (v1, v2 and v3) <br> 1st, 2nd and 3rd value (l1, l2 and l3) |
 
 #
