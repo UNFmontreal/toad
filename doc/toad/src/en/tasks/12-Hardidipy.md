@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Hardidipy                                    |
 |**Goal**        | Perform constrain spherical deconvolution using Dipy  |
-|**Parameters**  | Diffusion-weigthed images (dwi) <br> Diffusion-weighted gradient scheme (bvec and bval)|
+|**Parameters**  | `triangulated_spheres` <br> `ignore`|
 |**Time**        | N/A        |
 |**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
 
@@ -19,19 +19,23 @@ Hardidipy step reconstruct fiber orientation distribution (fod) using non-negati
 - Diffusion-weighted gradient scheme (bvec and bval)
 - Mask of the brain (optional)
 
+## Config file parameters
+
+Sphere tesselation {symmetric362, symmetric642, symmetric724, repulsion724, repulsion100} (default=symmetric724)
+- `triangulated_spheres: symmetric724`
+
+Ignore hardidipy task: not recommended
+- `ignore: False`
+
 ## Implementation
 
 ### 1- Get response from a single population fiber
 
-```{.python}
-function: response, ratio = dipy.reconst.csdeconv.auto_response(gradientTable, dwiData, roi_radius=10, fa_thr=0.7)
-```
+- [auto_response](http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd)
 
 ### 2- Perform spherical deconvolution
 
-```{.python}
-function: csdModel = dipy.reconst.csdeconv.ConstrainedSphericalDeconvModel(gradientTable, response)
-```
+- [reconst_csd](http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd)
 
 ### 3- Extract general fractional anisotropy (gfa) and number of fibers orientations (nufo)
 
@@ -47,9 +51,10 @@ function: csdCoeff = csdPeaks.shm_coeff
 
 ## References
 
-Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage*.
-
-## Highly suggested readings
+### Web documentation
 
 - <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Dipy example</a>
-- References
+
+### Scientific articles
+
+Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage*.
