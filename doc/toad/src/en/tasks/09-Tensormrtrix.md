@@ -46,8 +46,9 @@ cmd = "mrmath {} {} {} mean {} -nthreads {} -quiet ".format(adImage, value2, val
 ## Expected result(s) - Quality Assessment (QA)
 
 - Creation of the tensor and metrics
-- PNG of principal metrics (fa. ad, rd and md)
+- Produce an image (png) for each metric (fa. ad, rd and md)
 
 ## References
 
-Basser, P. J., Mattiello, J., & LeBihan, D. (1994). MR diffusion tensor spectroscopy and imaging. *Biophysical journal, 66(1)*, 259-67. Retrieved from http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=1275686&tool=pmcentrez&rendertype=abstract
+### Scientific articles
+- Basser, P. J., Mattiello, J., & LeBihan, D. (1994). MR diffusion tensor spectroscopy and imaging. *Biophysical journal, 66(1)*, 259-67. [[Link to the article](http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=1275686&tool=pmcentrez&rendertype=abstract)]
