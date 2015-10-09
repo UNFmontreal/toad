@@ -32,10 +32,10 @@ The preparation step ensures that all files required by TOAD are correctly provi
 
 ## Config file parameters
 
-If force_realign_strides is set to True, preparation task will for the images provided to flip them so they respect stride_orientation option
+If `force_realign_strides` is set to `True`, preparation task will for the images provided to flip them so they respect `stride_orientation` option
 
-- force_realign_strides: True
-- stride_orientation: 1,2,3
+- `force_realign_strides: True`
+- `stride_orientation: 1,2,3`
 
 **Warning**: It is strongly suggested that the axes of your data should be order and directed in 1,2,3 layout
 
