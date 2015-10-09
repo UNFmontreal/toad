@@ -23,53 +23,41 @@ The registration step overlays the anatomical image and atlases on the diffusion
 
 ## Config file parameters
 
-[what are the options in the config file -- see parameters in the table]
+If anatomical and diffusion-weigthed images were acquired during the same acquisition session we use -usesqform -dof 6 <br>
 
-If anatomical and diffusion-weigthed images were acquired during the same acquisition session we use -usesqform -dof 6
+Remove extra files
+- `cleanup: False`
 
 ## Implementation
 
 ### 1- Compute matrix  
 
-```R
-function: freesurferToDWIMatrix = self.__freesurferToDWITransformation(b0, norm, extraArgs)
-function: mrtrixMatrix = self.__transformFslToMrtrixMatrix(anat, b0, freesurferToDWIMatrix)
-```
+- [flirt](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt)
+
+- [transformcalc](https://github.com/MRtrix3/mrtrix3/wiki/transformcalc)
+
 
 ### 2- Resample
 
-```R
-function: self.__applyResampleFsl(anat, b0, freesurferToDWIMatrix, self.buildName(anat, "resample"))
-function: self.__applyResampleFsl(tt5, b0, freesurferToDWIMatrix, self.buildName(tt5, "resample"),True)
-function: self.__applyResampleFsl(norm, b0, freesurferToDWIMatrix, self.buildName(norm, "resample"),True)
-function: self.__applyResampleFsl(mask, b0, freesurferToDWIMatrix, self.buildName(mask, "resample"),True)
 
-function: self.__applyResampleFsl(aparcAsegFile, b0, freesurferToDWIMatrix, self.buildName(aparcAsegFile, "resample"), True)
-function: self.__applyResampleFsl(lhRibbon, b0, freesurferToDWIMatrix, self.buildName(lhRibbon, "resample"),True)
-function: self.__applyResampleFsl(rhRibbon, b0, freesurferToDWIMatrix, self.buildName(rhRibbon, "resample"),True)
-
-function: self.__applyResampleFsl(brodmann, b0, freesurferToDWIMatrix, self.buildName(brodmann, "resample"), True)
-
-```
+- [flirt](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt)
 
 ### 3- Registration
 
-```R
-function: self.__applyRegistrationMrtrix(tt5, mrtrixMatrix)
-function: self.__applyRegistrationMrtrix(norm, mrtrixMatrix)
-function: self.__applyRegistrationMrtrix(mask, mrtrixMatrix)
-
-function: self.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix)
-function: self.__applyRegistrationMrtrix(lhRibbon, mrtrixMatrix)
-function: self.__applyRegistrationMrtrix(rhRibbon, mrtrixMatrix)
-
-function: self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
-
-```
+[mrtransform](https://github.com/MRtrix3/mrtrix3/wiki/mrtransform)
 
 ## Expected result(s) - Quality Assessment (QA)
 
 - Produce an image (png) of the B0 overlayed by brain mask and its boundaries
 - Produce an image (png) of the B0 overlayed by aparc_aseg file and by the boundaries of the brain mask
 
+## References
+
+### Article
+
+Jenkinson, M., Bannister, P., Brady, M., & Smith, S. (2002). Improved optimization for the robust and accurate linear registration and motion correction of brain images. *NeuroImage, 17(2), 825-41*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/12377157
+
+Jenkinson, M., & Smith, S. (2001). A global optimisation method for robust affine registration of brain images. *Medical image analysis, 5(2), 143-56*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/11516708
+
+Greve, D. N., & Fischl, B. (2009). Accurate and robust brain image alignment using boundary-based registration. *NeuroImage, 48(1), 63-72*. Retrieved from http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=2733527&tool=pmcentrez&rendertype=abstract
 
