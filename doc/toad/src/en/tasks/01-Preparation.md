@@ -43,11 +43,11 @@ If `force_realign_strides` is set to `True`, preparation task will for the image
 
 ### 1- Produce missing diffusion-weighted gradient schemes (FSL, dipy and MRtrix compatibility)
 
-[mrinfo](https://github.com/MRtrix3/mrtrix3/wiki/mrinfo)
+[mrinfo](https://github.com/MRtrix3/mrtrix3/wiki/mrinfo) (diffusion-weighted gradient scheme)
 
 ### 2- Force re-orientation
 
-[mrconvert](https://github.com/MRtrix3/mrtrix3/wiki/mrconvert)
+- [mrconvert](https://github.com/MRtrix3/mrtrix3/wiki/mrconvert) (every images)
 
 ### 3- Check Freesurfer folder if exists
 
