@@ -24,18 +24,14 @@ This step uses `dtfit` command from FSL [ref: <a href="http://fsl.fmrib.ox.ac.uk
 
 ## Config file parameters
 
-[what are the options in the config file -- see parameters in the table]
-
-ignore tensorfsl task: not recommended
-ignore: False
+Ignore tensorfsl task: not recommended
+- `ignore: False`
 
 ## Implementation
 
 ### 1- Reconstruction of the tensor
 
-```{.python}
-function: cmd = "dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target, bVecs, bVals)
-```
+- [dtifit](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/fdt/UserGuide#DTIFIT)
 
 ### 2- Creation of the radial diffusivity
 
