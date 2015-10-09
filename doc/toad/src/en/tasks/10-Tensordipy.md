@@ -37,4 +37,10 @@ Ignore tensordipy task: **not recommended**
 
 ## References
 
+### Scientific articles
+
 Basser, P. J., Mattiello, J., & LeBihan, D. (1994). MR diffusion tensor spectroscopy and imaging. *Biophysical journal, 66(1)*, 259-67. Retrieved from http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=1275686&tool=pmcentrez&rendertype=abstract
+
+### Associated documentation
+
+[reconst_dti](http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti)
