@@ -40,6 +40,7 @@ exclude_seeds =
 ### 1- Creation of specific masks for tractography
 
 ```python
+function: seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 seed_gmwmi = self.__launch5tt2gmwmi(tt5Register)
 whiteMatterAct = self.__extractWhiteMatterFrom5tt(tt5Resample)
 ```
