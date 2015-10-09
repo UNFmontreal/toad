@@ -76,15 +76,11 @@ cleanup: True
 
 ### 1- Run reconAll from Freesurfer [ref: [freesurferwiki](#wikiFS)]
 
-```{.python}
-function: self.__submitReconAll(anat)
-```
+- [recon-all](https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all) (on anat)
 
 ### 2- Conversion
 
-```{.python}
-function: self.__convertFeesurferImageIntoNifti(anat)
-```
+- [mrconvert](https://github.com/MRtrix3/mrtrix3/wiki/mrconvert) (all needed files from freesurfer)
 
 ### 3- Creation of masks from Freesurfer atlases
 
@@ -98,9 +94,7 @@ function: self.__create5ttImage()
 
 ### 4- Re-orientation
 
-```{.python}
-function: self.__convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)), target)
-```
+- [mrconvert](https://github.com/MRtrix3/mrtrix3/wiki/mrconvert) (all needed files from freesurfer)
 
 ## Expected result(s) - Quality Assessment (QA)
 
