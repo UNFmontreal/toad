@@ -52,9 +52,9 @@ Ignore hardimrtrix task: **not recommended**
 
 ## References
 
+### Scientific articles
+
 Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage*.
 
-## Highly suggested readings
-
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix wiki</a>
-- References
+### Associated documentation
+- [MRtrix dwi2fod](https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod)
