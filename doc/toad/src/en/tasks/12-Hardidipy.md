@@ -3,10 +3,10 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | Hardidipy                                    |
+|**Name**        | Hardidipy                                             |
 |**Goal**        | Perform constrain spherical deconvolution using Dipy  |
-|**Parameters**  | `triangulated_spheres` <br> `ignore`|
-|**Time**        | N/A        |
+|**Config file** | `triangulated_spheres` <br> `ignore`                  |
+|**Time**        | N/A                                                   |
 |**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
 
 ## Goal
@@ -55,6 +55,6 @@ function: csdCoeff = csdPeaks.shm_coeff
 
 - <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Dipy example</a>
 
-### Scientific articles
+### Articles
 
-Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage*.
+- Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage, 35(4)*, 1459-1472. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/17379540" target="_blank">Link to the article</a>]
