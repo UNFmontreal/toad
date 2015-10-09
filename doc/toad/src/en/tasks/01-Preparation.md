@@ -43,16 +43,11 @@ If `force_realign_strides` is set to `True`, preparation task will for the image
 
 ### 1- Produce missing diffusion-weighted gradient schemes (FSL, dipy and MRtrix compatibility)
 
-```{.python}
-function: __produceEncodingFiles(bEncs, bVecs, bVals, dwi)
-```
+[mrinfo](https://github.com/MRtrix3/mrtrix3/wiki/mrinfo)
 
 ### 2- Force re-orientation
 
-```{.python}
-function: __stride4DImage(dwi, bEncs, bVecs, bVals, expectedLayout)
-function: mriutil.stride3DImage(image, self.buildName(image, "stride"), expectedLayout))
-```
+[mrconvert](https://github.com/MRtrix3/mrtrix3/wiki/mrconvert)
 
 ### 3- Check Freesurfer folder if exists
 
