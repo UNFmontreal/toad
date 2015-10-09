@@ -96,6 +96,10 @@ function: self.__createAcquisitionParameterFile('eddy')
 - Creation of a gif of dwi before and after correction step
 - Creation of a gif of diffusion-weighted gradient scheme before and after correction
  
+## References
+
+### Scientific articles
+
 
 
 
