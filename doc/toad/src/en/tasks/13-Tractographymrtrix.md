@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | tractographyhmrtrix                                    |
 |**Goal**        | Run tractography on tensors and constrained spherical deconvolution using tckgen from MRtrix                                   |
-|**Parameters**  | - Diffusion-weigthed images (dwi) <br> - Diffusion-weighted gradient scheme (b or bvec and bval) <br> - Constrained spherical deconvolution (csd) <br> - 5tt map|
+|**Parameters**  | `step` <br> `maxlength` <br> `number_tracks` <br> `downsample` <br> `ignore`|
 |**Time**        | N/A         |
 |**Output**      | - Probabilist tensor tractography and connectome <br> - Probabilist tensor tractography and connectome <br> - Probabilist "sifted" csd tractography and connectome |
 
@@ -22,44 +22,38 @@ Tractographymrtrix step run tractography on different reconstruction method (ten
 - Five-tissue-type maps (5tt)
 - Atlas (brodmann, aal2) optional
 
-## Parameters
+## Config files parameter
 
 We use default paramaters suggested in MRtrix documentation.
 
+Step size of the algorithm in mm (default is 0.1 x voxelsize; for iFOD2: 0.5 x voxelsize).
+- `step: 0.2`
+
+Maximum length of any track in mm
+- `maxlength: 300`
+
+Desired number of tracks
+- `number_tracks: 1000000`
+
+Downsample factor to reduce output file size
+- `downsample: 8`
+
+Ignore tractographymrtrix task: not recommended <br>
+- `ignore: False`
 
 ## Implementation
 
-### 1- Tractographies from diffusion tensor (dt)
+### 1- Tractographies 
 
-Determinist tractography 
-```{.python}
-function: tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
-```
+[tckgen](https://github.com/MRtrix3/mrtrix3/wiki/tckgen)
 
-Probabilist tractography 
+### 2- Spherical-deconvolution informed filtering of tractograms (SIFT)
 
-```{.python}
-function: tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
-```
+[tcksift](https://github.com/MRtrix3/mrtrix3/wiki/sift)
 
-### 2- Tractographies from constrained spherical deconvolution
+### 3- Creation of the structural connectome
 
-Probabilist tractography 
-```{.python}
-function: hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
-```
-
-### 3- Spherical-deconvolution informed filtering of tractograms (SIFT)
-
-```{.python}
-function: tcksift = self.__tcksift(hardiTck, csd)
-```
-
-### 4- Creation of the structural connectome
-
-```{.python}
-function: tcksiftConnectome = self.__tck2connectome(tcksift, brodmann, self.buildName(tcksift, 'connectome', 'csv'))
-```
+[tck2connectome](https://github.com/MRtrix3/mrtrix3/wiki/tck2connectome)
 
 ## Expected result(s) - Quality Assessment (QA)
 
@@ -78,21 +72,22 @@ It creates PNG of the structural connectomes.
 
 ## References
 
+
+### Scientific articles 
 - Tractography 
 
-Smith, R. E., Tournier, J.-D., Calamante, F., & Connelly, A. (2012). Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information. *NeuroImage, 62(3), 1924-38*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/22705374
+> Smith, R. E., Tournier, J.-D., Calamante, F., & Connelly, A. (2012). Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information. *NeuroImage, 62(3), 1924-38*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/22705374
 
 - SIFT
 
-Smith, R. E., Tournier, J.-D., Calamante, F., & Connelly, A. (2013). SIFT: Spherical-deconvolution informed filtering of tractograms. *NeuroImage, 67, 298-312*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/23238430
+> Smith, R. E., Tournier, J.-D., Calamante, F., & Connelly, A. (2013). SIFT: Spherical-deconvolution informed filtering of tractograms. *NeuroImage, 67, 298-312*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/23238430
 
-Smith, R. E., Tournier, J.-D., Calamante, F., & Connelly, A. (2015). The effects of SIFT on the reproducibility and biological accuracy of the structural connectome. *NeuroImage, 104, 253-65*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/25312774
+> Smith, R. E., Tournier, J.-D., Calamante, F., & Connelly, A. (2015). The effects of SIFT on the reproducibility and biological accuracy of the structural connectome. *NeuroImage, 104, 253-65*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/25312774
 
-Calamante, F., Smith, R. E., Tournier, J.-D., Raffelt, D., & Connelly, A. (2015). Quantification of voxel-wise total fibre density: Investigating the problems associated with track-count mapping. *NeuroImage, 117, 284-93*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/26037054
+> Calamante, F., Smith, R. E., Tournier, J.-D., Raffelt, D., & Connelly, A. (2015). Quantification of voxel-wise total fibre density: Investigating the problems associated with track-count mapping. *NeuroImage, 117, 284-93*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/26037054
 
-## Highly recommanded readings
+### Web documentation
 
-- References
 - MRtrix wiki<br>
 -- <a href="https://github.com/MRtrix3/mrtrix3/wiki/tckgen" target="_blank">MRtrix tckgen</a> <br>
 -- <a href="https://github.com/MRtrix3/mrtrix3/wiki/tcksift" target="_blank">MRtrix tcksift</a> <br>
