@@ -70,7 +70,7 @@ function: self.__createAcquisitionParameterFile('topup')
 function: self.__createAcquisitionParameterFile('eddy')
 ```
 
-- [eddy](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy) 
+- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy" target="_blank">FSL Eddy</a>
 
 ### 2- With fieldmap images (phase and magnitude)
 
@@ -79,7 +79,7 @@ function: self.__createAcquisitionParameterFile('eddy')
 function: self.__computeFieldmap(eddyCorrectionImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
 ```
 
-- [eddy](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy)
+- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy" target="_blank">FSL Eddy</a>
 
 ### 3- Without fieldmaps or b0s (with opposite PE)
 
@@ -87,7 +87,7 @@ function: self.__computeFieldmap(eddyCorrectionImage, bVals, mag, phase, norm, p
 function: self.__createAcquisitionParameterFile('eddy')
 ```
 
-- [eddy](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy)
+- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy" target="_blank">FSL Eddy</a>
 
 ## Expected result(s) - Quality Assessment (QA)
 
