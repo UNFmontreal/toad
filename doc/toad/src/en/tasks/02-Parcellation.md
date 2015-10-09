@@ -65,3 +65,20 @@ function: self.__create5ttImage()
 ### Associated documentation
 
 - <a name="wikiFS"></a>[FreeSurfer Wiki](http://freesurfer.net/fswiki)
+
+### Articles
+
+Dale, A. M., Fischl, B., & Sereno, M. I. (1999). Cortical surface-based analysis. I. Segmentation and surface reconstruction. *NeuroImage, 9(2), 179-94*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/9931268
+
+Collins, D. L., Neelin, P., Peters, T. M., & Evans, A. C.Automatic 3D intersubject registration of MR volumetric data in standardized Talairach space. *Journal of computer assisted tomography*.
+
+Fischl, B., Sereno, M. I., & Dale, A. M. (1999). Cortical surface-based analysis. II: Inflation, flattening, and a surface-based coordinate system. *NeuroImage, 9(2), 195-207*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/9931269
+
+Fischl, B., Sereno, M. I., Tootell, R. B., & Dale, A. M. (1999). High-resolution intersubject averaging and a coordinate system for the cortical surface. Human brain mapping, 8(4), 272-84. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/10619420
+
+Fischl, B., & Dale, A. M. (2000). Measuring the thickness of the human cerebral cortex from magnetic resonance images. Proceedings of the National Academy of Sciences of the United States of America, 97(20), 11050-5. Retrieved from http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=27146&tool=pmcentrez&rendertype=abstract
+
+Fischl, B., Salat, D. H., Busa, E., Albert, M., Dieterich, M., Haselgrove, C., Kouwe, A. van der, et al. (2002). Whole brain segmentation: automated labeling of neuroanatomical structures in the human brain. Neuron, 33(3), 341-55. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/11832223
+
+Fischl, B., Kouwe, A. van der, Destrieux, C., Halgren, E., Ségonne, F., Salat, D. H., Busa, E., et al. (2004). Automatically parcellating the human cerebral cortex. Cerebral cortex (New York, N.Y. : 1991), 14(1), 11-22. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/14654453
+
