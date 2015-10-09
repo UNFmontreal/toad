@@ -57,6 +57,6 @@ function: self.__mean(l2, l3, rd)
 
 ### Scientific articles
 
-- Smith, S. M., Jenkinson, M., Woolrich, M. W., Beckmann, C. F., Behrens, T. E. J., Johansen-Berg, H., Bannister, P. R., et al. (2004). Advances in functional and structural MR image analysis and implementation as FSL. *NeuroImage, 23 Suppl 1, S208-19*. [[Link to the article]](http://www.sciencedirect.com/science/article/pii/S1053811904003933)
+- Smith, S. M., Jenkinson, M., Woolrich, M. W., Beckmann, C. F., Behrens, T. E. J., Johansen-Berg, H., Bannister, P. R., et al. (2004). Advances in functional and structural MR image analysis and implementation as FSL. *NeuroImage, 23 Suppl 1, S208-19*. [[Link to the article](http://www.sciencedirect.com/science/article/pii/S1053811904003933)]
 
 
