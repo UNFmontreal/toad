@@ -5,33 +5,24 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Backup                                                |
 |**Goal**        | Archiving initial dataset                             |
-|**Config file** | N/A                                                   |
 |**Time**        | N/A                                                   |
-|**Output**      | None                                                  |
+|**Output**      | 00-backup folder                                      |
 
 
 ## Goal
 
-[presentation of the objective of the method]
-
-
-## Requirements
-
-[what files are needed to run the task]
+Backup step creates a 00-backup folder where it moves every files, folders submitted to TOAD
 
 
 ## Implementation
 
-
-
-### [1- Step 1 name]
+### 1- Move files and folders
 
 ```
-function: 
+function: shutil.move(image, self.workingDir)
+function: shutil.move(folder, self.workingDir)
 ```
 
-## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
 
 
