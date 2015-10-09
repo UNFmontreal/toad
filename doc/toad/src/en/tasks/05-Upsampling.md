@@ -5,11 +5,9 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Upsampling                                            |
 |**Goal**        | Upsampling of the diffusion-weigthed images           |
-|**Config file** | `voxel_size` <br />`b0_extract_at_axis`<br />'cleanup`|
+|**Config file** | `voxel_size` <br /> `cleanup` |
 |**Time**        | N/A                                                   |
 |**Output**      | Diffusion-weigthed upsampled images                   |
-
-# 
 
 ## Goal
 
@@ -18,33 +16,20 @@ The upsampling tasks creates diffusion-weigthed images (DWI) upsampled to anatom
 ## Requirements
 
 - Diffusion-weigthed images (dwi)
-- 
 
 ## Config file parameters
 
-[what are the options in the config file -- see parameters in the table]
+Upsampling voxel size in x y z direction suited for upsampling
+- `voxel_size: 1 1 1`
 
-#upsampling voxel size in x y z direction suited for upsampling
-voxel_size: 1 1 1
-
-#extract B0
-#extract_at_axis: {1, 2 , 3}
-#        "Extract data only at the coordinates specified. This option
-#        specifies the Axis. Must be used in conjunction with
-#        extract_at_coordinate.
-b0_extract_at_axis: 3
-
-
-#remove extra files
-cleanup: True
+Remove extra files
+- `cleanup: True`
 
 ## Implementation
 
 ### 1- Upsampling
 
-```R
-function: dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
-```
+[mri_convert](https://github.com/MRtrix3/mrtrix3/wiki/mrconvert)
 
 ## Expected result(s) - Quality Assessment (QA)
 
