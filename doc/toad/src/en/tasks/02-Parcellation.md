@@ -28,7 +28,8 @@ Option available for Freesurfer recon-all command {all,autorecon-all,autorecon1,
 - `directive: all`<br />
 
 Remove extra files<br />
-- `cleanup: True`
+- `cleanup: True`<br />
+
 ## Implementation
 
 ### 1- Run reconAll from Freesurfer [ref: [freesurferwiki](#wikiFS)]
