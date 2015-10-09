@@ -53,7 +53,7 @@ Remove extra files
 
 ## References
 
-### Article
+### Scientific articles
 
 Jenkinson, M., Bannister, P., Brady, M., & Smith, S. (2002). Improved optimization for the robust and accurate linear registration and motion correction of brain images. *NeuroImage, 17(2), 825-41*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/12377157
 
