@@ -69,6 +69,8 @@ function: self.__launchMatlabExecution(scriptName)
 
 ## References
 
+### Scientific articles
+
 - Denoising: nlmeans <br>
 > Coupe, P., Yger, P., Prima, S., Hellier, P., Kervrann, C., & Barillot, C. (2008). An Optimized Blockwise Nonlocal Means Denoising Filter for 3-D Magnetic Resonance Images. *IEEE Transactions on Medical Imaging, 27(4), 425-441*. [[Link to the article](http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=2881565&tool=pmcentrez&rendertype=abstract)]
 
