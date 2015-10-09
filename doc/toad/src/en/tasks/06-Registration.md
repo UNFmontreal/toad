@@ -32,19 +32,18 @@ Remove extra files
 
 ### 1- Compute matrix  
 
-- [flirt](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt)
+- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt" target="_blank">FSL flirt</a>
 
-- [transformcalc](https://github.com/MRtrix3/mrtrix3/wiki/transformcalc)
-
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/transformcalc" target="_blank">MRtrix transformcalc</a>
 
 ### 2- Resample
 
-
-- [flirt](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt)
+- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt" target="_blank">FSL flirt</a>
 
 ### 3- Registration
 
-- [mrtransform](https://github.com/MRtrix3/mrtrix3/wiki/mrtransform)
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/mrtransform" target="_blank">MRtrix mrtransform</a>
+
 
 ## Expected result(s) - Quality Assessment (QA)
 
@@ -53,11 +52,11 @@ Remove extra files
 
 ## References
 
-### Scientific articles
+### Articles
 
-Jenkinson, M., Bannister, P., Brady, M., & Smith, S. (2002). Improved optimization for the robust and accurate linear registration and motion correction of brain images. *NeuroImage, 17(2), 825-41*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/12377157
+- Jenkinson, M., Bannister, P., Brady, M., & Smith, S. (2002). Improved optimization for the robust and accurate linear registration and motion correction of brain images. *NeuroImage, 17(2), 825-841*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/12377157" target="_blank">Link to the article</a>]
 
-Jenkinson, M., & Smith, S. (2001). A global optimisation method for robust affine registration of brain images. *Medical image analysis, 5(2), 143-56*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/11516708
+- Jenkinson, M., & Smith, S. (2001). A global optimisation method for robust affine registration of brain images. *Medical Image Analysis, 5(2), 143-156*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/11516708" target="_blank">Link to the article</a>]
 
-Greve, D. N., & Fischl, B. (2009). Accurate and robust brain image alignment using boundary-based registration. *NeuroImage, 48(1), 63-72*. Retrieved from http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=2733527&tool=pmcentrez&rendertype=abstract
+- Greve, D. N., & Fischl, B. (2009). Accurate and robust brain image alignment using boundary-based registration. *NeuroImage, 48(1), 63-72*. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=2733527&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>]
 
