@@ -3,58 +3,37 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
-
-#
-
-[brief description]    
+|**Name**        | Snr                                    |
+|**Goal**        | Assessment of the SNR                                    |
+|**Parameters**  | N/A |
+|**Time**        | N/A         |
+|**Output**      | QA images                                     |
 
 
 ## Goal
 
-[presentation of the objective of the method]
+The SNR step creates several graphs to assess the Signal to Noise Ratio of the DWI data
 
+## Minimal Requirements
 
-## Requirements
+- Native diffusion-weigthed images
+- Corpus Callusum mask
+- Brain mask
 
-[what files are needed to run the task]
+## Optimal Requirements
 
-
-## Parameters
-
-[what are the parameters used in the following steps -- see parameters in the table]
+- Denoised diffusion-weigthed images
+- Corrected diffusion-weigthed images
 
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
-```
-
-### [1- Step 1 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [2- Step 2 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [3- Step 3 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+- SNR for each directions of the diffusion-weigthed images
+- Noise profile
+- Noise mask used to extract noise data
+- Corpus Callusum mask to extract signal data
 
 
