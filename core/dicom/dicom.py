@@ -71,15 +71,15 @@ class Dicom(Ascconv):
             Ascconv.__init__(self, self.__filename)
             bandwidthPerPixelPhaseEncodeTag = Tag((0x0019, 0x1028))
 
-            if header.has_key(bandwidthPerPixelPhaseEncodeTag):
-                self.__bandwidthPerPixelPhaseEncode = float(header[bandwidthPerPixelPhaseEncodeTag].value)
-
             try:
+                if header.has_key(bandwidthPerPixelPhaseEncodeTag):
+                    self.__bandwidthPerPixelPhaseEncode = float(header[bandwidthPerPixelPhaseEncodeTag].value)
+
                 self.__echoSpacing = 1/(self.__bandwidthPerPixelPhaseEncode* self.getEpiFactor()) *1000.0 * \
                               self.getPatFactor() * self.getPhaseResolution() * \
                               self.getPhaseOversampling()
 
-            except (KeyError, IndexError, TypeError):
+            except (KeyError, IndexError, TypeError, ValueError):
                 self.__echoSpacing = None
 
 
