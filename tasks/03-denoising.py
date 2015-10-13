@@ -65,10 +65,10 @@ class Denoising(GenericTask):
                 denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
 
             else:
-                self.sigmaVector, sigma, noiseMask = self.__computeSigmaAndNoiseMask(dwiData)
+                self.sigmaVector, sigma, piesnoNoiseMask = self.__computeSigmaAndNoiseMask(dwiData)
                 self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
                 denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
-                nibabel.save(nibabel.Nifti1Image(noiseMask.astype(numpy.float32),dwiImage.get_affine()), self.buildName(target, "noise_mask"))
+                nibabel.save(nibabel.Nifti1Image(piesnoNoiseMask.astype(numpy.float32),dwiImage.get_affine()), self.buildName(target, "piesno_noise_mask"))
 
             nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
 
