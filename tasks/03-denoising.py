@@ -48,6 +48,7 @@ class Denoising(GenericTask):
                                                     self.buildName(parcellationMask, 'temporary'),
                                                     extraArgs)
 
+
         target = self.buildName(dwi, "denoise")
 
         if self.get("algorithm") == "nlmeans":
@@ -56,8 +57,7 @@ class Denoising(GenericTask):
             dwiImage = nibabel.load(dwi)
             dwiData  = dwiImage.get_data()
             if self.get('number_array_coil') == "32":
-                parcellationMask = self.getParcellationImage('mask')
-                noiseMask = mriutil.computeNoiseMask(parcellationMask, self.buildName(parcellationMask, 'noisemask'))
+                noiseMask = mriutil.computeNoiseMask(mask, self.buildName(mask, 'noisemask'))
                 noiseMaskImage = nibabel.load(noiseMask)
                 noiseMaskData  = noiseMaskImage.get_data()
                 sigma = numpy.std(dwiData[noiseMaskData > 0])
@@ -68,10 +68,9 @@ class Denoising(GenericTask):
                 self.sigmaVector, sigma, noiseMask = self.__computeSigmaAndNoiseMask(dwiData)
                 self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
                 denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
+                nibabel.save(nibabel.Nifti1Image(noiseMask.astype(numpy.float32),dwiImage.get_affine()), self.buildName(target, "noise_mask"))
 
             nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
-            nibabel.save(nibabel.Nifti1Image(noiseMask.astype(numpy.float32),
-                                             dwiImage.get_affine()), self.buildName(target, "noise_mask"))
 
         elif self.get('general', 'matlab_available'):
             dwi = self.__getDwiImage()
@@ -138,9 +137,7 @@ class Denoising(GenericTask):
             numberArrayCoil = int(self.get("number_array_coil"))
         except ValueError:
             numberArrayCoil = 1
-        #sigmaMatrix = numpy.zeros_like(data, dtype=numpy.float32)
         sigmaVector = numpy.zeros(data.shape[2], dtype=numpy.float32)
-        #maskNoise = numpy.zeros(data.shape[:-1], dtype=numpy.bool)
 
         sigmaMatrix, maskNoise = dipy.denoise.noise_estimate.piesno(data, N=numberArrayCoil, return_mask=True)
         return sigmaVector, sigmaMatrix, maskNoise
