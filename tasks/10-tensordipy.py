@@ -63,8 +63,6 @@ class TensorDipy(GenericTask):
         faColor = numpy.clip(fit.fa, 0, 1)
         rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
         nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(source, "tensor_rgb"))
-
-        self.info("End tensor and metrics creation from dipy, resulting file is {} ".format(fit))
         return fit
 
 

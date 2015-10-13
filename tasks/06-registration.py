@@ -159,8 +159,8 @@ class Registration(GenericTask):
 
         qaImages = Images(
             (brainMaskPng, 'Brain mask on upsampled b0'),
-            (aparcAsegPng, 'aparcaseg segmentaion on upsampled b0'),
-            (brodmannPng, 'Brodmann segmentaion on upsampled b0'),
+            (aparcAsegPng, 'aparcaseg segmentation on upsampled b0'),
+            (brodmannPng, 'Brodmann segmentation on upsampled b0'),
             )
 
         return qaImages
