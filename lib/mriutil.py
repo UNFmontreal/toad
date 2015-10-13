@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import nibabel
 import random
+import scipy
 import numpy
 import util
 import os
@@ -620,4 +621,15 @@ def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, ex
     invertMatrix(matrix, freesurferToB0)
     cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {} ".format(sourceToResample, source, freesurferToB0, target)
     util.launchCommand(cmd)
+    return target
+
+
+def computeNoiseMask(source, target):
+    brainImage = nibabel.load(source)
+    brainData = brainImage.get_data()
+    brainData[brainData>0] = 1
+    maskNoise = scipy.ndimage.morphology.binary_dilation(brainData, iterations=25)
+    maskNoise[..., :maskNoise.shape[-1]//2] = 1
+    maskNoise = ~maskNoise
+    nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.uint8), brainImage.get_affine()), target)
     return target
