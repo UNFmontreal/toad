@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Snr                                    |
 |**Goal**        | Assessment of the SNR                                    |
-|**Parameters**  | N/A |
+|**Parameters**  | `ignore` |
 |**Time**        | N/A         |
 |**Output**      | QA images                                     |
 
@@ -13,6 +13,11 @@
 ## Goal
 
 The SNR step creates several graphs to assess the Signal to Noise Ratio of the DWI data
+
+## Config file parameters
+
+Ignore snr task
+- `ignore: False`
 
 ## Minimal Requirements
 
@@ -24,7 +29,6 @@ The SNR step creates several graphs to assess the Signal to Noise Ratio of the D
 
 - Denoised diffusion-weigthed images
 - Corrected diffusion-weigthed images
-
 
 ## Implementation
 
