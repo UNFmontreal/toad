@@ -6,7 +6,7 @@
 |**Name**        | Upsampling                                            |
 |**Goal**        | Upsampling of the diffusion-weigthed images           |
 |**Config file** | `voxel_size` <br /> `cleanup` |
-|**Time**        | N/A                                                   |
+|**Time**        | Few minutes                                                  |
 |**Output**      | Diffusion-weigthed upsampled images                   |
 
 ## Goal
