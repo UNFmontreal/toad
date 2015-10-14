@@ -6,7 +6,7 @@
 |**Name**        | tractographyhmrtrix                                    |
 |**Goal**        | Run tractography on tensors and constrained spherical deconvolution using tckgen from MRtrix                                   |
 |**Config file** | `step` <br> `maxlength` <br> `number_tracks` <br> `downsample` <br> `ignore`|
-|**Time**        | N/A         |
+|**Time**        | About 2 hours         |
 |**Output**      | - Probabilist tensor tractography and connectome <br> - Probabilist tensor tractography and connectome <br> - Probabilist "sifted" csd tractography and connectome |
 
 #
