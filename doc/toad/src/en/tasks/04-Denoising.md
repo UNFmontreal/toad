@@ -6,7 +6,7 @@
 |**Name**        | Denoising                                             |
 |**Goal**        | Apply a denoising algorithm on diffusion-weighted images |
 |**Config file** | `algorithm` <br />`rician`<br />`number_array_coil`<br />`cleanup`<br />`ignore`                                      |
-|**Time**        | N/A                                                   |
+|**Time**        | Depends on the denoising algorithm                                                 |
 |**Output**      | Diffusion-weighted images denoised                    |
 
 ## Goal
