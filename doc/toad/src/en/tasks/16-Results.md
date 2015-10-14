@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | results                                    |
 |**Goal**        | Copy every useful files                                    |
-|**Time**        | N/A         |
+|**Time**        | Few seconds         |
 |**Output**      | None                                     |
 
 ## Goal
