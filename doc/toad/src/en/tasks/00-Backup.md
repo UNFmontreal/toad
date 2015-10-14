@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Backup                                                |
 |**Goal**        | Archiving initial dataset                             |
-|**Time**        | N/A                                                   |
+|**Time**        | Few seconds                                                  |
 |**Output**      | 00-backup folder                                      |
 
 
