@@ -98,7 +98,7 @@ function: self.__createAcquisitionParameterFile('eddy')
  
 ## References
 
-### Scientific articles
+### Articles
 
 
 
