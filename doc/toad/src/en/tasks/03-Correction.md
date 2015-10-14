@@ -6,7 +6,7 @@
 |**Name**        | Correction                                            |
 |**Goal**        | Motion and distortion correction of dwi images        |
 |**Config file** | `phase_enc_dir` <br> `echo_spacing` <br> `epi_factor` <br> `ignore` <br> `cost` <br> `dof` <br> `interp` <br> `applyxfm` <br> `smooth3` |
-|**Time**        | N/A                                                   |
+|**Time**        | About 1 hour                                                   |
 |**Output**      | Diffusion-weighted images corrected <br> Diffusion-weighted gradient scheme corrected|
 
 #
