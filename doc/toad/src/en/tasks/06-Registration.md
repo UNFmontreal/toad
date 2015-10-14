@@ -6,7 +6,7 @@
 |**Name**        | Registration                                          |
 |**Goal**        | Registration of the anatomical on diffusion-weighted images |
 |**Config file** | `cleanup`                                             |
-|**Time**        | N/A                                                   |
+|**Time**        | Few minutes                                           |
 |**Output**      | - Anatomical images (resample) <br> - 5tt (resampled, registered) <br> - norm (resampled, registered) <br> - mask (resampled, registered) <br> - aparc_aseg (resampled, registered) <br> - left, right ribbon (resampled, registered)|
 
 #
