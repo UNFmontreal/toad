@@ -6,7 +6,7 @@
 |**Name**        | Hardidipy                                             |
 |**Goal**        | Perform constrain spherical deconvolution using Dipy  |
 |**Config file** | `triangulated_spheres` <br> `ignore`                  |
-|**Time**        | N/A                                                   |
+|**Time**        | About 15 minutes                                               |
 |**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
 
 #
