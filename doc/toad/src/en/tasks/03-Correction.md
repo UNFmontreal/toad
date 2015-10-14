@@ -100,7 +100,7 @@ function: self.__createAcquisitionParameterFile('eddy')
 
 ### Articles
 
-
+Andersson, J. L. R., Skare, S., & Ashburner, J. (2003). How to correct susceptibility distortions in spin-echo echo-planar images: application to diffusion tensor imaging. *NeuroImage, 20(2), 870-88*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/14568458
 
 
 
