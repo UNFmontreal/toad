@@ -6,7 +6,7 @@
 |**Name**        | Parcellation                                          |
 |**Goal**        | Run Freesurfer pipeline                               |
 |**Config file** | `intrasubject` <br />`directive`<br />`cleanup` |
-|**Time**        | N/A                                                   |
+|**Time**        | About 10 hours                                                   |
 |**Output**      | - Anatomical from Freesurfer <br> - Aparc_aseg segmentation <br> - Mask from aparc_aseg file <br> - lh_ribbon and rh_ribbon <br> - 5tt image (five-tissue-type)|
 
 #
