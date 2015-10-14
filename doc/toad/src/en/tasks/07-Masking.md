@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Masking                                               |
 |**Goal**        | Creation of masks from atlases                        |
-|**Time**        | N/A         |
+|**Time**        | Few minutes         |
 |**Output**      | - Seed grey/white matter interface <br> - White matter mask <br> - Mask from aparc_aseg (253 and 1024) |
 
 #
