@@ -45,7 +45,7 @@ class Denoising(GenericTask):
         mask = mriutil.computeDwiMaskFromFreesurfer(b0,
                                                     norm,
                                                     parcellationMask,
-                                                    self.buildName(parcellationMask, 'temporary'),
+                                                    self.buildName(parcellationMask, 'resample'),
                                                     extraArgs)
 
 
@@ -190,7 +190,7 @@ class Denoising(GenericTask):
         #Get images
         dwi = self.getPreparationImage("dwi")
         dwiDenoised = self.getImage('dwi', 'denoise')
-        brainMask = self.getImage('mask', 'temporary')
+        brainMask = self.getImage('mask', 'resample')
         b0 = self.getImage('b0')
         noiseMask = self.getImage('mask', 'noise_mask')
 
