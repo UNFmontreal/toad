@@ -105,7 +105,7 @@ class TensorDipy(GenericTask):
         cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
         ellipsoidsPng = self.buildName(dwi, 'ellipsoids_tensor', 'png')
         self.reconstructionPng(self.__fit, mask, cc, ellipsoidsPng, model='tensor')
-        qaImages.extend(Images((ellipsoidsPng, 'Tensor ellipsoids in a part of the CC')))
+        qaImages.extend(Images((ellipsoidsPng, 'Coronal slice of tensor ellipsoids in the Corpus Callosum')))
 
         #Build qa images
         tags = (
