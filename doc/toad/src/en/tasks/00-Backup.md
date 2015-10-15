@@ -3,58 +3,26 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
-
-#
-
-[brief description]    
+|**Name**        | Backup                                                |
+|**Goal**        | Archiving initial dataset                             |
+|**Time**        | Few seconds                                                  |
+|**Output**      | 00-backup folder                                      |
 
 
 ## Goal
 
-[presentation of the objective of the method]
-
-
-## Requirements
-
-[what files are needed to run the task]
-
-
-## Parameters
-
-[what are the parameters used in the following steps -- see parameters in the table]
+Backup step creates a 00-backup folder where it moves every files, folders submitted to TOAD
 
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
-```
-
-### [1- Step 1 name]
+### 1- Move files and folders
 
 ```
-[Tool or function used with the reference to the official documentation]
+function: shutil.move(image, self.workingDir)
+function: shutil.move(folder, self.workingDir)
 ```
 
-### [2- Step 2 name]
 
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [3- Step 3 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-## Expected result(s) - Quality Assessment (QA)
-
-[what should be produced by TOAD, the expected output]
 
 

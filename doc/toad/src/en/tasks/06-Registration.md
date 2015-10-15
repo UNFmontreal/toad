@@ -4,67 +4,59 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | Registration                                          |
-|**Goal**        | Registration of the anat on dwi                       |
-|**Parameters**  | |
-|**Time**        | N/A                                                   |
-|**Output**      | - Anat (resample) <br> - 5tt (resampled, registered) <br> - norm (resampled, registered) <br> - mask (resampled, registered) <br> - aparc_aseg (resampled, registered) <br> - left, right ribbon (resampled, registered)|
+|**Goal**        | Registration of the anatomical on diffusion-weighted images |
+|**Config file** | `cleanup`                                             |
+|**Time**        | Few minutes                                           |
+|**Output**      | - Anatomical images (resample) <br> - 5tt (resampled, registered) <br> - norm (resampled, registered) <br> - mask (resampled, registered) <br> - aparc_aseg (resampled, registered) <br> - left, right ribbon (resampled, registered)|
 
 #
 
 ## Goal
 
-Registration task overlay anatomical and atlases on diffusion images. 
+The registration step overlays the anatomical image and atlases on the diffusion-weigthed images. 
 
 ## Requirements
 
-- Diffusion weighted images
+- Diffusion-weigthed images (dwi)
+- Anatomical image (anat)
+- 5tt, norm, mask, aparc_aseg and left right ribbon from parcellation step (Freesurfer pipeline) 
 
-## Parameters
+## Config file parameters
 
-If anatomical and diffusion images were acquired during the same acquisition session we use -usesqform -dof 6
+If anatomical and diffusion-weigthed images were acquired during the same acquisition session we use -usesqform -dof 6 <br>
+
+Remove extra files
+- `cleanup: False`
 
 ## Implementation
 
 ### 1- Compute matrix  
 
-```
-function: freesurferToDWIMatrix = self.__freesurferToDWITransformation(b0, norm, extraArgs)
-function: mrtrixMatrix = self.__transformFslToMrtrixMatrix(anat, b0, freesurferToDWIMatrix)
-```
+- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt" target="_blank">FSL flirt</a>
+
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/transformcalc" target="_blank">MRtrix transformcalc</a>
 
 ### 2- Resample
 
-```
-function: self.__applyResampleFsl(anat, b0, freesurferToDWIMatrix, self.buildName(anat, "resample"))
-function: self.__applyResampleFsl(tt5, b0, freesurferToDWIMatrix, self.buildName(tt5, "resample"),True)
-function: self.__applyResampleFsl(norm, b0, freesurferToDWIMatrix, self.buildName(norm, "resample"),True)
-function: self.__applyResampleFsl(mask, b0, freesurferToDWIMatrix, self.buildName(mask, "resample"),True)
-
-function: self.__applyResampleFsl(aparcAsegFile, b0, freesurferToDWIMatrix, self.buildName(aparcAsegFile, "resample"), True)
-function: self.__applyResampleFsl(lhRibbon, b0, freesurferToDWIMatrix, self.buildName(lhRibbon, "resample"),True)
-function: self.__applyResampleFsl(rhRibbon, b0, freesurferToDWIMatrix, self.buildName(rhRibbon, "resample"),True)
-
-function: self.__applyResampleFsl(brodmann, b0, freesurferToDWIMatrix, self.buildName(brodmann, "resample"), True)
-
-```
+- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt" target="_blank">FSL flirt</a>
 
 ### 3- Registration
 
-```
-function: self.__applyRegistrationMrtrix(tt5, mrtrixMatrix)
-function: self.__applyRegistrationMrtrix(norm, mrtrixMatrix)
-function: self.__applyRegistrationMrtrix(mask, mrtrixMatrix)
+- <a href="https://github.com/MRtrix3/mrtrix3/wiki/mrtransform" target="_blank">MRtrix mrtransform</a>
 
-function: self.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix)
-function: self.__applyRegistrationMrtrix(lhRibbon, mrtrixMatrix)
-function: self.__applyRegistrationMrtrix(rhRibbon, mrtrixMatrix)
-
-function: self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
-
-```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+- Produce an image (png) of the B0 overlayed by brain mask and its boundaries
+- Produce an image (png) of the B0 overlayed by aparc_aseg file and by the boundaries of the brain mask
 
+## References
+
+### Articles
+
+- Jenkinson, M., Bannister, P., Brady, M., & Smith, S. (2002). Improved optimization for the robust and accurate linear registration and motion correction of brain images. *NeuroImage, 17(2), 825-841*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/12377157" target="_blank">Link to the article</a>]
+
+- Jenkinson, M., & Smith, S. (2001). A global optimisation method for robust affine registration of brain images. *Medical Image Analysis, 5(2), 143-156*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/11516708" target="_blank">Link to the article</a>]
+
+- Greve, D. N., & Fischl, B. (2009). Accurate and robust brain image alignment using boundary-based registration. *NeuroImage, 48(1), 63-72*. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=2733527&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>]
 
