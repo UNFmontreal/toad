@@ -4,34 +4,37 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | Upsampling                                            |
-|**Goal**        | Upsampling of the dwi                                 |
-|**Parameters**  | Diffusion images (dwi)                                |
-|**Time**        | N/A                                                   |
-|**Output**      | Diffusion upsampled images                            |
+|**Goal**        | Upsampling of the diffusion-weigthed images           |
+|**Config file** | `voxel_size` <br /> `cleanup`                         |
+|**Time**        | Few minutes                                           |
+|**Output**      | Diffusion-weigthed upsampled images                   |
+
+# 
 
 ## Goal
 
-Upsampling task creates diffusion images upsampled to anatomical images resolution
-
+The upsampling tasks creates diffusion-weigthed images (DWI) upsampled to anatomical images resolution
 
 ## Requirements
 
-Diffusion images (dwi)
+- Diffusion-weigthed images (dwi)
 
-## Parameters
+## Config file parameters
 
-Resolution of the anatomic
+Upsampling voxel size in x y z direction suited for upsampling
+- `voxel_size: 1 1 1`
+
+Remove extra files
+- `cleanup: True`
 
 ## Implementation
 
 ### 1- Upsampling
 
-```
-function: dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
-```
+<a href="https://github.com/MRtrix3/mrtrix3/wiki/mrconvert" target="_blank">mri_convert</a>
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Diffusion weigthed images upsampled
-- Creation of a png of dwi and a png of the b0 
+- Diffusion-weigthed upsampled images
+- Creation of an image (png) of DWI and an image (png) of the b0 
 

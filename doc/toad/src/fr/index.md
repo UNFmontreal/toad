@@ -1,4 +1,4 @@
-<img src="figs/toad_highres.jpg" alt="Toad logo" style="width: 450px;"/>
+<img src="figs/toad_logo.png" alt="Toad logo" style="width: 450px;"/>
 
 # TOolkit d’Analyse de Diffusion (TOAD)
 
@@ -27,25 +27,32 @@ Nous vous conseillons également de **consulter [cette page](tuto/00-refs.md)** 
 
 ## L’équipe
 
-<img src="figs/JDoyon.jpg" alt="Julien Doyon" style="width: 50px;"/> [**Julien Doyon**](mailto:julien.doyon@umontreal.ca) : directeur scientifique de l’[UNF (Unité de Neuroimagerie Fonctionnelle)](www.unf-montreal.ca)
+<img src="figs/JDoyon.jpg" alt="Julien Doyon" style="width: 50px;"/> **Julien Doyon** : directeur scientifique de l’[UNF (Unité de Neuroimagerie Fonctionnelle)](www.unf-montreal.ca)
 
-<img src="figs/SBrambati.jpg" alt="Simona Brambati" style="width: 50px;"/> [**Simona Brambati**](mailto:simonabrambati@gmail.com) : chercheuse et responsable scientifique du projet
+<img src="figs/SBrambati.jpg" alt="Simona Brambati" style="width: 50px;"/> **Simona Brambati** : chercheuse et responsable scientifique du projet
 
-<img src="figs/ABore.jpg" alt="Arnaud Boré" style="width: 50px;"/> [**Arnaud Boré**](mailto:arnaud.bore@gmail.com) : développeur et responsable scientifique du projet
+<img src="figs/ABore.jpg" alt="Arnaud Boré" style="width: 50px;"/> **Arnaud Boré** : développeur et responsable scientifique du projet
 
-<img src="figs/MDesrosiers.jpg" alt="Mathieu Desrosiers" style="width: 50px;"/> [**Mathieu Desrosiers**](mailto:mathieu.desrosiers@criugm.qc.ca) : développeur principal et mainteneur du projet
+<img src="figs/MDesrosiers.jpg" alt="Mathieu Desrosiers" style="width: 50px;"/> **Mathieu Desrosiers** : développeur principal et mainteneur du projet
 
-<img src="figs/CBedetti.jpg" alt="Christophe Bedetti" style="width: 50px;"/> [**Christophe Bedetti**](mailto:christophe.bedetti@gmail.com) : développeur et responsable de l’évaluation qualité 
+<img src="figs/CBedetti.jpg" alt="Christophe Bedetti" style="width: 50px;"/> **Christophe Bedetti** : développeur et responsable de l’évaluation qualité 
 
-<img src="figs/GVallet.jpg" alt="Guillaume Vallet" style="width: 50px;"/>  [**Guillaume Vallet**](mailto:gtvallet@gmail.com) : responsable de la documentation et du site internet
+<img src="figs/GVallet.jpg" alt="Guillaume Vallet" style="width: 50px;"/>  **Guillaume Vallet** : responsable de la documentation et du site internet
 
-<img src="figs/JChen.jpg" alt="Jeni Chen" style="width: 50px;"/> [**Jeni Chen**](mailto:jen-i.chen@umontreal.ca) : traduction et documentation du projet
+<img src="figs/JChen.jpg" alt="Jeni Chen" style="width: 50px;"/> **Jeni Chen** : traduction et documentation du projet
 
-<img src="figs/BPinsard.jpg" alt="Basile Pinsard" style="width: 50px;"/> [**Basile Pinsard**](mailto:basile.pinsard@gmail.com) : développeur et conseiller scientifique
+<img src="figs/BPinsard.jpg" alt="Basile Pinsard" style="width: 50px;"/> **Basile Pinsard** : développeur et conseiller scientifique
 
-<img src="figs/AHanganu.jpg" alt="Alexandru Hanganu" style="width: 50px;"/> [**Alexandru Hanganu**](mailto:hanganu.alexandru@gmail.com) : conseiller scientifique
+<img src="figs/AHanganu.jpg" alt="Alexandru Hanganu" style="width: 50px;"/> **Alexandru Hanganu** : conseiller scientifique
 
 
 ## Mot du directeur
 
 [A venir]
+
+
+## [Contact](about/contact.md)
+
+Vous pouvez nous contacter directement par courriel : [**toadunf.criugm@gmail.com**](toadunf.criugm@gmail.com).
+
+**Pour toute question**, merci d’indiquer dans l’*objet du message* le nom de la tâche et/ou de la section entre crochet suivi de votre question, tel que `[denoising] comment changer l’algorithme ?` ou encore `[website] information manquante`.

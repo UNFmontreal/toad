@@ -3,58 +3,61 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
+|**Name**        | Hardidipy                                             |
+|**Goal**        | Perform constrain spherical deconvolution using Dipy  |
+|**Config file** | `triangulated_spheres` <br> `ignore`                  |
+|**Time**        | About 15 minutes                                      |
+|**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
 
 #
-
-[brief description]    
-
-
+ 
 ## Goal
 
-[presentation of the objective of the method]
-
+The hardidipy step reconstructs fiber orientation distribution (fod) using non-negativity constrained spherical deconvolution (csd) from diffusion-weigthed images (dwi). [ref: <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Dipy</a>]
 
 ## Requirements
 
-[what files are needed to run the task]
+- Diffusion-weigthed images (dwi)
+- Diffusion-weighted gradient scheme (bvec and bval)
+- Mask of the brain (optional)
 
+## Config file parameters
 
-## Parameters
+Sphere tesselation {symmetric362, symmetric642, symmetric724, repulsion724, repulsion100} (default=symmetric724)
+- `triangulated_spheres: symmetric724`
 
-[what are the parameters used in the following steps -- see parameters in the table]
-
+Ignore hardidipy task: not recommended
+- `ignore: False`
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
-```
+### 1- Get response from a single population fiber
 
-### [1- Step 1 name]
+- <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Nipy auto_response</a>
 
-```
-[Tool or function used with the reference to the official documentation]
-```
+### 2- Perform spherical deconvolution
 
-### [2- Step 2 name]
+- <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Nipy reconst_csd</a>
 
-```
-[Tool or function used with the reference to the official documentation]
-```
+### 3- Extract general fractional anisotropy (gfa) and number of fibers orientations (nufo)
 
-### [3- Step 3 name]
-
-```
-[Tool or function used with the reference to the official documentation]
+```{.python}
+function: gfa = csdPeaks.gfa
+function: csdCoeff = csdPeaks.shm_coeff
 ```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+- Creation of the fiber orientation distribution (fod) and number of fibers orientations (nufo)
+- Produce an image (png) of the number of fibers orientations (nufo)
 
+## References
+
+### Associated documentation
+
+- <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Dipy example</a>
+
+### Articles
+
+- Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage, 35(4)*, 1459-1472. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/17379540" target="_blank">Link to the article</a>]
 
