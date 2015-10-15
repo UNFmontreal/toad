@@ -9,7 +9,7 @@
 ---
 
 TOAD aims to offer an **automated pipeline to process diffusion neuroimaging data**.
-The toolkit uses a large combination of tools (Matlab, FreeSurfer, FSL, Mrtrix) to clean the data, compute different masks, segment maps and then compute fibers, tensors and their associate metrics such as Fractional Anisotropy (FA) and so on.
+The toolkit uses a large combination of tools (Matlab, FreeSurfer, FSL, Mrtrix) to clean the data, compute different masks, segment maps and then compute fibers, tensors and their associated metrics such as Fractional Anisotropy (FA) and so on.
 
 The project just started and is under active development. 
 You can find some documentation on how to contribute in the `doc` folder.
