@@ -190,39 +190,57 @@ class Validation(object):
         if self.config.get('arguments', 'debug') == 'True':
             self.debug("Images found into {} directory: {}".format(self.workingDir, images))
 
-        for key, (value, description) in images.iteritems():
-            if value:
-                if not mriutil.isDataStridesOrientationExpected(value, self.config.get('preparation', 'stride_orientation'))\
-                        and self.config.getboolean('arguments', 'prompt')\
-                        and self.config.getboolean("preparation", "force_realign_strides"):
-                    msg = "Data strides layout for {} is unexpected and force_realign_strides is set to True.\n \
-                           If you continue, all unexpected images will be realign accordingly.\n\
-                           Only a copy of the original images will be alter.".format(value)
-                    if not util.displayYesNoMessage(msg):
-                        self.warning("Remove this subject from the list?")
-                        return False
-                    else:
-                        break
 
-        #if one and only one b0 image is given, make sure that the b0 image is not on same direction than the dwi.
-        if (not (images['b0_ap'][0] and images['b0_pa'][0])) and (images['b0_ap'][0] or images['b0_pa'][0])  \
-            and (self.config.get("correction", "ignore") == "False") and self.config.getboolean('arguments', 'prompt'):
-            if ((self.config.get("correction", "phase_enc_dir") == "0") and images['b0_pa'][0]) \
-                or ((self.config.get("correction", "phase_enc_dir") == "1")  and images['b0_ap'][0]):
-                    msg = "Found only one B0 image into the subject directory and that B0 is in " \
-                          "the same phase encoding direction than the DWI.\n" \
-                          "We recommend to remove the B0 image so at least a motion correction will be perform"
-                    if not util.displayYesNoMessage(msg):
-                        self.warning("Remove this subject from the list?")
-                        return False
+        if self.config.getboolean('arguments', 'prompt'):
 
-        if images['mag'][0] and images['phase'][0] and (images['b0_ap'][0] or images['b0_pa'][0]) and self.config.getboolean('arguments', 'prompt'):
-            msg = "Found both Fieldmap and B0 images into the subject directory\n" \
-                  "We recommend to disabled fieldmap correction?"
-            if not util.displayYesNoMessage(msg):
-                self.warning("Remove this subject from the list?")
-                return False
+            for key, (value, description) in images.iteritems():
+                if value:
+                    if not mriutil.isDataStridesOrientationExpected(value, self.config.get('preparation', 'stride_orientation'))\
+                            and self.config.getboolean("preparation", "force_realign_strides"):
+                        msg = "Data strides layout for {} is unexpected and force_realign_strides is set to True.\n \
+                               If you continue, all unexpected images will be realign accordingly.\n\
+                               Only a copy of the original images will be alter.".format(value)
+                        if not util.displayYesNoMessage(msg):
+                            self.warning("Remove this subject from the list?")
+                            return False
+                        else:
+                            break
 
+            #if one and only one b0 image is given, make sure that the b0 image is not on same direction than the dwi.
+            if (not (images['b0_ap'][0] and images['b0_pa'][0])) and (images['b0_ap'][0] or images['b0_pa'][0])  \
+                and (self.config.get("correction", "ignore") == "False"):
+                if ((self.config.get("correction", "phase_enc_dir") == "0") and images['b0_pa'][0]) \
+                    or ((self.config.get("correction", "phase_enc_dir") == "1")  and images['b0_ap'][0]):
+                        msg = "Found only one B0 image into the subject directory and that B0 is in " \
+                              "the same phase encoding direction than the DWI.\n" \
+                              "We recommend to remove the B0 image so at least a motion correction will be perform"
+                        if not util.displayYesNoMessage(msg):
+                            self.warning("Remove this subject from the list?")
+                            return False
+
+            if images['mag'][0] and images['phase'][0] and (images['b0_ap'][0] or images['b0_pa'][0]):
+                msg = "Found both Fieldmap and B0 images into the subject directory\n" \
+                      "We recommend to disabled fieldmap correction?"
+                if not util.displayYesNoMessage(msg):
+                    self.warning("Remove this subject from the list?")
+                    return False
+            """
+            if self.config.get('denoising', 'algorithm') == "nlmeans"  and \
+                self.config.get('denoising', 'number_array_coil') == "32" and \
+                    not self.config.getboolean('denoising', 'ignore'):
+
+                msg = "NLMEANS algorithm is not yet implemented for 32 coils channels images.\n" \
+
+                if self.config.getboolean('general', 'matlab_available'):
+                    msg += "set algorithm to lpca or aonlm into [denoising] section of your config.cfg.\nOtherwise " \
+
+                msg += "set ignore: True into [denoising] section of your config.cfg.\n" \
+                        "This subject will probably failed"
+
+                if not util.displayYesNoMessage(msg, "Continue anyway? (y or n)"):
+                    self.warning("Remove this subject from the list?")
+                    return False
+            """
         return True
 
 

@@ -20,15 +20,17 @@ class Denoising(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'correction', 'preparation', 'parcellation', 'qa')
+        GenericTask.__init__(self, subject,'preparation', 'parcellation', 'qa')
         self.matlabWarning = False
         self.sigmaVector = None
+        self.algorithm = None
 
 
     def implement(self):
 
-        dwi = self.__getDwiImage()
-        bVals = self.__getBValsImage()
+
+        dwi = self.getPreparationImage("dwi")
+        bVals = self.getPreparationImage('grad',  None, 'bvals')
         norm=   self.getParcellationImage('norm')
         parcellationMask = self.getParcellationImage('mask')
 
@@ -46,22 +48,31 @@ class Denoising(GenericTask):
                                                     self.buildName(parcellationMask, 'temporary'),
                                                     extraArgs)
 
+
         target = self.buildName(dwi, "denoise")
 
         if self.get("algorithm") == "nlmeans":
 
+            self.algorithm = "nlmeans"
             dwiImage = nibabel.load(dwi)
             dwiData  = dwiImage.get_data()
-            self.sigmaVector, sigma, maskNoise = self.__computeSigmaAndNoiseMask(dwiData)
-            self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
+            if self.get('number_array_coil') == "32":
+                noiseMask = mriutil.computeNoiseMask(mask, self.buildName(mask, 'noisemask'))
+                noiseMaskImage = nibabel.load(noiseMask)
+                noiseMaskData  = noiseMaskImage.get_data()
+                sigma = numpy.std(dwiData[noiseMaskData > 0])
+                self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
 
-            denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
+            else:
+                self.sigmaVector, sigma, piesnoNoiseMask = self.__computeSigmaAndNoiseMask(dwiData)
+                self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
+                denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
+                nibabel.save(nibabel.Nifti1Image(piesnoNoiseMask.astype(numpy.float32),dwiImage.get_affine()), self.buildName(target, "piesno_noise_mask"))
+
             nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
-            nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.float32),
-                                             dwiImage.get_affine()), self.buildName(target, "noise_mask"))
 
         elif self.get('general', 'matlab_available'):
-            dwi = self.__getDwiImage()
             dwiUncompress = self.uncompressImage(dwi)
 
             tmp = self.buildName(dwiUncompress, "tmp", 'nii')
@@ -81,22 +92,6 @@ class Denoising(GenericTask):
                          "Please configure matlab or set denoising algorithm to nlmeans or none"
                          .format(self.get("algorithm")))
 
-
-    def __getDwiImage(self):
-        if self.getCorrectionImage("dwi", 'corrected'):
-            return self.getCorrectionImage("dwi", 'corrected')
-        else:
-            return self.getPreparationImage("dwi")
-
-
-    def __getBValsImage(self):
-        if self.getCorrectionImage('grad',  None, 'bvals'):
-            return self.getCorrectionImage('grad',  None, 'bvals')
-        else:
-            return self.getPreparationImage('grad',  None, 'bvals')
-
-
-
     def __createMatlabScript(self, source, target):
 
         scriptName = os.path.join(self.workingDir, "{}.m".format(self.get("script_name")))
@@ -109,8 +104,10 @@ class Denoising(GenericTask):
                'nbthreads': self.getNTreadsDenoise()}
 
         if self.get("algorithm") == "aonlm":
+            self.algorithm = "aonlm"
             template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "denoise_aonlm.tpl"))
         else:
+            self.algorithm = "lpca"
             template = self.parseTemplate(tags, os.path.join(self.toadDir, "templates", "files", "denoise_lpca.tpl"))
 
         util.createScript(scriptName, template)
@@ -139,16 +136,9 @@ class Denoising(GenericTask):
             numberArrayCoil = int(self.get("number_array_coil"))
         except ValueError:
             numberArrayCoil = 1
-        sigmaMatrix = numpy.zeros_like(data, dtype=numpy.float32)
         sigmaVector = numpy.zeros(data.shape[2], dtype=numpy.float32)
-        maskNoise = numpy.zeros(data.shape[:-1], dtype=numpy.bool)
 
         sigmaMatrix, maskNoise = dipy.denoise.noise_estimate.piesno(data, N=numberArrayCoil, return_mask=True)
-        #for idx in range(data.shape[2]):
-        #    sigmaMatrix[:, :, idx], maskNoise[:, :, idx] = dipy.denoise.noise_estimate.piesno(data[:, :, idx],
-                                                                                         #N=numberArrayCoil,
-                                                                                         #return_mask=True)
-        #    sigmaVector[idx] = sigmaMatrix[0,0,idx,0]
         return sigmaVector, sigmaMatrix, maskNoise
 
 
@@ -157,13 +147,8 @@ class Denoising(GenericTask):
 
 
     def meetRequirement(self, result = True):
-        images = Images((self.getCorrectionImage("dwi", 'corrected'), 'corrected'),
-                       (self.getPreparationImage("dwi"), 'diffusion weighted'))
-
-        if not images.isAtLeastOneImageExists():
-            return False
-
-        images = Images((self.getParcellationImage('norm'), 'freesurfer normalize'),
+        images = Images((self.getPreparationImage("dwi"), 'diffusion weighted'),
+                        (self.getParcellationImage('norm'), 'freesurfer normalize'),
                         (self.getParcellationImage('mask'), 'freesurfer mask'))
 
         return images
@@ -172,18 +157,34 @@ class Denoising(GenericTask):
     def isDirty(self):
         return Images((self.getImage("dwi", 'denoise'), 'denoised'))
 
-
+    """
     def qaSupplier(self):
-        """Create and supply images for the report generated by qa task
+        """"""Create and supply images for the report generated by qa task
 
-        """
+        """"""
         qaImages = Images()
-        algorithm = self.get("algorithm")
 
         #Information on denoising algorithm
-        information = 'Algorithm {} is set'.format(algorithm)
+        information = 'Algorithm {} is set'.format(self.algorithm)
+
+        if self.config.get('denoising', 'algorithm') == "nlmeans"  and \
+            self.config.get('denoising', 'number_array_coil') == "32":
+
+            information = "NLMEANS algorithm is not yet implemented for 32 " \
+                "coils channels images. "
+
+            if self.config.getboolean('general', 'matlab_available'):
+                information += "set algorithm to lpca or aonlm into " \
+                    "[denoising] section of your config.cfg. Otherwise " \
+
+            information += "set ignore: True into [denoising] section of " \
+                "your config.cfg."
+
         if self.matlabWarning:
-            information += ' but matlab is not available on this server'
+            information = "Algorithm aonlm or lpca is set but matlab is not " \
+                "available for this server. Please configure matlab or set " \
+                "ignore: True into [denoising] section of your config.cfg."
+        qaImages.extend(Images((False, 'Denoised diffusion image')))
         qaImages.setInformation(information)
 
         #Get images
@@ -204,7 +205,7 @@ class Denoising(GenericTask):
                 (dwiCompareGif, 'Before and after denoising'),
                 ))
 
-            if algorithm == "nlmeans":
+            if self.algorithm == "nlmeans":
                 sigmaPng = self.buildName(dwiDenoised, 'sigma', 'png')
                 noiseMaskPng = self.buildName(noiseMask, None, 'png')
                 self.plotSigma(self.sigmaVector, sigmaPng)
@@ -215,3 +216,4 @@ class Denoising(GenericTask):
                     ))
 
         return qaImages
+    """

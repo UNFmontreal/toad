@@ -390,8 +390,9 @@ def displayYesNoMessage(msg, question = "Continue? (y or n)", default = None):
        A boolean True if the user press y, False otherwise
     """
     print msg
+    #make sure the buffer is not clear
     while True:
-        choice = rawInput(question)
+        choice = raw_input(question)
         if choice.strip() == "" and default is not None:
             if default == 'yes':
                 return True
@@ -416,7 +417,7 @@ def displayContinueQuitRemoveMessage(msg):
     """
     print msg
     while True:
-        choice = rawInput("Continue? (y, n or r)")
+        choice = raw_input("Continue? (y, n or r)")
         if choice.lower() == 'y':
             return "y"
         elif choice.lower() == 'n':
@@ -446,6 +447,6 @@ def rawInput(message):
     Returns:
          a line read from input
     """
-    sys.stdout.flush();
+    sys.stdout.flush()
     termios.tcflush(sys.stdin, termios.TCIOFLUSH)
     return raw_input(message)

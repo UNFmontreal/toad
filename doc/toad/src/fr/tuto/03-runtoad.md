@@ -40,8 +40,8 @@ L’ensemble des dossiers pour chaque sujet devrait ressembler à peu près au t
 |00-qa                  | Quality Assessment - pages HTML de synthèse           |
 |01-preparation         | Réorientation des images si nécessaire                |
 |02-parcellation        | Parseg et Brodmann, gauche/droite (Freesurfer)        |
-|03-correction          | Correction mouvement, inhomgénéité du champs, etc.    |
-|04-denoising           | Débruitage des images                                 |
+|03-denoising           | Débruitage des images                                 |
+|04-correction          | Correction mouvement, inhomgénéité du champs, etc.    |
 |05-preprocessing       |                                                       |
 |06-registration        | Registration T1/DWI                                   |
 |07-masking             | Création des masques                                  |

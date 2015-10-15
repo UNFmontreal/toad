@@ -23,7 +23,8 @@ class Snr(GenericTask):
 
         #Noise mask computation
         brainMask = self.getCorrectionImage('mask', 'corrected')
-        noiseMask = self.__computeNoiseMask(brainMask)
+
+        noiseMask = mriutil.computeNoiseMask(brainMask, self.buildName(brainMask, 'noisemask'))
 
         #Voxel Size of native dwi
         dwiNative = self.getPreparationImage('dwi')
@@ -35,18 +36,6 @@ class Snr(GenericTask):
         cmdString = "mri_convert -voxsize {} -rl {} --input_volume {} --output_volume {}"
         cmd = cmdString.format(" ".join(voxelSize), brainMask, ccMask, ccMaskDownsample)
         self.launchCommand(cmd)
-
-
-    def __computeNoiseMask(self, brain):
-        target = self.buildName(brain, 'noisemask')
-        brainImage = nibabel.load(brain)
-        brainData = brainImage.get_data()
-        brainData[brainData>0] = 1
-        maskNoise = scipy.ndimage.morphology.binary_dilation(brainData, iterations=25)
-        maskNoise[..., :maskNoise.shape[-1]//2] = 1
-        maskNoise = ~maskNoise
-        nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.uint8), brainImage.get_affine()), target)
-        return target
 
 
     def __noiseAnalysis(self, dwi, noiseMask, ccMask, qaImages, description):

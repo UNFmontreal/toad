@@ -144,7 +144,7 @@ Nous vous recommandons de regrouper les données de la façon suivante :
 </pre>
     
 ***Attention :*** dans ce cas de figure, il est de votre responsabilité de vous assurer les données ont été correctement converties et que le fichier d’encodage respecte bien les normes habituelles (strides...). 
-Si ces données proviennent d’un scanner Siemens 3T Tim Trio (comme à l’UNF), et si vous disposez encore des données brutes, nous recommandons fortement de reconvertir les données avec le logiciel `unf2toad` [voir section Conversion des données](#conversion)
+Si ces données proviennent d’un scanner Siemens 3T Tim Trio (comme à l’UNF), et si vous disposez encore des données brutes, nous recommandons fortement de reconvertir les données avec le logiciel `dcm2toad` [voir section Conversion des données](#conversion)
 
 
 ### Nomemclature des fichiers

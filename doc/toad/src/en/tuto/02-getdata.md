@@ -71,7 +71,7 @@ It is **strongly recommended** to use this tool for file conversion, because not
 This file contains all existing information that is unique in the raw data which is lost upon conversion when using other softwares.
 
 `dcm2toad` automatically unzips and converts your data.
-Different options are available (see help by typing `unf2tad -h`). 
+Different options are available (see help by typing `dcm2toad -h`). 
 By default, `dcm2toad` creates a new directory called `toad_data` where it stores all the converted files from each subject/session.
 
 ~~~bash

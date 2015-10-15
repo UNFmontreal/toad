@@ -40,10 +40,9 @@ class Upsampling(GenericTask):
 
 
     def __linkDwiImage(self):
-
-        dwi = self.getDenoisingImage('dwi', 'denoise')
+        dwi = self.getCorrectionImage('dwi', 'corrected')
         if not dwi:
-            dwi = self.getCorrectionImage('dwi', 'corrected')
+            dwi = self.getDenoisingImage('dwi', 'denoise')
         if not dwi:
             dwi = self.getPreparationImage('dwi')
         return util.symlink(dwi, self.workingDir)

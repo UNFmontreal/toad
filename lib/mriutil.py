@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import nibabel
 import random
+import scipy
 import numpy
 import util
 import os
@@ -549,48 +550,6 @@ def tck2trk(source, anatomical ,target):
     nibabel.trackvis.write(target, trk_tracks, trk_header)
     return target
 
-def createVtkPng(source, anatomical, roi):
-    import vtk
-    from dipy.viz.colormap import line_colors
-    from dipy.viz import fvtk
-
-    target = source.replace(".trk",".png")
-    roiImage= nibabel.load(roi)
-    anatomicalImage = nibabel.load(anatomical)
-
-    sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
-    try:
-        sourceActor = fvtk.streamtube(sourceImage, line_colors(sourceImage))
-
-        roiActor = fvtk.contour(roiImage.get_data(), levels=[1], colors=[(1., 1., 0.)], opacities=[1.])
-        anatomicalActor = fvtk.slicer(anatomicalImage.get_data(),
-                                  voxsz=(1.0, 1.0, 1.0),
-                                  plane_i=None,
-                                  plane_j=None,
-                                  plane_k=[65],
-                                  outline=False)
-    except ValueError:
-        return False
-        
-    sourceActor.RotateX(-70)
-    sourceActor.RotateY(2.5)
-    sourceActor.RotateZ(185)
-
-    roiActor.RotateX(-70)
-    roiActor.RotateY(2.5)
-    roiActor.RotateZ(185)
-
-    anatomicalActor.RotateX(-70)
-    anatomicalActor.RotateY(2.5)
-    anatomicalActor.RotateZ(185)
-
-    ren = fvtk.ren()
-    fvtk.add(ren, sourceActor)
-    fvtk.add(ren, roiActor)
-    fvtk.add(ren, anatomicalActor)
-    fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1, verbose=True, cam_pos=(90.03, 118.33, 700.59))
-    return target
-
 
 def isAfreesurferStructure(directory):
     """Validate if the specified directory qualify as a freesurfer structure
@@ -662,4 +621,15 @@ def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, ex
     invertMatrix(matrix, freesurferToB0)
     cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {} ".format(sourceToResample, source, freesurferToB0, target)
     util.launchCommand(cmd)
+    return target
+
+
+def computeNoiseMask(source, target):
+    brainImage = nibabel.load(source)
+    brainData = brainImage.get_data()
+    brainData[brainData>0] = 1
+    maskNoise = scipy.ndimage.morphology.binary_dilation(brainData, iterations=25)
+    maskNoise[..., :maskNoise.shape[-1]//2] = 1
+    maskNoise = ~maskNoise
+    nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.uint8), brainImage.get_affine()), target)
     return target
