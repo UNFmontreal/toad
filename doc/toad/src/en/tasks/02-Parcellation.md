@@ -5,9 +5,9 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Parcellation                                          |
 |**Goal**        | Run Freesurfer pipeline                               |
-|**Config file** | `intrasubject` <br />`directive`<br />`cleanup` |
-|**Time**        | About 10 hours                                                   |
-|**Output**      | - Anatomical from Freesurfer <br> - Aparc_aseg segmentation <br> - Mask from aparc_aseg file <br> - lh_ribbon and rh_ribbon <br> - 5tt image (five-tissue-type)|
+|**Config file** | `intrasubject` <br />`directive`<br />`cleanup`       |
+|**Time**        | About 10 hours                                        |
+|**Output**      | - Anatomical from Freesurfer <br> - Aparc_aseg segmentation <br> - Mask from aparc_aseg file <br> - lh_ribbon and rh_ribbon <br> - 5tt image (five-tissue-type)       |
 
 #
 
@@ -68,13 +68,13 @@ function: self.__create5ttImage()
 
 ### Articles
 
-- Dale, A. M., Fischl, B., & Sereno, M. I. (1999). Cortical surface-based analysis. I. Segmentation and surface reconstruction. *NeuroImage, 9(2), 179-194*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/9931268" target="_blank">Link to the article</a>]
+- Dale, A. M., Fischl, B., & Sereno, M. I. (1999). Cortical surface-based analysis. I. Segmentation and surface reconstruction. *NeuroImage, 9(2)*, 179-194. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/9931268" target="_blank">Link to the article</a>]
 
 - Collins, D. L., Neelin, P., Peters, T. M., & Evans, A. C. (1994) Automatic 3D intersubject registration of MR volumetric data in standardized Talairach space. *Journal of Computer Assisted Tomography, 18(2)*, 192-205. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/8126267" target="_blank">Link to the article</a>]
 
-- Fischl, B., Sereno, M. I., & Dale, A. M. (1999). Cortical surface-based analysis. II: Inflation, flattening, and a surface-based coordinate system. *NeuroImage, 9(2), 195-207*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/9931269" target="_blank">Link to the article</a>] 
+- Fischl, B., Sereno, M. I., & Dale, A. M. (1999). Cortical surface-based analysis. II: Inflation, flattening, and a surface-based coordinate system. *NeuroImage, 9(2)*, 195-207. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/9931269" target="_blank">Link to the article</a>] 
 
-- Fischl, B., Sereno, M. I., Tootell, R. B., & Dale, A. M. (1999). High-resolution intersubject averaging and a coordinate system for the cortical surface. *Human Brain Mapping, 8(4)*, 272-84. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/10619420" target="_blank">Link to the article</a>] 
+- Fischl, B., Sereno, M. I., Tootell, R. B., & Dale, A. M. (1999). High-resolution intersubject averaging and a coordinate system for the cortical surface. *Human Brain Mapping, 8(4)*, 272-284. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/10619420" target="_blank">Link to the article</a>] 
 
 - Fischl, B., & Dale, A. M. (2000). Measuring the thickness of the human cerebral cortex from magnetic resonance images. *Proceedings of the National Academy of Sciences of the United States of America, 97(20)*, 11050-11055. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=27146&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>] 
 
