@@ -3,57 +3,58 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | tensormrtrix                                          |
-|**Goal**        | Reconstruction of the tensor using MRtrix dwi2tensor  |
-|**Config file** | `modulate` <br> `ignore`                              |
-|**Time**        | About 10 minutes        |
-|**Output**      | Tensor image <br> Fractional anisotropy (fa) <br> Mean diffusivity (md) <br> Axial diffusivity (ad) <br> Radial diffusivity (rd) <br> 1st, 2nd and 3rd eigenvector (v1, v2 and v3) <br> 1st, 2nd and 3rd value (l1, l2 and l3)<br> Mode of the anisotropy (mo) <br> Raw T2 signal with no diffusion weighting (so) <br> Sum of square errors (sse) |
+|**Name**        | [Name of the task]                                    |
+|**Goal**        | [Simple objective]                                    |
+|**Parameters**  | [Simple parameters or reference to the config section]|
+|**Time**        | [Estimate processing time in a local machine]         |
+|**Output**      | [File(s) created]                                     |
+
+#
+
+[brief description]    
+
 
 ## Goal
 
-The tensormrtrix step reconstructs tensors from diffusion-weigthed images and extracts tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD). 
-This step uses the `dtfit` command line from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor" target="_blank">MRtrix</a>]
+[presentation of the objective of the method]
 
-## Config file
-
-- Method used to fit the `tensor: non-linear` (check MRtrix default parameters)<br>
-- Strength of the regularisation term on the magnitude of the tensor elements: 5000 (check MRtrix default parameters)
-
-Specify how to modulate the magnitude of the eigenvectors {none, FA, eval}
-- `modulate: FA`
-
-Ignore tensormrtrix task: not recommended
-- `ignore: False`
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
-- Diffusion-weighted gradient scheme (b or bvec and bval)
-- Mask of the brain (optional)
+[what files are needed to run the task]
+
+
+## Parameters
+
+[what are the parameters used in the following steps -- see parameters in the table]
+
 
 ## Implementation
 
-### 1- Reconstruction of the tensor
+```
+[If only one step, do not add the subtitle step 1]
+```
 
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor" target="_blank">dwi2tensor</a>
+### [1- Step 1 name]
 
-### 2- Creation of metrics from tensor
+```
+[Tool or function used with the reference to the official documentation]
+```
 
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/tensor2metric" target="_blank">tensor2metric</a>
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/mrmath" target="_blank">mrmath</a>
+### [2- Step 2 name]
+
+```
+[Tool or function used with the reference to the official documentation]
+```
+
+### [3- Step 3 name]
+
+```
+[Tool or function used with the reference to the official documentation]
+```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Creation of the tensor and metrics
-- Produce an image (png) for each metric (fa. ad, rd and md)
+[what should be produced by TOAD, the expected output]
 
-## References
-
-### Associated documentation
-
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor" target="_blank">MRtrix dwi2tensor</a>
-
-### Articles
-
-- Basser, P. J., Mattiello, J., & LeBihan, D. (1994). MR diffusion tensor spectroscopy and imaging. *Biophysical journal, 66(1)*, 259-267. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=1275686&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>]
 

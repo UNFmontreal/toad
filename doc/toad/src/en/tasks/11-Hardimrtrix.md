@@ -3,61 +3,58 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | hardimrtrix                                           |
-|**Goal**        | Perform constrain spherical deconvolution using MRtrix dwi2fod |
-|**Config file** | `ignore`                                              |
-|**Time**        | About 1 hour                                                   |
-|**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
+|**Name**        | [Name of the task]                                    |
+|**Goal**        | [Simple objective]                                    |
+|**Parameters**  | [Simple parameters or reference to the config section]|
+|**Time**        | [Estimate processing time in a local machine]         |
+|**Output**      | [File(s) created]                                     |
 
 #
 
+[brief description]    
+
+
 ## Goal
 
-The hardimrtrix step reconstructs fiber orientation distribution (fod) using non-negativity constrained spherical deconvolution (csd) from diffusion-weigthed images (dwi). 
-This step uses the `dwi2fod` command from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix</a>]
-
-## Default paramaters
-
-We provide default parameters as they are suggested in <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix wiki</a>
-
-## Config file parameters
-
-Ignore hardimrtrix task: **not recommended**
-- `ignore: False`
+[presentation of the objective of the method]
 
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
-- Diffusion-weighted gradient scheme (b or bvec and bval)
-- Mask of the brain (optional)
+[what files are needed to run the task]
+
+
+## Parameters
+
+[what are the parameters used in the following steps -- see parameters in the table]
+
 
 ## Implementation
 
-### 1- Get response from a single population fiber
+```
+[If only one step, do not add the subtitle step 1]
+```
 
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2response" target="_blank">dwi2response</a>
+### [1- Step 1 name]
 
-### 2- Perform spherical deconvolution
+```
+[Tool or function used with the reference to the official documentation]
+```
 
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">dwi2fod</a>
+### [2- Step 2 name]
 
-### 3- Extract fixelPeaks and number of fiber orientation map 
+```
+[Tool or function used with the reference to the official documentation]
+```
 
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/fod2fixel" target="_blank">fod2fixel</a>
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/fixel2voxel" target="_blank">fixel2voxel</a>
+### [3- Step 3 name]
+
+```
+[Tool or function used with the reference to the official documentation]
+```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Creation of the fiber orientation distribution (fod) and metrics (nufo, peaks)
-- Produce an image (png) of the number of fibers orientations (nufo)
+[what should be produced by TOAD, the expected output]
 
-## References
 
-### Associated documentation
-
-<a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix dwi2fod</a>
-
-### Articles
-
-- Tournier, J. D., Calamante, F., & Connelly, A. (2007). Robust determination of the fibre orientation distribution in diffusion MRI: Non-negativity constrained super-resolved spherical deconvolution. *NeuroImage, 35(4)*, 1459-1472. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/17379540" target="_blank">Link to the article</a>]

@@ -3,96 +3,58 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | tractographyhmrtrix                                    |
-|**Goal**        | Run tractography on tensors and constrained spherical deconvolution using tckgen from MRtrix                                   |
-|**Config file** | `step` <br> `maxlength` <br> `number_tracks` <br> `downsample` <br> `ignore`|
-|**Time**        | About 2 hours         |
-|**Output**      | - Probabilist tensor tractography and connectome <br> - Probabilist tensor tractography and connectome <br> - Probabilist "sifted" csd tractography and connectome |
+|**Name**        | [Name of the task]                                    |
+|**Goal**        | [Simple objective]                                    |
+|**Parameters**  | [Simple parameters or reference to the config section]|
+|**Time**        | [Estimate processing time in a local machine]         |
+|**Output**      | [File(s) created]                                     |
 
 #
 
+[brief description]    
+
+
 ## Goal
 
-The tractographymrtrix step compute the tractography on different reconstruction method (tensor, csd).
-It creates as well connectome from anatomical segmentation.
+[presentation of the objective of the method]
 
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
-- Diffusion-weighted gradient scheme (b or bvec and bval)
-- Constrained spherical deconvolution (csd)
-- Five-tissue-type maps (5tt)
-- Atlas (brodmann, aal2) optional
+[what files are needed to run the task]
 
-## Config files parameter
 
-We use default paramaters suggested in MRtrix documentation.
+## Parameters
 
-Step size of the algorithm in mm (default is 0.1 x voxelsize; for iFOD2: 0.5 x voxelsize).
-- `step: 0.2`
+[what are the parameters used in the following steps -- see parameters in the table]
 
-Maximum length of any track in mm
-- `maxlength: 300`
-
-Desired number of tracks
-- `number_tracks: 1000000`
-
-Downsample factor to reduce output file size
-- `downsample: 8`
-
-Ignore tractographymrtrix task: not recommended <br>
-- `ignore: False`
 
 ## Implementation
 
-### 1- Tractographies 
+```
+[If only one step, do not add the subtitle step 1]
+```
 
-<a href="https://github.com/MRtrix3/mrtrix3/wiki/tckgen" target="_blank">MRtrix tckgen</a>
+### [1- Step 1 name]
 
-### 2- Spherical-deconvolution informed filtering of tractograms (SIFT)
+```
+[Tool or function used with the reference to the official documentation]
+```
 
-<a href="https://github.com/MRtrix3/mrtrix3/wiki/sift" target="_blank">MRtrix tcksift</a>
+### [2- Step 2 name]
 
-### 3- Creation of the structural connectome
+```
+[Tool or function used with the reference to the official documentation]
+```
 
-<a href="https://github.com/MRtrix3/mrtrix3/wiki/tck2connectome" target="_blank">MRtrix tck2connectome</a>
+### [3- Step 3 name]
+
+```
+[Tool or function used with the reference to the official documentation]
+```
 
 ## Expected result(s) - Quality Assessment (QA)
 
-Tractographymrtrix runs determinist tractographies from
-- Tensor reconstruction
+[what should be produced by TOAD, the expected output]
 
-Tractographymrtrix runs probabilist tractographies from
-- Tensor reconstruction
-- Constrained spherical deconvolution
 
-It filters tractograms using SIFT algorithm
-It creates structural connectomes from tractographies
-
-Produce an image (png) from a dummy examples for the QA in order to check the results.   
-Produce an image (png) of the structural connectomes.
-
-## References
-
-### Associated documentation
-
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/tcksift" target="_blank">MRtrix tckgen</a>
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/tcksift" target="_blank">MRtrix tcksift</a>
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/tck2connectome" target="_blank">MRtrix tck2connectome</a>
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/Anatomically-Constrained-Tractography-(ACT)" target="_blank">MRtrix workflow ACT</a>
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/SIFT" target="_blank">MRtrix workflow SIFT</a>
-
-### Articles 
-
-- Tractography 
-
-> Smith, R. E., Tournier, J.-D., Calamante, F., & Connelly, A. (2012). Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information. *NeuroImage, 62(3), 1924-38*. [<a href="XXXXXXXX" target="_blank">Link to the article</a>]Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/22705374
-
-- SIFT
-
-> Smith, R. E., Tournier, J.-D., Calamante, F., & Connelly, A. (2013). SIFT: Spherical-deconvolution informed filtering of tractograms. *NeuroImage, 67, 298-312*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/23238430" target="_blank">Link to the article</a>]
-
-> Smith, R. E., Tournier, J.-D., Calamante, F., & Connelly, A. (2015). The effects of SIFT on the reproducibility and biological accuracy of the structural connectome. *NeuroImage, 104, 253-265*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/25312774" target="_blank">Link to the article</a>] 
-
-> Calamante, F., Smith, R. E., Tournier, J.-D., Raffelt, D., & Connelly, A. (2015). Quantification of voxel-wise total fibre density: Investigating the problems associated with track-count mapping. *NeuroImage, 117, 284-293*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/26037054" target="_blank">Link to the article</a>] 

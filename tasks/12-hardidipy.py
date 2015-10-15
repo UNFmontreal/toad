@@ -19,6 +19,9 @@ class HardiDipy(GenericTask):
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking', 'qa')
+        self.__dwiData = None
+        self.__csdModel = None
+        self.__csdPeaks = None
 
 
     def implement(self):
@@ -49,18 +52,20 @@ class HardiDipy(GenericTask):
         csdModel = dipy.reconst.csdeconv.ConstrainedSphericalDeconvModel(gradientTable, response)
         self.info('Start fODF computation')
 
-        csdPeaks = dipy.direction.peaks_from_model(model=csdModel,
-                                                                  data=dwiData,
-                                                                  sphere=sphere,
-                                                                  relative_peak_threshold=.5,
-                                                                  min_separation_angle=25,
-                                                                  mask=maskData,
-                                                                  return_sh=True,
-                                                                  return_odf=False,
-                                                                  normalize_peaks=True,
-                                                                  npeaks=5,
-                                                                  parallel=True,
-                                                                  nbr_processes=int(self.getNTreads()))
+        csdPeaks = dipy.direction.peaks_from_model(
+            model=csdModel,
+            data=dwiData,
+            sphere=sphere,
+            relative_peak_threshold=.5,
+            min_separation_angle=25,
+            mask=maskData,
+            return_sh=True,
+            return_odf=False,
+            normalize_peaks=True,
+            npeaks=5,
+            parallel=True,
+            nbr_processes=int(self.getNTreads()),
+            )
 
         #CSD
         target = self.buildName(source, 'csd')
@@ -88,6 +93,11 @@ class HardiDipy(GenericTask):
         numDirsImage = nibabel.Nifti1Image(nuDirs.astype(numpy.float32), dwiImage.get_affine())
         nibabel.save(numDirsImage, target)
 
+        #Data for qa
+        self.__dwiData = dwiData
+        self.__csdModel = csdModel
+        self.__csdPeaks = csdPeaks
+
 
     def isIgnore(self):
         return self.get("ignore")
@@ -113,8 +123,21 @@ class HardiDipy(GenericTask):
         qaImages = Images()
         softwareName = 'dipy'
 
-        #Get images
+        #mask images
         mask = self.getRegistrationImage('mask', 'resample')
+
+        #Produce hardi odfs png image
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
+        data = {'dwiData':self.__dwiData, 'csdModel':self.__csdModel}
+        odfsPng = self.buildName(dwi, 'hardi_odf', 'png')
+        self.reconstructionPng(data, mask, cc, odfsPng, model='hardi_odf')
+        qaImages.extend(Images((odfsPng, 'Coronal slice of hardi CSD ODFs in the Corpus Callosum')))
+
+        #Produce hardi peaks png image
+        peaksPng = self.buildName(dwi, 'hardi_peak', 'png')
+        self.reconstructionPng(self.__csdPeaks, mask, cc, peaksPng, model='hardi_peak')
+        qaImages.extend(Images((peaksPng, 'Coronal slice of hardi CSD Peaks in the Corpus Callosum')))
 
         #Build qa images
         tags = (

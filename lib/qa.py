@@ -12,6 +12,7 @@ import dipy.segment.mask
 import dipy.reconst.dti
 import dipy.data
 import dipy.viz.fvtk
+import dipy.viz.colormap
 from lib import util
 from string import ascii_uppercase, digits
 from random import choice
@@ -23,7 +24,7 @@ __credits__ = ["Christophe Bedetti", "Mathieu Desrosiers"]
 
 class Qa(object):
 
-    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, grid=False, isData=False):
+    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, grid=False, isData=False, textData=None):
         """Utility method to slice a 3d image
         Args:
             source : background image
@@ -87,7 +88,10 @@ class Qa(object):
                 ax.set_axisbelow(True)
             else:
                 ax.set_axis_off()
-    
+
+        if textData != None:
+            fig.text(0, 0, textData, verticalalignment='bottom', horizontalalignment='left', color='red', fontsize=width/30)
+
         matplotlib.pyplot.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.001)
         fig.savefig(target, facecolor='black')
         matplotlib.pyplot.close()
@@ -143,9 +147,11 @@ class Qa(object):
             vmax=numpy.percentile(imageData1, 99)
 
         imageList = []
-        for num, image in enumerate([imageData1, imageData2]):
+        for num, imageData in enumerate(([imageData1, 'before'], [imageData2, 'after'])):
+            image = imageData[0]
+            textData = imageData[1]
             output = gifId + '{0:04}.png'.format(num)
-            self.slicerPng(image[:,:,:,2], output, vmax=vmax, isData=True, boundaries=boundaries)
+            self.slicerPng(image[:,:,:,2], output, vmax=vmax, isData=True, boundaries=boundaries, textData=textData)
             imageList.append(output)
 
         self.__imageList2Gif(imageList, target, gifSpeed)
@@ -310,16 +316,16 @@ class Qa(object):
         matplotlib.rcdefaults()
 
 
-    def tensorPng(self, fit, cc, ellipsoidsPng):
+    def reconstructionPng(self, data, mask, cc, targetPng, model=None):
         """
         """
+        #Showbox
+        maskImage = nibabel.load(mask)
+        maskData = maskImage.get_data()
         ccImage = nibabel.load(cc)
         ccData = ccImage.get_data()
-        fa = dipy.reconst.dti.fractional_anisotropy(fit.evals)
-        rgbData = dipy.reconst.dti.color_fa(fa, fit.evecs)
 
-        #Showbox
-        brainBox = dipy.segment.mask.bounding_box(rgbData)
+        brainBox = dipy.segment.mask.bounding_box(maskData)
         brainBox = numpy.array(brainBox)
         ccBox = dipy.segment.mask.bounding_box(ccData)
         ccBox = numpy.array(ccBox)
@@ -336,18 +342,73 @@ class Qa(object):
         zmin = ccCenter[2] - shift[0]
         zmax = ccCenter[2] + shift[0]
 
-        evals = fit.evals[xmin:xmax, ymin:ymax, zmin:zmax]
-        evecs = fit.evecs[xmin:xmax, ymin:ymax, zmin:zmax]
-        cfa = rgbData[xmin:xmax, ymin:ymax, zmin:zmax]
-        cfa /= cfa.max()
-        cfa *= 2
-
+        #Visualization
         sphere = dipy.data.get_sphere('symmetric724')
         ren = dipy.viz.fvtk.ren()
-        dipy.viz.fvtk.add(ren, dipy.viz.fvtk.tensor(evals, evecs, cfa, sphere))
+
+        if model == 'tensor':
+            fa = dipy.reconst.dti.fractional_anisotropy(data.evals)
+            rgbData = dipy.reconst.dti.color_fa(fa, data.evecs)
+            evals = data.evals[xmin:xmax, ymin:ymax, zmin:zmax]
+            evecs = data.evecs[xmin:xmax, ymin:ymax, zmin:zmax]
+            cfa = rgbData[xmin:xmax, ymin:ymax, zmin:zmax]
+            cfa /= cfa.max()
+            cfa *= 2
+            dipy.viz.fvtk.add(ren, dipy.viz.fvtk.tensor(evals, evecs, cfa, sphere))
+        elif model == 'hardi_odf':
+            data_small = data['dwiData'][xmin:xmax, ymin:ymax, zmin:zmax]
+            csdodfs = data['csdModel'].fit(data_small).odf(sphere)
+            csdodfs = numpy.clip(csdodfs, 0, numpy.max(csdodfs, -1)[..., None])
+            dipy.viz.fvtk.add(ren, dipy.viz.fvtk.sphere_funcs(csdodfs, sphere, scale=1.3, colormap='RdYlBu', norm=False))
+        elif model == 'hardi_peak':
+            peak_dirs = data.peak_dirs[xmin:xmax, ymin:ymax, zmin:zmax]
+            peak_values = data.peak_values[xmin:xmax, ymin:ymax, zmin:zmax]
+            fodf_peaks = dipy.viz.fvtk.peaks(peak_dirs, peak_values, scale=1.3)
+            dipy.viz.fvtk.add(ren, fodf_peaks)
+
         dipy.viz.fvtk.camera(ren, pos=(0,1,0), focal=(0,0,0), viewup=(0,0,1), verbose=False)
-        dipy.viz.fvtk.record(ren, n_frames=1, out_path=ellipsoidsPng, size=(600, 600))
+        dipy.viz.fvtk.record(ren, n_frames=1, out_path=targetPng, size=(1200, 1200))
         dipy.viz.fvtk.clear(ren)
+
+
+    def createVtkPng(self, source, anatomical, roi):
+        target = source.replace(".trk", ".png")
+        roiImage= nibabel.load(roi)
+        anatomicalImage = nibabel.load(anatomical)
+
+        sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
+        try:
+            sourceActor = dipy.viz.fvtk.streamtube(sourceImage, dipy.viz.colormap.line_colors(sourceImage))
+            roiActor = dipy.viz.fvtk.contour(roiImage.get_data(), levels=[1], colors=[(1., 1., 0.)], opacities=[1.])
+            anatomicalActor = dipy.viz.fvtk.slicer(
+                anatomicalImage.get_data(),
+                voxsz=(1.0, 1.0, 1.0),
+                plane_i=None,
+                plane_j=None,
+                plane_k=[65],
+                outline=False)
+        except ValueError:
+            return False
+
+        sourceActor.RotateX(-70)
+        sourceActor.RotateY(2.5)
+        sourceActor.RotateZ(185)
+
+        roiActor.RotateX(-70)
+        roiActor.RotateY(2.5)
+        roiActor.RotateZ(185)
+
+        anatomicalActor.RotateX(-70)
+        anatomicalActor.RotateY(2.5)
+        anatomicalActor.RotateZ(185)
+
+        ren = dipy.viz.fvtk.ren()
+        dipy.viz.fvtk.add(ren, sourceActor)
+        dipy.viz.fvtk.add(ren, roiActor)
+        dipy.viz.fvtk.add(ren, anatomicalActor)
+        dipy.viz.fvtk.camera(ren, pos=(0,0,1), focal=(0,0,0), viewup=(0,1,0), verbose=False)
+        dipy.viz.fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
+        return target
 
 
     def createQaReport(self, images):

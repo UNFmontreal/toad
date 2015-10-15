@@ -23,6 +23,13 @@ case "$HOSTNAME" in
         export LD_LIBRARY_PATH=/usr/local/vtk/lib
         export SGEQUEUE='toad.q'
     ;;
+    sati | physnum)
+        export TOADSERVER=$HOSTNAME
+        APPDIR=/usr/local
+        export PATH=/usr/local/python-toad/bin:/usr/local/c3d/bin:/usr/local/itksnap/bin:/usr/local/fibernavigator/bin:$PATH
+        export LD_LIBRARY_PATH=/usr/local/vtk/lib
+        export SGEQUEUE='toad.q'
+    ;;
     *)
     if [ -z "${BQMAMMOUTH}" ];
         then
@@ -34,7 +41,7 @@ case "$HOSTNAME" in
         else
             export TOADSERVER=mammouth
             APPDIR=/netmount/ip01_home/desrosie/local
-            export LD_LIBRARY_PATH=$APPDIR/osmesa/lib:$APPDIR/lib:$APPDIR/vtk/lib:$APPDIR/python-2.7/lib:$LD_LIBRARY_PATH
+            export LD_LIBRARY_PATH=$APPDIR/imagemagik-6.9/lib:$APPDIR/osmesa/lib:$APPDIR/lib:$APPDIR/vtk/lib:$APPDIR/python-2.7/lib:$LD_LIBRARY_PATH
             export PATH=$APPDIR/python-2.7/bin:$APPDIR/imagemagik-6.9/bin:$PATH
             export SGEQUEUE='qwork@mp2'
     fi
@@ -68,4 +75,3 @@ export FSLDIR PATH
 
 export PATH=$TOADDIR/bin:$APPDIR/matlab-8.0/bin:$APPDIR/mrtrix3/bin:$APPDIR/mrtrix3/scripts:$PATH
 export PATH=$FREESURFER_HOME/mni/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$PATH
-#:/usr/local/c3d/bin:/usr/local/itksnap/bin:/usr/local/fibernavigator/bin:$PATH
