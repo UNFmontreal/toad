@@ -7,5 +7,5 @@ Vous pouvez nous contacter directement par courriel : [**toadunf.criugm@gmail.co
 
 ## Code source
 
-Le code de TOAD est librement accessible sur [Github](https://github.com/UNFmontreal/toad) sous les conditions de la licence GPL v2 [(voir section licence)](about/license.md).
+Le code de TOAD est librement accessible sur [Github](https://github.com/UNFmontreal/toad) sous les conditions de la licence GPL v2 [(voir section licence)](license.md).
 

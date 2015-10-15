@@ -1,4 +1,4 @@
-<img src="figs/toad_highres.jpg" alt="Toad logo" style="width: 450px;"/>
+<img src="figs/toad_logo.png" alt="Toad logo" style="width: 450px;"/>
 
 # TOolkit of Analysis in Diffusion imaging (TOAD)
 
