@@ -20,7 +20,7 @@ pages:
 - Tâches:
     - 'Vue d’ensemble': 'tasks/overview.md'
     - '00-Backup': 'tasks/00-Backup.md'
-    - '00-Qa': 'tasks/00-Qa.md'
+    - '00-QA': 'tasks/00-Qa.md'
     - '01-Preparation': 'tasks/01-Preparation.md'
     - '02-Parcellation': 'tasks/02-Parcellation.md'
     - '03-Denoising': 'tasks/03-Denoising.md'
@@ -40,3 +40,4 @@ pages:
 - À propos:
     - 'Conditions d’utilisation': 'about/license.md'
     - 'Versions': 'about/versions.md'
+    - 'Contact': 'about/contact.md'

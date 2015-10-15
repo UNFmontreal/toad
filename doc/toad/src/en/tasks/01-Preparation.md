@@ -6,7 +6,7 @@
 |**Name**        | Preparation                                           |
 |**Goal**        | Create missing diffusion-weighted gradient scheme files <br> Check image's orientation|
 |**Config file** | `stride_orientation` <br />`force_realign_strides`    |
-|**Time**        | Few minutes                                                   |
+|**Time**        | Few minutes                                           |
 |**Output**      | Re-oriented files <br> Missing gradients scheme files <br> Pictures for the QA (png and gif)|
 
 #
