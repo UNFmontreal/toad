@@ -5,8 +5,8 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Correction                                            |
 |**Goal**        | Motion and distortion correction of dwi images        |
-|**Config file** | `phase_enc_dir` <br> `echo_spacing` <br> `epi_factor` <br> `ignore` <br> `cost` <br> `dof` <br> `interp` <br> `applyxfm` <br> `smooth3` |
-|**Time**        | About 1 hour                                                   |
+|**Config file** | `phase_enc_dir` <br> `echo_spacing` <br> `epi_factor` <br> `ignore` <br> `cost` <br> `dof` <br> `interp` <br> `applyxfm` <br> `smooth3`                             |
+|**Time**        | About 1 hour                                          |
 |**Output**      | Diffusion-weighted images corrected <br> Diffusion-weighted gradient scheme corrected|
 
 #
@@ -100,8 +100,5 @@ function: self.__createAcquisitionParameterFile('eddy')
 
 ### Articles
 
-Andersson, J. L. R., Skare, S., & Ashburner, J. (2003). How to correct susceptibility distortions in spin-echo echo-planar images: application to diffusion tensor imaging. *NeuroImage, 20(2), 870-88*. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/14568458
-
-
-
+Andersson, J. L. R., Skare, S., & Ashburner, J. (2003). How to correct susceptibility distortions in spin-echo echo-planar images: application to diffusion tensor imaging. *NeuroImage, 20(2)*, 870-888. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/14568458" target="_blank">Link to the article</a>]
 

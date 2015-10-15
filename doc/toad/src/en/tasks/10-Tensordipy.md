@@ -3,58 +3,50 @@
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | [Name of the task]                                    |
-|**Goal**        | [Simple objective]                                    |
-|**Parameters**  | [Simple parameters or reference to the config section]|
-|**Time**        | [Estimate processing time in a local machine]         |
-|**Output**      | [File(s) created]                                     |
+|**Name**        | tensordipy                                            |
+|**Goal**        | Reconstruction of the tensor using dipy               |
+|**Config file** | `ignore`                                              |
+|**Time**        | About 30 minutes                                      |
+|**Output**      | Tensor image <br> Fractional anisotropy (fa) <br> Mean diffusivity (md) <br> Axial diffusivity (ad) <br> Radial diffusivity (rd) <br> 1st, 2nd and 3rd eigenvector (v1, v2 and v3) <br> 1st, 2nd and 3rd value (l1, l2 and l3) |
 
 #
 
-[brief description]    
-
-
 ## Goal
 
-[presentation of the objective of the method]
-
+The tensordipy step reconstructs tensors from diffusion-weigthed images and extracts tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD).
+This step uses the `dtfit` command line from dipy [ref: <a href="http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti" target="_blank">dipy</a>]
 
 ## Requirements
 
-[what files are needed to run the task]
+- Diffusion-weigthed images (dwi)
+- Diffusion-weighted gradient scheme (bvec and bval)
+- Mask of the brain (optional)
 
+## Config file
 
-## Parameters
-
-[what are the parameters used in the following steps -- see parameters in the table]
-
+Ignore tensordipy task: **not recommended**
+- `ignore: False`
 
 ## Implementation
 
-```
-[If only one step, do not add the subtitle step 1]
-```
+### 1- Reconstruction of the tensor
 
-### [1- Step 1 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [2- Step 2 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
-
-### [3- Step 3 name]
-
-```
-[Tool or function used with the reference to the official documentation]
-```
+<a href="http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti" target="_blank">Dipy reconst_dti</a>
 
 ## Expected result(s) - Quality Assessment (QA)
 
-[what should be produced by TOAD, the expected output]
+- Creation of the tensor and metrics
+- Produce an image (png) for each metric (fa. ad, rd and md)
+
+## References
+
+### Associated documentation
+
+<a href="http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti" target="_blank">Dipy reconst_dti</a>
+
+### Articles
+
+- Basser, P. J., Mattiello, J., & LeBihan, D. (1994). MR diffusion tensor spectroscopy and imaging. *Biophysical journal, 66(1)*, 259-267. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=1275686&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>] 
+
 
 
