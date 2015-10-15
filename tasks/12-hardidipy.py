@@ -21,6 +21,7 @@ class HardiDipy(GenericTask):
         GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking', 'qa')
         self.__dwiData = None
         self.__csdModel = None
+        self.__csdPeaks = None
 
 
     def implement(self):
@@ -95,6 +96,7 @@ class HardiDipy(GenericTask):
         #Data for qa
         self.__dwiData = dwiData
         self.__csdModel = csdModel
+        self.__csdPeaks = csdPeaks
 
 
     def isIgnore(self):
@@ -127,10 +129,15 @@ class HardiDipy(GenericTask):
         #Produce hardi odfs png image
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
-        odfsPng = self.buildName(dwi, 'odfs_hardi', 'png')
         data = {'dwiData':self.__dwiData, 'csdModel':self.__csdModel}
-        self.reconstructionPng(data, mask, cc, odfsPng, model='hardi')
-        qaImages.extend(Images((odfsPng, 'Hardi ODFs in a part of the CC')))
+        odfsPng = self.buildName(dwi, 'hardi_odf', 'png')
+        self.reconstructionPng(data, mask, cc, odfsPng, model='hardi_odf')
+        qaImages.extend(Images((odfsPng, 'Hardi CSD ODFs in a part of the CC')))
+
+        #Produce hardi peaks png image
+        peaksPng = self.buildName(dwi, 'hardi_peak', 'png')
+        self.reconstructionPng(self.__csdPeaks, mask, cc, peaksPng, model='hardi_peak')
+        qaImages.extend(Images((peaksPng, 'Hardi CSD Peaks in a part of the CC')))
 
         #Build qa images
         tags = (

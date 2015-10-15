@@ -355,11 +355,16 @@ class Qa(object):
             cfa /= cfa.max()
             cfa *= 2
             dipy.viz.fvtk.add(ren, dipy.viz.fvtk.tensor(evals, evecs, cfa, sphere))
-        elif model == 'hardi':
+        elif model == 'hardi_odf':
             data_small = data['dwiData'][xmin:xmax, ymin:ymax, zmin:zmax]
             csdodfs = data['csdModel'].fit(data_small).odf(sphere)
             csdodfs = numpy.clip(csdodfs, 0, numpy.max(csdodfs, -1)[..., None])
-            dipy.viz.fvtk.add(ren, dipy.viz.fvtk.sphere_funcs(csdodfs, sphere, colormap='jet'))
+            dipy.viz.fvtk.add(ren, dipy.viz.fvtk.sphere_funcs(csdodfs, sphere, scale=1.3, colormap='RdYlBu', norm=False))
+        elif model == 'hardi_peak':
+            peak_dirs = data.peak_dirs[xmin:xmax, ymin:ymax, zmin:zmax]
+            peak_values = data.peak_values[xmin:xmax, ymin:ymax, zmin:zmax]
+            fodf_peaks = dipy.viz.fvtk.peaks(peak_dirs, peak_values, scale=1.3)
+            dipy.viz.fvtk.add(ren, fodf_peaks)
 
         dipy.viz.fvtk.camera(ren, pos=(0,1,0), focal=(0,0,0), viewup=(0,0,1), verbose=False)
         dipy.viz.fvtk.record(ren, n_frames=1, out_path=targetPng, size=(1200, 1200))
