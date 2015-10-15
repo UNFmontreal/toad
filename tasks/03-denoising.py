@@ -73,7 +73,6 @@ class Denoising(GenericTask):
             nibabel.save(nibabel.Nifti1Image(denoisingData.astype(numpy.float32), dwiImage.get_affine()), target)
 
         elif self.get('general', 'matlab_available'):
-            dwi = self.__getDwiImage()
             dwiUncompress = self.uncompressImage(dwi)
 
             tmp = self.buildName(dwiUncompress, "tmp", 'nii')
