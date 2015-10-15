@@ -66,23 +66,6 @@ function: self.__launchMatlabExecution(scriptName)
 - Diffusion-weigthed images corrected
 - A gif showing the DWI data before and after correction
 
-## References
 
-<<<<<<< HEAD:doc/toad/src/en/tasks/03-Denoising.md
-[Coupe, P., Yger, P., Prima, S., Hellier, P., Kervrann, C., & Barillot, C. (2008). An optimized blockwise nonlocal means denoising filter for 3-D magnetic resonance images. *IEEE Transactions on Medical Imaging, 27*, 425–441. doi:10.1109/TMI.2007.906087](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=4359947)
-
-[Manjón, J. V., Coupé, P., Concha, L., Buades, A., Collins, D. L., & Robles, M. (2013). Diffusion Weighted Image Denoising Using Overcomplete Local PCA. *PLoS ONE, 8(9)*, 1–12. doi:10.1371/journal.pone.0073021](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0073021)
-
-[Manjón, J. V., Coupé, P., Martí-Bonmatí, L., Collins, D. L., & Robles, M. (2010). Adaptive non-local means denoising of MR images with spatially varying noise levels. *Journal of Magnetic Resonance Imaging, 31(1)*, 192–203. doi:10.1002/jmri.22003](http://onlinelibrary.wiley.com/doi/10.1002/jmri.22003/abstract)
-=======
 ### Articles
 
-- Denoising: nlmeans <br>
-> Coupe, P., Yger, P., Prima, S., Hellier, P., Kervrann, C., & Barillot, C. (2008). An Optimized Blockwise Nonlocal Means Denoising Filter for 3-D Magnetic Resonance Images. *IEEE Transactions on Medical Imaging, 27(4), 425-441*. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=2881565&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>]
-
-- Denoising: lpca <br>
-> Manjón, J. V., Coupé, P., Concha, L., Buades, A., Collins, D. L., & Robles, M. (2013). Diffusion weighted image denoising using overcomplete local PCA. *PloS one, 8(9), e73021*. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=3760829&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>]
-
-- Denoising: aonlm <br>
-> Manjón, J. V., Coupé, P., Martí-Bonmatí, L., Collins, D. L., & Robles, M. (2010). Adaptive non-local means denoising of MR images with spatially varying noise levels. *Journal of magnetic resonance imaging : JMRI, 31(1), 192-203*. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/20027588" target="_blank">Link to the article</a>]
->>>>>>> fe5302e80eb4c0d95cf3a729ac1b3fc375dec9d7:doc/toad/src/en/tasks/04-Denoising.md

@@ -132,12 +132,12 @@ class HardiDipy(GenericTask):
         data = {'dwiData':self.__dwiData, 'csdModel':self.__csdModel}
         odfsPng = self.buildName(dwi, 'hardi_odf', 'png')
         self.reconstructionPng(data, mask, cc, odfsPng, model='hardi_odf')
-        qaImages.extend(Images((odfsPng, 'Hardi CSD ODFs in a part of the CC')))
+        qaImages.extend(Images((odfsPng, 'Coronal slice of hardi CSD ODFs in the Corpus Callosum')))
 
         #Produce hardi peaks png image
         peaksPng = self.buildName(dwi, 'hardi_peak', 'png')
         self.reconstructionPng(self.__csdPeaks, mask, cc, peaksPng, model='hardi_peak')
-        qaImages.extend(Images((peaksPng, 'Hardi CSD Peaks in a part of the CC')))
+        qaImages.extend(Images((peaksPng, 'Coronal slice of hardi CSD Peaks in the Corpus Callosum')))
 
         #Build qa images
         tags = (
