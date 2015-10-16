@@ -13,8 +13,8 @@
 
 ## Goal
 
-The tractographymrtrix step compute the tractography on different reconstruction method (tensor, csd).
-It creates as well connectome from anatomical segmentation.
+The tractographymrtrix step computes the tractography on from/with/using different reconstruction methods (tensor, csd). 
+It also creates as well connectomes from anatomical segmentation.
 
 
 ## Requirements
@@ -67,11 +67,11 @@ Tractographymrtrix runs probabilist tractographies from
 - Tensor reconstruction
 - Constrained spherical deconvolution
 
-It filters tractograms using SIFT algorithm
+It filters tractograms using SIFT algorithm  
 It creates structural connectomes from tractographies
 
-Produce an image (png) from a dummy examples for the QA in order to check the results.   
-Produce an image (png) of the structural connectomes.
+Production of an image (png) from a dummy examples for the QA in order to check the results.   
+Production of an image (png) of the structural connectomes.
 
 ## References
 

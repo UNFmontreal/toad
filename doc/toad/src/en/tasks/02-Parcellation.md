@@ -21,7 +21,7 @@ The parcellation step creates the required masks using Freesurfer functions.
 
 ## Config file parameters
 
-Specify if the anatomical and dwi where acquire during the same session<br />
+Specify if the anatomical and dwi were acquired during the same session<br />
 - `intrasubject: True`<br />
 
 Option available for Freesurfer recon-all command {all,autorecon-all,autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon2-inflate1,autorecon2-perhemi,autorecon3 }<br />

@@ -13,7 +13,7 @@
 
 ## Goal
 
-Denoising step denoises diffusion-weighted images (DWI) depending on the algorithm choosen.
+The denoising step denoises diffusion-weighted images (DWI) depending on the algorithm choosen.
 
 ## Requirements
 
@@ -65,8 +65,8 @@ function: self.__launchMatlabExecution(scriptName)
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Diffusion-weigthed images corrected
-- A gif showing the DWI data before and after correction
+- Production of corrected diffusion-weigthed images 
+- Production of a gif showing the DWI data before and after correction
 
 
 ## References
