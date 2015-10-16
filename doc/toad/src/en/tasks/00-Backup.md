@@ -5,13 +5,14 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | Backup                                                |
 |**Goal**        | Archiving initial dataset                             |
-|**Time**        | Few seconds                                                  |
+|**Time**        | Few seconds                                           |
 |**Output**      | 00-backup folder                                      |
 
+#
 
 ## Goal
 
-Backup step creates a 00-backup folder where it moves every files, folders submitted to TOAD
+The backup step creates a 00-backup folder into which where it moves every files and folders submitted to TOAD will be moved
 
 
 ## Implementation
@@ -22,7 +23,4 @@ Backup step creates a 00-backup folder where it moves every files, folders submi
 function: shutil.move(image, self.workingDir)
 function: shutil.move(folder, self.workingDir)
 ```
-
-
-
 

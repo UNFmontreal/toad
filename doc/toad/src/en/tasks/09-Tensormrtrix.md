@@ -31,7 +31,7 @@ Ignore tensormrtrix task: not recommended
 
 - Diffusion-weigthed images (dwi)
 - Diffusion-weighted gradient scheme (b or bvec and bval)
-- Mask of the brain (optional)
+- Production of of the mask of the brain (optional)
 
 ## Implementation
 

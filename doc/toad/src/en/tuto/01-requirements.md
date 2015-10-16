@@ -8,7 +8,7 @@ To obtain an account, or for all account-related inquiries, please contact the s
 
 ## Command line
 TOAD toolbox is command-line-based that requires entries on a terminal.
-The introduction to the use of command line and terminal is beyond the purpose of this tutorial.
+Introduction to the use of command line and terminal is beyond the purpose of this tutorial.
 However, there are plenty of resources available for those who need to become familiar with this requirement. 
 
 For instance:
@@ -17,7 +17,7 @@ For instance:
 - [Life hacker tutorial](http://lifehacker.com/5633909/who-needs-a-mouse-learn-to-use-the-command-line-for-almost-anything)
 
 ## SSH communication
-The use of TOAD requires a remote connection between your computer and the UNF servers (even if you are working from the CRIUGM’s analysis room). To do so, it is strongly recommended to use the SSH protocol, which has been installed by default on all Apple and GNU/Linux based computers. For Windows system, please refer to the various external documentations listed below:
+The use of TOAD requires a remote connection between your computer and the UNF servers (even if you are working from the CRIUGM’s analysis room). To do so, it is strongly recommended to use the SSH protocol, which has been installed by default on all Apple and GNU/Linux based computers. For Windows, please refer to the various external documentation listed below:
 
 - [Tutorial on Gamexe.net](http://www.gamexe.net/other/beginner-guide-ssh/)
 - [Youtube video demo](https://www.youtube.com/watch?v=9CZphjhQxIQ)

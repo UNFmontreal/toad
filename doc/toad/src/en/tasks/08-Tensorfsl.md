@@ -14,7 +14,7 @@
 ## Goal
 
 The tensorFSL step reconstructs the tensors from the diffusion-weigthed images and then extracts the tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD).
-This step uses `dtfit` command from FSL [ref: <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT" target="_blank">FSL</a>]
+This step uses the `dtfit` command from FSL [ref: <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT" target="_blank">FSL</a>]
 
 ## Requirements
 
@@ -43,7 +43,7 @@ function: self.__mean(l2, l3, rd)
 
 - Creation of the tensor and metrics
 - Creation of the sum of square error map (sse)
-- Produce an image (png) of the principal metrics (FA, AD, RD and MD) and an image (png) of the SSE
+- Production of an image (png) of the principal metrics (FA, AD, RD and MD) and an image (png) of the SSE
 
 ## References
 

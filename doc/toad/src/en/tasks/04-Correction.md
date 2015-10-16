@@ -14,7 +14,7 @@
 ## Goal
 
 The correction step creates diffusion-weighted images (DWI) corrected for motion. 
-If a fielmap or two b0 with opposite PE are provided, the correction step will use them to corerct for geometrical distortion as well.
+If a fielmap or two b0 with opposite PE are provided, the correction step will use them to correct for geometrical distortion as well.
 
 
 ## Minimal Requirements
