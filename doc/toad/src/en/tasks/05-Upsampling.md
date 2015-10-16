@@ -13,7 +13,7 @@
 
 ## Goal
 
-The upsampling tasks creates diffusion-weigthed images (DWI) upsampled to anatomical images resolution
+The upsampling task creates diffusion-weigthed images (DWI) upsampled to anatomical images resolution
 
 ## Requirements
 

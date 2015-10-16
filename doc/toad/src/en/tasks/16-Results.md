@@ -10,7 +10,7 @@
 
 ## Goal
 
-Results step has been created to copy every files in their final version of the pipeline. Due to storage restriction we won't copy them.
+The results step has been created to copy every files in their final version of the pipeline. Due to storage restriction we won't copy them.
 
 ## Requirements
 
