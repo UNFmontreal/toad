@@ -26,6 +26,10 @@ class QA(GenericTask):
         if not os.path.exists(imagesDir):
             os.makedirs(imagesDir)
 
+        #Copy logo
+        logoLink = os.path.join(self.toadDir, 'templates', 'files', 'qa_logo.png')
+        util.copy(logoLink, imagesDir, 'qa_logo.png')
+
         #Copy style.css
         styleTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.style.tpl')
         util.copy(styleTemplate, self.workingDir, 'style.css')
