@@ -224,7 +224,7 @@ class Validation(object):
                 if not util.displayYesNoMessage(msg):
                     self.warning("Remove this subject from the list?")
                     return False
-            """
+
             if self.config.get('denoising', 'algorithm') == "nlmeans"  and \
                 self.config.get('denoising', 'number_array_coil') == "32" and \
                     not self.config.getboolean('denoising', 'ignore'):
@@ -240,7 +240,7 @@ class Validation(object):
                 if not util.displayYesNoMessage(msg, "Continue anyway? (y or n)"):
                     self.warning("Remove this subject from the list?")
                     return False
-            """
+
         return True
 
 
