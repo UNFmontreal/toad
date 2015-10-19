@@ -10,7 +10,7 @@
         <header>
             <div id="title">
                 <h1>
-                    <a href="index.html">TOAD-Qa</a>
+                    <a href="index.html"><img src="./images/qa_logo.png"></a>
                 </h1>
                 <h2>Subject : $subject</h2>
             </div>

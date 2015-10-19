@@ -47,8 +47,8 @@ Remove extra files
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Produce an image (png) of the B0 overlayed by brain mask and its boundaries
-- Produce an image (png) of the B0 overlayed by aparc_aseg file and by the boundaries of the brain mask
+- Production of an image (png) of the B0 overlayed by brain mask and its boundaries
+- Production of an image (png) of the B0 overlayed by aparc_aseg file and within the boundaries of the brain mask
 
 ## References
 

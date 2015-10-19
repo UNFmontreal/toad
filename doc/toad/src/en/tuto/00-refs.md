@@ -1,4 +1,4 @@
-Before you start using TOAD, we recommand to read the following articles to better know what analyses are conducted within TOAD:
+Before you start using TOAD, we recommend reading the following articles to get acquainted what with the kind of analyses are that can be conducted within TOAD:
 
 - [Jones, D. K., & Cercignani, M. (2010). Twenty-five pitfalls in the analysis of diffusion MRI data. *NMR in Biomedicine, 23(7)*, 803–820.](http://www.ncbi.nlm.nih.gov/pubmed/20886566)
 - [Smith, R. E., Tournier, J. D., Calamante, F., & Connelly, A. (2012). Anatomically-constrained tractography: Improved diffusion MRI streamlines tractography through effective use of anatomical information. *NeuroImage, 62(3)*, 1924–1938.](http://www.ncbi.nlm.nih.gov/pubmed/22705374)

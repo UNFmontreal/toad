@@ -36,7 +36,7 @@ Ignore tensordipy task: **not recommended**
 ## Expected result(s) - Quality Assessment (QA)
 
 - Creation of the tensor and metrics
-- Produce an image (png) for each metric (fa. ad, rd and md)
+- Production of an image (png) for each metric (fa. ad, rd and md)
 
 ## References
 

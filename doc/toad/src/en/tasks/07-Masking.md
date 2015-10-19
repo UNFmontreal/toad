@@ -39,4 +39,4 @@ self.info(mriutil.mrcalc(aparcAsegResample, '1024', self.buildName('aparc_aseg',
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Produce an image (png) of the white matter
+- Production of an image (png) of the white matter

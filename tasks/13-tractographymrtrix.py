@@ -278,7 +278,7 @@ class TractographyMrtrix(GenericTask):
         """
         qaImages = Images()
 
-        information = 'Warning: due to storage restriction streamlines were downsampled. Even if there is no difference in structural connectivity you should be carefull if you want to compute metrics along streamlines.'
+        information = 'Warning: due to storage restriction streamlines were downsampled. Even if there is no difference in structural connectivity you should be careful if you want to compute metrics along streamlines.'
         qaImages.setInformation(information)
 
         #get images
