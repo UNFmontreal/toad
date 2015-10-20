@@ -166,33 +166,29 @@ class Denoising(GenericTask):
 
         #Information on denoising algorithm
         information = 'Algorithm {} is set'.format(self.algorithm)
-        """
-        if self.config.get('denoising', 'algorithm') == "nlmeans"  and \
-            self.config.get('denoising', 'number_array_coil') == "32":
 
-            information = "NLMEANS algorithm is not yet implemented for 32 " \
-                "coils channels images. "
-
-            if self.config.getboolean('general', 'matlab_available'):
-                information += "set algorithm to lpca or aonlm into " \
-                    "[denoising] section of your config.cfg. Otherwise " \
-
-            information += "set ignore: True into [denoising] section of " \
-                "your config.cfg."
+        if self.algorithm == "nlmeans" and \
+            self.config.get("denoising", "number_array_coil") == "32":
+            information = "NLMEANS algorithm is not yet implement for 32 " \
+                "coils channels images, this step will probably fail, "
+            if self.config.getboolean("general", "matlab_available"):
+                information += "set algorithm to lpca or aonlm or "
+            information += "set ignore: True into [denoising] section of your config.cfg"
 
         if self.matlabWarning:
             information = "Algorithm aonlm or lpca is set but matlab is not " \
                 "available for this server. Please configure matlab or set " \
                 "ignore: True into [denoising] section of your config.cfg."
-        qaImages.extend(Images((False, 'Denoised diffusion image')))
+            qaImages.extend(Images((False, 'Denoised diffusion image')))
+
         qaImages.setInformation(information)
-        """
+
         #Get images
         dwi = self.getPreparationImage("dwi")
         dwiDenoised = self.getImage('dwi', 'denoise')
         brainMask = self.getImage('mask', 'resample')
         b0 = self.getImage('b0')
-        noiseMask = self.getImage('mask', 'noise_mask')
+        noiseMask = self.getImage('mask', 'noisemask')
 
         #Build qa images
         if dwiDenoised:
@@ -204,15 +200,14 @@ class Denoising(GenericTask):
                 (dwiDenoisedGif, 'Denoised diffusion image'),
                 (dwiCompareGif, 'Before and after denoising'),
                 ))
-            """
             if self.algorithm == "nlmeans":
-                sigmaPng = self.buildName(dwiDenoised, 'sigma', 'png')
+                if self.sigmaVector != None:
+                    sigmaPng = self.buildName(dwiDenoised, 'sigma', 'png')
+                    self.plotSigma(self.sigmaVector, sigmaPng)
+                    qaImages.extend(
+                        Images(sigmaPng,'Sigmas from nlmeans algorithm'))
                 noiseMaskPng = self.buildName(noiseMask, None, 'png')
-                self.plotSigma(self.sigmaVector, sigmaPng)
                 self.slicerPng(b0, noiseMaskPng, maskOverlay=noiseMask, boundaries=noiseMask)
-                qaImages.extend(Images(
-                    (sigmaPng, 'Sigmas from nlmeans algorithm'),
-                    (noiseMaskPng, 'Noise mask from nlmeans algorithm'),
-                    ))
-            """
+                qaImages.extend(
+                    Images(noiseMaskPng, 'Noise mask from nlmeans algorithm'))
         return qaImages
