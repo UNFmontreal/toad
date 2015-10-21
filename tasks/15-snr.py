@@ -89,8 +89,8 @@ class Snr(GenericTask):
         #Build qa images
         tags = (
             (dwiNative, 'Native'),
-            (dwiCorrected, 'Corrected'),
             (dwiDenoised, 'denoised'),
+            (dwiCorrected, 'Corrected'),
             )
         for dwi, description in tags:
             if dwi:
