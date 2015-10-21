@@ -170,7 +170,7 @@ class Denoising(GenericTask):
         if self.algorithm == "nlmeans" and \
             self.config.get("denoising", "number_array_coil") == "32":
             information = "NLMEANS algorithm is not yet implement for 32 " \
-                "coils channels images, this step will probably fail, "
+                "coils channels images, "
             if self.config.getboolean("general", "matlab_available"):
                 information += "set algorithm to lpca or aonlm or "
             information += "set ignore: True into [denoising] section of your config.cfg"
