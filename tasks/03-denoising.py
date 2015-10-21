@@ -57,7 +57,7 @@ class Denoising(GenericTask):
             dwiImage = nibabel.load(dwi)
             dwiData  = dwiImage.get_data()
             if self.get('number_array_coil') == "32":
-                noiseMask = mriutil.computeNoiseMask(mask, self.buildName(mask, 'noisemask'))
+                noiseMask = mriutil.computeNoiseMask(mask, self.buildName(mask, 'noise_mask'))
                 noiseMaskImage = nibabel.load(noiseMask)
                 noiseMaskData  = noiseMaskImage.get_data()
                 sigma = numpy.std(dwiData[noiseMaskData > 0])
@@ -188,7 +188,7 @@ class Denoising(GenericTask):
         dwiDenoised = self.getImage('dwi', 'denoise')
         brainMask = self.getImage('mask', 'resample')
         b0 = self.getImage('b0')
-        noiseMask = self.getImage('mask', 'noisemask')
+        noiseMask = self.getImage('mask', 'noise_mask')
 
         #Build qa images
         if dwiDenoised:
