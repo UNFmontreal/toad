@@ -139,8 +139,8 @@ class Registration(GenericTask):
                   (self.getImage('mask', 'resample'), 'brain mask resample'),
                   (self.getImage('norm', 'resample'), 'brain  resample'),
                   (self.getImage('brodmann', 'resample'), 'brodmann atlas  resample'),
-                  (self.getImage('brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere atlas'),
-                  (self.getImage('brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere atlas'),
+                  #(self.getImage('brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere atlas'),
+                  #(self.getImage('brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere atlas'),
                   (self.getImage('aal2', 'resample'), 'aal2 atlas resample'))
 
 
