@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy
-
+import os
 from core.toad.generictask import GenericTask
 from lib import mriutil
 from lib.images import Images
@@ -26,6 +26,7 @@ class TractographyMrtrix(GenericTask):
         tt5 = self.getRegistrationImage("tt5", "register")
         seed_gmwmi = self.getMaskingImage("tt5", ["register", "5tt2gmwmi"])
         brodmann = self.getRegistrationImage("brodmann", "resample")
+        aal2 =  self.getRegistrationImage("aal2", "resample")
         norm = self.getRegistrationImage("norm", "resample")
 
         mask253 = self.getMaskingImage('aparc_aseg', ['253', 'mask'])
@@ -35,21 +36,24 @@ class TractographyMrtrix(GenericTask):
 
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
-         
+
+        aal2LutFile = os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", "aa2_lut"))
+
+
         #tensor part
         tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
-        tckDetConnectome = self.__tck2connectome(tckDet, brodmann, self.buildName(tckDet, 'connectome', 'csv'))
+        tckDetConnectome = self.__tck2connectome(tckDet, aal2, self.buildName(tckDet, 'connectome', 'csv'))
         tckDetConnectomeNormalize = self.__normalizeConnectome(tckDetConnectome, self.buildName(tckDetConnectome, 'normalize', 'csv'))
-        mriutil.plotConnectome(tckDetConnectomeNormalize, self.buildName(tckDetConnectomeNormalize, None, "png"))
+        mriutil.plotConnectome(tckDetConnectomeNormalize, self.buildName(tckDetConnectomeNormalize, None, "png"), aal2LutFile)
 
         tckDetRoi = self.__tckedit(tckDet, mask253, self.buildName(tckDet, 'roi','tck'))
         tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, norm , self.buildName(tckDetRoi, None, 'trk'))
 
 
         tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
-        tckProbConnectome = self.__tck2connectome(tckProb, brodmann, self.buildName(tckProb, 'connectome', 'csv'))
+        tckProbConnectome = self.__tck2connectome(tckProb, aal2, self.buildName(tckProb, 'connectome', 'csv'))
         tckProbConnectomeNormalize = self.__normalizeConnectome(tckProbConnectome, self.buildName(tckProbConnectome, 'normalize', 'csv'))
-        mriutil.plotConnectome(tckProbConnectomeNormalize, self.buildName(tckProbConnectomeNormalize, None, "png"))
+        mriutil.plotConnectome(tckProbConnectomeNormalize, self.buildName(tckProbConnectomeNormalize, None, "png"), aal2LutFile)
 
         tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
@@ -57,19 +61,19 @@ class TractographyMrtrix(GenericTask):
         #HARDI part
         csd =  self.getHardimrtrixImage('dwi','csd')
         hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
-        hardiTckConnectome = self.__tck2connectome(hardiTck, brodmann, self.buildName(hardiTck, 'connectome', 'csv'))
+        hardiTckConnectome = self.__tck2connectome(hardiTck, aal2, self.buildName(hardiTck, 'connectome', 'csv'))
         hardiTckConnectomeNormalize = self.__normalizeConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, 'normalize', 'csv'))
-        mriutil.plotConnectome(hardiTckConnectomeNormalize, self.buildName(hardiTckConnectomeNormalize, None, "png"))
+        mriutil.plotConnectome(hardiTckConnectomeNormalize, self.buildName(hardiTckConnectomeNormalize, None, "png"), aal2LutFile)
 
         hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
         tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
 
 
         tcksift = self.__tcksift(hardiTck, csd)
-        tcksiftConnectome = self.__tck2connectome(tcksift, brodmann, self.buildName(tcksift, 'connectome', 'csv'))
+        tcksiftConnectome = self.__tck2connectome(tcksift, aal2, self.buildName(tcksift, 'connectome', 'csv'))
         tcksiftConnectomeNormalize = self.__normalizeConnectome(tcksiftConnectome, self.buildName(tcksiftConnectome, 'normalize', 'csv'))
+        mriutil.plotConnectome(tcksiftConnectomeNormalize, self.buildName(tcksiftConnectomeNormalize, None, "png"), aal2LutFile)
 
-        mriutil.plotConnectome(tcksiftConnectomeNormalize, self.buildName(tcksiftConnectomeNormalize, None, "png"))
         tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
 
@@ -254,6 +258,7 @@ class TractographyMrtrix(GenericTask):
                   (self.getUpsamplingImage('grad', None, 'b'), '.b gradient encoding file'),
                   (self.getRegistrationImage("mask", "resample"), 'mask resampled'),
                   (self.getRegistrationImage("brodmann", "resample"), 'resampled brodmann area'),
+                  (self.getRegistrationImage("aal2", "resample"), 'resampled aal2 area'),
                   (self.getRegistrationImage("norm", "resample"), 'brain resampled'),
                   (self.getMaskingImage('aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
                   (self.getRegistrationImage("tt5", "register"),'5tt register'),
