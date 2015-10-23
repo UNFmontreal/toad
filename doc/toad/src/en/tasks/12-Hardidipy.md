@@ -24,9 +24,11 @@ The hardidipy step reconstructs fiber orientation distribution (fod) using non-n
 ## Config file parameters
 
 Sphere tesselation {symmetric362, symmetric642, symmetric724, repulsion724, repulsion100} (default=symmetric724)
+
 - `triangulated_spheres: symmetric724`
 
 Ignore hardidipy task: not recommended
+
 - `ignore: False`
 
 ## Implementation

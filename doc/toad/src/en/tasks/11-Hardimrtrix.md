@@ -23,6 +23,7 @@ We provide default parameters as they are suggested in <a href="https://github.c
 ## Config file parameters
 
 Ignore hardimrtrix task: **not recommended**
+
 - `ignore: False`
 
 

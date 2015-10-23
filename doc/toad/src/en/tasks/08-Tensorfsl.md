@@ -25,6 +25,7 @@ This step uses the `dtfit` command from FSL [ref: <a href="http://fsl.fmrib.ox.a
 ## Config file parameters
 
 Ignore tensorfsl task: not recommended
+
 - `ignore: False`
 
 ## Implementation

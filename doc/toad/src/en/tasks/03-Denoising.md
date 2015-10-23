@@ -23,20 +23,26 @@ The denoising step denoises diffusion-weighted images (DWI) depending on the alg
 ## Config file parameters
 
 Algorithm chosen for denoising the dwi {lpca, aonlm, nlmeans}
+
 - `algorithm: nlmeans`
 
 Noise model, { 1 for rician noise model and 0 for gaussian noise model}
+
 - `rician: 1`
 
 `number_array_coil`: The number of phase array coils of the MRI scanner.
+
 If your scanner does a SENSE reconstruction, ALWAYS use `number_array_coil=1`, as the noise profile is always Rician.
 If your scanner does a GRAPPA reconstruction, set `number_array_coil` as the number of phase array coils.
+
 - `number_array_coil: 1`
 
 remove extra files at the end of the tasks
+
 - `cleanup: False`
 
 Ignore denoising task: **not recommended**
+
 - `ignore: False`
 
 ## Implementation
