@@ -37,7 +37,7 @@ class TractographyMrtrix(GenericTask):
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
 
-        aal2LutFile = os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", "aa2_lut"))
+        aal2LutFile = os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", "aal2_lut"))
 
 
         #tensor part

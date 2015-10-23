@@ -381,9 +381,8 @@ def plotConnectome(source, target,  lutFile=None, title=None, label=None, skipro
 
     import matplotlib.pylab as plt
     data = numpy.loadtxt(source, skiprows=skiprows, usecols=usecols)
-    #figure = plt.figure(figsize=(16, 12), dpi=160, facecolor='w', edgecolor='k')
-    figure = plt.figure()
-    figure.clf()
+    figure = plt.figure(figsize=(18,14), dpi=120)
+    #figure.clf()
     ax = figure.add_subplot(111)
     image = ax.imshow(data, interpolation="nearest")
 
