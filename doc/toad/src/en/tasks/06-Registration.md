@@ -26,6 +26,7 @@ The registration step overlays the anatomical image and atlases on the diffusion
 If anatomical and diffusion-weigthed images were acquired during the same acquisition session we use -usesqform -dof 6 <br>
 
 Remove extra files
+
 - `cleanup: False`
 
 ## Implementation

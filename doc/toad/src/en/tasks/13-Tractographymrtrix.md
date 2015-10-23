@@ -30,18 +30,23 @@ It also creates as well connectomes from anatomical segmentation.
 We use default paramaters suggested in MRtrix documentation.
 
 Step size of the algorithm in mm (default is 0.1 x voxelsize; for iFOD2: 0.5 x voxelsize).
+
 - `step: 0.2`
 
 Maximum length of any track in mm
+
 - `maxlength: 300`
 
 Desired number of tracks
+
 - `number_tracks: 1000000`
 
 Downsample factor to reduce output file size
+
 - `downsample: 8`
 
-Ignore tractographymrtrix task: not recommended <br>
+Ignore tractographymrtrix task: not recommended
+
 - `ignore: False`
 
 ## Implementation
@@ -61,14 +66,16 @@ Ignore tractographymrtrix task: not recommended <br>
 ## Expected result(s) - Quality Assessment (QA)
 
 Tractographymrtrix runs determinist tractographies from
+
 - Tensor reconstruction
 
 Tractographymrtrix runs probabilist tractographies from
+
 - Tensor reconstruction
 - Constrained spherical deconvolution
 
-It filters tractograms using SIFT algorithm  
-It creates structural connectomes from tractographies
+It filters tractograms using SIFT algorithm.  
+It creates structural connectomes from tractographies.
 
 Production of an image (png) from a dummy examples for the QA in order to check the results.   
 Production of an image (png) of the structural connectomes.

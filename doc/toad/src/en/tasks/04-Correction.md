@@ -33,32 +33,41 @@ or
 ## Config file parameters
 
 Phase encoding direction.  {0 = P>>A, 1 = A>>P, 2 = R>>L, 3 = L>>R}
+
 - `phase_enc_dir:`
 
 Echo spacing values of the diffusion image (DWI) in ms
+
 - `echo_spacing:`
 
 EPI factor value
+
 - `epi_factor:`
 
 Ignore eddy correction task: **not recommended**
+
 - `ignore: False`
 
 **if fieldmap is provided:**
 
 Cost function from a range of inter- and intra-modal functions {mutualinfo,corratio,normcorr,normmi,leastsq,labeldiff,bbr} (default=corratio)
+
 - `cost: normmi`
 
 Number of transform degrees of freedom (default is 12)
+
 - `dof: 6`
 
 Flirt final interpolation interp {trilinear, nearestneighbour, sinc, spline}  (def=trilinear)
+
 - `interp: nearestneighbour`
 
 Applies transform (no optimisation): requires -init
+
 - `applyxfm: True`
 
 Fugue -s,--smooth3	apply 3D Gaussian smoothing of sigma N (in mm)
+
 - `smooth3: 2.00`
 
 ## Implementation

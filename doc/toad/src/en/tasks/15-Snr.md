@@ -18,6 +18,7 @@ The SNR step creates several graphs to assess the Signal to Noise Ratio of the D
 ## Config file parameters
 
 Ignore snr task
+
 - `ignore: False`
 
 ## Minimal Requirements

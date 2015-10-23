@@ -22,9 +22,11 @@ The upsampling task creates diffusion-weigthed images (DWI) upsampled to anatomi
 ## Config file parameters
 
 Upsampling voxel size in x y z direction suited for upsampling
+
 - `voxel_size: 1 1 1`
 
 Remove extra files
+
 - `cleanup: True`
 
 ## Implementation

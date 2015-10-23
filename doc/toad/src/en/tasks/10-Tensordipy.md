@@ -25,6 +25,7 @@ This step uses the `dtfit` command line from dipy [ref: <a href="http://nipy.org
 ## Config file
 
 Ignore tensordipy task: **not recommended**
+
 - `ignore: False`
 
 ## Implementation

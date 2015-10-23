@@ -22,9 +22,11 @@ This step uses the `dtfit` command line from MRtrix [ref: <a href="https://githu
 - Strength of the regularisation term on the magnitude of the tensor elements: 5000 (check MRtrix default parameters)
 
 Specify how to modulate the magnitude of the eigenvectors {none, FA, eval}
+
 - `modulate: FA`
 
 Ignore tensormrtrix task: not recommended
+
 - `ignore: False`
 
 ## Requirements
