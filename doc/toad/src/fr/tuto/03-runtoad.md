@@ -53,7 +53,7 @@ L’ensemble des dossiers pour chaque sujet devrait ressembler à peu près au t
 |13-hardidipy           | Reconstruction HARDI (Dipy)                           |
 |14-tractographymrtrix  | Reconstruction des faisceaux (MRTRIX)                 |
 |15-tractographydipy    | Reconstruction des faisceaux (Dipy)                   |
-|16-results             |                                                       |
+|16-outputs             |                                                       |
 |99-logs                | Fichiers logs et erreurs                              |
 
 *Note :* Il est possible que cet arbre change avec les versions de TOAD. 

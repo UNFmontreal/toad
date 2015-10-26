@@ -8,7 +8,7 @@ __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 
 
-class Results(GenericTask):
+class Outputs(GenericTask):
 
 
     def __init__(self, subject):

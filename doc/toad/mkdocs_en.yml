@@ -36,7 +36,7 @@ pages:
     - '13-Tractography MRtrix': 'tasks/13-Tractographymrtrix.md'
     - '14-Tractography Dipy': 'tasks/14-Tractographydipy.md'
     - '15-Signal-noise ratio': 'tasks/15-Snr.md'
-    - '16-Results': 'tasks/16-Results.md'
+    - '16-Outputs': 'tasks/16-Outputs.md'
 - About:
     - 'License agreement': 'about/license.md'
     - 'Versions': 'about/versions.md'
