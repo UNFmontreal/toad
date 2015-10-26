@@ -5,6 +5,7 @@ import scipy
 import numpy
 import util
 import os
+from collections import OrderedDict
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -353,29 +354,28 @@ def plotConnectome(source, target,  lutFile=None, title=None, label=None, skipro
     """
     #ADD figsize
 
-    def __getLabels(locations, lutFile):
+    def __getLabels(lutFile):
         """ This need to be implemented
 
         """
-        if lutFile is None:
-            return locations
-
         with open(lutFile, 'r') as f:
-            dict ={}
+            dict = OrderedDict()
+
             luts = f.readlines()
             if len(luts) == 1:
                 labels = luts[0].split()
-                if len(labels) == len(locations):
-                    for index, label in enumerate(labels):
-                        dict[index] = label
+                #if len(labels) == len(locations):
+                for index, label in enumerate(labels):
+                    dict[index] = label
             else:
                 for lut in luts:
                     index = int(lut.split()[0])
                     label = lut.split()[7]
                     dict[index] = label.strip().strip("\"")
         values =[]
-        for index in locations:
-            values.append(dict[index])
+        print "FUCKING ME=", dict
+        for index, label in dict.iteritems():
+            values.append(label)
         return values
 
 
@@ -389,10 +389,16 @@ def plotConnectome(source, target,  lutFile=None, title=None, label=None, skipro
     colorBar = plt.colorbar(image)
     plt.setp(colorBar.ax.get_yticklabels(), visible=True)
 
-    xLocations = [index for index in range(data.shape[1])]
-    xLabels = __getLabels(xLocations, lutFile)
-    yLocations = [index for index in range(data.shape[0])]
-    yLabels = __getLabels(yLocations, lutFile)
+    #Connectomme matrix must be square
+    if lutFile is not None:
+        xLabels = yLabels = __getLabels(lutFile)
+        xLocations = yLocations = [index for index, value in xLabels.iteritems()]
+
+    else:
+        xLocations = [index for index, value in range(data.shape[1])]
+        yLocations = [index for index in range(data.shape[0])]
+        xLabels = xLocations
+        yLabels = yLocations
 
     plt.xticks(xLocations, xLabels, rotation='vertical', fontsize=8)
     plt.yticks(yLocations, yLabels, fontsize=8)
