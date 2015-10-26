@@ -171,7 +171,7 @@ class Registration(GenericTask):
         self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg, boundaries=brainMask)
         self.slicerPng(b0, brodmannPng, segOverlay=brodmann, boundaries=brainMask)
         self.slicerPng(b0, aal2Png, segOverlay=aal2, boundaries=brainMask)
-        self.slicerPng(b0, networks7Png, segOverlay=networks7Png, boundaries=brainMask)
+        self.slicerPng(b0, networks7Png, segOverlay=networks7, boundaries=brainMask)
 
         qaImages = Images(
             (brainMaskPng, 'Brain mask on upsampled b0'),

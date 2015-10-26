@@ -354,54 +354,51 @@ def plotConnectome(source, target,  lutFile=None, title=None, label=None, skipro
     """
     #ADD figsize
 
-    def __getLabels(lutFile):
+    def __getDataIndexsAndLabels(lutFile):
         """ This need to be implemented
 
         """
         with open(lutFile, 'r') as f:
-            dict = OrderedDict()
-
+            labels = []
+            locations = []
             luts = f.readlines()
             if len(luts) == 1:
                 labels = luts[0].split()
                 #if len(labels) == len(locations):
                 for index, label in enumerate(labels):
-                    dict[index] = label
+                    labels.append(label)
+                    locations.append(index)
             else:
                 for lut in luts:
                     index = int(lut.split()[0])
-                    label = lut.split()[7]
-                    dict[index] = label.strip().strip("\"")
-        values =[]
-        print "FUCKING ME=", dict
-        for index, label in dict.iteritems():
-            values.append(label)
-        return values
-
+                    if index != 0:
+                    	label = lut.split()[7]
+                    	labels.append(label.strip().strip("\""))
+                        locations.append(index-1)
+        return locations, labels
 
     import matplotlib.pylab as plt
     data = numpy.loadtxt(source, skiprows=skiprows, usecols=usecols)
     figure = plt.figure(figsize=(18,14), dpi=120)
     #figure.clf()
     ax = figure.add_subplot(111)
-    image = ax.imshow(data, interpolation="nearest")
+    #Connectomme matrix must be square
+    if lutFile is not None:
+        indexLocations, labels = __getDataIndexsAndLabels(lutFile)
 
+        #probably a better solution exists to reshape the matrix
+        data = numpy.take(data, indexLocations, axis=0)
+        data = numpy.take(data, indexLocations, axis=1)
+
+    else:
+        labels = [index for index in range(data.shape[0])]
+ 
+    image = ax.imshow(data, interpolation="nearest")
     colorBar = plt.colorbar(image)
     plt.setp(colorBar.ax.get_yticklabels(), visible=True)
 
-    #Connectomme matrix must be square
-    if lutFile is not None:
-        xLabels = yLabels = __getLabels(lutFile)
-        xLocations = yLocations = [index for index, value in xLabels.iteritems()]
-
-    else:
-        xLocations = [index for index, value in range(data.shape[1])]
-        yLocations = [index for index in range(data.shape[0])]
-        xLabels = xLocations
-        yLabels = yLocations
-
-    plt.xticks(xLocations, xLabels, rotation='vertical', fontsize=8)
-    plt.yticks(yLocations, yLabels, fontsize=8)
+    plt.xticks([index for index in range(0, len(labels)-1)], labels, rotation='vertical', fontsize=8)
+    plt.yticks([index for index in range(0, len(labels)-1)], labels, fontsize=8)
     #plt.subplots_adjust(bottom=0.1, left=0.1, right=1)
 
     if title is not None:

@@ -27,7 +27,7 @@ class TractographyMrtrix(GenericTask):
         seed_gmwmi = self.getMaskingImage("tt5", ["register", "5tt2gmwmi"])
         #@TODO reactivate brodmann = self.getRegistrationImage("brodmann", "resample")
         aal2 =  self.getRegistrationImage("aal2", "resample")
-        netwoks7 =  self.getRegistrationImage("netwoks7", "resample")
+        networks7 =  self.getRegistrationImage("networks7", "resample")
         norm = self.getRegistrationImage("norm", "resample")
 
         mask253 = self.getMaskingImage('aparc_aseg', ['253', 'mask'])
@@ -41,13 +41,13 @@ class TractographyMrtrix(GenericTask):
         #tensor part
         tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
         self.__plotConnectome(tckDet, aal2, "aal2_lut", "aal2")
-        self.__plotConnectome(tckDet, netwoks7, "networks7_lut", "netwoks7")
+        self.__plotConnectome(tckDet, networks7, "networks7_lut", "networks7")
         tckDetRoi = self.__tckedit(tckDet, mask253, self.buildName(tckDet, 'roi','tck'))
         tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, norm , self.buildName(tckDetRoi, None, 'trk'))
 
         tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
         self.__plotConnectome(tckProb, aal2, "aal2_lut", "aal2")
-        self.__plotConnectome(tckProb, netwoks7, "networks7_lut", "netwoks7")
+        self.__plotConnectome(tckProb, networks7, "networks7_lut", "networks7")
         tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
 
@@ -55,14 +55,14 @@ class TractographyMrtrix(GenericTask):
         csd =  self.getHardimrtrixImage('dwi','csd')
         hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
         self.__plotConnectome(hardiTck, aal2, "aal2_lut", "aal2")
-        self.__plotConnectome(hardiTck, netwoks7, "networks7_lut", "netwoks7")
+        self.__plotConnectome(hardiTck, networks7, "networks7_lut", "networks7")
         hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
         tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
 
 
         tcksift = self.__tcksift(hardiTck, csd)
         self.__plotConnectome(tcksift, aal2, "aal2_lut", "aal2")
-        self.__plotConnectome(tcksift, netwoks7, "networks7_lut", "netwoks7")
+        self.__plotConnectome(tcksift, networks7, "networks7_lut", "networks7")
         tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
 
@@ -196,8 +196,16 @@ class TractographyMrtrix(GenericTask):
         Returns:
             a connectome png image
         """
+        if lut is not None:
+            lutFile= os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", lut))
+        else:
+            lutFile= None
 
-        lutFile = os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", lut))
+        if self.get('arguments', 'debug'):
+            self.info('Source file: {}'.format(source))
+            self.info('Atlas file: {}'.format(atlas))
+            self.info('Lut file location: {}'.format(lutFile))
+             
         connectome = self.__tck2connectome(source, atlas, self.buildName(source, [ prefix , 'connectome'], 'csv'))
         connectomeNormalize = self.__normalizeConnectome(connectome, self.buildName(connectome, 'normalize', 'csv'))
         pngImage = mriutil.plotConnectome(connectomeNormalize, self.buildName(connectomeNormalize, None, "png"), lutFile)
