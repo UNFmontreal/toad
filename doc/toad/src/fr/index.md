@@ -48,7 +48,16 @@ Nous vous conseillons également de **consulter [cette page](tuto/00-refs.md)** 
 
 ## Mot du directeur
 
-[A venir]
+L’exploration in vivo de la connectivité structurale du cerveau et de la moelle épinière, de façon non-invasive grâce à l’imagerie de diffusion, est devenue aujourd’hui un incontournable tant en clinique que dans de nombreux domaines des neurosciences fondamentales. Toutefois, l’analyse des données provenant de cette technique de l’imagerie par résonance magnétique demeure encore complexe et peu standardisée. Résultant d’un travaille d’équipe exceptionnel, la présente plateforme nommée « Toolkit for Analysis of Diffusion MRI (TOAD) » offre aux utilisateurs novices et experts une gamme d’outils faciles d’utilisation qui permettent de vérifier et visualiser, étape-par-étape, les résultats obtenus suite au pré-traitement des images et à l’analyse statistique des diverses métriques d’anisotropie et de tractographie.
+
+A titre de Directeur Scientifique de l’Unité de Neuroimagerie Fonctionnelle (UNF) du Centre de recherche de l’Institut universitaire de gériatrie de Montréal (CRIUGM), c’est avec fierté que je remercie toute l’équipe de professionnels de recherche, étudiants et chercheurs qui, ensemble, ont permis la création de TOAD.  Je crois sincèrement que cette dernière sera non seulement utile pour les cliniciens-nnes, mais pour la communauté scientifique du Québec, du Canada et d’ailleurs dans le monde.
+
+Julien Doyon, Ph.D.
+Directeur scientifique
+Unité de Neuroimagerie Fonctionnelle
+
+Directeur
+Réseau de Bio-Imagerie du Québec
 
 
 ## [Contact](about/contact.md)
