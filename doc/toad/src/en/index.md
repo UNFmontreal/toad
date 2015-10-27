@@ -48,7 +48,16 @@ We also recommend to **visit [this page](tuto/00-refs.md)** to better understand
 
 ## Word from our director
 
-[To come]
+Today, in-vivo diffusion weighted imaging has become the method of choice for clinicians and researchers in neuroscience interested in exploring the structural connectivity of the brain and spinal cord. Yet, analysis of the data acquired using this magnetic resonance imaging technique still remains complex and non-standardized. Resulting from an exceptional team work, the present platform named "Toolkit for Analysis of Diffusion MRI (TOAD)" provides novice and experts a range of user-friendly tools that allow to verify and visualize, step-by-step, the results obtained following image pre-processing and statistical analyses of various anisotropy and tractography metrics.  
+
+As Scientific Director of the Functional Neuroimaging Unit (UNF) affiliated to the “Centre de recherche de l’Institut universitaire de gériatrie de Montréal” it is with pride that I thank the entire team of research professionals, students and researchers who, together, created TOAD. I sincerely believe that this pipeline will not only be useful to clinicians, but also to the scientific community in Quebec, Canada and around the world.
+
+Julien Doyon, Ph.D.
+Scientific Director
+Functional Neuroimaging Unit
+
+Director
+Quebec Bio-Imaging Network
 
 
 ## Contact
