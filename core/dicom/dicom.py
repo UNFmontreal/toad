@@ -1,5 +1,6 @@
 import os
 import sys
+import struct
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from pydicom.filereader import read_file
@@ -73,7 +74,12 @@ class Dicom(Ascconv):
 
             try:
                 if header.has_key(bandwidthPerPixelPhaseEncodeTag):
-                    self.__bandwidthPerPixelPhaseEncode = float(header[bandwidthPerPixelPhaseEncodeTag].value)
+                    val = header[bandwidthPerPixelPhaseEncodeTag].value
+                    try:
+                        self.__bandwidthPerPixelPhaseEncode = float(val)
+                    except ValueError:
+                        # some data have wrong VR in dicom, try to unpack
+                        self.__bandwidthPerPixelPhaseEncode = struct.unpack('d', val)[0]
 
                 self.__echoSpacing = 1/(self.__bandwidthPerPixelPhaseEncode* self.getEpiFactor()) *1000.0 * \
                               self.getPatFactor() * self.getPhaseResolution() * \
