@@ -51,15 +51,22 @@ class Ascconv(object):
     def getNumberArrayCoil(self):
         return self.__numberArrayCoil
 
+
     def __initialize(self):
         with open(self.__fileName, 'r') as f:
+            ascconv = []
             for line in f.readlines():
+                if "### ASCCONV BEGIN ###" in line:
+                    self.__ascconvFound = True
+                if "### ASCCONV END ###" in line:
+                    break
+                if self.__ascconvFound:
+                    ascconv.append(line)
+
+            for line in ascconv:
                 line = line.lower()
 
-                if "ascconv begin" in line:
-                    self.__ascconvFound = True
-
-                elif "coil" in line and "meas" in line and "lrxchannelconnected" in line:
+                if "coil" in line and "meas" in line and "lrxchannelconnected" in line:
                     self.__numberArrayCoil += 1
 
                 elif "sslicearray.asslice" in line and ".dinplanerot" in line:
