@@ -24,6 +24,8 @@ class Registration(GenericTask):
         rhRibbon = self.getParcellationImage("rh_ribbon")
         lhRibbon = self.getParcellationImage("lh_ribbon")
         brodmann = self.getParcellationImage("brodmann")
+        aal2 = self.getParcellationImage("aal2")
+        networks7 = self.getParcellationImage("networks7")
         tt5 = self.getParcellationImage("tt5")
         mask = self.getParcellationImage("mask")
 
@@ -42,6 +44,12 @@ class Registration(GenericTask):
         brodmannRegister = self.__applyRegistrationMrtrix(brodmann, mrtrixMatrix)
         self.__applyResampleFsl(brodmann, b0, freesurferToDWIMatrix, self.buildName(brodmann, "resample"), True)
 
+        aal2Register = self.__applyRegistrationMrtrix(aal2, mrtrixMatrix)
+        self.__applyResampleFsl(aal2, b0, freesurferToDWIMatrix, self.buildName(aal2, "resample"), True)
+
+        networks7Register = self.__applyRegistrationMrtrix(networks7, mrtrixMatrix)
+        self.__applyResampleFsl(networks7, b0, freesurferToDWIMatrix, self.buildName(networks7, "resample"), True)
+
         lhRibbonRegister = self.__applyRegistrationMrtrix(lhRibbon, mrtrixMatrix)
         rhRibbonRegister = self.__applyRegistrationMrtrix(rhRibbon, mrtrixMatrix)
         tt5Register = self.__applyRegistrationMrtrix(tt5, mrtrixMatrix)
@@ -54,11 +62,11 @@ class Registration(GenericTask):
         self.__applyResampleFsl(mask, b0, freesurferToDWIMatrix, self.buildName(mask, "resample"),True)
         self.__applyResampleFsl(norm, b0, freesurferToDWIMatrix, self.buildName(norm, "resample"),True)
 
-        brodmannLRegister =  self.buildName(brodmannRegister, "left_hemisphere")
-        brodmannRRegister =  self.buildName(brodmannRegister, "right_hemisphere")
+        #brodmannLRegister =  self.buildName(brodmannRegister, "left_hemisphere")
+        #brodmannRRegister =  self.buildName(brodmannRegister, "right_hemisphere")
 
-        self.__multiply(brodmannRegister, lhRibbonRegister, brodmannLRegister)
-        self.__multiply(brodmannRegister, rhRibbonRegister, brodmannRRegister)
+        #self.__multiply(brodmannRegister, lhRibbonRegister, brodmannLRegister)
+        #self.__multiply(brodmannRegister, rhRibbonRegister, brodmannRRegister)
 
 
     def __multiply(self, source, ribbon, target):
@@ -120,7 +128,9 @@ class Registration(GenericTask):
                           (self.getParcellationImage('lh_ribbon'), 'left hemisphere ribbon'),
                           (self.getParcellationImage('tt5'), '5tt'),
                           (self.getParcellationImage('mask'), 'brain mask'),
-                          (self.getParcellationImage('brodmann'), 'brodmann'))
+                          (self.getParcellationImage('brodmann'), 'brodmann atlas'),
+                          (self.getParcellationImage('aal2'), 'aal2 atlas'),
+                          (self.getParcellationImage('networks7'), 'Resting state sevens networks atlas'))
 
 
     def isDirty(self):
@@ -133,8 +143,8 @@ class Registration(GenericTask):
                   (self.getImage('mask', 'resample'), 'brain mask resample'),
                   (self.getImage('norm', 'resample'), 'brain  resample'),
                   (self.getImage('brodmann', 'resample'), 'brodmann atlas  resample'),
-                  (self.getImage('brodmann', ['register', "left_hemisphere"]), 'brodmann register left hemisphere atlas'),
-                  (self.getImage('brodmann', ['register', "right_hemisphere"]), 'brodmann register right hemisphere atlas'))
+                  (self.getImage('aal2', 'resample'), 'aal2 atlas resample'),
+                  (self.getImage('networks7', 'resample'), 'Resting state sevens networks atlas resample'))
 
 
     def qaSupplier(self):
@@ -146,21 +156,28 @@ class Registration(GenericTask):
         brainMask = self.getImage('mask', 'resample')
         aparcAseg = self.getImage('aparc_aseg', 'resample')
         brodmann = self.getImage('brodmann', 'resample')
+        aal2 = self.getImage('aal2', 'resample')
+        networks7 = self.getImage('networks7', 'resample')
 
         #Build qa names
         brainMaskPng = self.buildName(brainMask, None, 'png')
         aparcAsegPng = self.buildName(aparcAseg, None, 'png')
         brodmannPng = self.buildName(brodmann, None, 'png')
+        aal2Png = self.buildName(aal2, None, 'png')
+        networks7Png = self.buildName(networks7, None, 'png')
 
         #Build qa images
         self.slicerPng(b0, brainMaskPng, maskOverlay=brainMask, boundaries=brainMask)
         self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg, boundaries=brainMask)
         self.slicerPng(b0, brodmannPng, segOverlay=brodmann, boundaries=brainMask)
+        self.slicerPng(b0, aal2Png, segOverlay=aal2, boundaries=brainMask)
+        self.slicerPng(b0, networks7Png, segOverlay=networks7, boundaries=brainMask)
 
         qaImages = Images(
             (brainMaskPng, 'Brain mask on upsampled b0'),
             (aparcAsegPng, 'aparcaseg segmentation on upsampled b0'),
             (brodmannPng, 'Brodmann segmentation on upsampled b0'),
-            )
+            (aal2Png, 'Aal2 segmentation on upsampled b0'),
+            (networks7Png, 'Resting state sevens networks segmentation on upsampled b0'))
 
         return qaImages

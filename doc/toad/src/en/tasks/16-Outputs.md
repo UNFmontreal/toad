@@ -1,16 +1,16 @@
-# Results
+# Outputs
 ---
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | results                                    |
+|**Name**        | outputs                                    |
 |**Goal**        | Copy every useful files                                    |
 |**Time**        | Few seconds         |
 |**Output**      | None                                     |
 
 ## Goal
 
-The results step has been created to copy every files in their final version of the pipeline. Due to storage restriction we won't copy them.
+The outputs step has been created to copy every files in their final version of the pipeline. Due to storage restriction we won't copy them.
 
 ## Requirements
 

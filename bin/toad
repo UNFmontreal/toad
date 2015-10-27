@@ -68,7 +68,7 @@ def __parseArguments():
               |- 13-hardidipy
               |- 14-tractographymrtrix
               |- 15-tractographydipy
-              |- 16-results
+              |- 16-outputs
               |- 99-logs
 
 

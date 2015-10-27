@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy
-
+import os
 from core.toad.generictask import GenericTask
 from lib import mriutil
 from lib.images import Images
@@ -25,7 +25,9 @@ class TractographyMrtrix(GenericTask):
 
         tt5 = self.getRegistrationImage("tt5", "register")
         seed_gmwmi = self.getMaskingImage("tt5", ["register", "5tt2gmwmi"])
-        brodmann = self.getRegistrationImage("brodmann", "resample")
+        #@TODO reactivate brodmann = self.getRegistrationImage("brodmann", "resample")
+        aal2 =  self.getRegistrationImage("aal2", "resample")
+        networks7 =  self.getRegistrationImage("networks7", "resample")
         norm = self.getRegistrationImage("norm", "resample")
 
         mask253 = self.getMaskingImage('aparc_aseg', ['253', 'mask'])
@@ -35,41 +37,32 @@ class TractographyMrtrix(GenericTask):
 
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
-         
+
         #tensor part
         tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
-        tckDetConnectome = self.__tck2connectome(tckDet, brodmann, self.buildName(tckDet, 'connectome', 'csv'))
-        tckDetConnectomeNormalize = self.__normalizeConnectome(tckDetConnectome, self.buildName(tckDetConnectome, 'normalize', 'csv'))
-        mriutil.plotConnectome(tckDetConnectomeNormalize, self.buildName(tckDetConnectomeNormalize, None, "png"))
-
+        self.__plotConnectome(tckDet, aal2, "aal2_lut", "aal2")
+        self.__plotConnectome(tckDet, networks7, "networks7_lut", "networks7")
         tckDetRoi = self.__tckedit(tckDet, mask253, self.buildName(tckDet, 'roi','tck'))
         tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, norm , self.buildName(tckDetRoi, None, 'trk'))
 
-
         tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
-        tckProbConnectome = self.__tck2connectome(tckProb, brodmann, self.buildName(tckProb, 'connectome', 'csv'))
-        tckProbConnectomeNormalize = self.__normalizeConnectome(tckProbConnectome, self.buildName(tckProbConnectome, 'normalize', 'csv'))
-        mriutil.plotConnectome(tckProbConnectomeNormalize, self.buildName(tckProbConnectomeNormalize, None, "png"))
-
+        self.__plotConnectome(tckProb, aal2, "aal2_lut", "aal2")
+        self.__plotConnectome(tckProb, networks7, "networks7_lut", "networks7")
         tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
         tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
 
         #HARDI part
         csd =  self.getHardimrtrixImage('dwi','csd')
         hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
-        hardiTckConnectome = self.__tck2connectome(hardiTck, brodmann, self.buildName(hardiTck, 'connectome', 'csv'))
-        hardiTckConnectomeNormalize = self.__normalizeConnectome(hardiTckConnectome, self.buildName(hardiTckConnectome, 'normalize', 'csv'))
-        mriutil.plotConnectome(hardiTckConnectomeNormalize, self.buildName(hardiTckConnectomeNormalize, None, "png"))
-
+        self.__plotConnectome(hardiTck, aal2, "aal2_lut", "aal2")
+        self.__plotConnectome(hardiTck, networks7, "networks7_lut", "networks7")
         hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
         tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
 
 
         tcksift = self.__tcksift(hardiTck, csd)
-        tcksiftConnectome = self.__tck2connectome(tcksift, brodmann, self.buildName(tcksift, 'connectome', 'csv'))
-        tcksiftConnectomeNormalize = self.__normalizeConnectome(tcksiftConnectome, self.buildName(tcksiftConnectome, 'normalize', 'csv'))
-
-        mriutil.plotConnectome(tcksiftConnectomeNormalize, self.buildName(tcksiftConnectomeNormalize, None, "png"))
+        self.__plotConnectome(tcksift, aal2, "aal2_lut", "aal2")
+        self.__plotConnectome(tcksift, networks7, "networks7_lut", "networks7")
         tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
         tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
 
@@ -192,6 +185,32 @@ class TractographyMrtrix(GenericTask):
         return self.rename(tmp, target)
 
 
+    def __plotConnectome(self, source, atlas, lut, prefix):
+        """ perform connectomme steps.
+
+        Args:
+            source: the input track file
+            atlas: the atlas
+            lut: an compatible itksnap lut file
+
+        Returns:
+            a connectome png image
+        """
+        if lut is not None:
+            lutFile= os.path.join(self.toadDir, "templates", "lookup_tables", self.get("template", lut))
+        else:
+            lutFile= None
+
+        if self.get('arguments', 'debug'):
+            self.info('Source file: {}'.format(source))
+            self.info('Atlas file: {}'.format(atlas))
+            self.info('Lut file location: {}'.format(lutFile))
+             
+        connectome = self.__tck2connectome(source, atlas, self.buildName(source, [ prefix , 'connectome'], 'csv'))
+        connectomeNormalize = self.__normalizeConnectome(connectome, self.buildName(connectome, 'normalize', 'csv'))
+        pngImage = mriutil.plotConnectome(connectomeNormalize, self.buildName(connectomeNormalize, None, "png"), lutFile)
+        return pngImage
+
 
     def __tck2connectome(self, source, nodes, target):
         """ generate a connectome matrix from a streamlines file and a node parcellation image
@@ -237,6 +256,7 @@ class TractographyMrtrix(GenericTask):
         numpy.savetxt(target, matrix, delimiter=' ', fmt='%0.4f')
         return target
 
+
     def isIgnore(self):
         if self.get("ignore"):
             return True
@@ -254,6 +274,8 @@ class TractographyMrtrix(GenericTask):
                   (self.getUpsamplingImage('grad', None, 'b'), '.b gradient encoding file'),
                   (self.getRegistrationImage("mask", "resample"), 'mask resampled'),
                   (self.getRegistrationImage("brodmann", "resample"), 'resampled brodmann area'),
+                  (self.getRegistrationImage("aal2", "resample"), 'resampled aal2 area'),
+                  (self.getRegistrationImage("networks7", "resample"), 'resampled seven networks area'),
                   (self.getRegistrationImage("norm", "resample"), 'brain resampled'),
                   (self.getMaskingImage('aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
                   (self.getRegistrationImage("tt5", "register"),'5tt register'),
@@ -265,12 +287,15 @@ class TractographyMrtrix(GenericTask):
     def isDirty(self):
 
         return Images((self.getImage('dwi', 'tensor_det', 'tck'), "deterministic tensor connectome matrix from a streamlines"),
-                  (self.getImage('dwi', ['tensor_det', 'connectome', 'normalize'], 'csv'), "normalize deterministic tensor connectome matrix from a streamlines csv"),
+                  (self.getImage('dwi', ['tensor_det','aal2', 'connectome', 'normalize'], 'csv'), "Aal2 normalize deterministic tensor connectome matrix from a streamlines csv"),
+                  (self.getImage('dwi', ['tensor_det', 'networks7' ,'connectome', 'normalize'], 'csv'), "Seven networks normalize deterministic tensor connectome matrix from a streamlines csv"),
                   (self.getImage('dwi', 'tensor_prob', 'tck'), "probabilistic tensor connectome matrix from a streamlines"),
-                  (self.getImage('dwi', ['tensor_prob', 'connectome', 'normalize'], 'csv'), "normalize probabilistic tensor connectome matrix from a streamlines csv"),
+                  (self.getImage('dwi', ['tensor_prob', 'aal2', 'connectome', 'normalize'], 'csv'), "Aal2 normalize probabilistic tensor connectome matrix from a streamlines csv"),
+                  (self.getImage('dwi', ['tensor_prob', 'networks7' ,'connectome', 'normalize'], 'csv'), "Seven networks normalize probabilistic tensor connectome matrix from a streamlines csv"),
                   (self.getImage('dwi', 'hardi_prob', 'tck'), "tckgen hardi probabilistic streamlines tractography"),
                   (self.getImage('dwi', 'tcksift', 'tck'), 'tcksift'),
-                  (self.getImage('dwi', ['tcksift', 'connectome', 'normalize'], 'csv'), 'normalize connectome matrix from a tcksift csv'))
+                  (self.getImage('dwi', ['tcksift', 'aal2', 'connectome', 'normalize'], 'csv'), 'Aal2 normalize connectome matrix from a tcksift csv'),
+                  (self.getImage('dwi', ['tcksift', 'networks7', 'connectome', 'normalize'], 'csv'), 'Seven networks normalize connectome matrix from a tcksift csv'))
 
     def qaSupplier(self):
         """Create and supply images for the report generated by qa task
@@ -287,23 +312,33 @@ class TractographyMrtrix(GenericTask):
 
         #images production
         tensorDetPng = self.createVtkPng(self.__tckDetRoiTrk, norm, mask253)#self.getImage('dwi', ['tensor_det', 'roi'], 'png')
-        tensorDetPlot = self.getImage('dwi', ['tensor_det', 'connectome', 'normalize'], 'png')
+        tensorAal2DetPlot = self.getImage('dwi', ['tensor_det', 'aal2', 'connectome', 'normalize'], 'png')
+        tensorNetworks7DetPlot = self.getImage('dwi', ['tensor_det', 'networks7', 'connectome', 'normalize'], 'png')
+
         tensorProbPng = self.createVtkPng(self.__tckProbRoiTrk, norm, mask253)#self.getImage('dwi', ['tensor_prob', 'roi'], 'png')
-        tensorProbPlot = self.getImage('dwi', ['tensor_prob', 'connectome', 'normalize'], 'png')
+        tensorAal2ProbPlot = self.getImage('dwi', ['tensor_prob', 'aal2', 'connectome', 'normalize'], 'png')
+        tensorNetworks7ProbPlot = self.getImage('dwi', ['tensor_prob', 'networks7', 'connectome', 'normalize'], 'png')
+
         hardiProbPng = self.createVtkPng(self.__tckgenRoiTrk, norm, mask253)#self.getImage('dwi', ['hardi_prob', 'roi'], 'png')
-        hardiProbPlot = self.getImage('dwi', ['hardi_prob', 'connectome', 'normalize'], 'png')
+        hardiAal2ProbPlot = self.getImage('dwi', ['hardi_prob', 'aal2', 'connectome', 'normalize'], 'png')
+        hardiNetworks7ProbPlot = self.getImage('dwi', ['hardi_prob', 'networks7', 'connectome', 'normalize'], 'png')
+
         tcksiftPng = self.createVtkPng(self.__tcksiftRoiTrk, norm, mask253)#self.getImage('dwi', ['tcksift', 'roi'], 'png')
-        tcksiftPlot = self.getImage('dwi', ['tcksift', 'connectome', 'normalize'], 'png')
+        tcksiftAal2Plot = self.getImage('dwi', ['tcksift', 'aal2', 'connectome', 'normalize'], 'png')
+        tcksiftNetworks7Plot = self.getImage('dwi', ['tcksift', 'networks7', 'connectome', 'normalize'], 'png')
 
         qaImages.extend(Images(
             (tensorDetPng, 'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),
-            (tensorDetPlot,'normalize connectome matrix from a deterministic tensor streamlines'),
+            (tensorAal2DetPlot,'Aal2 normalize connectome matrix from a deterministic tensor streamlines'),
+            (tensorNetworks7DetPlot,'Seven networks normalize connectome matrix from a deterministic tensor streamlines'),
             (tensorProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
-            (tensorProbPlot,'normalize connectome matrix from a probabilistic tensor streamlines'),
+            (tensorAal2ProbPlot,'Aal2 normalize connectome matrix from a probabilistic tensor streamlines'),
+            (tensorNetworks7ProbPlot,'Seven networks normalize connectome matrix from a probabilistic tensor streamlines'),
             (hardiProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines'),
-            (hardiProbPlot, 'normalize connectome matrix from a probabilistic hardi streamlines'),
+            (hardiAal2ProbPlot, 'Aal2 normalize connectome matrix from a probabilistic hardi streamlines'),
+            (hardiNetworks7ProbPlot, 'Seven networks normalize connectome matrix from a probabilistic hardi streamlines'),
             (tcksiftPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
-            (tcksiftPlot, 'tcksift'),
-            ))
+            (tcksiftAal2Plot, 'Aal2 tcksift'),
+            (tcksiftNetworks7Plot, 'Seven networks tcksift')))
 
         return qaImages
