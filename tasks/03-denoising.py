@@ -188,7 +188,7 @@ class Denoising(GenericTask):
         dwiDenoised = self.getImage('dwi', 'denoise')
         brainMask = self.getImage('mask', 'resample')
         b0 = self.getImage('b0')
-        noiseMask = self.getImage('mask', 'noise_mask')
+        noiseMask = self.getImage('dwi', 'noise_mask')
 
         #Build qa images
         if dwiDenoised:
