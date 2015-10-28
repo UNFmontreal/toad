@@ -1,6 +1,6 @@
 <img src="figs/toad_logo.png" alt="Toad logo" style="width: 450px;"/>
 
-# TOolkit of Analysis in Diffusion imaging (TOAD)
+# TOolkit of Analysis in Diffusion MRI (TOAD)
 
 Welcome to the English version of the documentation of [TOAD](http://unf-montreal.ca/toad/).
 Sources files as well as installation’s instructions are available on [Github](https://github.com/UNFmontreal/toad).
