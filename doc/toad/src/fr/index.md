@@ -59,6 +59,11 @@ Unité de Neuroimagerie Fonctionnelle
 Directeur
 Réseau de Bio-Imagerie du Québec
 
+## Introduction à TOAD (diapositives)
+
+<iframe src="http://slides.com/toadunfcriugm/deck-2/embed" width="576" height="420" scrolling="no" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+
+*Note :* Vous pouvez naviguer verticalement tel qu'indiqué par les flèches bleues.
 
 ## [Contact](about/contact.md)
 
