@@ -61,7 +61,9 @@ Quebec Bio-Imaging Network
 
 ## Introduction to TOAD (slides)
 
-<iframe src="//slides.com/toadunfcriugm/deck-2/embed" width="576" height="420" scrolling="no" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+<iframe src="http://slides.com/toadunfcriugm/deck-2/embed" width="576" height="420" scrolling="no" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+
+*Note:* You can navigate vertically as indicated by the blue arrows. 
 
 ## Contact
 
