@@ -13,6 +13,7 @@ import dipy.reconst.dti
 import dipy.data
 import dipy.viz.fvtk
 import dipy.viz.colormap
+import xml.dom.minidom as minidom
 from lib import util
 from string import ascii_uppercase, digits
 from random import choice
@@ -421,6 +422,7 @@ class Qa(object):
         subjectName = self.subject.getName()
         taskInfo = images.getInformation()
         imagesDir = os.path.join(self.qaDir, self.config.get('qa', 'images_dir'))
+        versions = minidom.parse(os.path.join(self.logDir, self.get('general','versions_file_name')))
         tablesCode = ''
         
         print "createQaReport images =", images
@@ -446,9 +448,9 @@ class Qa(object):
             'subject':subjectName,
             'taskInfo':taskInfo,
             'parseHtmlTables':tablesCode,
+            'parseVersionTables': versions.toprettyxml(),
             }
         htmlCode = self.parseTemplate(tags, mainTemplate)
-
         htmlFile = os.path.join(self.qaDir,'{}.html'.format(self.getName()))
         util.createScript(htmlFile, htmlCode)
 
