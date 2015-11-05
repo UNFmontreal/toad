@@ -159,23 +159,23 @@ class SubjectManager(Logger, Config):
             subject:  a subject
 
         """
-        if subject.getConfig().get('general', 'server') in ['magma', 'stark']:
-            notify = " -notify "
-        else:
-            notify = ""
 
-        extraFlags = ""
+        gridFlags = " -q {}".format(subject.getConfig().get('general', 'sge_queue'))
+        if subject.getConfig().get('general', 'server') in ['magma', 'stark']:
+            gridFlags = " -notify "
+
+        if subject.getConfig().get('general', 'server') in ['mammouth']:
+            gridFlags += " -l walltime=48:00:00 "
+
+        toadFlags = " -l -p "
+        if subject.getConfig().get('arguments', 'stop_before_task'):
+            toadFlags += " --stopBeforeTask {} ".format(subject.getConfig().get('arguments', 'stop_before_task'))
 
         if not subject.getConfig().getboolean('arguments', 'tractography'):
-            extraFlags += " --noTractography "
+            toadFlags += " --noTractography "
 
-        wallTime = ""
-        if subject.getConfig().get('general', 'server') in ['mammouth']:
-            wallTime += " -l walltime=48:00:00 "
-
-
-        cmd = "echo {0}/bin/toad {1} -l -p {2} | qsub {3} -V -N {4} -o {5} -e {5} -q {6} {7}".format(self.config.get('arguments', 'toad_dir'),
-              subject.getDir(), extraFlags , notify, subject.getName(), subject.getLogDir(),subject.getConfig().get('general', 'sge_queue'), wallTime)
+        cmd = "echo {0}/bin/toad {1} {2} | qsub -V -N {3} -o {4} -e {4} {5}".format(self.config.get('arguments', 'toad_dir'),
+              subject.getDir(), toadFlags , subject.getName(), subject.getLogDir(), gridFlags)
         self.info("Command launch: {}".format(cmd))
 
         import subprocess
