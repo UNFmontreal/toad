@@ -168,7 +168,7 @@ class SubjectManager(Logger, Config):
             gridFlags += " -l walltime=48:00:00 "
 
         toadFlags = " -l -p "
-        if subject.getConfig().get('arguments', 'stop_before_task'):
+        if subject.getConfig().has_option('arguments', 'stop_before_task'):
             toadFlags += " --stopBeforeTask {} ".format(subject.getConfig().get('arguments', 'stop_before_task'))
 
         if not subject.getConfig().getboolean('arguments', 'tractography'):
