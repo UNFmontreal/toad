@@ -32,7 +32,10 @@ class QA(GenericTask):
 
         #Copy style.css
         styleTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.style.tpl')
+        jQuery = os.path.join(self.toadDir, 'templates', 'files', self.get('general', 'jquery'))
+
         util.copy(styleTemplate, self.workingDir, 'style.css')
+        util.copy(jQuery, self.workingDir, 'jquery.js')
 
         #Create menu.html only for tasks with implemented QA
         menuTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.menu.tpl')
@@ -43,6 +46,7 @@ class QA(GenericTask):
             'subject':self.__subject.getName(),
             'taskInfo':'',
             'parseHtmlTables':'',
+            'parseVersionTables':'',
             }
         htmlCode = self.parseTemplate(tags, mainTemplate)
         util.createScript('index.html', htmlCode)
@@ -59,4 +63,5 @@ class QA(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        return Images((os.path.join(self.workingDir, 'index.html'), 'QA index.html'))
+        return Images((os.path.join(self.workingDir, 'index.html'), 'QA index.html'),
+                        (os.path.join(self.workingDir, 'jquery.js'), 'Jquery library'))

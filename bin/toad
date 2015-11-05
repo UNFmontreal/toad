@@ -72,8 +72,13 @@ def __parseArguments():
               |- 99-logs
 
 
-        Please report bugs to mathieu.desrosiers@criugm.qc.ca
-        Check whether it CROAK like a toad and WALK like a toad. It is not uncommon to find a warty skinned frog that isn\'t a toad.
+        Please report bugs to toadunf.criugm@gmail.com
+
+           When you feel like a toad on the highway of life...
+           and everyone seems like a steel-belted radial tire...
+           when you\'re lyin\' there squished in an assortment of bodily fluids...
+           at least you left your mark.  (The red green show)
+
         """)
     parser.add_argument("inputs", nargs='+', help="Specify the directories where we should find the subjects, wildcard * ? are accepted")
     parser.add_argument("-c", "--config", metavar=('filename'), required=False, action='append',
@@ -94,8 +99,7 @@ def __parseArguments():
     parser.add_argument("-p","--noPrompt", help=("Disable command prompt and assume yes to any answer (not recommended)"), action="store_true")
     parser.add_argument("-r","--reinitialize", help="reinitialize and cleanup the study at is initial stage", action="store_true")
     parser.add_argument("-e","--emergency", help=("Overwrite nb_threads parameter and deploy unlimited number of threads at each parallelizable steps. "
-                        "If more than one subject is submit, this parameter will be ignored "
-                        "(This parameter is dangerous and may crash the server or create deadlocks.)"
+                        "effective only if --local is specified"
                         ), action="store_true")
     parser.add_argument("-l","--local", help=("Do not use the Grid Engine during pipeline execution"), action="store_true")
     parser.add_argument("-q", "--queue", nargs='?',metavar=('queue_name'), required=False,
