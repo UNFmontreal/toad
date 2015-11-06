@@ -63,8 +63,6 @@ Quebec Bio-Imaging Network
 
 <iframe src="http://slides.com/toadunfcriugm/deck-2/embed" width="576" height="420" scrolling="no" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-*Note:* You can navigate vertically as indicated by the blue arrows. 
-
 ## Contact
 
 You can contact us directly by email at: [**toadunf.criugm@gmail.com**](toadunf.criugm@gmail.com).
