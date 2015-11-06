@@ -32,7 +32,7 @@ $parseHtmlTables
 
         <versions></versions>
 
-        <div id="dataVersions">
+        <div hidden id="dataVersions">
 $parseVersionTables
         </div>
 
@@ -41,20 +41,22 @@ $parseVersionTables
     </body>
 </html>
 <script type = "text/javascript">
-    var $lastTimestamp = $("application:last");
-    var $timestamp = $lastTimestamp.attr("timestamp");
-    var $date = new Date();
-    var $currentdate = $date.getFullYear()+"-"+("0" + ($date.getMonth() + 1)).slice(-2) + "-" +("0" + $date.getDate()).slice(-2) +" "+ $date.getHours() + ":" + $date.getMinutes();
-    $("#dataVersions").hide();
-    $("versions").html($lastTimestamp);
-    $("versions").hide();
-    $("#hide-versions-href" ).hide()
+    $( "#hide-versions-href" ).hide();
 
     if ( $( "applications" ).length == 0) {
         $( "#show-versions-href" ).hide();
     }
     else{
-        $("#timestamp").html("<strong>Toad launch at:</strong> "+$timestamp.substr(0,4)+"-"+$timestamp.substr(4,2)+"-"+$timestamp.substr(6,2)+" "+$timestamp.substr(8,2)+":"+$timestamp.substr(10,2)+"<br /><strong>This task finish at: </strong>"+$currentdate);
+        var $lastApplicationTag = $("application:last");
+        var $timestamp = $lastApplicationTag.attr("timestamp");
+        var $now = new Date();
+        var $formatTimestamp = $timestamp.substr(0,4)+"-"+$timestamp.substr(4,2)+"-"+$timestamp.substr(6,2)+" "+$timestamp.substr(8,2)+":"+$timestamp.substr(10,2);
+        var $formatDateNow = $now.getFullYear()+"-"+("0" + ($now.getMonth() + 1)).slice(-2) + "-" +("0" + $now.getDate()).slice(-2) +" "+ $now.getHours() + ":" + $now.getMinutes();
+        $("#timestamp").html("<strong>Toad launch at:</strong> "+$formatTimestamp+"<br /><strong>This task finish at: </strong>"+$formatDateNow);
+        $("versions").html($lastApplicationTag);
+        $("versions").hide();
+        $("#show-versions-href" ).show()
+
     }
     $("#show-versions-href" ).click(function( event ) {
       $("versions").show();
