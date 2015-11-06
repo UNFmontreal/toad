@@ -63,8 +63,6 @@ Réseau de Bio-Imagerie du Québec
 
 <iframe src="http://slides.com/toadunfcriugm/deck-2/embed" width="576" height="420" scrolling="no" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
-*Note :* Vous pouvez naviguer verticalement tel qu'indiqué par les flèches bleues.
-
 ## [Contact](about/contact.md)
 
 Vous pouvez nous contacter directement par courriel : [**toadunf.criugm@gmail.com**](toadunf.criugm@gmail.com).
