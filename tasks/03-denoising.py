@@ -206,6 +206,7 @@ class Denoising(GenericTask):
                     self.plotSigma(self.sigmaVector, sigmaPng)
                     qaImages.extend(
                         Images(sigmaPng,'Sigmas from nlmeans algorithm'))
+
                 if noiseMask:
                     noiseMaskPng = self.buildName(noiseMask, None, 'png')
                     self.slicerPng(b0, noiseMaskPng, maskOverlay=noiseMask, boundaries=noiseMask)
