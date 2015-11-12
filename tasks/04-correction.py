@@ -584,7 +584,7 @@ class Correction(GenericTask):
         qaImages.setInformation(information)
 
         #Get images
-        dwi = self.getDenoisingImage('dwi' 'denoise')
+        dwi = self.getDenoisingImage('dwi', 'denoise')
         if not dwi:
             dwi = self.getPreparationImage('dwi')
 
