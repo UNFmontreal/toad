@@ -17,7 +17,6 @@ class Converter(object):
 
     def __init__(self, arguments):
         self.__arguments = arguments
-        self.__arguments = arguments
         self.__configParser = ConfigParser.ConfigParser()
         self.__configFilename = None
 
