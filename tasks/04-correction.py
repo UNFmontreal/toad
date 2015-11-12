@@ -26,7 +26,7 @@ class Correction(GenericTask):
 
     def implement(self):
 
-        dwi = self.getDenoisingImage('dwi')
+        dwi = self.getDenoisingImage('dwi', 'denoise')
         if not dwi:
             dwi = self.getPreparationImage('dwi')
 
@@ -43,17 +43,17 @@ class Correction(GenericTask):
         phase = self.getPreparationImage("phase")
         freesurferAnat = self.getParcellationImage('anat', 'freesurfer')
 
-
-        #extract b0 image from the dwi
+        self.info("extract b0 image from the dwi")
         b0 = os.path.join(self.workingDir, os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
 
-        #make sure all the images have the same voxel size and dimension scale between them
+        self.info("look if all images have the same voxel size and dimension scale")
         self.__validateSizeAndDimension(dwi, b0, b0AP, b0PA)
 
         #Generate a missing b0 image if we could. --> 0 = P>>A, 1 = A>>P
         if self.get("phase_enc_dir") == "0" and b0AP and b0PA is False:
+            
             b0PA = b0
 
         if self.get("phase_enc_dir") == "1" and b0PA and b0AP is False :
@@ -85,7 +85,6 @@ class Correction(GenericTask):
         extraArgs = ""
         if self.get("parcellation", "intrasubject"):
             extraArgs += " -usesqform -dof 6"
-
 
         mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
                                                     norm,
@@ -585,7 +584,7 @@ class Correction(GenericTask):
         qaImages.setInformation(information)
 
         #Get images
-        dwi = self.getDenoisingImage('dwi')
+        dwi = self.getDenoisingImage('dwi' 'denoise')
         if not dwi:
             dwi = self.getPreparationImage('dwi')
 
