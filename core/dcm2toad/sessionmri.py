@@ -21,6 +21,7 @@ class SessionMRI(object):
             self.__archiveName = archiveName
             self.__comparable = None
 
+        self.__nameFromUser = 'None'
         self.__checked = False
         self.__sequences = {}
 
@@ -57,6 +58,9 @@ class SessionMRI(object):
 
     def getName(self):
         return self.__name
+
+    def getNameFromUser(self):
+        return self.__nameFromUser
 
     def setName(self, name):
         self.__name = name
