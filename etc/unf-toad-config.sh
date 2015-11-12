@@ -69,6 +69,7 @@ export PERL5LIB=$FREESURFER_HOME/mni/lib/perl5/5.8.5:$PERL5LIB
 # FSL Configuration
 FSLDIR=$APPDIR/fsl
 export FSLOUTPUTTYPE=NIFTI_GZ
+export FSLEDITOR=vi
 PATH=${FSLDIR}/bin:${PATH}
 . ${FSLDIR}/etc/fslconf/fsl.sh
 export FSLDIR PATH
