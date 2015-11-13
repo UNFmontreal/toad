@@ -60,14 +60,14 @@ def __parseArguments():
               |- 05-preprocessing
               |- 06-registration
               |- 07-masking
-              |- 08-snr
-              |- 09-tensorfsl
-              |- 10-tensormrtrix
-              |- 11-tensordipy
-              |- 12-hardimrtrix
-              |- 13-hardidipy
-              |- 14-tractographymrtrix
-              |- 15-tractographydipy
+              |- 08-tensorfsl
+              |- 09-tensormrtrix
+              |- 10-tensordipy
+              |- 11-hardimrtrix
+              |- 12-hardidipymrtrix
+              |- 13-tractographymrtrix
+              |- 14-tractographydipy
+              |- 15-snr
               |- 16-outputs
               |- 99-logs
 
