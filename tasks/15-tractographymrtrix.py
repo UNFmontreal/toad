@@ -15,7 +15,7 @@ class TractographyMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'hardimrtrix', 'masking', 'registration','qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'hardimrtrix', 'masking', 'registration', 'atlasregistration' ,'qa')
         self.__tckDetRoiTrk = None
         self.__tckProbRoiTrk = None
         self.__tckgenRoiTrk = None
@@ -26,8 +26,8 @@ class TractographyMrtrix(GenericTask):
         tt5 = self.getRegistrationImage("tt5", "register")
         seed_gmwmi = self.getMaskingImage("tt5", ["register", "5tt2gmwmi"])
         #@TODO reactivate brodmann = self.getRegistrationImage("brodmann", "resample")
-        aal2 =  self.getRegistrationImage("aal2", "resample")
-        networks7 =  self.getRegistrationImage("networks7", "resample")
+        aal2 =  self.getAtlasregistrationImage("aal2", "resample")
+        networks7 =  self.getAtlasregistrationImage("networks7", "resample")
         norm = self.getRegistrationImage("norm", "resample")
 
         mask253 = self.getMaskingImage('aparc_aseg', ['253', 'mask'])
@@ -276,15 +276,14 @@ class TractographyMrtrix(GenericTask):
         return Images((self.getUpsamplingImage('dwi','upsample'), 'upsampled diffusion weighted'),
                   (self.getUpsamplingImage('grad', None, 'b'), '.b gradient encoding file'),
                   (self.getRegistrationImage("mask", "resample"), 'mask resampled'),
-                  (self.getRegistrationImage("brodmann", "resample"), 'resampled brodmann area'),
-                  (self.getRegistrationImage("aal2", "resample"), 'resampled aal2 area'),
-                  (self.getRegistrationImage("networks7", "resample"), 'resampled seven networks area'),
+                  (self.getAtlasregistrationImage("brodmann", "resample"), 'resampled brodmann area'),
+                  (self.getAtlasregistrationImage("aal2", "resample"), 'resampled aal2 area'),
+                  (self.getAtlasregistrationImage("networks7", "resample"), 'resampled seven networks area'),
                   (self.getRegistrationImage("norm", "resample"), 'brain resampled'),
                   (self.getMaskingImage('aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
                   (self.getRegistrationImage("tt5", "register"),'5tt register'),
                   (self.getMaskingImage('aparc_aseg',['1024','mask']), 'area 1024 from aparc_aseg'),
                   (self.getMaskingImage("tt5", ["register", "5tt2gmwmi"]), 'grey matter, white matter interface'))
-
 
 
     def isDirty(self):

@@ -80,7 +80,6 @@ class Upsampling(GenericTask):
         if images.isNoImagesExists():
             self.warning("No proper dwi image found as requirement")
             result = False
-
         return result
 
 

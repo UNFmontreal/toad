@@ -35,14 +35,9 @@ class Parcellation(GenericTask):
 
 
         self.__convertFeesurferImageIntoNifti(anat)
-        self.__createImageFromAtlas("template_brodmann", self.get("brodmann"))
-        self.__createImageFromAtlas("template_aal2", self.get("aal2"))
-        self.__createImageFromAtlas("template_networks7", self.get("networks7"))
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
         tt5Mgz = self.__create5ttImage()
-        self. __convertAndRestride(tt5Mgz, self.get('tt5'))
-
-
+        mriutil.convertAndRestride(tt5Mgz, self.get('tt5'), self.get('preparation', 'stride_orientation'))
         anatFreesurfer = self.getImage('anat', 'freesurfer')
 
         if self.get('cleanup'):
@@ -101,7 +96,9 @@ class Parcellation(GenericTask):
                                     (self.get('lh_ribbon'), "lh.ribbon.mgz"),
                                     (self.get('norm'), "norm.mgz")]:
 
-            self.__convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)), target)
+            mriutil.convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)),
+                                       target,
+                                       self.get('preparation', 'stride_orientation') )
 
 
     def __create5ttImage(self, subdiv=4):
@@ -277,50 +274,6 @@ class Parcellation(GenericTask):
         nibabel.save(nibabel.Nifti1Image(tt5.astype(numpy.float32),parc.get_affine()), target)
         return target
 
-
-
-    def __createImageFromAtlas(self, source, target):
-        """
-            Create a area map base on a source name
-        Args:
-            source: template name as specify into config.cfg
-            target: output file name
-
-        Returns:
-            A brodmann area images
-
-        """
-        tmpImage = 'tmp_{0:.6g}.mgz'.format(random.randint(0,999999))
-        template = os.path.join(self.toadDir, "templates", "mri", self.get(source))
-
-        self.info("Set SUBJECTS_DIR to {}".format(self.workingDir))
-        os.environ["SUBJECTS_DIR"] = self.workingDir
-
-        cmd = "mri_vol2vol --mov {} --targ $FREESURFER_HOME/subjects/fsaverage/mri/T1.mgz" \
-              " --o {} --regheader --interp nearest".format(template, tmpImage)
-        self.launchCommand(cmd)
-
-        cmd =  "mri_vol2vol --mov $SUBJECTS_DIR/{0}/mri/norm.mgz --targ {1} --s {0} " \
-               " --m3z talairach.m3z --o {2} --interp nearest --inv-morph".format(self.id, tmpImage, target)
-        self.launchCommand(cmd)
-        return self.__convertAndRestride(target, target)
-
-
-    def __convertAndRestride(self, source, target):
-        """Utility for converting between different file formats
-
-        Args:
-            source: The input source file
-            target: The name of the resulting output file name
-
-        """
-        self.info("convert {} image to {} ".format(source, target))
-        cmd = "mrconvert {} {} -stride {} -force -quiet"\
-            .format(source, target, self.get('preparation', 'stride_orientation'))
-        self.launchCommand(cmd)
-        return target
-
-
     def __findImageInDirectory(self, image, freesurferDirectory):
         """Utility method that look if a input image could be found in a directory and his subdirectory
 
@@ -398,12 +351,9 @@ class Parcellation(GenericTask):
                   (self.getImage('anat', 'freesurfer'), 'anatomical'),
                   (self.getImage('rh_ribbon'), 'rh_ribbon'),
                   (self.getImage('lh_ribbon'), 'lh_ribbon'),
-                  (self.getImage('brodmann'), 'brodmann atlas'),
-                  (self.getImage('aal2'), 'buckner atlas'),
-                  (self.getImage('networks7'), 'seven networks atlas'),
                   (self.getImage('norm'), 'norm'),
                   (self.getImage('mask'), 'freesurfer brain masks'),
-                  (self.getImage('tt5'), '5tt'),)
+                  (self.getImage('tt5'), '5tt'))
 
     
     def qaSupplier(self):
@@ -416,33 +366,24 @@ class Parcellation(GenericTask):
         norm = self.getImage('norm')
         brainMask = self.getImage('mask')
         aparcAseg = self.getImage('aparc_aseg')
-        brodmann = self.getImage('brodmann')
-        aal2 = self.getImage('aal2')
-        networks7 = self.getImage('networks7')
+
 
 
         #Build qa names
         anatPng = self.buildName(anat, None, 'png')
         brainMaskPng = self.buildName(brainMask, None, 'png')
         aparcAsegPng = self.buildName(aparcAseg, None, 'png')
-        brodmannPng = self.buildName(brodmann, None, 'png')
-        aal2Png = self.buildName(aal2, None, 'png')
-        networks7Png = self.buildName(networks7, None, 'png')
+
 
         #Build qa images
         self.slicerPng(anat, anatPng, boundaries=brainMask)
         self.slicerPng(norm, brainMaskPng, maskOverlay=brainMask, boundaries=brainMask)
         self.slicerPng(anat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
-        self.slicerPng(anat, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
-        self.slicerPng(anat, aal2Png, segOverlay=aal2, boundaries=aal2)
-        self.slicerPng(anat, networks7Png, segOverlay=networks7, boundaries=networks7)
+
 
         qaImages = Images(
             (anatPng, 'High resolution anatomical image of freesurfer'),
             (brainMaskPng, 'Brain mask on norm from freesurfer'),
-            (aparcAsegPng, 'Aparc aseg segmentation from freesurfer'),
-            (brodmannPng, 'Brodmann segmentation from freesurfer'),
-            (aal2Png, 'Aal2 segmentation from freesurfer'),
-            (networks7Png, 'Seven networks segmentation from freesurfer'))
+            (aparcAsegPng, 'Aparc aseg segmentation from freesurfer'))
 
         return qaImages
