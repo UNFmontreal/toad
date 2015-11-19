@@ -10,7 +10,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from core.toad import logger
 from lib import util, xmlhelper, arguments
 
-
 __author__ = "Mathieu Desrosiers, Arnaud Bore, and Christophe Bedetti"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers", "Arnaud Bore", "Christophe Bedetti", "Guillaume Vallet", "Basile Pinsard"]
@@ -52,23 +51,26 @@ def __parseArguments():
 
         Then a subject completed will look like this
         sujN--\\
-              |- 00-backup
-              |- 00-qa
-              |- 01-preparation
-              |- 02-parcellation
-              |- 03-correction
-              |- 05-preprocessing
-              |- 06-registration
-              |- 07-masking
-              |- 08-tensorfsl
-              |- 09-tensormrtrix
-              |- 10-tensordipy
-              |- 11-hardimrtrix
-              |- 12-hardidipymrtrix
-              |- 13-tractographymrtrix
-              |- 14-tractographydipy
-              |- 15-snr
-              |- 16-outputs
+              |- 00-backup.py
+              |- 00-qa.py
+              |- 01-preparation.py
+              |- 02-parcellation.py
+              |- 03-atlas.py
+              |- 04-denoising.py
+              |- 05-correction.py
+              |- 06-upsampling.py
+              |- 07-registration.py
+              |- 08-atlasregistration.py
+              |- 09-masking.py
+              |- 10-tensorfsl.py
+              |- 11-tensormrtrix.py
+              |- 12-tensordipy.py
+              |- 13-hardimrtrix.py
+              |- 14-hardidipy.py
+              |- 15-tractographymrtrix.py
+              |- 16-tractographydipy.py
+              |- 17-snr.py
+              |- 18-outputs.py
               |- 99-logs
 
 
