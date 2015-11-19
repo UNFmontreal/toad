@@ -13,15 +13,16 @@ class SessionMRI(object):
         if isinstance(directoryOrMriSession, SessionMRI):
             self.__directory = directoryOrMriSession.getDirectory()
             self.__name = directoryOrMriSession.getName()
+            self.__nameFromUser = directoryOrMriSession.getNameFromUser()
             self.__archiveName = directoryOrMriSession.getArchiveName()
             self.__comparable = directoryOrMriSession.getComparable()
         else:
             self.__directory = directoryOrMriSession
             self.__name = os.path.basename(self.__directory)
+            self.__nameFromUser = None
             self.__archiveName = archiveName
             self.__comparable = None
 
-        self.__nameFromUser = 'None'
         self.__checked = False
         self.__sequences = {}
 
@@ -59,11 +60,14 @@ class SessionMRI(object):
     def getName(self):
         return self.__name
 
+    def setName(self, name):
+        self.__name = name
+
     def getNameFromUser(self):
         return self.__nameFromUser
 
-    def setName(self, name):
-        self.__name = name
+    def setNameFromUser(self, name):
+        self.__nameFromUser = name
 
     def getDirectory(self):
         return self.__directory

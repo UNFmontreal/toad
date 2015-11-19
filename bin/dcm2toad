@@ -38,9 +38,9 @@ class Dcm2Toad(object):
         if self.__arguments.fieldmap:
             self.__initialPrefixs.extend(self.__fieldmap)
         self.__mriSessions = self.__initializeMRISessions()
+        if self.__arguments.namesFromUser:
+            self.__initializeNamesFromUser()
         self.__effectivePrefixs = self.__initializeEffectivePrefixs()
-        if self.__arguments.listSubjects:
-            self.__userSessionNames = self.__initializeUserSessionNames()
         self.__outputDirectory = self.__initializeOutputDirectory()
         self.__xmlFilename = os.path.join(self.__outputDirectory, ".dcm2toad.xml")
         self.__initializeSessionFromXmlFile()
@@ -62,7 +62,7 @@ class Dcm2Toad(object):
         parser.add_argument("-i","--ignoreArchive", help="Do not open archive to search for MRI sessions.", action="store_true")
         parser.add_argument("-n","--noConfig", help="Do not produce a config.cfg file during conversion", action="store_true")
         parser.add_argument("-s","--noStride", help="Keep original stride orientation.", action="store_true")
-        parser.add_argument("-l", "--listSubjects", nargs='?', metavar=('listSubjects'), required=False, help="Specify a text file with your subject names.")
+        parser.add_argument("-u", "--namesFromUser", nargs='?', metavar=('namesFromUser'), required=False, help="Specify a text file with your subject names.")
         parser.add_argument("-d", "--dirName", nargs='?', metavar=('dirname'), required=False,
                             help="Specify a directory name for the destination. Default: toad_data")
         #parser.add_argument("-m","--multipleDWI", metavar=('N'), type=int,
@@ -92,12 +92,13 @@ class Dcm2Toad(object):
         return self.__arguments.dirName
 
 
-    def __initializeUserSessionNames(self):
-        filename = self.__arguments.listSubjects
-        text = open(filename, 'r')
-        lines = text.read().split('\n')
-        text.close
-        return lines
+    def __initializeNamesFromUser(self):
+        filename = self.__arguments.namesFromUser
+        with open(filename) as f:
+            lines = [line.rstrip('\n') for line in f]
+        if len(self.__mriSessions) == len(lines):
+            for session, name in zip(self.__mriSessions, lines):
+                session.setNameFromUser(name)
 
 
     def getMriSessions(self, key):
@@ -160,7 +161,6 @@ class Dcm2Toad(object):
                     if session.isUnfSession() and (session not in sessions):
                         session.initializeMRISequences()
                         sessions.append(session)
-
         return sessions
 
 
@@ -411,9 +411,15 @@ class Dcm2Toad(object):
         """
         self.__printQuestion()
         def __changeSessionName(session):
-            answer = util.rawInput("Please enter a subject name for {0}? Defaults {1}:".format(session.getName(), session.getNameFromUser()))
+            defaultName = session.getName()
+            nameFromUser = session.getNameFromUser()
+            if nameFromUser:
+                defaultName = nameFromUser
+            answer = util.rawInput("Please enter a subject name for {0}? Defaults {1}:".format(session.getName(), defaultName))
             if answer.strip(" ") != "":
                 session.setName(answer)
+            else:
+                session.setName(defaultName)
             return session
 
         if isinstance(sessionOrSessions, sessionmri.SessionMRI):
