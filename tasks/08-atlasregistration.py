@@ -10,17 +10,17 @@ __credits__ = ["Your_name", "Mathieu Desrosiers"]
 class Atlasregistration(GenericTask):
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'parcellation', 'registration')
+        GenericTask.__init__(self, subject, 'atlas', 'upsampling', 'registration')
 
     def implement(self):
 
         b0 = self.getUpsamplingImage('b0','upsample')
-        mrtrixMatrix =  self.getRegistrationImage("freesurferToDWI", ["transformation", "mrtrix"], "mat")
-        freesurferToDWI = self.getRegistrationImage("freesurferToDWI", "transformation", "mat")
+        mrtrixMatrix =  self.getRegistrationImage("freesurfer_dwi", ["transformation", "mrtrix"], "mat")
+        freesurferToDWI = self.getRegistrationImage("freesurfer_dwi", "transformation", "mat")
 
-        brodmann = self.getParcellationImage("brodmann")
-        aal2 = self.getParcellationImage("aal2")
-        networks7 = self.getParcellationImage("networks7")
+        brodmann = self.getAtlasImage("brodmann")
+        aal2 = self.getAtlasImage("aal2")
+        networks7 = self.getAtlasImage("networks7")
 
         brodmannRegister = mriutil.applyRegistrationMrtrix(brodmann, mrtrixMatrix, self.buildName(brodmann, "register"))
         mriutil.applyResampleFsl(brodmann, b0, freesurferToDWI, self.buildName(brodmann, "resample"), True)
@@ -34,11 +34,11 @@ class Atlasregistration(GenericTask):
 
     def meetRequirement(self):
         return Images(self.getUpsamplingImage('b0','upsample'),
-                      self.getRegistrationImage("freesurferToDWI", ["transformation", "mrtrix"], "mat"),
-                      self.getRegistrationImage("freesurferToDWI", "transformation", "mat"),
-                      self.getParcellationImage("brodmann"),
-                      self.getParcellationImage("aal2"),
-                      self.getParcellationImage("networks7"))
+                      self.getRegistrationImage("freesurfer_dwi", ["transformation", "mrtrix"], "mat"),
+                      self.getRegistrationImage("freesurfer_dwi", "transformation", "mat"),
+                      self.getAtlasImage("brodmann"),
+                      self.getAtlasImage("aal2"),
+                      self.getAtlasImage("networks7"))
 
 
     def isDirty(self):

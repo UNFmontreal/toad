@@ -150,6 +150,10 @@ class GenericTask(Logger, Load, Qa):
             else:
                 taskName = items[3:-5].lower()
                 directory = getattr(self, "{}Dir".format(taskName))
+                if not directory:
+                    self.warning("method {} request into task {} but {} dependencies not found,  "
+                                 .format(items, self.getName(),taskName))
+
             def wrapper(*args):
                 arguments = [self.config, directory] + list(args)
                 return util.getImage(*arguments)
@@ -248,7 +252,6 @@ class GenericTask(Logger, Load, Qa):
         """
         self.logHeader("meetRequirement")
         result = self.meetRequirement()
-
         if isinstance(result, Images):
             if self.get("arguments", "debug"):
                 self.debug(result)
