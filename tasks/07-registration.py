@@ -31,12 +31,11 @@ class Registration(GenericTask):
             extraArgs += " -usesqform -dof 6"
 
         freesurferToDWIMatrix = self.__freesurferToDWITransformation(b0, norm, extraArgs)
-
-        self.applyResampleFsl(anat, b0, freesurferToDWIMatrix, self.buildName(anat, "resample"))
+        mriutil.applyResampleFsl(anat, b0, freesurferToDWIMatrix, self.buildName(anat, "resample"))
         mrtrixMatrix = self.__transformFslToMrtrixMatrix(anat, b0, freesurferToDWIMatrix)
 
-        mriutil.__applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix, self.buildName(aparcAsegFile, "register"))
-        self.applyResampleFsl(aparcAsegFile, b0, freesurferToDWIMatrix, self.buildName(aparcAsegFile, "resample"), True)
+        mriutil.applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix, self.buildName(aparcAsegFile, "register"))
+        mriutil.applyResampleFsl(aparcAsegFile, b0, freesurferToDWIMatrix, self.buildName(aparcAsegFile, "resample"), True)
 
         lhRibbonRegister = mriutil.applyRegistrationMrtrix(lhRibbon, mrtrixMatrix, self.buildName(lhRibbon, "register"))
         rhRibbonRegister = mriutil.applyRegistrationMrtrix(rhRibbon, mrtrixMatrix, self.buildName(rhRibbon, "register"))
