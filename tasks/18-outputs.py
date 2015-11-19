@@ -19,8 +19,7 @@ class Outputs(GenericTask):
 
         structs = {'dwi': self.getUpsamplingImage('dwi'),
                     'anat': self.getRegistrationImage('anat', ['freesurfer', 'resample']),
-                    'mask': self.getRegistrationImage('mask', 'resample'),
-                    'brodmann': self.getRegistrationImage('brodmann', 'resample')}
+                    'mask': self.getRegistrationImage('mask', 'resample')}
 
         for postfix, image in structs.iteritems():
            util.copy(image, self.workingDir,  self.buildName(self.subject.getName(), postfix, 'nii.gz'))
@@ -49,8 +48,7 @@ class Outputs(GenericTask):
                         (self.getUpsamplingImage('grad', None, 'bvecs'),'gradient .bvecs encoding file'),
                         (self.getUpsamplingImage('grad', None, 'benc'),'gradient .b encoding file'),
                         (self.getRegistrationImage('anat', ['freesurfer', 'resample']), 'freesurfer anatomical resample'),
-                        (self.getRegistrationImage('mask', 'resample'), 'freesurfer mask resample'),
-                        (self.getRegistrationImage('brodmann', 'resample'), 'brodmann atlas resample'))
+                        (self.getRegistrationImage('mask', 'resample'), 'freesurfer mask resample'))
 
         #@TODO Add all metrics dependencies
         return images
