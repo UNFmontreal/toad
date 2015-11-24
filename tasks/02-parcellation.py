@@ -420,7 +420,7 @@ class Parcellation(GenericTask):
         aal2 = self.getImage('aal2')
         networks7 = self.getImage('networks7')
 
-
+        """
         #Build qa names
         anatPng = self.buildName(anat, None, 'png')
         brainMaskPng = self.buildName(brainMask, None, 'png')
@@ -428,14 +428,14 @@ class Parcellation(GenericTask):
         brodmannPng = self.buildName(brodmann, None, 'png')
         aal2Png = self.buildName(aal2, None, 'png')
         networks7Png = self.buildName(networks7, None, 'png')
-
+        """
         #Build qa images
-        self.slicerPng(anat, anatPng, boundaries=brainMask)
-        self.slicerPng(norm, brainMaskPng, maskOverlay=brainMask, boundaries=brainMask)
-        self.slicerPng(anat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
-        self.slicerPng(anat, brodmannPng, segOverlay=brodmann, boundaries=brodmann)
-        self.slicerPng(anat, aal2Png, segOverlay=aal2, boundaries=aal2)
-        self.slicerPng(anat, networks7Png, segOverlay=networks7, boundaries=networks7)
+        anatPng = self.slicer3d(anat, boundaries=brainMask)
+        brainMaskPng = self.slicer3d(norm, maskOverlay=brainMask, boundaries=brainMask)
+        aparcAsegPng = self.slicer3d(anat, segOverlay=aparcAseg, boundaries=aparcAseg)
+        brodmannPng = self.slicer3d(anat, segOverlay=brodmann, boundaries=brodmann)
+        aal2Png = self.slicer3d(anat, segOverlay=aal2, boundaries=aal2)
+        networks7Png = self.slicer3d(anat, segOverlay=networks7, boundaries=networks7)
 
         qaImages = Images(
             (anatPng, 'High resolution anatomical image of freesurfer'),

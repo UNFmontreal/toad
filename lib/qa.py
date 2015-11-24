@@ -25,40 +25,38 @@ __credits__ = ["Christophe Bedetti", "Mathieu Desrosiers"]
 
 class Qa(object):
 
-    def slicerPng(self, source, target, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, grid=False, isData=False, textData=None):
+    def slicer3d(self, source, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, grid=False, isData=False, textData=None):
         """Utility method to slice a 3d image
         Args:
             source : background image
-            target : output in png format
             optionalOverlay : optional overlay: put the edges of the image on top of the background
             vmax : to fix the colorbar max, if None slicerPng take the max of the background
         """
+        target = self.buildName(source, None, 'png')
+
         if isData:
             imageData = source
         else:
-            image = nibabel.load(source)
-            imageData = image.get_data()
+            imageData = self.__loadImage(source)
 
         if vmax == None:
             vmax=numpy.percentile(imageData, 99)
-    
+
         width, fig_dims = self.__configFigure(imageData)
         fig = matplotlib.pyplot.figure(figsize=fig_dims)
-    
+
         slices = self.__image3d2slices(imageData, width, boundaries=boundaries)
         imageImshow = functools.partial(matplotlib.pyplot.imshow, \
                                         vmin=0, \
                                         vmax=vmax, \
                                         cmap=matplotlib.pyplot.cm.gray)
-    
+
         if maskOverlay != None:
-            mask = nibabel.load(maskOverlay)
-            maskData = mask.get_data()
+            maskData = self.__loadImage(maskOverlay)
             maskSlices = self.__image3d2slices(maskData, width, boundaries=boundaries)
 
         if segOverlay != None:
-            seg = nibabel.load(segOverlay)
-            segData = seg.get_data()
+            segSata = self.__loadImage(segOverlay)
             segSlices = self.__image3d2slices(segData, width, boundaries=boundaries)
             segSlices = [numpy.ma.masked_where(segSlices[dim] == 0, segSlices[dim]) for dim in range(3)]
             lutFiles = os.path.join(self.toadDir, 'templates', 'lookup_tables', self.config.get('template', 'freesurfer_lut'))
@@ -97,6 +95,8 @@ class Qa(object):
         fig.savefig(target, facecolor='black')
         matplotlib.pyplot.close()
         matplotlib.rcdefaults()
+
+        return target
 
 
     def slicerGif(self, source, target, gifSpeed=30, vmax=None, boundaries=None):
@@ -483,36 +483,91 @@ class Qa(object):
 
 
 
-    def __image3d2slices(self, image3dData, maxWidth, boundaries=None):
+    def __image3d2slices(self, image3dData, outputWidth, boundaries=None):
         """Slice a 3d image along the 3 axis given a maximum Width
         Args:
             image3dData: 3d image
-            maxWidth: maximum width of the result
+            outputWidth: maximum width of the output
+            boundaries: 
         Return:
             tuple a lenght 3 with slices along the 3 axis (x, y, z)
         """
-        
-        xSlicesNumber = maxWidth / image3dData.shape[1]
-        ySlicesNumber = maxWidth / image3dData.shape[0]
-        zSlicesNumber = ySlicesNumber
-        slicesNumbers = (xSlicesNumber, ySlicesNumber, zSlicesNumber)
-        
-        mins, maxs = (0, 0, 0), image3dData.shape
-        
+        # Determine mins and maxs of the image boundaries
         if boundaries != None:
-            boundariesImage = nibabel.load(boundaries)
-            boundariesData = boundariesImage.get_data()
+            boundariesData = self.__loadImage(boundaries)
             mins, maxs = dipy.segment.mask.bounding_box(boundariesData)
-        
-        slicesIndices3d = []
-        for minimum, maximum, slicesNumber in zip(mins, maxs, slicesNumbers):
-            dimSize = maximum - minimum
-            start = minimum + (dimSize / slicesNumber)
-            stop = maximum
-            slicesIndices = numpy.linspace(start, stop, slicesNumber, endpoint=False)
-            slicesIndices = slicesIndices.astype('uint8')
-            slicesIndices3d.append(slicesIndices)
-        
+            image3dData = numpy.ma.masked_where(boundariesData==0, image3dData)
+        else:
+            mins, maxs = (0, 0, 0), image3dData.shape
+        crop = dipy.segment.mask.crop(image3dData, mins, maxs)
+
+        # Number of slices in each dimension
+        x = outputWidth / crop.shape[1]
+        y = outputWidth / crop.shape[0]
+        z = y
+        slicesNumbers = (x, y, z)
+
+        # Compute slices indices
+        sliceIndex = []
+        for dimSize, slicesNumber in zip(crop.shape ,slicesNumbers):
+            start = dimSize / slicesNumber
+            stop = dimSize
+            index = numpy.linspace(start, stop, slicesNumber, endpoint=False)
+            index = index.astype('uint8')
+            sliceIndex.append(index)
+
+        # Extract x slices
+        xSlices = crop[sliceIndex[0], :, :]
+        xNewShape = (crop.shape[1] * x, crop.shape[2])
+        xSlices = numpy.reshape(xSlices, xNewShape)
+
+        # Extract y slices
+        ySlices = crop[:, sliceIndex[1], :]
+        ySlices = numpy.rollaxis(ySlices, 1)
+        yNewShape = (crop.shape[0] * y, crop.shape[2])
+        ySlices = numpy.reshape(ySlices, yNewShape)
+
+        # Extract z slices
+        zSlices = crop[:, :, sliceIndex[2]]
+        zSlices = numpy.rollaxis(zSlices, 2)
+        zNewShape = (crop.shape[0] * z, crop.shape[1])
+        zSlices = numpy.reshape(zSlices, zNewShape)
+
+        return (xSlices, ySlices, zSlices)
+
+
+    def __idGenerator(self, size=8, chars=ascii_uppercase + digits):
+        """Generate random strings
+        Args:
+            size: length of the string. default: 8 characters
+            chars: ascii_uppercase + digits
+        Returns:
+            a string of lenght (size) that contain random number
+        """
+        return ''.join(choice(chars) for _ in range(size))
+
+
+    def __loadImage(self, source):
+        """
+        """
+        image = nibabel.load(source)
+        return image.get_data()
+
+
+
+    def __imageList2Gif(self, imageList, target, gifSpeed):
+        """Generate animated gif with convert from imagemagick
+        Args:
+            imageList: list of png to convert
+            target: output filename
+            gifSpeed: delay between images (tens of ms)
+        """
+        cmd = 'convert -delay {} '.format(str(gifSpeed))
+        for image in imageList:
+            cmd += '{} '.format(image)
+        cmd += target
+        self.launchCommand(cmd)
+
         '''param = [(ximage3dDataSliced),
                     (yimage3dDataSliced),
                     (zimage3dDataSliced),
@@ -540,17 +595,22 @@ class Qa(object):
         return (ximage3dDataSliced, yimage3dDataSliced, zimage3dDataSliced)
 
 
-
     def __idGenerator(self, size=8, chars=ascii_uppercase + digits):
         """Generate random strings
         Args:
-            size: length of 8 uppercase and digits. default: 8 characters
-            #@Christophe comment
+            size: length of the string. default: 8 characters
             chars: ascii_uppercase + digits
         Returns:
             a string of lenght (size) that contain random number
         """
         return ''.join(choice(chars) for _ in range(size))
+
+
+    def __loadImage(self, source):
+        """
+        """
+        image = nibabel.load(source)
+        return image.get_data()
 
 
 
