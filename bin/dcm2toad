@@ -62,7 +62,7 @@ class Dcm2Toad(object):
         parser.add_argument("-i","--ignoreArchive", help="Do not open archive to search for MRI sessions.", action="store_true")
         parser.add_argument("-n","--noConfig", help="Do not produce a config.cfg file during conversion", action="store_true")
         parser.add_argument("-s","--noStride", help="Keep original stride orientation.", action="store_true")
-        parser.add_argument("-u", "--namesFromUser", nargs='?', metavar=('namesFromUser'), required=False, help="Specify a file to change the session name automatically, each line of the file must have this format: <old_name>:<new_name>")
+        parser.add_argument("-u", "--namesFromUser", metavar=('namesFromUser'), required=False, action='append', help="Specify a file to change the session name automatically, each line of the file must have this format: <old_name>:<new_name>")
         parser.add_argument("-d", "--dirName", nargs='?', metavar=('dirname'), required=False,
                             help="Specify a directory name for the destination. Default: toad_data")
         #parser.add_argument("-m","--multipleDWI", metavar=('N'), type=int,
@@ -93,12 +93,15 @@ class Dcm2Toad(object):
 
 
     def __initializeNamesFromUser(self):
+        def checkInput(line):
+            return len(line.split(":")) == 2
         filename = self.__arguments.namesFromUser
         namesFromUser = {}
         with open(filename) as f:
             for line in f:
-                key, val = line.split(":")
-                namesFromUser[key] = val.strip("\n")
+                if checkInput(line):
+                    key, val = line.split(":")
+                    namesFromUser[key] = val.strip("\n")
         for session in self.__mriSessions:
             name = session.getName()
             if name in namesFromUser.keys():
