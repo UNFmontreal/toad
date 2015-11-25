@@ -95,7 +95,7 @@ class Dcm2Toad(object):
     def __initializeNamesFromUser(self):
         def checkInput(line):
             return len(line.split(":")) == 2
-        filename = self.__arguments.namesFromUser
+        filename = self.__arguments.namesFromUser[0]
         namesFromUser = {}
         with open(filename) as f:
             for line in f:
