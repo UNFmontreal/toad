@@ -1,87 +1,56 @@
-# Parcellation
+# Atlas
 ---
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | Parcellation                                          |
-|**Goal**        | Run Freesurfer pipeline                               |
-|**Config file** | `intrasubject` <br />`directive`<br />`cleanup`       |
-|**Time**        | About 10 hours                                        |
-|**Output**      | - Anatomical from Freesurfer <br> - Aparc_aseg segmentation <br> - Mask from aparc_aseg file <br> - lh_ribbon and rh_ribbon <br> - 5tt image (five-tissue-type)       |
+|**Name**        | Atlas                                          |
+|**Goal**        | Create atlases using Freesurfer tempalte                               |
+|**Config file** | N/A|
+|**Time**        | Few minutes                                        |
+|**Output**      | - 7networks atlas<br> - AAL2 atlas     |
 
 #
 
 ## Goal
 
-The parcellation step creates the required masks using Freesurfer functions.
+The atlas step creates the required atlas using Freesurfer functions.
 
 ## Requirements
 
 - Anatomical image (anat)
+- Freesurfer pipeline
 
 ## Config file parameters
-
-Specify if the anatomical and dwi were acquired during the same session
-
-- `intrasubject: True`
-
-Option available for Freesurfer recon-all command {all,autorecon-all,autorecon1,autorecon2,autorecon2-cp,autorecon2-wm,autorecon2-inflate1,autorecon2-perhemi,autorecon3 }
-
-- `directive: all`
-
-Remove extra files
 
 - `cleanup: True`
 
 ## Implementation
 
-### 1- Run reconAll from Freesurfer [ref: [freesurferwiki](#wikiFS)]
+### 1- Creation of atlases using Freesurfer template
 
-- <a href="https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all" target="_blank">recon-all</a> (on anat)
-
-### 2- Conversion
-
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/mrconvert" target="_blank">mrconvert</a> (all needed files from freesurfer)
-
-### 3- Creation of masks from Freesurfer atlases
-
-```{.python}
-function: self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
-function: self.__create5ttImage()
-```
-
-- [mri_vol2vol]()
-
-### 4- Re-orientation
-
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/mrconvert" target="_blank">mrconvert</a> (all needed files from freesurfer)
+- function: self.__createImageFromAtlas("template_aal2", self.get("aal2"))
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Anatomical, norm, rh_ribbon and lh_ribbon mgz images will be converted into nifti format from Freesurfer pipeline.
-- Brodmann, Choi and Buckner atlases will be created.
-- A mask of the brain will be computed using aparc_aseg.
-- 5tt map will be computed using lh.white, rh.white, lh.pial and rh.pial from Freesurfer.
+- AAL2, Choi, Yeo and Buckner atlases will be created.
+- Choi, Yeo and Buckner have been merged into one atlas renamed 7networks.
 
 ## References
 
 ### Associated documentation
 
-- <a name="wikiFS"></a><a href="http://freesurfer.net/fswiki" target="_blank">FreeSurfer Wiki</a>
+- <a href="https://surfer.nmr.mgh.harvard.edu/fswiki/CorticalParcellation_Yeo2011" target="_blank">Atlas Yeo</a>
+- <a href="http://surfer.nmr.mgh.harvard.edu/fswiki/CerebellumParcellation_Buckner2011" target="_blank">Atlas Buckner</a>
+- <a href="http://surfer.nmr.mgh.harvard.edu/fswiki/StriatumParcellation_Choi2012" target="_blank">Atlas Choi</a>
+- <a href="http://www.gin.cnrs.fr/AAL2" target="_blank">Atlas AAL2</a>
+
 
 ### Articles
 
-- Dale, A. M., Fischl, B., & Sereno, M. I. (1999). Cortical surface-based analysis. I. Segmentation and surface reconstruction. *NeuroImage, 9(2)*, 179-194. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/9931268" target="_blank">Link to the article</a>]
+- Buckner, R. L., Krienen, F. M., Castellanos, a, Diaz, J. C., & Yeo, B. T. T. (2011). The organization of the human cerebellum estimated by intrinsic functional connectivity. Journal of Neurophysiology, 106(5), 2322-2345.
 
-- Collins, D. L., Neelin, P., Peters, T. M., & Evans, A. C. (1994) Automatic 3D intersubject registration of MR volumetric data in standardized Talairach space. *Journal of Computer Assisted Tomography, 18(2)*, 192-205. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/8126267" target="_blank">Link to the article</a>]
+- Yeo, B. T., Krienen, F. M., Sepulcre, J., Sabuncu, M. R., Lashkari, D., Hollinshead, M., Roffman, J. L., et al. (2011). The organization of the human cerebral cortex estimated by intrinsic functional connectivity. J Neurophysiol, 106(3), 1125-1165. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/21653723
 
-- Fischl, B., Sereno, M. I., & Dale, A. M. (1999). Cortical surface-based analysis. II: Inflation, flattening, and a surface-based coordinate system. *NeuroImage, 9(2)*, 195-207. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/9931269" target="_blank">Link to the article</a>] 
+- Rolls, E. T., Joliot, M., & Tzourio-Mazoyer, N. (2015). Implementation of a new parcellation of the orbitofrontal cortex in the automated anatomical labeling atlas. NeuroImage, 122, 1-5. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/26241684
 
-- Fischl, B., Sereno, M. I., Tootell, R. B., & Dale, A. M. (1999). High-resolution intersubject averaging and a coordinate system for the cortical surface. *Human Brain Mapping, 8(4)*, 272-284. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/10619420" target="_blank">Link to the article</a>] 
-
-- Fischl, B., & Dale, A. M. (2000). Measuring the thickness of the human cerebral cortex from magnetic resonance images. *Proceedings of the National Academy of Sciences of the United States of America, 97(20)*, 11050-11055. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=27146&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>] 
-
-- Fischl, B., Salat, D. H., Busa, E., Albert, M., Dieterich, M., Haselgrove, C., Kouwe, A. van der, et al. (2002). Whole brain segmentation: Automated labeling of neuroanatomical structures in the human brain. *Neuron, 33(3)*, 341-355. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/11832223" target="_blank">Link to the article</a>] 
-
-- Fischl, B., Kouwe, A. van der, Destrieux, C., Halgren, E., Ségonne, F., Salat, D. H., Busa, E., et al. (2004). Automatically parcellating the human cerebral cortex. *Cerebral Cortex, 14(1)*, 11-22. [<a href="http://www.ncbi.nlm.nih.gov/pubmed/14654453" target="_blank">Link to the article</a>] 
 
