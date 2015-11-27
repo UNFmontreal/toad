@@ -41,7 +41,7 @@ Remove extra files
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Production of an image (png) of the B0 overlayed by brain mask and its boundaries
+- Production of an image (png) of atlases overlayed by brain mask.
 
 ## References
 
