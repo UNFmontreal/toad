@@ -59,7 +59,6 @@ function: self.__create5ttImage()
 ## Expected result(s) - Quality Assessment (QA)
 
 - Anatomical, norm, rh_ribbon and lh_ribbon mgz images will be converted into nifti format from Freesurfer pipeline.
-- Brodmann, Choi and Buckner atlases will be created.
 - A mask of the brain will be computed using aparc_aseg.
 - 5tt map will be computed using lh.white, rh.white, lh.pial and rh.pial from Freesurfer.
 
