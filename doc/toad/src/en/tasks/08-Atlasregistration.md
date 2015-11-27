@@ -1,25 +1,25 @@
-# Registration
+# Atlas Registration
 ---
 
 |                |                                                       |
 |----------------|-------------------------------------------------------|
-|**Name**        | Registration                                          |
-|**Goal**        | Registration of the anatomical on diffusion-weighted images |
+|**Name**        | Atlas Registration                                          |
+|**Goal**        | Registration of atlases on diffusion-weighted images |
 |**Config file** | `cleanup`                                             |
 |**Time**        | Few minutes                                           |
-|**Output**      | - Anatomical images (resample) <br> - 5tt (resampled, registered) <br> - norm (resampled, registered) <br> - mask (resampled, registered) <br> - aparc_aseg (resampled, registered) <br> - left, right ribbon (resampled, registered)|
+|**Output**      | - AAL2 atlas (resampled, registered) <br> - 7networks (resampled, registered)|
 
 #
 
 ## Goal
 
-The registration step overlays the anatomical image and atlases on the diffusion-weigthed images. 
+The registration step overlays atlases on the diffusion-weigthed images. 
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
-- Anatomical image (anat)
-- 5tt, norm, mask, aparc_aseg and left right ribbon from parcellation step (Freesurfer pipeline) 
+- Matrix of registration (registration step)
+- 7networks atlas
+- AAL2 atlas
 
 ## Config file parameters
 
@@ -31,25 +31,17 @@ Remove extra files
 
 ## Implementation
 
-### 1- Compute matrix  
+### 1- Resample
 
 - <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt" target="_blank">FSL flirt</a>
 
-- <a href="https://github.com/MRtrix3/mrtrix3/wiki/transformcalc" target="_blank">MRtrix transformcalc</a>
-
-### 2- Resample
-
-- <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/flirt" target="_blank">FSL flirt</a>
-
-### 3- Registration
+### 2- Registration
 
 - <a href="https://github.com/MRtrix3/mrtrix3/wiki/mrtransform" target="_blank">MRtrix mrtransform</a>
-
 
 ## Expected result(s) - Quality Assessment (QA)
 
 - Production of an image (png) of the B0 overlayed by brain mask and its boundaries
-- Production of an image (png) of the B0 overlayed by aparc_aseg file and within the boundaries of the brain mask
 
 ## References
 
