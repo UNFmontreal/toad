@@ -13,7 +13,7 @@
 
 ## Goal
 
-The registration step overlays the anatomical image and atlases on the diffusion-weigthed images. 
+The registration step overlays the anatomical image on the diffusion-weigthed images. 
 
 ## Requirements
 
