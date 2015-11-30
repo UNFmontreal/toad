@@ -56,19 +56,22 @@ def __parseArguments():
               |- 00-qa
               |- 01-preparation
               |- 02-parcellation
-              |- 03-correction
-              |- 05-preprocessing
-              |- 06-registration
-              |- 07-masking
-              |- 08-tensorfsl
-              |- 09-tensormrtrix
-              |- 10-tensordipy
-              |- 11-hardimrtrix
-              |- 12-hardidipymrtrix
-              |- 13-tractographymrtrix
-              |- 14-tractographydipy
-              |- 15-snr
-              |- 16-outputs
+              |- 03-atlas
+              |- 04-denoising
+              |- 05-correction
+              |- 06-preprocessing
+              |- 07-registration
+              |- 08-atlasregistration
+              |- 09-masking
+              |- 10-tensorfsl
+              |- 11-tensormrtrix
+              |- 12-tensordipy
+              |- 13-hardimrtrix
+              |- 14-hardidipymrtrix
+              |- 15-tractographymrtrix
+              |- 16-tractographydipy
+              |- 17-snr
+              |- 18-outputs
               |- 99-logs
 
 
