@@ -1,31 +1,31 @@
 # -*- coding: utf-8 -*-
-import os
-import shutil
-import functools
-import numpy
-import nibabel
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot
-import mpl_toolkits.mplot3d
-import dipy.segment.mask
-import dipy.reconst.dti
-import dipy.data
-import dipy.viz.fvtk
-import dipy.viz.colormap
-import xml.dom.minidom as minidom
-from lib import util
-from string import ascii_uppercase, digits
-from random import choice
+#import os
+#import shutil
+#import functools
+#import numpy
+#import nibabel
+#import matplotlib
+#matplotlib.use('Agg')
+#import matplotlib.pyplot
+#import mpl_toolkits.mplot3d
+#import dipy.segment.mask
+#import dipy.reconst.dti
+#import dipy.data
+#import dipy.viz.fvtk
+#import dipy.viz.colormap
+#import xml.dom.minidom as minidom
+#from lib import util
+#from string import ascii_uppercase, digits
+#from random import choice
+from lib import qautil
 
 __author__ = "Christophe Bedetti"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Christophe Bedetti", "Mathieu Desrosiers"]
 
-
 class Qa(object):
 
-    def slicer3d(self, source, maskOverlay=None, segOverlay=None, vmax=None, boundaries=None, grid=False, isData=False, textData=None):
+    def slicer3d(self, source, fov=None, maskEdges=None, segOverlay=None, textData=None, grid=False, vmax=None, sourceIsData=False):
         """Utility method to slice a 3d image
         Args:
             source : background image
@@ -33,6 +33,8 @@ class Qa(object):
             vmax : to fix the colorbar max, if None slicerPng take the max of the background
         """
         target = self.buildName(source, None, 'png')
+        qautil.slicer3d(source, target, fov=None, maskEdges=None, segOverlay=None, textData=None, grid=False, vmax=None, sourceIsData=False):
+        return target
 
         if isData:
             imageData = source
@@ -455,85 +457,9 @@ class Qa(object):
         util.createScript(htmlFile, htmlCode)
 
 
-    def __configFigure(self, imageData, nbrOfSlices=7, dpi=72.27):
-        """
-        """
-        width = max(imageData.shape) * nbrOfSlices
-
-        fig_width_px  = 2000
-        try:
-            fig_height_px = int(2000 * 3 / nbrOfSlices)#max(imageData.shape) * 3
-        except ValueError:
-            fig_height_px = 857
-        
-
-        fig_width_in  = fig_width_px  / dpi  # figure width in inches
-        fig_height_in = fig_height_px / dpi  # figure height in inches
-        fig_dims      = [fig_width_in, fig_height_in] # fig dims as a list
-
-        #Figure parameters
-        matplotlib.rcParams['figure.figsize'] = fig_dims
-        matplotlib.rcParams['figure.dpi'] = dpi
-
-        #savefig parameter
-        matplotlib.rcParams['savefig.dpi'] = dpi
-
-        return width, fig_dims
 
 
 
-
-    def __image3d2slices(self, image3dData, outputWidth, boundaries=None):
-        """Slice a 3d image along the 3 axis given a maximum Width
-        Args:
-            image3dData: 3d image
-            outputWidth: maximum width of the output
-            boundaries: 
-        Return:
-            tuple a lenght 3 with slices along the 3 axis (x, y, z)
-        """
-        # Determine mins and maxs of the image boundaries
-        if boundaries != None:
-            boundariesData = self.__loadImage(boundaries)
-            mins, maxs = dipy.segment.mask.bounding_box(boundariesData)
-            image3dData = numpy.ma.masked_where(boundariesData==0, image3dData)
-        else:
-            mins, maxs = (0, 0, 0), image3dData.shape
-        crop = dipy.segment.mask.crop(image3dData, mins, maxs)
-
-        # Number of slices in each dimension
-        x = outputWidth / crop.shape[1]
-        y = outputWidth / crop.shape[0]
-        z = y
-        slicesNumbers = (x, y, z)
-
-        # Compute slices indices
-        sliceIndex = []
-        for dimSize, slicesNumber in zip(crop.shape ,slicesNumbers):
-            start = dimSize / slicesNumber
-            stop = dimSize
-            index = numpy.linspace(start, stop, slicesNumber, endpoint=False)
-            index = index.astype('uint8')
-            sliceIndex.append(index)
-
-        # Extract x slices
-        xSlices = crop[sliceIndex[0], :, :]
-        xNewShape = (crop.shape[1] * x, crop.shape[2])
-        xSlices = numpy.reshape(xSlices, xNewShape)
-
-        # Extract y slices
-        ySlices = crop[:, sliceIndex[1], :]
-        ySlices = numpy.rollaxis(ySlices, 1)
-        yNewShape = (crop.shape[0] * y, crop.shape[2])
-        ySlices = numpy.reshape(ySlices, yNewShape)
-
-        # Extract z slices
-        zSlices = crop[:, :, sliceIndex[2]]
-        zSlices = numpy.rollaxis(zSlices, 2)
-        zNewShape = (crop.shape[0] * z, crop.shape[1])
-        zSlices = numpy.reshape(zSlices, zNewShape)
-
-        return (xSlices, ySlices, zSlices)
 
 
     def __idGenerator(self, size=8, chars=ascii_uppercase + digits):
@@ -547,11 +473,6 @@ class Qa(object):
         return ''.join(choice(chars) for _ in range(size))
 
 
-    def __loadImage(self, source):
-        """
-        """
-        image = nibabel.load(source)
-        return image.get_data()
 
 
 
@@ -606,11 +527,6 @@ class Qa(object):
         return ''.join(choice(chars) for _ in range(size))
 
 
-    def __loadImage(self, source):
-        """
-        """
-        image = nibabel.load(source)
-        return image.get_data()
 
 
 
