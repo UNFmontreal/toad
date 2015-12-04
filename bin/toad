@@ -51,26 +51,26 @@ def __parseArguments():
 
         Then a subject completed will look like this
         sujN--\\
-              |- 00-backup.py
-              |- 00-qa.py
-              |- 01-preparation.py
-              |- 02-parcellation.py
-              |- 03-atlas.py
-              |- 04-denoising.py
-              |- 05-correction.py
-              |- 06-upsampling.py
-              |- 07-registration.py
-              |- 08-atlasregistration.py
-              |- 09-masking.py
-              |- 10-tensorfsl.py
-              |- 11-tensormrtrix.py
-              |- 12-tensordipy.py
-              |- 13-hardimrtrix.py
-              |- 14-hardidipy.py
-              |- 15-tractographymrtrix.py
-              |- 16-tractographydipy.py
-              |- 17-snr.py
-              |- 18-outputs.py
+              |- 00-backup
+              |- 00-qa
+              |- 01-preparation
+              |- 02-parcellation
+              |- 03-atlas
+              |- 04-denoising
+              |- 05-correction
+              |- 06-preprocessing
+              |- 07-registration
+              |- 08-atlasregistration
+              |- 09-masking
+              |- 10-tensorfsl
+              |- 11-tensormrtrix
+              |- 12-tensordipy
+              |- 13-hardimrtrix
+              |- 14-hardidipymrtrix
+              |- 15-tractographymrtrix
+              |- 16-tractographydipy
+              |- 17-snr
+              |- 18-outputs
               |- 99-logs
 
 
