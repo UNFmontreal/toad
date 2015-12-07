@@ -6,7 +6,7 @@ Vous pouvez nous contacter directement par courriel : [**toadunf.criugm@gmail.co
 
 ## Groupe
 
-Vous pouvez vous tenir au courant des nouveautés en suivant ce lien: [Inscription](https://groups.google.com/d/forum/toad-info)
+Si vous utilisez ou voulez utiliser TOAD nous vous conseillons de vous inscrire à la liste de diffusion pour vous tenir au courant des nouveautés: [Groupe TOAD](https://groups.google.com/d/forum/toad-info)
 
 ## Code source
 
