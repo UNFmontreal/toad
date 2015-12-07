@@ -12,7 +12,7 @@
 
 ## Goal
 
-The backup step creates a 00-backup folder into which where it moves every files and folders submitted to TOAD will be moved
+The backup step creates a 00-backup folder into which it moves every file and folder submitted to TOAD
 
 
 ## Implementation
