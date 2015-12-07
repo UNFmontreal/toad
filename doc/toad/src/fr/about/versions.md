@@ -1,9 +1,9 @@
 # Versions de TOAD
 
-| Version                  | Date de sortie  | Commentaires                    |
-| :----------------------- | :-------------: | :------------------------------ |
-| [v01.1](versions.md###v01) | 2015-12-07      | 1ère version stable             |
-| [v01](versions.md###v01) | 2015-08-24      | 1ère version stable             |
+| Version                  | Date de sortie  | Nom | Commentaires                    |
+| :----------------------- | :-------------: | :---: | :------------------------------: |
+| [v01.1](versions.md###v01) | 2015-12-07   | **Anaxyrus**  | Nouvelles tâches (Atlas)  + dcm2toad option           |
+| [v01](versions.md###v01) | 2015-08-24     | **Adenomus**  | 1ère version stable             |
 
 
 ## Journal des modifications
@@ -14,7 +14,8 @@
   - Atlas (Création d'atlas)
   - Atlas Registration (Registration d'atlas)
 
-- Ajout d'une option pour l'outil `dcm2toad` 
+- Ajout d'une option pour l'outil `dcm2toad` permettant d'utiliser un fichier texte pour définir le nom du dossier de sortie.
+- Correctifs mineurs
 
 ### v01
 
