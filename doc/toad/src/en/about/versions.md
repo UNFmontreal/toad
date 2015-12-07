@@ -9,7 +9,14 @@
 
 ### v01.1
 
+- New tasks: 
+  - Atlas (creation)
+  - Atlas registration
 
+These steps will now be performed as a separate task.
+
+- dcm2toad: the tool to convert your data from dicom to toad has been updated. You can also change your output folder name using a text file.
+- Miscellaneous:  minor bugs and typos have been fixed.
 
 ### v01
 
