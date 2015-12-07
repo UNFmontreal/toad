@@ -4,7 +4,7 @@ Vous pouvez nous contacter directement par courriel : [**toadunf.criugm@gmail.co
 
 **Pour toute question**, merci d’indiquer dans l’*objet du message* le nom de la tâche et/ou de la section entre crochet suivi de votre question, tel que `[denoising] comment changer l’algorithme ?` ou encore `[website] information manquante`.
 
-## Groupe
+## Liste de diffusion
 
 Si vous utilisez ou voulez utiliser TOAD nous vous conseillons de vous inscrire à la liste de diffusion pour vous tenir au courant des nouveautés: [Groupe TOAD](https://groups.google.com/d/forum/toad-info)
 
