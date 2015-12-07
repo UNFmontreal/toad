@@ -28,7 +28,7 @@ pages:
     - '05-Correction': 'tasks/05-Correction.md'
     - '06-Upsampling': 'tasks/06-Upsampling.md'
     - '07-Registration': 'tasks/07-Registration.md'
-    - '08-Registration': 'tasks/08-Atlasregistration.md'
+    - '08-Atlas Registration': 'tasks/08-Atlasregistration.md'
     - '09-Masking': 'tasks/09-Masking.md'
     - '10-Tensors FSL': 'tasks/10-Tensorfsl.md'
     - '11-Tensors MRtrix': 'tasks/11-Tensormrtrix.md'
