@@ -13,7 +13,7 @@
 
 ## Goal
 
-The tractographymrtrix step computes the tractography on from/with/using different reconstruction methods (tensor, csd). 
+The tractographymrtrix step computes tractography using different reconstruction methods (tensor, csd). 
 It also creates connectomes from anatomical segmentations.
 
 
