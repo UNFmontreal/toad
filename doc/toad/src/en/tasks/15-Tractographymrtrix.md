@@ -7,19 +7,19 @@
 |**Goal**        | Run tractography on tensors and constrained spherical deconvolution using tckgen from MRtrix |
 |**Config file** | `step` <br> `maxlength` <br> `number_tracks` <br> `downsample` <br> `ignore`|
 |**Time**        | About 2 hours                                         |
-|**Output**      | - Probabilist tensor tractography and connectome <br> - Probabilist tensor tractography and connectome <br> - Probabilist "sifted" csd tractography and connectome |
+|**Output**      | - Probabilistic tensor tractography and connectome <br> - Probabilistic tensor tractography and connectome <br> - Probabilistic "sifted" csd tractography and connectome |
 
 #
 
 ## Goal
 
 The tractographymrtrix step computes the tractography on from/with/using different reconstruction methods (tensor, csd). 
-It also creates as well connectomes from anatomical segmentation.
+It also creates connectomes from anatomical segmentations.
 
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
+- Diffusion-weighted images (dwi)
 - Diffusion-weighted gradient scheme (b or bvec and bval)
 - Constrained spherical deconvolution (csd)
 - Five-tissue-type maps (5tt)
@@ -27,7 +27,7 @@ It also creates as well connectomes from anatomical segmentation.
 
 ## Config files parameter
 
-We use default paramaters suggested in MRtrix documentation.
+We use default paramaters suggested in the MRtrix documentation.
 
 Step size of the algorithm in mm (default is 0.1 x voxelsize; for iFOD2: 0.5 x voxelsize).
 
@@ -65,19 +65,19 @@ Ignore tractographymrtrix task: not recommended
 
 ## Expected result(s) - Quality Assessment (QA)
 
-Tractographymrtrix runs determinist tractographies from
+Tractographymrtrix runs deterministic tractographies from
 
 - Tensor reconstruction
 
-Tractographymrtrix runs probabilist tractographies from
+Tractographymrtrix runs probabilistic tractographies from
 
 - Tensor reconstruction
 - Constrained spherical deconvolution
 
-It filters tractograms using SIFT algorithm.  
+It filters tractograms using the SIFT algorithm.  
 It creates structural connectomes from tractographies.
 
-Production of an image (png) from a dummy examples for the QA in order to check the results.   
+Production of an image (png) from a dummy example for the QA in order to check the results.   
 Production of an image (png) of the structural connectomes.
 
 ## References
