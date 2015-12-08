@@ -4,7 +4,7 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | Registration                                          |
-|**Goal**        | Registration of the anatomical on diffusion-weighted images |
+|**Goal**        | Registration of the anatomical to diffusion-weighted images |
 |**Config file** | `cleanup`                                             |
 |**Time**        | Few minutes                                           |
 |**Output**      | - Anatomical images (resample) <br> - 5tt (resampled, registered) <br> - norm (resampled, registered) <br> - mask (resampled, registered) <br> - aparc_aseg (resampled, registered) <br> - left, right ribbon (resampled, registered)|
@@ -13,17 +13,17 @@
 
 ## Goal
 
-The registration step overlays the anatomical image on the diffusion-weigthed images. 
+The registration step overlays the anatomical image on the diffusion-weighted images. 
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
+- Diffusion-weighted images (dwi)
 - Anatomical image (anat)
 - 5tt, norm, mask, aparc_aseg and left right ribbon from parcellation step (Freesurfer pipeline) 
 
 ## Config file parameters
 
-If anatomical and diffusion-weigthed images were acquired during the same acquisition session we use -usesqform -dof 6 <br>
+If anatomical and diffusion-weighted images were acquired during the same acquisition session we use -usesqform -dof 6 <br>
 
 Remove extra files
 
@@ -48,8 +48,8 @@ Remove extra files
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Production of an image (png) of the B0 overlayed by brain mask and its boundaries
-- Production of an image (png) of the B0 overlayed by aparc_aseg file and within the boundaries of the brain mask
+- Production of an image (png) of the B0 overlayed on brain mask and its boundaries
+- Production of an image (png) of the B0 overlayed on aparc_aseg file and within the boundaries of the brain mask
 
 ## References
 
