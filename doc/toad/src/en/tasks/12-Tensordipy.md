@@ -13,12 +13,12 @@
 
 ## Goal
 
-The tensordipy step reconstructs tensors from diffusion-weigthed images and extracts tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD).
+The tensordipy step reconstructs tensors from diffusion-weighted images and extracts tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD).
 This step uses the `dtfit` command line from dipy [ref: <a href="http://nipy.org/dipy/examples_built/reconst_dti.html#example-reconst-dti" target="_blank">dipy</a>]
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
+- Diffusion-weighted images (dwi)
 - Diffusion-weighted gradient scheme (bvec and bval)
 - Mask of the brain (optional)
 
