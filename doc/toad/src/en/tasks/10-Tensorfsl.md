@@ -13,12 +13,12 @@
 
 ## Goal
 
-The tensorFSL step reconstructs the tensors from the diffusion-weigthed images and then extracts the tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD).
+The tensorFSL step reconstructs the tensors from the diffusion-weighted images and then extracts the tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD).
 This step uses the `dtfit` command from FSL [ref: <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FDT" target="_blank">FSL</a>]
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
+- Diffusion-weighted images (dwi)
 - Diffusion-weighted gradient scheme (b or bvec and bval)
 - Mask of the brain (optional)
 
@@ -34,7 +34,7 @@ Ignore tensorfsl task: not recommended
 
 - <a href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/fdt/UserGuide#DTIFIT" target="_blank">FSL dtifit</a>
 
-### 2- Creation of the radial diffusivity
+### 2- Creation of radial diffusivity
 
 ```{.python}
 function: self.__mean(l2, l3, rd)
