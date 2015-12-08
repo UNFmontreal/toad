@@ -7,13 +7,13 @@
 |**Goal**        | Upsampling of the diffusion-weigthed images           |
 |**Config file** | `voxel_size` <br /> `cleanup`                         |
 |**Time**        | Few minutes                                           |
-|**Output**      | Diffusion-weigthed upsampled images                   |
+|**Output**      | Diffusion-weighted upsampled images                   |
 
 # 
 
 ## Goal
 
-The upsampling task creates diffusion-weigthed images (DWI) upsampled to anatomical images resolution
+The upsampling task creates diffusion-weighted images (DWI) upsampled to anatomical image resolution
 
 ## Requirements
 
@@ -37,6 +37,6 @@ Remove extra files
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Diffusion-weigthed upsampled images
+- Diffusion-weighted upsampled images
 - Creation of an image (png) of DWI and an image (png) of the b0 
 
