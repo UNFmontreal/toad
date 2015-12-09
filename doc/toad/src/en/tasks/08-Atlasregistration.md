@@ -13,17 +13,17 @@
 
 ## Goal
 
-The registration step overlays atlases on the diffusion-weigthed images. 
+The registration step overlays atlases on the diffusion-weighted images. 
 
 ## Requirements
 
-- Matrix of registration (registration step)
+- Registration matrix (registration step)
 - 7networks atlas
 - AAL2 atlas
 
 ## Config file parameters
 
-If anatomical and diffusion-weigthed images were acquired during the same acquisition session we use -usesqform -dof 6 <br>
+If anatomical and diffusion-weighted images were acquired during the same acquisition session we use -usesqform -dof 6 <br>
 
 Remove extra files
 
@@ -41,7 +41,7 @@ Remove extra files
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Production of an image (png) of atlases overlayed by brain mask.
+- Production of an image (png) of atlases overlayed on brain mask.
 
 ## References
 

@@ -21,24 +21,24 @@ Ignore snr task
 
 - `ignore: False`
 
-## Minimal Requirements
+## Minimum Requirements
 
-- Native diffusion-weigthed images
-- Corpus Callusum mask
+- Native diffusion-weighted images
+- Corpus callosum mask
 - Brain mask
 
 ## Optimal Requirements
 
-- Denoised diffusion-weigthed images
-- Corrected diffusion-weigthed images
+- Denoised diffusion-weighted images
+- Corrected diffusion-weighted images
 
 ## Implementation
 
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- SNR for each directions of the diffusion-weigthed images
+- SNR for each direction of the diffusion-weighted images
 - Noise profile
 - Noise mask used to extract noise data
-- Corpus Callusum mask to extract signal data
+- Corpus callosum mask to extract signal data
 

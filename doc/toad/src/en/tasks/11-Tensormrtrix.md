@@ -13,7 +13,7 @@
 
 ## Goal
 
-The tensormrtrix step reconstructs tensors from diffusion-weigthed images and extracts tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD). 
+The tensormrtrix step reconstructs tensors from diffusion-weighted images and extracts tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD). 
 This step uses the `dtfit` command line from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor" target="_blank">MRtrix</a>]
 
 ## Config file
@@ -31,7 +31,7 @@ Ignore tensormrtrix task: not recommended
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
+- Diffusion-weighted images (dwi)
 - Diffusion-weighted gradient scheme (b or bvec and bval)
 - Production of of the mask of the brain (optional)
 

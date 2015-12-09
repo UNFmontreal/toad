@@ -4,7 +4,7 @@
 In order to use TOAD at CRIUGM, you need to create an account on the UNF’s server. 
 This account could either be an individual or a team account.
 
-To obtain an account, or for all account-related inquiries, please contact the system administrator at the UNF [Mathieu Desrosiers](mailto:mathieu.desrosiers@criugm.qc.ca).
+To obtain an account, or for all account-related inquiries, please contact the system administrator at the UNF [André Cyr](mailto:andre.cyr@criugm.qc.ca).
 
 ## Command line
 TOAD toolbox is command-line-based that requires entries on a terminal.
