@@ -8,7 +8,7 @@ The easiest and most practical way to retrieve data acquired at the Unité de Ne
 ### Data preparation
 
 1. Before you can download the data, you need to reconstruct them into Dicom format. To do so, go to the UNF data download website [https://unf-montreal.ca](https://unf-montreal.ca)
-2. Enter your user ID and password at the UNF
+2. Enter your UNF user ID and password
 3. Select the data you want to download and click on `Build images` (keep the default option `tar.gz` for image compression type. TOAD will only work with this type)
 4. Give a name to the dataset to be downloaded (in our example, `unf-data`), and click on `submit`
 
@@ -68,7 +68,7 @@ Your data are now being downloaded and will be ready to be converted by TOAD int
 **ATTENTION**
 TOAD uses its own file conversion tool `dcm2toad` to convert DICOM images into NIfTI.
 It is **strongly recommended** to use this tool for file conversion, because not only can it convert your data, it also generates a configuration file for TOAD. 
-This file contains all existing information that is unique in the raw data which is lost upon conversion when using other softwares.
+This file contains all the existing information that is unique to the raw data, and which is lost upon conversion when using other softwares.
 
 `dcm2toad` automatically unzips and converts your data.
 Different options are available (see help by typing `dcm2toad -h`). 
@@ -86,7 +86,7 @@ dcm2toad -d DWI unf-data.tar.gz
 
 The software will ask you a series of questions to specify which file corresponds to which type of image (anatomical, diffusion, etc.), and to indicate the study/project ID. 
 
-One of the strong features of `dcm2toad` is its ability to manage multiple sessions/subjects simultaneously. It will first show you a list of sessions/subjects found within the downloaded data set. Subject ID followed by an asterisk * indicates the data from that subject have been converted.
+One of the strong features of `dcm2toad` is its ability to manage multiple sessions/subjects simultaneously. It will first show you a list of sessions/subjects found within the downloaded data set. Subject ID followed by an asterisk * indicates that the data from that subject has been converted.
 
 ![dcm2toad in action](../figs/terminal_convert_subjects.png)
 
@@ -99,7 +99,7 @@ When multiple sessions/subjects share the exact same data structure, `dcm2toad` 
 
 ### Data type
 
-The analysis of diffusion data requires at least 3 types of images from each subject: 
+Diffusion data analyses require at least 3 types of images for each subject: 
 
 1. **anatomical images** (T1, type MPRAGE) : anatomical mask creation, coregistration
 2. **diffusion images** (DWI) : white matter tracts (fibre extraction)
@@ -121,10 +121,10 @@ For simplicity’s sake, TOAD only accepts the following file formats:
 
 ### Data organization
 
-If you have data that are already converted into NIfTI as well as the encoding files, you can directly bypass the TOAD data conversion step. We recommend regrouping your data in the following manner:
+If you have data that are already converted into NIfTI, as well as the encoding files, you can bypass the TOAD data conversion step. We recommend regrouping your data in the following manner:
 
 - a parent folder containing all the files from your subjects
-- individual subject folder containing all the imaging files (\*.nii, \*.b)
+- an individual subject folder containing all the imaging files (\*.nii, \*.b)
 
 <pre>
     PROJET  
@@ -138,13 +138,13 @@ If you have data that are already converted into NIfTI as well as the encoding f
 </pre>
     
 ***Attention:*** *in this case, it is your responsibility to ensure that all your files have been correctly converted, and that the encoding file complies with the usual standards (strides ...).
-If these data come from a 3T Tim Trio Siemens MRI scanner (as at the UNF), and if you still have the raw data, we strongly recommend to convert the data with the software `dcm2toad` [see section Data conversion](# conversion)
+If the data comes from a 3T Tim Trio Siemens MRI scanner (like at the UNF), and you have access to the raw dicom data, we strongly recommend using the software `dcm2toad` [see section Data conversion](# conversion)
 
 
-### File naming
+### File nomenclature
 TOAD needs to identify which files correspond to which image. 
-To do so, TOAD uses the prefix that is common to the file name of each type of files. Similarly, all the anatomical images should start by the same prefix; by default TOAD looks for files that start with `anat`.
-For diffusion images, TOAD looks for files that start with `dwi` and for the encoding files files starting with `dwi` and with `.b` or `.bval` and `.bvec` as file extension.
+To do so, TOAD uses a prefix that is common to all the files of the same type. Similarly, all the anatomical images should start by the same prefix; by default TOAD looks for files that start with `anat`.
+For diffusion images, TOAD looks for files that start with `dwi`, and for the encoding files TOAD looks for files that start with `dwi` and have `.b` or `.bval` and `.bvec` extensions.
 When the anterior-posterior or posterior-anterior files are available, TOAD looks for the prefix `b0_ap` and `b0_pa`.
 
 You are free to use any current naming system, as long as it is specified in your configuration file `config.cfg`.

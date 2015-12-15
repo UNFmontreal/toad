@@ -4,17 +4,17 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | outputs                                    |
-|**Goal**        | Copy every useful files                                    |
+|**Goal**        | Copy every useful file                                    |
 |**Time**        | Few seconds         |
 |**Output**      | None                                     |
 
 ## Goal
 
-The outputs step has been created to copy every files in their final version of the pipeline. Due to storage restriction we won't copy them.
+The outputs step has been created to copy every file in the final version of the pipeline. Due to storage restrictions we won't copy them.
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi) <br>
+- Diffusion-weighted images (dwi) <br>
 - Diffusion-weighted gradient scheme (b or bvec and bval) <br>
 - Anatomical image resampled (anat)
 - Mask image resampled

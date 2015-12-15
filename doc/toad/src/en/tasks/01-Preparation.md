@@ -4,10 +4,10 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | Preparation                                           |
-|**Goal**        | Create missing diffusion-weighted gradient scheme files <br> Check image's orientation|
+|**Goal**        | Create missing diffusion-weighted gradient scheme files <br> Check image orientation|
 |**Config file** | `stride_orientation` <br />`force_realign_strides`    |
 |**Time**        | Few minutes                                           |
-|**Output**      | Re-oriented files <br> Missing gradients scheme files <br> Pictures for the QA (png and gif)|
+|**Output**      | Re-oriented files <br> Missing gradients scheme files <br> Pictures for QA (png and gif)|
 
 #
 
@@ -15,7 +15,7 @@
 
 The preparation step ensures that all files required by TOAD are correctly provided.
 
-## Minimal requirements
+## Minimum requirements
 
 - Diffusion-weighted images (dwi)
 - Anatomical image (anat)
@@ -37,7 +37,7 @@ If `force_realign_strides` is set to `True`, the preparation task will require t
 - `force_realign_strides: True`
 - `stride_orientation: 1,2,3`
 
-**Warning**: It is strongly suggested that the axes of your data be ordered and directed in a 1,2,3 layout
+**Warning**: It is strongly recommended that the axes of your data be ordered and directed in a 1,2,3 layout
 
 ## Implementation
 
@@ -57,7 +57,7 @@ function: mriutil.isAfreesurferStructure(directory)
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Diffusion-weighted gradient schemes missing files will be created.  
-- Every files provided will be re-oriented.  
-- The preparation step will create an image (png) of the anatomic image and a gif from the dwi.  
+- Diffusion-weighted gradient scheme missing files will be created.  
+- Every file provided will be re-oriented.  
+- The preparation step will create an image (png) of the anatomical image and a gif from the dwi.  
 - Finally, if b0_ap, b0_pa, magnitude or phase images exist, the preparation step will create an image (png) to be used in the QA

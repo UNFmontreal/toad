@@ -1,6 +1,6 @@
 # User agreement
 
-If you use TOAD, you must agree to the follow these rules:
+If you use TOAD, you must agree to the following:
 
 - ensure to use the latest stable version of TOAD (check the website)
 - cite TOAD [FIXME] in your publications

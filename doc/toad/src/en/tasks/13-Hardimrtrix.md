@@ -4,16 +4,16 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | hardimrtrix                                           |
-|**Goal**        | Perform constrain spherical deconvolution using MRtrix dwi2fod |
+|**Goal**        | Perform constrained spherical deconvolution using MRtrix dwi2fod |
 |**Config file** | `ignore`                                              |
 |**Time**        | About 1 hour                                          |
-|**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
+|**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fiber orientations (nufo) <br> |
 
 #
 
 ## Goal
 
-The hardimrtrix step reconstructs fiber orientation distribution (fod) using non-negativity constrained spherical deconvolution (csd) from diffusion-weigthed images (dwi). 
+The hardimrtrix step reconstructs the fiber orientation distribution (fod) using non-negativity constrained spherical deconvolution (csd) from diffusion-weighted images (dwi). 
 This step uses the `dwi2fod` command from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix</a>]
 
 ## Default paramaters
@@ -29,7 +29,7 @@ Ignore hardimrtrix task: **not recommended**
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
+- Diffusion-weighted images (dwi)
 - Diffusion-weighted gradient scheme (b or bvec and bval)
 - Mask of the brain (optional)
 
@@ -51,7 +51,7 @@ Ignore hardimrtrix task: **not recommended**
 ## Expected result(s) - Quality Assessment (QA)
 
 - Creation of the fiber orientation distribution (fod) and metrics (nufo, peaks)
-- Produce an image (png) of the number of fibers orientations (nufo)
+- Produce an image (png) of the number of fiber orientations (nufo)
 
 ## References
 
