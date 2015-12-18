@@ -60,10 +60,10 @@ L’ensemble des dossiers pour chaque sujet devrait ressembler à peu près au t
 |99-logs                | Fichiers logs et erreurs                              |
 
 *Note :* Il est possible que cet arbre change avec les versions de TOAD. 
-De même, le choix de certains paramètres au lancement de TOAD ou l’absence de certains type de fichiers (comme les B0 AP/PA) font que certaines tâches ne seront pas exécutées. 
+De même, le choix de certains paramètres au lancement de TOAD ou l’absence de certains types de fichiers (comme les B0 AP/PA) font que certaines tâches ne seront pas exécutées. 
 
 Ainsi, une première vérification du bon déroulement de TOAD consiste à vérifier que ces dossiers ont bien été créés pour chaque participant.
-L’absence d’une série de dossier indique que le pipeline a probablement rencontré un problème et a dû s’arrêter pour le participant en question.
+L’absence d’une série de dossiers indique que le pipeline a probablement rencontré un problème et a dû s’arrêter pour le participant en question.
 
 Dans ce cas, il est utile d’aller regarder le dernier log produit par TOAD. 
 Ce fichier `*.log` se trouvera dans le dernier répertoire créé par TOAD ou alors dans le dossier `99-logs`.
@@ -78,7 +78,11 @@ TOAD offre une interface simple et pourtant complète pour explorer la qualité 
 Pour lancer le QA, il suffit d’ouvrir la page internet du QA grâce à la commande : `firefox 00-qa/index.html`.
 L’ouverture de la fenêtre prendra un peu de temps afin de charger les différentes images associées au QA.
 
-*Attention:* pour que la commande fonctionne, il faut avoir lancé votre session SSH avec l’option `-Y` pour permettre l’envoi de données graphiques (donc `ssh -Y username@stark.criugm.qc.ca`). 
+*Attention:* pour que la commande fonctionne, il faut avoir lancé votre session SSH avec l’option `-Y` pour permettre l’envoi de données graphiques, donc
+
+~~~bash
+ssh -Y username@stark.criugm.qc.ca
+~~~
 
 La page internet s’ouvrira sur une page d’accueil qui propose aussi des liens vers chacune des tâches.
 Vous trouverez alors les principales métriques et images qui permettent d’évaluer la qualité de vos données et le bon fonctionnement de TOAD.
@@ -124,12 +128,12 @@ Il est possible que vous rencontriez quelques problèmes durant le traitement de
 Par exemple, TOAD pourrait vous informer que l’algorithme utilisé par défaut (NLMEANS) n’est pas compatible avec les données que vous avez. 
 Dans ce cas, il faudra annuler le traitement des données qui sera lancé malgré tout.
 
-Pour ce faire, placer vous dans le terminal (session SSH) dans votre dossier de travail :
+Pour ce faire, placez-vous dans le terminal (session SSH) dans votre dossier de travail :
 
 1. Vérifier si vos participants sont en cours de traitement avec la commande : `qstat -f`
-2. Arrêter le travail en cours par particiapnt avec la commande : `qdel #id` où "#id" correspond au numéro de processus affiché par qstat. 
-3. Réinitialiser les données avant le traitement de TOAD avec la commande : `toad -r .` TOAD affichera un avertissement comme quoi les processus sont vérouiller. Il faudra appuyer sur `r` et valider pour que TOAD enlève ce verrou pour réinitiliser les données.
-4. Apporter les modifications nécessaire à vos données ou au fichier de configuration (par exemple ajouter un fichier "config.cfg" dans le dossier de travail avec l'option `algorithm=lpca` sous la section `[denoising]`)
+2. Arrêter le travail en cours par participant avec la commande : `qdel #id` où "#id" correspond au numéro de processus affiché par qstat. 
+3. Réinitialiser les données avant le traitement de TOAD avec la commande : `toad -r .` TOAD affichera un avertissement comme quoi les processus sont verrouiller. Il faudra appuyer sur `r` et valider pour que TOAD enlève ce verrou pour réinitialiser les données.
+4. Apporter les modifications nécessaires à vos données ou au fichier de configuration (par exemple ajouter un fichier "config.cfg" dans le dossier de travail avec l'option `algorithm=lpca` sous la section `[denoising]`)
 5. Relancer TOAD avec la commande : `toad .`
 
 **Pensez à consulter la documentation** relative à chacune des tâches de TOAD pour plus d’informations.
