@@ -1,52 +1,96 @@
-"""A preset format, used as a starting point for developing a toad task
-
-        Simply copy and rename this file:  cp xx-template yourtaskname.py into any folder.
-            yourtaskname is any name at your convenience. you should keep the name must be lowercase
-        Change the class name Template for Yourtaskname. Note the first letter of the name should be capitalized
-
-        A directory called Yourtaskname will be create into the subject dir. A local variable self.workingDir will
-        be initialize to that directory
-
-
-        Do not forget to specify the location and the file name (-t switch) when you launch toad***
-                #toad  -t <this file name and location>
-
-
-        Args:
-            subject: a Subject instance inherit by the subjectmanager.
-
-"""
+# -*- coding: utf-8 -*-
+import os.path
 from core.toad.generictask import GenericTask
-__author__ = "Your_name"
-__copyright__ = "Copyright (C) 2014, TOAD"
-__credits__ = ["Your_name", "Mathieu Desrosiers"]
+from lib import mriutil
 
 
-class Template(GenericTask):
-
+class TractographyPont(GenericTask):
 
     def __init__(self, subject):
-        """initialisation methods. Please leave as is"""
-
-        GenericTask.__init__(self, subject)
-        """Inherit from a generic Task.
-
-        Args:
-            subject: Subject instance inherit by the subjectmanager.
-
-            Note that you may supply additional arguments to generic tasks.
-            Exemple: if you provide GenericTask.__init__(self, subject, foo, bar ...)
-            toad will create an variable fooDir and barDir
-            that will point to the first additionnal argurments fooDir.
-
-        """
+        GenericTask.__init__(self, subject, 'tensormrtrix', 'preparation', 'hardimrtrix', 'registration', 'tractographymrtrix', 'qa')
+        self.setCleanupBeforeImplement(False)
+        self.dirty = True
 
 
     def implement(self):
-        """Placeholder for the business logic implementation
+        # Load images
+        dwi = self.getPreparationImage('dwi')
+        hardiTck = self.getTractographymrtrixImage('dwi', 'hardi_prob', 'tck')
+        norm = self.getRegistrationImage('norm', 'resample')
+        aparcAsegResample = self.getRegistrationImage('aparc_aseg', 'resample')
 
-        """
-        pass
+        # conversion tck > trk
+        hardiTrk = self.__tck2trk(hardiTck, norm)
+
+        # tract_querier
+        qryFile = '/data/gosselin_n/cbedetti/TRAUMASOMMEIL/lpca_nocorrection/tract_queries_pont.qry'
+        self.__tractQuerier(hardiTrk, aparcAsegResample, qryFile)
+
+        # tckmap
+        tags = ['brainstem2thalamus', 'brainstem2ventraldc']
+        #self.__launchTckmap(tags, norm):
+
+        self.dirty = False
+
+
+    def __launchTckmap(self, tags, norm):
+        tckmaps = []
+        for tag in tags:
+            tckmap = self.__tckmap(tag, norm)
+            if tckmap:
+                tckmaps.append(tckmap)
+        self.__extractFiberStats(tckmaps)
+
+
+    def __tck2trk(self, hardiTck, norm):
+        trk = self.buildName(hardiTck, None, 'trk')
+        if os.path.isfile(trk):
+            target = self.getImage('dwi', 'hardi_prob', 'trk')
+        else:
+            target = mriutil.tck2trk(hardiTck, norm , trk)
+        return target
+
+
+    def __tractQuerier(self, trk, atlas, qryFile):
+        output = self.buildName(trk, None, 'trk')
+        cmd = "tract_querier -t {} -a {} -q {} -o {}"
+        cmd = cmd.format(trk, atlas, qryFile, output)
+        self.launchCommand(cmd)
+
+
+    def __tckmap(self, tag, norm):
+        tck = self.getImage('dwi', tag, 'tck')
+        tckmapCmd = "tckmap {} -template {} {}"
+        tckstatsCmd ="tckstats {} | awk -F \" \" '{{print $6}}' | sed -n 2p > {}"
+        if tck:
+            tckMap = self.buildName(tck, 'map', 'nii.gz')
+            cmd = tckmapCmd.format(tck, norm, tckMap)
+            self.launchCommand(cmd)
+            tckCount = self.buildName(tck, 'count', 'txt')
+            cmd = tckstatsCmd.format(tck, tckCount)
+            self.launchCommand(cmd)
+            target = tckMap
+        else:
+            target = False
+        return target
+
+
+    def __extractFiberStats(self, tckmaps):
+        # mrstats
+        fa = self.getTensormrtrixImage('dwi', 'fa')
+        rd = self.getTensormrtrixImage('dwi', 'rd')
+        md = self.getTensormrtrixImage('dwi', 'md')
+        ad = self.getTensormrtrixImage('dwi', 'ad')
+        nufo = self.getHardimrtrixImage('dwi', 'nufo')
+        #mrstatsCmd = "mrstats -mask {} -output mean {} > {}"
+        fslmeantsCmd = "fslmeants -i {} -m {} -w | sed -n 1p > {}"
+        for tckmap in tckmaps:
+            if tckmap:
+                for metric, postfix in zip([fa, rd, md, ad, nufo], ['fa', 'rd', 'md', 'ad', 'nufo']):
+                    output = self.buildName(tckmap, postfix, 'txt')
+                    #cmd = mrstatsCmd.format(tckmap, metric, output)
+                    cmd = fslmeantsCmd.format(metric, tckmap, output)
+                    self.launchCommand(cmd)
 
 
     def meetRequirement(self):
@@ -64,4 +108,4 @@ class Template(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        return True
+        return self.dirty
