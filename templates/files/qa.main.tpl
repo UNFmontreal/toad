@@ -1,46 +1,58 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <link rel="stylesheet" type="text/css" href="style.css">
-        <script src ="jquery.js"></script>
-        <title>TOAD-Qa</title>
-    </head>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src ="jquery.js"></script>
+    <title>TOAD-Qa</title>
+  </head>
 
-    <body>
-        <header>
-            <div id="title">
-                <h1>
-                    <a href="index.html"><img src="./images/qa_logo.png"></a>
-                </h1>
-                <h2>Subject : $subject</h2>
-                <div id="timestamp"></div>
+  <body>
+    <header>
+      <div id="title">
+         <div id="title">
+           <a href="index.html" class="logo">
+             <img src="./images/qa_logo.png" class="logo">
+           </a>
+          
+          <h2>Subject : $subject</h2>
+            <div id="timestamp"></div>
+          </div>
+          
+          <div id="navwrap">
+            <div id="nav">
+              TOAD MENU
             </div>
-            <div id="menu">
-                <object type="text/html" data="menu.html"></object>
-            </div>
-        </header>
+          </div>
+    </header>
+    <div id="wrapper">  
+      <h1>$taskname</h1>
+     
+      <div class='taskInfo'>$taskInfo</div>
 
-        <h1>$taskInfo</h1>
+      <section id="results">
+        $parseHtmlTables
+      </section>
 
-        <section id="results">
-$parseHtmlTables
-        </section>
+      <a href="#" id="show-versions-href">Show Software Versions</a>
+      <a href="#" id="hide-versions-href">Hide Software Versions</a>
 
-        <a href="#" id="show-versions-href">Show Software Versions</a>
-        <a href="#" id="hide-versions-href">Hide Software Versions</a>
+      <versions></versions>
 
-        <versions></versions>
+      <div hidden id="dataVersions">
+	    $parseVersionTables
+      </div>
 
-        <div hidden id="dataVersions">
-$parseVersionTables
-        </div>
+   </div>
 
-
-        <footer></footer>
-    </body>
+    <footer></footer>
+  </body>
 </html>
 <script type = "text/javascript">
+	$( document ).ready( function() {
+        $( '#nav' ).load( 'menu.html' );
+    });
+           
     $( "#hide-versions-href" ).hide();
 
     if ( $( "applications" ).length == 0) {
