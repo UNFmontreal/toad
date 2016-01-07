@@ -50,7 +50,7 @@ class Qa(object):
                                         vmin=0, \
                                         vmax=vmax, \
                                         cmap=matplotlib.pyplot.cm.gray)
-    
+
         if maskOverlay != None:
             mask = nibabel.load(maskOverlay)
             maskData = mask.get_data()
@@ -62,14 +62,22 @@ class Qa(object):
             segSlices = self.__image3d2slices(segData, width, boundaries=boundaries)
             segSlices = [numpy.ma.masked_where(segSlices[dim] == 0, segSlices[dim]) for dim in range(3)]
             lutFiles = os.path.join(self.toadDir, 'templates', 'lookup_tables', self.config.get('template', 'freesurfer_lut'))
-            lutData = numpy.loadtxt(lutFiles, usecols=(0,1,2,3))
+            lutDataOrigin = numpy.loadtxt(lutFiles, usecols=(0,1,2,3))
+
+            """ Create empty lutData """
+            lutData = numpy.zeros((lutDataOrigin[-1,0].astype(numpy.int)+1,lutDataOrigin.shape[1]))
+
+            lutData[:,0] = range(0,lutDataOrigin[-1,0].astype(numpy.int)+1,1)
+            lutData[lutDataOrigin[:,0].astype(numpy.int),1:] = lutDataOrigin[:,1:]
             lutCmap = matplotlib.colors.ListedColormap(lutData[:,1:]/256)
+
             norm = matplotlib.colors.BoundaryNorm(lutData[:,0], lutCmap.N)
+
             segImshow = functools.partial(matplotlib.pyplot.imshow, \
                                           alpha=0.6, \
                                           norm=norm, \
                                           cmap=lutCmap)
- 
+
         #show_slices
         for dim in range(3):
             ax = matplotlib.pyplot.subplot(3, 1, dim+1)
@@ -107,7 +115,7 @@ class Qa(object):
             gifSpeed: delay between images (tens of ms), default=30
         """
         gifId = self.__idGenerator()
-    
+
         image = nibabel.load(source)
         imageData = image.get_data()
 
@@ -119,14 +127,14 @@ class Qa(object):
             output = gifId + '{0:04}.png'.format(num)
             self.slicerPng(imageData[:,:,:,num], output, vmax=vmax, isData=True, boundaries=boundaries, grid=True)
             imageList.append(output)
-        
+
         self.__imageList2Gif(imageList, target, gifSpeed)
         #Cleaning temp files
         cmd = 'rm {}*.png'.format(gifId)
         self.launchCommand(cmd)
-    
+
         return target
-             
+
 
 
     def slicerGifCompare(self, source1, source2, target, gifSpeed=100, vmax=None, boundaries=None):
@@ -173,11 +181,11 @@ class Qa(object):
         translations = parameters[1:Vsize,0:3]
         rotations = parameters[1:Vsize,3:6]
         rotations = rotations / numpy.pi * 180
-    
+
         plotdata = [(translations,'translation (mm)',targetTranslations),
                     (rotations,'rotation (degree)',targetRotations)
                     ]
-    
+
         for data, ylabel, pngoutput in plotdata:
             matplotlib.pyplot.clf()
             px, = matplotlib.pyplot.plot(vols, data[:,0])
@@ -188,7 +196,7 @@ class Qa(object):
             matplotlib.pyplot.ylabel(ylabel)
             matplotlib.pyplot.legend([px, py, pz], ['x', 'y', 'z'])
             matplotlib.pyplot.savefig(pngoutput)
-    
+
         matplotlib.pyplot.close()
         matplotlib.rcdefaults()
 
