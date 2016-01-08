@@ -4,20 +4,20 @@
 |                |                                                       |
 |----------------|-------------------------------------------------------|
 |**Name**        | Hardidipy                                             |
-|**Goal**        | Perform constrain spherical deconvolution using Dipy  |
+|**Goal**        | Perform constrained spherical deconvolution using Dipy  |
 |**Config file** | `triangulated_spheres` <br> `ignore`                  |
 |**Time**        | About 15 minutes                                      |
-|**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fibers orientations (nufo) <br> |
+|**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fiber orientations (nufo) <br> |
 
 #
  
 ## Goal
 
-The hardidipy step reconstructs fiber orientation distribution (fod) using non-negativity constrained spherical deconvolution (csd) from diffusion-weigthed images (dwi). [ref: <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Dipy</a>]
+The hardidipy step reconstructs the fiber orientation distribution (fod) using non-negativity constrained spherical deconvolution (csd) from diffusion-weighted images (dwi). [ref: <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Dipy</a>]
 
 ## Requirements
 
-- Diffusion-weigthed images (dwi)
+- Diffusion-weighted images (dwi)
 - Diffusion-weighted gradient scheme (bvec and bval)
 - Mask of the brain (optional)
 
@@ -33,7 +33,7 @@ Ignore hardidipy task: not recommended
 
 ## Implementation
 
-### 1- Get response from a single population fiber
+### 1- Get response from a single fiber population 
 
 - <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Nipy auto_response</a>
 
@@ -41,7 +41,7 @@ Ignore hardidipy task: not recommended
 
 - <a href="http://nipy.org/dipy/examples_built/reconst_csd.html#example-reconst-csd" target="_blank">Nipy reconst_csd</a>
 
-### 3- Extract general fractional anisotropy (gfa) and number of fibers orientations (nufo)
+### 3- Extract general fractional anisotropy (gfa) and number of fiber orientations (nufo)
 
 ```{.python}
 function: gfa = csdPeaks.gfa
@@ -50,8 +50,8 @@ function: csdCoeff = csdPeaks.shm_coeff
 
 ## Expected result(s) - Quality Assessment (QA)
 
-- Creation of the fiber orientation distribution (fod) and number of fibers orientations (nufo)
-- Produce an image (png) of the number of fibers orientations (nufo)
+- Creation of the fiber orientation distribution (fod) and number of fiber orientations (nufo)
+- Produce an image (png) of the number of fiber orientations (nufo)
 
 ## References
 

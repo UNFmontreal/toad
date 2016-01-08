@@ -635,3 +635,42 @@ def computeNoiseMask(source, target):
     maskNoise = ~maskNoise
     nibabel.save(nibabel.Nifti1Image(maskNoise.astype(numpy.uint8), brainImage.get_affine()), target)
     return target
+
+
+def convertAndRestride(source, target, orientation):
+    """Utility for converting between different file formats
+
+    Args:
+        source: The input source file
+        target: The name of the resulting output file name
+
+    """
+    cmd = "mrconvert {} {} -stride {} -force -quiet"\
+        .format(source, target, orientation)
+    util.launchCommand(cmd)
+    return target
+
+def applyResampleFsl(source, reference, matrix, target, nearest = False):
+    """Register an image with symmetric normalization and mutual information metric
+
+    Args:
+        source:
+        reference: use this image as reference
+        matrix:
+        target: the output file name
+        nearest: A boolean, process nearest neighbour interpolation
+
+    Returns:
+        return a file containing the resulting image transform
+    """
+    cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {} ".format(source, reference, matrix, target)
+    if nearest:
+        cmd += "-interp nearestneighbour"
+    util.launchCommand(cmd)
+    return target
+
+
+def applyRegistrationMrtrix(source , matrix, target):
+    cmd = "mrtransform  {} -linear {} {} -quiet".format(source, matrix, target)
+    util.launchCommand(cmd)
+    return target

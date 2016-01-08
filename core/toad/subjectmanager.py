@@ -162,7 +162,7 @@ class SubjectManager(Logger, Config):
 
         gridFlags = " -q {}".format(subject.getConfig().get('general', 'sge_queue'))
         if subject.getConfig().get('general', 'server') in ['magma', 'stark']:
-            gridFlags = " -notify "
+            gridFlags += " -notify "
 
         if subject.getConfig().get('general', 'server') in ['mammouth']:
             gridFlags += " -l walltime=48:00:00 "

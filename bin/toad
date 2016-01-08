@@ -10,12 +10,11 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from core.toad import logger
 from lib import util, xmlhelper, arguments
 
-
 __author__ = "Mathieu Desrosiers, Arnaud Bore, and Christophe Bedetti"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers", "Arnaud Bore", "Christophe Bedetti", "Guillaume Vallet", "Basile Pinsard"]
 __license__ = "GPL v2"
-__version__ = "1.0"
+__version__ = "1.1"
 __maintainer__ = "Mathieu Desrosiers"
 __email__ = "mathieu.desrosiers@criugm.qc.ca"
 __status__ = "Production"
@@ -56,19 +55,22 @@ def __parseArguments():
               |- 00-qa
               |- 01-preparation
               |- 02-parcellation
-              |- 03-correction
-              |- 05-preprocessing
-              |- 06-registration
-              |- 07-masking
-              |- 08-snr
-              |- 09-tensorfsl
-              |- 10-tensormrtrix
-              |- 11-tensordipy
-              |- 12-hardimrtrix
-              |- 13-hardidipy
-              |- 14-tractographymrtrix
-              |- 15-tractographydipy
-              |- 16-outputs
+              |- 03-atlas
+              |- 04-denoising
+              |- 05-correction
+              |- 06-preprocessing
+              |- 07-registration
+              |- 08-atlasregistration
+              |- 09-masking
+              |- 10-tensorfsl
+              |- 11-tensormrtrix
+              |- 12-tensordipy
+              |- 13-hardimrtrix
+              |- 14-hardidipymrtrix
+              |- 15-tractographymrtrix
+              |- 16-tractographydipy
+              |- 17-snr
+              |- 18-outputs
               |- 99-logs
 
 

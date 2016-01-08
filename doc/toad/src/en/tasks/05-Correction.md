@@ -7,17 +7,17 @@
 |**Goal**        | Motion and distortion correction of dwi images        |
 |**Config file** | `phase_enc_dir` <br> `echo_spacing` <br> `epi_factor` <br> `ignore` <br> `cost` <br> `dof` <br> `interp` <br> `applyxfm` <br> `smooth3`                             |
 |**Time**        | About 1 hour                                          |
-|**Output**      | Diffusion-weighted images corrected <br> Diffusion-weighted gradient scheme corrected|
+|**Output**      | Corrected diffusion-weighted images <br> Corrected diffusion-weighted gradient scheme|
 
 #
 
 ## Goal
 
 The correction step creates diffusion-weighted images (DWI) corrected for motion. 
-If a fielmap or two b0 with opposite PE are provided, the correction step will use them to correct for geometrical distortion as well.
+If a fielmap or two b0 with opposite phase encoding (PE) are provided, the correction step will use them to correct for geometrical distortion as well.
 
 
-## Minimal Requirements
+## Minimum Requirements
 
 - Diffusion-weigthed images (dwi)
 - Diffusion-weighted gradient scheme (b or bvec and bval)

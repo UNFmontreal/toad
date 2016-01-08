@@ -14,6 +14,11 @@ class Images(object):
         for arg in args:
             if isinstance(arg, tuple) and len(arg) == 2:
                 self.__images.append(arg)
+            elif isinstance(arg, str):
+                self.__images.append((arg, arg))
+            else:
+                self.__images.append((False, False))
+
 
     def __repr__(self):
         string = ""
