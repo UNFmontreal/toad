@@ -8,8 +8,8 @@ import os
 
 from lib.images import Images
 from core.toad.logger import Logger
+from core.toad.qa import Qa
 from load import Load
-from lib.qa import Qa
 from lib import util
 
 
@@ -47,6 +47,7 @@ class GenericTask(Logger, Load, Qa):
         self.tasksAsReferences = None
         Logger.__init__(self, subject.getLogDir())
         Load.__init__(self, self.config)
+        Qa.__init__(self)
         self.dependencies = []
         self.__dependenciesDirNames = {}
         for arg in args:
