@@ -150,19 +150,17 @@ class Preparation(GenericTask):
         qaImages = Images()
 
         tags = (
-            ('anat', 'png', self.slicer3d, 'High resolution anatomical image'),
-            #('dwi', 'gif', self.slicerGif, 'Diffusion weighted image'),
-            ('b0_ap', 'png', self.slicer3d, 'B0 AP image'),
-            ('b0_pa', 'png', self.slicer3d, 'B0 PA image'),
-            ('mag', 'png', self.slicer3d, 'Magnitude image'),
-            ('phase', 'png', self.slicer3d, 'Phase image'),
+            ('anat', self.plot3dVolume, 'High resolution anatomical image'),
+            ('dwi', self.plot4dVolume, 'Diffusion weighted image'),
+            ('b0_ap', self.plot3dVolume, 'B0 AP image'),
+            ('b0_pa', self.plot3dVolume, 'B0 PA image'),
+            ('mag', self.plot3dVolume, 'Magnitude image'),
+            ('phase', self.plot3dVolume, 'Phase image'),
             )
-        for prefix, imageFormat, slicerMethod, description in tags:
+        for prefix, plotMethod, description in tags:
             source = self.getImage(prefix)
             if source:
-                qaImage = self.buildName(source, None, imageFormat)
-                print qaImage
-                qaImage = slicerMethod(source)
+                qaImage = plotMethod(source)
                 qaImages.append((qaImage, description))
 
         return qaImages
