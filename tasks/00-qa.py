@@ -20,25 +20,32 @@ class QA(GenericTask):
 
     def implement(self):
 
-        mainTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.main.tpl')
-        imagesDir = os.path.join(self.workingDir, self.get('qa', 'images_dir'))
+        mainTemplate = os.path.join(
+                self.toadDir, 'templates', 'files', 'qa.main.tpl')
+        imagesDir = os.path.join(
+                self.workingDir, self.get('qa', 'images_dir'))
 
         if not os.path.exists(imagesDir):
             os.makedirs(imagesDir)
 
         #Copy logo
-        logoLink = os.path.join(self.toadDir, 'templates', 'files', 'qa_logo.png')
+        logoLink = os.path.join(
+                self.toadDir, 'templates', 'files', 'qa_logo.png')
         util.copy(logoLink, imagesDir, 'qa_logo.png')
 
         #Copy style.css
-        styleTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.style.tpl')
-        jQuery = os.path.join(self.toadDir, 'templates', 'files', self.get('general', 'jquery'))
+        styleTemplate = os.path.join(
+                self.toadDir, 'templates', 'files', 'qa.style.tpl')
+        jQuery = os.path.join(
+                self.toadDir, 'templates', 'files',
+                self.get('general', 'jquery'))
 
         util.copy(styleTemplate, self.workingDir, 'style.css')
         util.copy(jQuery, self.workingDir, 'jquery.js')
 
         #Create menu.html only for tasks with implemented QA
-        menuTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.menu.tpl')
+        menuTemplate = os.path.join(
+                self.toadDir, 'templates', 'files', 'qa.menu.tpl')
         util.copy(menuTemplate, self.workingDir, 'menu.html')
 
         #Create index.html
@@ -54,7 +61,6 @@ class QA(GenericTask):
 
     def meetRequirement(self, result=True):
         """
-        
         """
         return result
 
@@ -63,5 +69,6 @@ class QA(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        return Images((os.path.join(self.workingDir, 'index.html'), 'QA index.html'),
-                        (os.path.join(self.workingDir, 'jquery.js'), 'Jquery library'))
+        return Images(
+                (os.path.join(self.workingDir, 'index.html'), 'QA index.html'),
+                (os.path.join(self.workingDir, 'jquery.js'), 'Jquery library'))
