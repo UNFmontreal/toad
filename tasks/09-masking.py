@@ -159,8 +159,7 @@ class Masking(GenericTask):
             #(area1024, 'area 1024 from aparc_aseg atlas'),
             )
         for image, description in tags:
-            qaImage = self.buildName(image, None, 'png')
-            self.slicerPng(b0, qaImage, maskOverlay=image, boundaries=image)
-            qaImages.extend(Images((qaImage, description)))
+            imageQa = self.plot3dVolume(b0, edges=image, fov=image)
+            qaImages.append((imageQa, description))
 
         return qaImages
