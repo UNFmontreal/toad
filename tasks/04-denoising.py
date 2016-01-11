@@ -192,24 +192,22 @@ class Denoising(GenericTask):
 
         #Build qa images
         if dwiDenoised:
-            dwiDenoisedGif = self.buildName(dwiDenoised, None, 'gif')
-            dwiCompareGif = self.buildName(dwiDenoised, 'compare', 'gif')
-            self.slicerGif(dwiDenoised, dwiDenoisedGif, boundaries=brainMask)
-            self.slicerGifCompare(dwi, dwiDenoised, dwiCompareGif, boundaries=brainMask)
-            qaImages.extend(Images(
-                (dwiDenoisedGif, 'Denoised diffusion image'),
-                (dwiCompareGif, 'Before and after denoising'),
-                ))
+
+            dwiDenoisedQa = self.plot4dVolume(dwiDenoised, fov=brainMask)
+            qaImages.append((dwiDenoisedQa, 'Denoised diffusion image'))
+
+            dwiCompareQa = self.compare4dVolumes(
+                    dwi, dwiDenoised, fov=brainMask)
+            qaImages.append((dwiCompareQa, 'Before and after denoising'))
+
             if self.algorithm == "nlmeans":
                 if self.sigmaVector != None:
-                    sigmaPng = self.buildName(dwiDenoised, 'sigma', 'png')
-                    self.plotSigma(self.sigmaVector, sigmaPng)
-                    qaImages.extend(
-                        Images(sigmaPng,'Sigmas from nlmeans algorithm'))
+                    sigmaQa = self.plotSigma(self.sigmaVector, dwiDenoised)
+                    qaImages.append((sigmaQa,'Sigmas from nlmeans algorithm'))
 
                 if noiseMask:
-                    noiseMaskPng = self.buildName(noiseMask, None, 'png')
-                    self.slicerPng(b0, noiseMaskPng, maskOverlay=noiseMask, boundaries=noiseMask)
-                    qaImages.extend(
-                        Images(noiseMaskPng, 'Noise mask from nlmeans algorithm'))
+                    noiseMaskQa = self.plot3dVolume(
+                            b0, edges=noiseMask, fov=noiseMask)
+                    qaImages.append(
+                            (noiseMaskQa, 'Noise mask from nlmeans algorithm'))
         return qaImages
