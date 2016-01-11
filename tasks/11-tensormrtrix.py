@@ -112,8 +112,8 @@ class TensorMrtrix(GenericTask):
         for postfix, description in tags:
             image = self.getImage('dwi', postfix)
             if image:
-                qaImage = self.buildName(image, softwareName, 'png')
-                self.slicerPng(image, qaImage, boundaries=mask)
-                qaImages.extend(Images((qaImage, description)))
+                imageQa = self.plot3dVolume(
+                        image, fov=mask, postfix=softwareName)
+                qaImages.append((imageQa, description))
 
         return qaImages
