@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 
-#import os
-#import shutil
-#import dipy.viz.colormap
-#import xml.dom.minidom as minidom
-#from string import ascii_uppercase, digits
-#from random import choice
-#from nipy.labs.viz_tools import slicers
 import dipy.data
 import dipy.reconst.dti
 import dipy.segment.mask
+#import dipy.viz.colormap
 import dipy.viz.fvtk
 import functools
 import matplotlib
