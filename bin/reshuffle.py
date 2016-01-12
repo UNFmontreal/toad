@@ -3,9 +3,11 @@
 import os
 import sys
 import shutil
+import argparse
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from core.dicom.dicom import Dicom
+from lib import arguments
 
 
 __author__ = "Mathieu Desrosiers"
@@ -33,8 +35,6 @@ def parseArguments():
     args = parser.parse_args()
     return args
 
-#destination = "/Users/mathieu/Desktop/reshuffle/results"
-
 class Reshuffler(object):
     def __init__(self, source):
         self.__source = source
@@ -58,12 +58,12 @@ class Reshuffler(object):
         session.appendDicom(dicom)
         self.__sessions[sessionName] = session
 
-    def convert(self):
+    def convert(self, target):
         for sessionName, session in self.__sessions.iteritems():
             for sequenceName, sequence in session.getSequences().iteritems():
                 for dicom in sequence.getDicoms():
                     dicomFileName = "{}-{:04d}.dcm".format(dicom.getSessionName(), dicom.getInstanceNumber())
-                    directory = os.path.join(destination, sessionName, sequenceName)
+                    directory = os.path.join(target, sessionName, sequenceName)
                     if sequence.isMultiEchoes():
                         directory = os.path.join(directory, "echo_{}".format(dicom.getEchoTime()))
                     if not os.path.exists(directory):
@@ -138,11 +138,8 @@ class Sequence(object):
         return cmd
 
 if __name__ == '__main__':
-    #source = sys.argv[1]
 
     arguments = parseArguments()
-    print arguments
-
-    #reshuffle = Reshuffler(source)
-    #reshuffle.convert()
+    reshuffle = Reshuffler(arguments.source)
+    reshuffle.convert(arguments.target)
 
