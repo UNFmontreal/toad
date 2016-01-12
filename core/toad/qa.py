@@ -12,12 +12,13 @@ __credits__ = ["Christophe Bedetti", "Mathieu Desrosiers"]
 class Qa(object):
 
     def __init__(self):
-        self.qaImageFormat = 'jpg'
+        self.qaImagesFormat = self.config.get('qa', 'images_format')
         self.qaImagesDir = os.path.join(
                 self.qaDir, self.config.get('qa', 'images_dir'), self.getName())
-        self.qaMainTemplate = os.path.join(
-                self.toadDir, 'templates', 'files', 'qa.main.tpl')
-        self.qaIndex = os.path.join(
+        self.qaHtmlTemplate = os.path.join(
+                self.toadDir, 'templates', 'files',
+                self.config.get('qa', 'index_template'))
+        self.qaHtml = os.path.join(
                 self.qaDir, '{}.html'.format(self.getName()))
 
 
@@ -26,17 +27,17 @@ class Qa(object):
         """
         Wrapper of the class Plot3dVolume of qautil
         """
-        target = self.buildName(source, postfix, ext=self.qaImageFormat)
+        target = self.buildName(source, postfix, ext=self.qaImagesFormat)
         qaPlot = qautil.Plot3dVolume(source, fov=fov)
         if segOverlay != None:
             lut = self.config.get('template', 'freesurfer_lut')
             lutFiles = os.path.join(
                     self.toadDir, 'templates', 'lookup_tables', lut)
             qaPlot.setSegOverlay(segOverlay, lutFiles)
-            target = self.buildName(segOverlay, None, ext=self.qaImageFormat)
+            target = self.buildName(segOverlay, None, ext=self.qaImagesFormat)
         if edges !=None:
             qaPlot.setEdges(edges)
-            target = self.buildName(edges, None, ext=self.qaImageFormat)
+            target = self.buildName(edges, None, ext=self.qaImagesFormat)
         qaPlot.save(target)
         return target
 
@@ -65,9 +66,9 @@ class Qa(object):
         """
         """
         targetTranslations = self.buildName(
-                basename, 'translations', ext=self.qaImageFormat)
+                basename, 'translations', ext=self.qaImagesFormat)
         targetRotations = self.buildName(
-                basename, 'rotations', ext=self.qaImageFormat)
+                basename, 'rotations', ext=self.qaImagesFormat)
         qautil.plotMovement(
                 parametersFile, targetTranslations, targetRotations)
         return targetTranslations, targetRotations
@@ -84,7 +85,7 @@ class Qa(object):
     def plotSigma(self, sigma, basename):
         """
         """
-        target = self.buildName(basename, 'sigma', ext=self.qaImageFormat)
+        target = self.buildName(basename, 'sigma', ext=self.qaImagesFormat)
         qautil.plotSigma(sigma, target)
         return target
 
@@ -92,8 +93,8 @@ class Qa(object):
     def noiseAnalysis(self, source, maskNoise, maskCc):
         """
         """
-        targetSnr = self.buildName(source, 'snr', ext=self.qaImageFormat)
-        targetHist = self.buildName(source, 'hist', ext=self.qaImageFormat)
+        targetSnr = self.buildName(source, 'snr', ext=self.qaImagesFormat)
+        targetHist = self.buildName(source, 'hist', ext=self.qaImagesFormat)
         qautil.noiseAnalysis(source, maskNoise, maskCc, targetSnr, targetHist)
         return targetSnr, targetHist
 
@@ -101,7 +102,7 @@ class Qa(object):
     def plotReconstruction(self, data, mask, cc, model, basename):
         """
         """
-        target = self.buildName(basename, model, ext=self.qaImageFormat)
+        target = self.buildName(basename, model, ext=self.qaImagesFormat)
         qautil.plotReconstruction(data, mask, cc, target, model)
         return target
 
@@ -109,9 +110,25 @@ class Qa(object):
     def createVtkPng(self, source, anatomical, roi):
         """
         """
-        target = source.replace(".trk", self.qaImageFormat)
+        target = source.replace(".trk", self.qaImagesFormat)
         qautil.createVtkPng(source, anatomical, roi, target)
         return target
+
+
+    def createTaskHtml(self, tags, htmlLink=None):
+        """
+        """
+        if htmlLink == None:
+            htmlLink = self.qaHtml
+
+        # Fill missing keys
+        keys = ['subject', 'taskInfo', 'parseHtmlTables', 'parseVersionTables']
+        for key in keys:
+            if not tags.has_key(key): tags[key] = ''
+
+        # Parse template and create html file
+        htmlCode = self.parseTemplate(tags, self.qaHtmlTemplate)
+        util.createScript(htmlLink, htmlCode)
 
 
     def updateQaMenu(self):
@@ -132,16 +149,11 @@ class Qa(object):
                 f.write(line)
 
         #Create temporary html
-        htmlTaskFile = os.path.join(self.qaDir, "{}.html".format(taskName))
         message = "Task is being processed. Refresh to check completion."
         tags = {
             'subject':self.subject.getName(),
-            'taskInfo':'',
-            'parseHtmlTables':message,
-            'parseVersionTables': '',
-            }
-        htmlCode = self.parseTemplate(tags, self.qaMainTemplate)
-        util.createScript(htmlTaskFile, htmlCode)
+            'parseHtmlTables':message}
+        self.createTaskHtml(tags)
 
 
     def createQaReport(self, images):
@@ -152,7 +164,8 @@ class Qa(object):
         if not os.path.exists(self.qaImagesDir):
             os.makedirs(self.qaImagesDir)
         tableTemplate = os.path.join(
-                self.toadDir, 'templates', 'files', 'qa.table.tpl')
+                self.toadDir, 'templates', 'files',
+                self.config.get('qa', 'table_template'))
         taskInfo = images.getInformation()
         versions = minidom.parse(os.path.join(
                 self.logDir, self.get('general','versions_file_name')))
@@ -205,7 +218,4 @@ class Qa(object):
             'parseHtmlTables':tablesCode,
             'parseVersionTables': versions.toprettyxml(),
             }
-        htmlCode = self.parseTemplate(tags, self.qaMainTemplate)
-        util.createScript(self.qaIndex, htmlCode)
-
-
+        self.createTaskHtml(tags)
