@@ -35,13 +35,10 @@ class QA(GenericTask):
             fileName = self.config.get('qa', tag)
             fileLink = os.path.join(
                     self.toadDir, 'templates', 'files', fileName)
-            util.copy(fileLink, self.workingDir, fileName
+            util.copy(fileLink, self.workingDir, fileName)
 
         #Create index.html
-        tags = {
-            'subject':self.subjectName,
-            'taskName':self.getName()}
-        self.createTaskHtml(tags, 'index.html')
+        self.createTaskHtml({}, 'index.html')
 
 
     def meetRequirement(self, result=True):
