@@ -3,22 +3,37 @@
 import os
 import sys
 import shutil
-
+import argparse
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from core.dicom.dicom import Dicom
+from lib import arguments
 
-"""
-tags = OrderedDict([('manufacturer', "0008 0070"),
-                    ('patientName', "0010 0010"),
-                    ('seriesDescription', "0008 103E"),
-                    ('seriesNumber', "0020 0011"),
-                    ('instanceNumber', "0020 0013"),
-                    ('echoTime', "0018 0081"),
-                    ('channel', "0051 100f")])
-"""
 
-destination = "/Users/mathieu/Desktop/reshuffle/results"
+__author__ = "Mathieu Desrosiers"
+__copyright__ = "Copyright (C) 2014, TOAD"
+__credits__ = ["Mathieu Desrosiers"]
+__license__ = "GPL v2"
+__version__ = "0.1.0"
+__maintainer__ = "Mathieu Desrosiers"
+__email__ = "mathieu.desrosiers@criugm.qc.ca"
+__status__ = "Prototype"
+
+
+def parseArguments():
+    """Prepare and parse user friendly command line arguments for sys.argv.
+
+    Returns:
+        a args stucture containing command lines arguments
+    """
+    parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description ="""\n
+         """)
+    parser.add_argument("source", help="A SIEMENS DICOM imges root directory")
+    parser.add_argument("target", help="the target directory")
+    parser.add_argument('-v', '--version', action='version', version="%(prog)s ({})".format(__version__))
+    args = parser.parse_args()
+    return args
 
 class Reshuffler(object):
     def __init__(self, source):
@@ -43,12 +58,12 @@ class Reshuffler(object):
         session.appendDicom(dicom)
         self.__sessions[sessionName] = session
 
-    def convert(self):
+    def convert(self, target):
         for sessionName, session in self.__sessions.iteritems():
             for sequenceName, sequence in session.getSequences().iteritems():
                 for dicom in sequence.getDicoms():
                     dicomFileName = "{}-{:04d}.dcm".format(dicom.getSessionName(), dicom.getInstanceNumber())
-                    directory = os.path.join(destination, sessionName, sequenceName)
+                    directory = os.path.join(target, sessionName, sequenceName)
                     if sequence.isMultiEchoes():
                         directory = os.path.join(directory, "echo_{}".format(dicom.getEchoTime()))
                     if not os.path.exists(directory):
@@ -123,7 +138,8 @@ class Sequence(object):
         return cmd
 
 if __name__ == '__main__':
-    source = sys.argv[1]
 
-    reshuffle = Reshuffler(source)
-    reshuffle.convert()
+    arguments = parseArguments()
+    reshuffle = Reshuffler(arguments.source)
+    reshuffle.convert(arguments.target)
+
