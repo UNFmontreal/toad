@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import dipy.data
-import dipy.reconst.dti
-import dipy.segment.mask
-#import dipy.viz.colormap
-import dipy.viz.fvtk
 import functools
 import matplotlib
 matplotlib.use('Agg')
@@ -13,6 +8,11 @@ import mpl_toolkits.mplot3d
 import nibabel
 import numpy
 import tempfile
+import dipy.data
+import dipy.reconst.dti
+import dipy.segment.mask
+import dipy.viz.colormap
+import dipy.viz.fvtk
 from lib import util
 
 __author__ = "Christophe Bedetti"

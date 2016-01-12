@@ -16,31 +16,27 @@ class QA(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'backup')
         self.setCleanupBeforeImplement(False)
-        self.__subject = subject
+        self.subjectName = subject.getName()
 
     def implement(self):
 
-        mainTemplate = os.path.join(
-                self.toadDir, 'templates', 'files', 'qa.main.tpl')
-        imagesDir = os.path.join(
-                self.workingDir, self.get('qa', 'images_dir'))
-
-        if not os.path.exists(imagesDir):
-            os.makedirs(imagesDir)
+        if not os.path.exists(self.qaImagesDir):
+            os.makedirs(self.qaImagesDir)
 
         #Copy logo
+        logoName = self.config.get('qa', 'logo')
         logoLink = os.path.join(
-                self.toadDir, 'templates', 'files', 'qa_logo.png')
-        util.copy(logoLink, imagesDir, 'qa_logo.png')
+                self.toadDir, 'templates', 'files', logoName)
+        util.copy(logoLink, self.qaImagesDir, logoName)
 
-        #Copy style.css
-        styleTemplate = os.path.join(
-                self.toadDir, 'templates', 'files', 'qa.style.tpl')
-        jQuery = os.path.join(
+        #Copy css & js
+        css = os.path.join(
                 self.toadDir, 'templates', 'files',
-                self.get('general', 'jquery'))
+                self.config.get('qa', 'css'))
+        util.copy(css, self.workingDir, 'style.css')
 
-        util.copy(styleTemplate, self.workingDir, 'style.css')
+        jQuery = os.path.join(
+                self.toadDir, 'templates', 'files', self.get('qa', 'jquery'))
         util.copy(jQuery, self.workingDir, 'jquery.js')
 
         #Create menu.html only for tasks with implemented QA
@@ -49,14 +45,8 @@ class QA(GenericTask):
         util.copy(menuTemplate, self.workingDir, 'menu.html')
 
         #Create index.html
-        tags = {
-            'subject':self.__subject.getName(),
-            'taskInfo':'',
-            'parseHtmlTables':'',
-            'parseVersionTables':'',
-            }
-        htmlCode = self.parseTemplate(tags, mainTemplate)
-        util.createScript('index.html', htmlCode)
+        tags = {'subject':self.subjectName}
+        self.createTaskHtml(tags, 'index.html')
 
 
     def meetRequirement(self, result=True):
