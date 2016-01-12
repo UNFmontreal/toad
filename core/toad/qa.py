@@ -117,14 +117,29 @@ class Qa(object):
 
     def createTaskHtml(self, tags, htmlLink=None):
         """
+        Create html file for the task
+        Arg:
+            tags: dict with the following keys to parse the html template
+                subject, taskInfo, taskName, parseHtmlTables, parseVersionTables
+                Script fills missing keys
         """
+        versions = minidom.parse(os.path.join(
+                self.logDir, self.get('general','versions_file_name')))
+
         if htmlLink == None:
             htmlLink = self.qaHtml
 
         # Fill missing keys
-        keys = ['subject', 'taskInfo', 'parseHtmlTables', 'parseVersionTables']
-        for key in keys:
-            if not tags.has_key(key): tags[key] = ''
+        baseTags = {
+                'jqueryFile': self.config.get('qa', 'jquery'),
+                'subject': self.subject.getName(),
+                'taskName': self.getName(),
+                'taskInfo': '',
+                'parseHtmlTables': '',
+                'parseVersionTables': versions.toprettyxml()
+                }
+        for key, value in baseTags.iteritems():
+            if not tags.has_key(key): tags[key] = value
 
         # Parse template and create html file
         htmlCode = self.parseTemplate(tags, self.qaHtmlTemplate)
@@ -133,13 +148,15 @@ class Qa(object):
 
     def updateQaMenu(self):
         """
+        This method runs at the beginning of a task with qaSupplier implemented
+        It adds a link to the task in qa menu
         """
         taskName = self.getName()
+        menuFile = os.path.join(self.qaDir, self.config.get('qa', 'menu'))
+        menuLinkTemplate = \
+                '<li><a id="{0}" href="{0}.html" target="_top">{0}</a></li>\n'
 
-        #Updating menu
-        menuFile = os.path.join(self.qaDir, 'menu.html')
-        menuLinkTemplate = '<li><a id="{0}" href="{0}.html" target="_top">{0}</a></li>\n'
-
+        #Add task link in qa menu if not already present
         with open(menuFile, 'r') as f:
             lines = f.readlines()
         if not any(taskName in line for line in lines):
@@ -150,10 +167,7 @@ class Qa(object):
 
         #Create temporary html
         message = "Task is being processed. Refresh to check completion."
-        tags = {
-            'subject':self.subject.getName(),
-            'parseHtmlTables':message}
-        self.createTaskHtml(tags)
+        self.createTaskHtml({'taskInfo':message})
 
 
     def createQaReport(self, images):
@@ -161,14 +175,13 @@ class Qa(object):
         Args:
            images : an Images object
         """
+        # make qa images directory
         if not os.path.exists(self.qaImagesDir):
             os.makedirs(self.qaImagesDir)
+
         tableTemplate = os.path.join(
                 self.toadDir, 'templates', 'files',
                 self.config.get('qa', 'table_template'))
-        taskInfo = images.getInformation()
-        versions = minidom.parse(os.path.join(
-                self.logDir, self.get('general','versions_file_name')))
 
         print "createQaReport images =", images
 
@@ -190,7 +203,7 @@ class Qa(object):
                 else:
                     classType = 'large_view'
 
-                # Copy qa image to qa image directory
+                # Copy images to qa image directory
                 # default: 00-qa/images/<task name>
                 shutil.copyfile(
                         imageLink,
@@ -213,9 +226,7 @@ class Qa(object):
                 tablesCode += self.parseTemplate(tags, tableTemplate)
 
         tags = {
-            'subject':self.subject.getName(),
-            'taskInfo':taskInfo,
-            'parseHtmlTables':tablesCode,
-            'parseVersionTables': versions.toprettyxml(),
-            }
+                'taskInfo':images.getInformation(),
+                'parseHtmlTables':tablesCode
+                }
         self.createTaskHtml(tags)
