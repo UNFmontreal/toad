@@ -29,23 +29,18 @@ class QA(GenericTask):
                 self.toadDir, 'templates', 'files', logoName)
         util.copy(logoLink, self.qaImagesDir, logoName)
 
-        #Copy css & js
-        css = os.path.join(
-                self.toadDir, 'templates', 'files',
-                self.config.get('qa', 'css'))
-        util.copy(css, self.workingDir, 'style.css')
-
-        jQuery = os.path.join(
-                self.toadDir, 'templates', 'files', self.get('qa', 'jquery'))
-        util.copy(jQuery, self.workingDir, 'jquery.js')
-
-        #Create menu.html only for tasks with implemented QA
-        menuTemplate = os.path.join(
-                self.toadDir, 'templates', 'files', 'qa.menu.tpl')
-        util.copy(menuTemplate, self.workingDir, 'menu.html')
+        #Copy menu, css & js
+        styleFiles = ('menu', 'css', 'jquery', 'js')
+        for tag in styleFiles:
+            fileName = self.config.get('qa', tag)
+            fileLink = os.path.join(
+                    self.toadDir, 'templates', 'files', fileName)
+            util.copy(fileLink, self.workingDir, fileName
 
         #Create index.html
-        tags = {'subject':self.subjectName}
+        tags = {
+            'subject':self.subjectName,
+            'taskName':self.getName()}
         self.createTaskHtml(tags, 'index.html')
 
 
