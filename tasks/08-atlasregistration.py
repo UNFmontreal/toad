@@ -66,6 +66,7 @@ class Atlasregistration(GenericTask):
         qaImages = Images(
                 (brodmannQa, 'Brodmann segmentation on upsampled b0'),
                 (aal2Qa, 'Aal2 segmentation on upsampled b0'),
-                (networks7Qa, 'Resting state sevens networks segmentation on upsampled b0'))
+                (networks7Qa, 'Resting state sevens networks segmentation ' \
+                        'on upsampled b0'))
 
         return qaImages

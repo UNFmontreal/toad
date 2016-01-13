@@ -84,8 +84,8 @@ class Atlas(GenericTask):
                 anat, segOverlay=networks7, fov=networks7)
 
         qaImages = Images(
-            (brodmannQa, 'Brodmann segmentation from freesurfer'),
-            (aal2Qa, 'Aal2 segmentation from freesurfer'),
-            (networks7Qa, 'Seven networks segmentation from freesurfer'))
+            (brodmannQa, 'Brodmann segmentation from Freesurfer'),
+            (aal2Qa, 'Aal2 segmentation from Freesurfer'),
+            (networks7Qa, 'Seven networks segmentation from Freesurfer'))
 
         return qaImages
