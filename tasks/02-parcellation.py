@@ -380,7 +380,7 @@ class Parcellation(GenericTask):
         qaImages = Images(
             (anatQa, 'High resolution anatomical image of freesurfer'),
             (brainMaskQa, 'Brain mask on norm from freesurfer'),
-            (aparcAsegQa, 'Aparc aseg segmentation from freesurfer'))
+            (aparcAsegQa, 'Aparc aseg segmentation from freesurfer'),
             (wmparcQa, 'White Matter segmentation from freesurfer'))
 
         return qaImages

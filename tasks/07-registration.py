@@ -127,7 +127,7 @@ class Registration(GenericTask):
 
         qaImages = Images(
             (brainMaskQa, 'Brain mask on upsampled b0'),
-            (aparcAsegQa, 'aparcaseg segmentation on upsampled b0'))
+            (aparcAsegQa, 'aparcaseg segmentation on upsampled b0'),
             (wmparcQa, 'white matter segmentation on upsampled b0'))
 
         return qaImages
