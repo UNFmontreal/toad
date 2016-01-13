@@ -92,6 +92,7 @@ class Parcellation(GenericTask):
         """
         for (target, source) in [(self.buildName(anatomicalName, 'freesurfer'), "T1.mgz"),
                                     (self.get('aparc_aseg'), "aparc+aseg.mgz"),
+                                    (self.get('wmparc'), "wmparc.mgz"),
                                     (self.get('rh_ribbon'), "rh.ribbon.mgz"),
                                     (self.get('lh_ribbon'), "lh.ribbon.mgz"),
                                     (self.get('norm'), "norm.mgz")]:
@@ -108,6 +109,7 @@ class Parcellation(GenericTask):
 
         subjectDir = os.path.join(self.workingDir, self.id)
         aparcAseg = self.__findImageInDirectory("aparc+aseg.mgz", subjectDir)
+	wmparc = self.__findImageInDirectory("wmparc.mgz", subjectDir)
         lhWhite = self.__findImageInDirectory("lh.white", subjectDir)
         rhWhite = self.__findImageInDirectory("rh.white", subjectDir)
         lhPial = self.__findImageInDirectory("lh.pial", subjectDir)
@@ -348,6 +350,7 @@ class Parcellation(GenericTask):
     def isDirty(self):
 
         return Images((self.getImage('aparc_aseg'), 'parcellation  atlas'),
+		  (self.getImage('wmparc'), 'wm parcellation'),
                   (self.getImage('anat', 'freesurfer'), 'anatomical'),
                   (self.getImage('rh_ribbon'), 'rh_ribbon'),
                   (self.getImage('lh_ribbon'), 'lh_ribbon'),
@@ -366,24 +369,27 @@ class Parcellation(GenericTask):
         norm = self.getImage('norm')
         brainMask = self.getImage('mask')
         aparcAseg = self.getImage('aparc_aseg')
-
+	wmparc = self.getImage('wmparc')
 
 
         #Build qa names
         anatPng = self.buildName(anat, None, 'png')
         brainMaskPng = self.buildName(brainMask, None, 'png')
         aparcAsegPng = self.buildName(aparcAseg, None, 'png')
+        wmparcPng = self.buildName(wmparc, None, 'png')
 
 
         #Build qa images
         self.slicerPng(anat, anatPng, boundaries=brainMask)
         self.slicerPng(norm, brainMaskPng, maskOverlay=brainMask, boundaries=brainMask)
         self.slicerPng(anat, aparcAsegPng, segOverlay=aparcAseg, boundaries=aparcAseg)
+        self.slicerPng(anat, wmparcPng, segOverlay=wmparc, boundaries=wmparc)
 
 
         qaImages = Images(
             (anatPng, 'High resolution anatomical image of freesurfer'),
             (brainMaskPng, 'Brain mask on norm from freesurfer'),
-            (aparcAsegPng, 'Aparc aseg segmentation from freesurfer'))
+            (aparcAsegPng, 'Aparc aseg segmentation from freesurfer'),
+	    (wmparcPng,'WM segmentation from freesurfer'))
 
         return qaImages
