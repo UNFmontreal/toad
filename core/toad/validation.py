@@ -163,7 +163,7 @@ class Validation(object):
                 msg = "Found only {} directions into {} image. Hardi model will not be accurate with diffusion weighted image " \
                       "that contain less than 45 directions\n\n".format(nbDirections, dwi)
                 self.warning(msg)
-                return False
+                #return False
 
             if bEnc and not self.__isValidEncoding(nbDirections, '.b'):
                 self.warning("Encoding file {} is invalid".format(bEnc))
