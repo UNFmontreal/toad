@@ -100,7 +100,7 @@ class TensorDipy(GenericTask):
         #mask image
         mask = self.getRegistrationImage('mask', 'resample')
 
-        #Produce tensor ellipsoids png image
+        #Produce tensor ellipsoids image
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
         ellipsoidsQa = self.plotReconstruction(
