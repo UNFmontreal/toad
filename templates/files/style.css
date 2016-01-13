@@ -38,9 +38,10 @@ header {
 
 #subj {
   display: inline-block;
-  padding-top: 10px;
+  padding-top: 25px;
   float: right;
   text-align: right;
+  font-size: 150%;
 }
 
 #timestamp {

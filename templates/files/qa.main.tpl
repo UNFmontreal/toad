@@ -16,7 +16,7 @@
           <img src="./images/qa/qa_logo.png" class="logo">
         </a>
 
-        <h2>Subject : $subject</h2>
+        <div id="subj">Subject: $subject</div>
 
         <div id="timestamp"></div>
       </div>
