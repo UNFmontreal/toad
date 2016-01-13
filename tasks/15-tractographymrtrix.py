@@ -301,7 +301,11 @@ class TractographyMrtrix(GenericTask):
         """
         qaImages = Images()
 
-        information = 'Warning: due to storage restriction streamlines were downsampled. Even if there is no difference in structural connectivity you should be careful if you want to compute metrics along streamlines.'
+        information = "Warning: due to storage restriction, streamlines were " \
+                "downsampled. Even if there is no difference in structural " \
+                "connectivity, you should be careful before computing any " \
+                "metrics along these streamlines.\n To run toad without this " \
+                "downsampling, please refer to the documentation."
         qaImages.setInformation(information)
 
         #get images
@@ -309,7 +313,6 @@ class TractographyMrtrix(GenericTask):
         mask253 = self.getMaskingImage('aparc_aseg',['253','mask'])
 
         #images production
-
         if self.__nbDirections <= 45:
             if self.__tckDetRoiTrk is not None:
                 tensorDetPng = self.createVtkPng(self.__tckDetRoiTrk, norm, mask253)#self.getImage('dwi', ['tensor_det', 'roi'], 'png')
