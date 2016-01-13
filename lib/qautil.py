@@ -568,7 +568,7 @@ def plotReconstruction(data, mask, cc, target, model):
     dipy.viz.fvtk.clear(ren)
 
 
-def createVtkPng(source, anatomical, roi, target):
+def plotTrk(source, target, anatomical, roi):
     roiImage= nibabel.load(roi)
     anatomicalImage = nibabel.load(anatomical)
 
@@ -604,5 +604,3 @@ def createVtkPng(source, anatomical, roi, target):
     dipy.viz.fvtk.camera(
             ren, pos=(0,0,1), focal=(0,0,0), viewup=(0,1,0), verbose=False)
     dipy.viz.fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
-    return target
-

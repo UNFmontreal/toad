@@ -107,11 +107,11 @@ class Qa(object):
         return target
 
 
-    def createVtkPng(self, source, anatomical, roi):
+    def plotTrk(self, source, anatomical, roi):
         """
         """
         target = source.replace(".trk", self.qaImagesFormat)
-        qautil.createVtkPng(source, anatomical, roi, target)
+        qautil.plotTrk(source, target, anatomical, roi)
         return target
 
 
