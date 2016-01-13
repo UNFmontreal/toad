@@ -378,9 +378,9 @@ class Parcellation(GenericTask):
         wmparcQa = self.plot3dVolume(anat, segOverlay=wmparc, fov=wmparc)
 
         qaImages = Images(
-            (anatQa, 'High resolution anatomical image of freesurfer'),
-            (brainMaskQa, 'Brain mask on norm from freesurfer'),
-            (aparcAsegQa, 'Aparc aseg segmentation from freesurfer'),
-            (wmparcQa, 'White Matter segmentation from freesurfer'))
+            (anatQa, 'High resolution anatomical image from Freesurfer'),
+            (brainMaskQa, 'Brain mask on norm from Freesurfer'),
+            (aparcAsegQa, 'Aparc aseg segmentation from Freesurfer'),
+            (wmparcQa, 'White matter segmentation from Freesurfer'))
 
         return qaImages
