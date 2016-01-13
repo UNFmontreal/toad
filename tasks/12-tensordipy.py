@@ -103,9 +103,11 @@ class TensorDipy(GenericTask):
         #Produce tensor ellipsoids png image
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
-        ellipsoidsPng = self.buildName(dwi, 'ellipsoids_tensor', 'png')
-        self.reconstructionPng(self.__fit, mask, cc, ellipsoidsPng, model='tensor')
-        qaImages.extend(Images((ellipsoidsPng, 'Coronal slice of tensor ellipsoids in the Corpus Callosum')))
+        ellipsoidsQa = self.plotReconstruction(
+                self.__fit, mask, cc, 'tensor', dwi)
+        qaImages.append((
+            ellipsoidsQa,
+            'Coronal slice of tensor ellipsoids in the Corpus Callosum'))
 
         #Build qa images
         tags = (
@@ -119,8 +121,8 @@ class TensorDipy(GenericTask):
         for postfix, description in tags:
             image = self.getImage('dwi', postfix)
             if image:
-                qaImage = self.buildName(image, softwareName, 'png')
-                self.slicerPng(image, qaImage, boundaries=mask)
-                qaImages.extend(Images((qaImage, description)))
+                imageQa = self.plot3dVolume(
+                        image, fov=mask, postfix=softwareName)
+                qaImages.append((imageQa, description))
 
         return qaImages

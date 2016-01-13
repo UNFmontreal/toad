@@ -120,20 +120,14 @@ class Registration(GenericTask):
         aparcAseg = self.getImage('aparc_aseg', 'resample')
         wmparc = self.getImage('wmparc', 'resample')
 
-
-        #Build qa names
-        brainMaskPng = self.buildName(brainMask, None, 'png')
-        aparcAsegPng = self.buildName(aparcAseg, None, 'png')
-        wmparcPng = self.buildName(wmparc, None, 'png')
-
         #Build qa images
-        self.slicerPng(b0, brainMaskPng, maskOverlay=brainMask, boundaries=brainMask)
-        self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg, boundaries=brainMask)
-        self.slicerPng(b0, wmparcPng, segOverlay=wmparc, boundaries=brainMask)
+        brainMaskQa = self.plot3dVolume(b0, edges=brainMask, fov=brainMask)
+        aparcAsegQa = self.plot3dVolume(b0, segOverlay=aparcAseg, fov=brainMask)
+        wmparcQa = self.plot3dVolume(b0, segOverlay=wmparc, fov=brainMask)
 
         qaImages = Images(
-            (brainMaskPng, 'Brain mask on upsampled b0'),
-            (aparcAsegPng, 'aparcaseg segmentation on upsampled b0'),
-            (wmparcPng, 'white matter segmentation on upsampled b0'))
+            (brainMaskQa, 'Brain mask on upsampled b0'),
+            (aparcAsegQa, 'aparcaseg segmentation on upsampled b0'),
+            (wmparcQa, 'white matter segmentation on upsampled b0'))
 
         return qaImages

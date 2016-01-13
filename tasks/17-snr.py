@@ -60,7 +60,8 @@ class Snr(GenericTask):
         return Images(
             (self.getPreparationImage('dwi'), 'diffusion weighted'),
             (self.getCorrectionImage('mask', 'corrected'), 'brain mask'),
-            (self.getMaskingImage('aparc_aseg', ['253','mask']), 'Corpus Callusum mask from masking task'),
+            (self.getMaskingImage('aparc_aseg', ['253','mask']),
+                'Corpus Callusum mask from masking task'),
             (self.getCorrectionImage('b0', 'corrected'), 'B0')
             )
 
@@ -68,7 +69,8 @@ class Snr(GenericTask):
     def isDirty(self):
         return Images(
             (self.getImage('mask', ['corrected', 'noisemask']), 'Noise mask'),
-            (self.getImage('aparc_aseg', ['253', 'mask', 'downsample']), 'Corpus callosum downsample'),
+            (self.getImage('aparc_aseg', ['253', 'mask', 'downsample']),
+                'Corpus callosum downsample'),
             )
 
 
@@ -104,6 +106,6 @@ class Snr(GenericTask):
         for mask, description in tags:
             maskPng = self.buildName(mask, None, 'png')
             self.slicerPng(b0, maskPng, maskOverlay=mask, boundaries=mask)
-            qaImages.extend(Images((maskPng, description)))
+            qaImages.append((maskPng, description))
 
         return qaImages
