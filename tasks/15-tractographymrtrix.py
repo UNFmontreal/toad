@@ -314,21 +314,23 @@ class TractographyMrtrix(GenericTask):
 
         #images production
         if self.__nbDirections <= 45:
-            if self.__tckDetRoiTrk is not None:
-                tensorDetPng = self.createVtkPng(self.__tckDetRoiTrk, norm, mask253)#self.getImage('dwi', ['tensor_det', 'roi'], 'png')
-                qaImages.extend(Images((tensorDetPng, 'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines')))
-
-            if self.__tckProbRoiTrk is not None:
-                tensorProbPng = self.createVtkPng(self.__tckProbRoiTrk, norm, mask253)#self.getImage('dwi', ['tensor_prob', 'roi'], 'png')
-                qaImages.extend(Images((tensorProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines')))
-
+            tags = (
+                (self.__tckDetRoiTrk,
+                'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),
+                (self.__tckProbRoiTrk,
+                'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
+                )
         else:
-            if self.__tckgenRoiTrk is not None:
-                hardiProbPng = self.createVtkPng(self.__tckgenRoiTrk, norm, mask253)#self.getImage('dwi', ['hardi_prob', 'roi'], 'png')
-                qaImages.extend(Images((hardiProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines')))
+            tags = (
+                (self.__tckgenRoiTrk,
+                'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines'),
+                (self.__tcksiftRoiTrk,
+                'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
+                )
 
-            if self.__tcksiftRoiTrk is not None:
-                tcksiftPng = self.createVtkPng(self.__tcksiftRoiTrk, norm, mask253)#self.getImage('dwi', ['tcksift', 'roi'], 'png')
-                qaImages.extend(Images((tcksiftPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines')))
+        for data, description in tags:
+            if data is not None:
+                imageQa = self.plotTrk(data, norm, mask253)
+                qaImages.append((imageQa, description))
 
         return qaImages
