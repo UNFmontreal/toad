@@ -165,20 +165,22 @@ class Denoising(GenericTask):
         qaImages = Images()
 
         #Information on denoising algorithm
-        information = 'Algorithm {} is set'.format(self.algorithm)
+        information = 'Denoising was done using the {} algorithm'.format(self.algorithm)
 
         if self.algorithm == "nlmeans" and \
             self.config.get("denoising", "number_array_coil") == "32":
-            information = "NLMEANS algorithm is not yet implement for 32 " \
+            information = "NLMEANS algorithm is not yet implemented for 32 " \
                 "coils channels images, "
             if self.config.getboolean("general", "matlab_available"):
-                information += "set algorithm to lpca or aonlm or "
-            information += "set ignore: True into [denoising] section of your config.cfg"
+                information += "set algorithm to `lpca` or `aonlm` or "
+            information += "set `ignore: True` into the [denoising] section " \
+                    "of your config.cfg file."
 
         if self.matlabWarning:
-            information = "Algorithm aonlm or lpca is set but matlab is not " \
-                "available for this server. Please configure matlab or set " \
-                "ignore: True into [denoising] section of your config.cfg."
+            information = "Algorithm `aonlm` or `lpca` was set for the " \
+                    "denoising, but Matlab is not available for this server. "\
+                    "Please install and configure Matlab or set `ignore: True`"\
+                    " into the [denoising] section of your config.cfg file."
             qaImages.extend(Images((False, 'Denoised diffusion image')))
 
         qaImages.setInformation(information)
@@ -205,11 +207,11 @@ class Denoising(GenericTask):
                     sigmaPng = self.buildName(dwiDenoised, 'sigma', 'png')
                     self.plotSigma(self.sigmaVector, sigmaPng)
                     qaImages.extend(
-                        Images(sigmaPng,'Sigmas from nlmeans algorithm'))
+                        Images(sigmaPng,'Sigmas from the nlmeans algorithm'))
 
                 if noiseMask:
                     noiseMaskPng = self.buildName(noiseMask, None, 'png')
                     self.slicerPng(b0, noiseMaskPng, maskOverlay=noiseMask, boundaries=noiseMask)
                     qaImages.extend(
-                        Images(noiseMaskPng, 'Noise mask from nlmeans algorithm'))
+                        Images(noiseMaskPng, 'Noise mask from the nlmeans algorithm'))
         return qaImages

@@ -81,8 +81,8 @@ class Atlas(GenericTask):
         self.slicerPng(anat, networks7Png, segOverlay=networks7, boundaries=networks7)
 
         qaImages = Images(
-            (brodmannPng, 'Brodmann segmentation from freesurfer'),
-            (aal2Png, 'Aal2 segmentation from freesurfer'),
-            (networks7Png, 'Seven networks segmentation from freesurfer'))
+            (brodmannPng, 'Brodmann segmentation from Freesurfer'),
+            (aal2Png, 'Aal2 segmentation from Freesurfer'),
+            (networks7Png, 'Seven networks segmentation from Freesurfer'))
 
         return qaImages

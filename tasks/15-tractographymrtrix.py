@@ -316,7 +316,11 @@ class TractographyMrtrix(GenericTask):
         """
         qaImages = Images()
 
-        information = 'Warning: due to storage restriction streamlines were downsampled. Even if there is no difference in structural connectivity you should be careful if you want to compute metrics along streamlines.'
+        information = "Warning: due to storage restriction, streamlines were " \
+                "downsampled. Even if there is no difference in structural " \
+                "connectivity, you should be careful before computing any " \
+                "metrics along these streamlines.\n To run toad without this " \
+                "downsampling, please refer to the documentation."
         qaImages.setInformation(information)
 
         #get images
@@ -330,8 +334,8 @@ class TractographyMrtrix(GenericTask):
             tensorNetworks7DetPlot = self.getImage('dwi', ['tensor_det', 'networks7', 'connectome', 'normalize'], 'png')
 
             qaImages.extend(Images((tensorDetPng, 'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),
-                    (tensorAal2DetPlot,'Aal2 normalize connectome matrix from a deterministic tensor streamlines'),
-                    (tensorNetworks7DetPlot,'Seven networks normalize connectome matrix from a deterministic tensor streamlines')))
+                    (tensorAal2DetPlot,'Aal2 normalized connectome matrix from a deterministic tensor streamlines'),
+                    (tensorNetworks7DetPlot,'Seven networks normalized connectome matrix from a deterministic tensor streamlines')))
 
         if self.__tckProbRoiTrk is not None:
             tensorProbPng = self.createVtkPng(self.__tckProbRoiTrk, norm, mask253)#self.getImage('dwi', ['tensor_prob', 'roi'], 'png')
@@ -339,8 +343,8 @@ class TractographyMrtrix(GenericTask):
             tensorNetworks7ProbPlot = self.getImage('dwi', ['tensor_prob', 'networks7', 'connectome', 'normalize'], 'png')
 
             qaImages.extend(Images((tensorProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
-                    (tensorAal2ProbPlot,'Aal2 normalize connectome matrix from a probabilistic tensor streamlines'),
-                    (tensorNetworks7ProbPlot,'Seven networks normalize connectome matrix from a probabilistic tensor streamlines')))
+                    (tensorAal2ProbPlot,'Aal2 normalized connectome matrix from a probabilistic tensor streamlines'),
+                    (tensorNetworks7ProbPlot,'Seven networks normalized connectome matrix from a probabilistic tensor streamlines')))
 
         if self.__tckgenRoiTrk is not None:
             hardiProbPng = self.createVtkPng(self.__tckgenRoiTrk, norm, mask253)#self.getImage('dwi', ['hardi_prob', 'roi'], 'png')
@@ -348,8 +352,8 @@ class TractographyMrtrix(GenericTask):
             hardiNetworks7ProbPlot = self.getImage('dwi', ['hardi_prob', 'networks7', 'connectome', 'normalize'], 'png')
 
             qaImages.extend(Images((hardiProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines'),
-                    (hardiAal2ProbPlot, 'Aal2 normalize connectome matrix from a probabilistic hardi streamlines'),
-                    (hardiNetworks7ProbPlot, 'Seven networks normalize connectome matrix from a probabilistic hardi streamlines')))
+                    (hardiAal2ProbPlot, 'Aal2 normalized connectome matrix from a probabilistic hardi streamlines'),
+                    (hardiNetworks7ProbPlot, 'Seven networks normalized connectome matrix from a probabilistic hardi streamlines')))
 
         if self.__tcksiftRoiTrk is not None:
 

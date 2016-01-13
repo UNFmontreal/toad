@@ -46,8 +46,8 @@ class Snr(GenericTask):
         histPng = self.buildName(dwi, 'hist', 'png')
         self.noiseAnalysis(dwi, noiseMask, ccMask, snrPng, histPng)
         qaImages.extend(Images(
-            (snrPng, '{} DWI image : SNR for each volume'.format(description)),
-            (histPng, '{} DWI image : noise histogram'.format(description)),
+            (snrPng, '{} DWI image: SNR for each volume'.format(description)),
+            (histPng, '{} DWI image: noise histogram'.format(description)),
             ))
         return qaImages
 
@@ -60,7 +60,7 @@ class Snr(GenericTask):
         return Images(
             (self.getPreparationImage('dwi'), 'diffusion weighted'),
             (self.getCorrectionImage('mask', 'corrected'), 'brain mask'),
-            (self.getMaskingImage('aparc_aseg', ['253','mask']), 'Corpus Callusum mask from masking task'),
+            (self.getMaskingImage('aparc_aseg', ['253','mask']), 'Corpus Callusum mask from the  masking task'),
             (self.getCorrectionImage('b0', 'corrected'), 'B0')
             )
 

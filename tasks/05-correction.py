@@ -574,13 +574,14 @@ class Correction(GenericTask):
         qaImages = Images()
 
         #Information on distorsion correction
-        information = 'Eddy has run '
+        information = "Eddy movement corrections were applied to the images "
         if self.__topupCorrection:
-            information += 'and distortion correction done with AP and PA images'
+            information += "and distortion corrections were conducted on the " \
+                    "AP and PA images."
         elif self.__fieldmapCorrection:
-            information += 'and distorsion correction done with fieldmap images'
+            information += "using the fieldmap images."
         else:
-            information += 'with no distortion correction'
+            information += "with no distortion correction."
         qaImages.setInformation(information)
 
         #Get images
@@ -610,9 +611,12 @@ class Correction(GenericTask):
         qaImages.extend(Images(
             (dwiCorrectedGif, 'DWI corrected'),
             (dwiCompareGif, 'Before and after corrections'),
-            (translationsPng, 'Translation correction by eddy'),
-            (rotationPng, 'Rotation correction by eddy'),
-            (bVecsGif, 'Gradients vectors on the unitary sphere. Red : raw bvec | Blue : opposite bvec     | Black + : movement corrected bvec'),
+            (translationsPng, 'Translation corrections by Eddy'),
+            (rotationPng, 'Rotation corrections by Eddy'),
+            (bVecsGif, "Gradients vectors on the unitary sphere. " \
+                    "Red: raw bvec | Blue: opposite bvec | Black +: movement " \
+                    "corrected bvec. The more corrected, the more the + is " \
+                    "from the center of the circle."),
             ))
 
         return qaImages
