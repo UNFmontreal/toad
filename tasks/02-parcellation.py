@@ -92,6 +92,7 @@ class Parcellation(GenericTask):
         """
         for (target, source) in [(self.buildName(anatomicalName, 'freesurfer'), "T1.mgz"),
                                     (self.get('aparc_aseg'), "aparc+aseg.mgz"),
+                                    (self.get('wmparc'), "wmparc.mgz"),
                                     (self.get('rh_ribbon'), "rh.ribbon.mgz"),
                                     (self.get('lh_ribbon'), "lh.ribbon.mgz"),
                                     (self.get('norm'), "norm.mgz")]:
@@ -108,6 +109,7 @@ class Parcellation(GenericTask):
 
         subjectDir = os.path.join(self.workingDir, self.id)
         aparcAseg = self.__findImageInDirectory("aparc+aseg.mgz", subjectDir)
+	wmparc = self.__findImageInDirectory("wmparc.mgz", subjectDir)
         lhWhite = self.__findImageInDirectory("lh.white", subjectDir)
         rhWhite = self.__findImageInDirectory("rh.white", subjectDir)
         lhPial = self.__findImageInDirectory("lh.pial", subjectDir)
@@ -348,6 +350,7 @@ class Parcellation(GenericTask):
     def isDirty(self):
 
         return Images((self.getImage('aparc_aseg'), 'parcellation  atlas'),
+		  (self.getImage('wmparc'), 'wm parcellation'),
                   (self.getImage('anat', 'freesurfer'), 'anatomical'),
                   (self.getImage('rh_ribbon'), 'rh_ribbon'),
                   (self.getImage('lh_ribbon'), 'lh_ribbon'),
@@ -365,16 +368,19 @@ class Parcellation(GenericTask):
         norm = self.getImage('norm')
         brainMask = self.getImage('mask')
         aparcAseg = self.getImage('aparc_aseg')
+        wmparc = self.getImage('wmparc')
 
         #Build qa images
         anatQa = self.plot3dVolume(anat, fov=brainMask)
         brainMaskQa = self.plot3dVolume(norm, edges=brainMask, fov=brainMask)
         aparcAsegQa = self.plot3dVolume(
                 anat, segOverlay=aparcAseg, fov=aparcAseg)
+        wmparcQa = self.plot3dVolume(anat, segOverlay=wmparc, fov=wmparc)
 
         qaImages = Images(
             (anatQa, 'High resolution anatomical image of freesurfer'),
             (brainMaskQa, 'Brain mask on norm from freesurfer'),
             (aparcAsegQa, 'Aparc aseg segmentation from freesurfer'))
+            (wmparcQa, 'White Matter segmentation from freesurfer'))
 
         return qaImages

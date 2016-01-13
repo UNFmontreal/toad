@@ -243,7 +243,12 @@ class Plot3dVolume(object):
 
 
     def __showSeg(self, dim):
-        lutData = numpy.loadtxt(self.lutFile, usecols=(0,1,2,3))
+        lutDataOrigin = numpy.loadtxt(self.lutFile, usecols=(0,1,2,3))
+        lutData = numpy.zeros((
+            lutDataOrigin[-1,0].astype(numpy.int)+1,
+            lutDataOrigin.shape[1]))
+        lutData[:,0] = range(0,lutDataOrigin[-1,0].astype(numpy.int)+1,1)
+        lutData[lutDataOrigin[:,0].astype(numpy.int),1:] = lutDataOrigin[:,1:]
         lutCmap = matplotlib.colors.ListedColormap(lutData[:,1:]/256)
         norm = matplotlib.colors.BoundaryNorm(lutData[:,0], lutCmap.N)
         segImshow = functools.partial(
