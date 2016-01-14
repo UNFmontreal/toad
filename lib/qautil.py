@@ -232,7 +232,7 @@ class Plot3dVolume(object):
             self.fig.set_size_inches([_ / 2 for _ in self.figsize])
         else:
             self.fig.set_size_inches(self.figsize)
-        self.__showColorbar()
+        if self.colorbar: self.__showColorbar()
         self.fig.savefig(target, facecolor='black')
         matplotlib.pyplot.close()
 
@@ -280,12 +280,14 @@ class Plot3dVolume(object):
 
 
     def __showColorbar(self):
-        if self.colorbar:
-            self.fig.subplots_adjust(right=0.8)
-            cbar_ax = self.fig.add_axes([0.85, 0.15, 0.05, 0.7])
-            cbar = self.fig.colorbar(self.im, cax=cbar_ax)
-            #cbar.outline.set_color('w')
-            #cbar.ax.yaxis.set_tick_params(color='w')
+        #give space for the colorbar
+        self.fig.subplots_adjust(right=0.9)
+        #description: add_axes([left, bottom, width, height])
+        cbar_ax = self.fig.add_axes([0.91, 0.15, 0.01, 0.7])
+        cbar = self.fig.colorbar(self.im, cax=cbar_ax)
+        #set colorbar to white
+        for t in cbar_ax.get_yticklabels():
+            t.set_color("w")
 
 
 class Plot4dVolume(object):

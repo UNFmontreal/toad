@@ -117,7 +117,6 @@ class TensorFsl(GenericTask):
             ('ad', 'Axial Diffusivity'),
             ('md', 'Mean Diffusivity'),
             ('rd', 'Radial Diffusivity'),
-            #('sse', 'Sum of squared errors'),
             )
 
         for postfix, description in tags:
@@ -126,5 +125,11 @@ class TensorFsl(GenericTask):
                 imageQa = self.plot3dVolume(
                         image, fov=mask, postfix=softwareName)
                 qaImages.append((imageQa, description))
+
+        #Build SSE image
+        sse = self.getImage('dwi', 'sse')
+        sseQa = self.plot3dVolume(
+                sse, fov=mask, postfix=softwareName, colorbar=True)
+        qaImages.append((sseQa, 'Sum of squared errors'))
 
         return qaImages
