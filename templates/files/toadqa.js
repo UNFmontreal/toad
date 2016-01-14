@@ -11,10 +11,13 @@ $( document ).ready( function() {
     else{
         var $lastApplicationTag = $("application:last");
         var $timestamp = $lastApplicationTag.attr("timestamp");
-        var $now = new Date();
         var $formatTimestamp = $timestamp.substr(0,4)+"-"+$timestamp.substr(4,2)+"-"+$timestamp.substr(6,2)+" "+$timestamp.substr(8,2)+":"+$timestamp.substr(10,2);
+        /*
+        var $now = new Date();
         var $formatDateNow = $now.getFullYear()+"-"+("0" + ($now.getMonth() + 1)).slice(-2) + "-" +("0" + $now.getDate()).slice(-2) +" "+ $now.getHours() + ":" + $now.getMinutes();
         $("#timestamp").html("<strong>Toad launch at:</strong> "+$formatTimestamp+"<br /><strong>This task finish at: </strong>"+$formatDateNow);
+        */
+        $("#timestamp").html("<strong>Toad launch at:</strong> "+$formatTimestamp);
         $("versions").html($lastApplicationTag);
         $("versions").hide();
         $("#show-versions-href" ).show();
