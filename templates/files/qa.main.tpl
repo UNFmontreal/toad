@@ -16,9 +16,8 @@
           <img src="./images/qa/qa_logo.png" class="logo">
         </a>
 
-        <div id="subj">Subject: $subject</div>
+        <div id="titleTask">$taskName / $subject</div>
 
-        <div id="timestamp"></div>
       </div>
 
       <div id="navwrap">
@@ -30,21 +29,23 @@
 
     <div id="wrapper">
       <h1>$taskName</h1>
+    
+        <div id="timestamp"></div>
+     
+        <div class='taskInfo'>$taskInfo</div>
 
-      <div class='taskInfo'>$taskInfo</div>
+        <section id="results">
+          $parseHtmlTables
+        </section>
 
-      <section id="results">
-        $parseHtmlTables
-      </section>
+        <a href="#" id="show-versions-href">Show Software Versions</a>
+        <a href="#" id="hide-versions-href">Hide Software Versions</a>
 
-      <a href="#" id="show-versions-href">Show Software Versions</a>
-      <a href="#" id="hide-versions-href">Hide Software Versions</a>
+        <versions></versions>
 
-      <versions></versions>
-
-      <div hidden id="dataVersions">
-        $parseVersionTables
-      </div>
+        <div hidden id="dataVersions">
+          $parseVersionTables
+        </div>
 
     </div>
     <footer></footer>
