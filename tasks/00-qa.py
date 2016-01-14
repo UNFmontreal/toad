@@ -53,4 +53,4 @@ class QA(GenericTask):
         """
         return Images(
                 (os.path.join(self.workingDir, 'index.html'), 'QA index.html'),
-                (os.path.join(self.workingDir, 'jquery.js'), 'Jquery library'))
+                (os.path.join(self.workingDir, self.config.get('qa', 'jquery')), 'Jquery library'))
