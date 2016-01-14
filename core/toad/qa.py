@@ -24,12 +24,13 @@ class Qa(object):
 
     def plot3dVolume(
             self, source, edges=None, segOverlay=None,
-            fov=None, colorbar=False, postfix=None):
+            fov=None, colorbar=False, vmax=None, postfix=None):
         """
         Wrapper of the class Plot3dVolume of qautil
         """
         target = self.buildName(source, postfix, ext=self.qaImagesFormat)
-        qaPlot = qautil.Plot3dVolume(source, fov=fov, colorbar=colorbar)
+        qaPlot = qautil.Plot3dVolume(
+                source, fov=fov, colorbar=colorbar, vmax=vmax)
         if segOverlay != None:
             lut = self.config.get('template', 'freesurfer_lut')
             lutFiles = os.path.join(
