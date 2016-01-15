@@ -113,18 +113,24 @@ class TensorFsl(GenericTask):
 
         #Build qa images
         tags = (
-            ('fa', 'Fractional anisotropy'),
-            ('ad', 'Axial Diffusivity'),
-            ('md', 'Mean Diffusivity'),
-            ('rd', 'Radial Diffusivity'),
-            ('sse', 'Sum of squared errors'),
+            ('fa', 0.7, 'Fractional anisotropy'),
+            ('ad', 0.005, 'Axial Diffusivity'),
+            ('md', 0.005, 'Mean Diffusivity'),
+            ('rd', 0.005, 'Radial Diffusivity'),
             )
 
-        for postfix, description in tags:
+        for postfix, vmax, description in tags:
             image = self.getImage('dwi', postfix)
             if image:
-                qaImage = self.buildName(image, softwareName, 'png')
-                self.slicerPng(image, qaImage, boundaries=mask)
-                qaImages.extend(Images((qaImage, description)))
+                imageQa = self.plot3dVolume(
+                        image, fov=mask, vmax=vmax,
+                        colorbar=True, postfix=softwareName)
+                qaImages.append((imageQa, description))
+
+        #Build SSE image
+        sse = self.getImage('dwi', 'sse')
+        sseQa = self.plot3dVolume(
+                sse, fov=mask, postfix=softwareName, colorbar=True)
+        qaImages.append((sseQa, 'Sum of squared errors'))
 
         return qaImages

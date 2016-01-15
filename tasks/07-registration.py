@@ -21,6 +21,7 @@ class Registration(GenericTask):
         norm= self.getParcellationImage('norm')
         anat = self.getParcellationImage('anat', 'freesurfer')
         aparcAsegFile =  self.getParcellationImage("aparc_aseg")
+        wmparcFile = self.getParcellationImage("wmparc")
         rhRibbon = self.getParcellationImage("rh_ribbon")
         lhRibbon = self.getParcellationImage("lh_ribbon")
         tt5 = self.getParcellationImage("tt5")
@@ -34,8 +35,13 @@ class Registration(GenericTask):
         mriutil.applyResampleFsl(anat, b0, freesurferToDWIMatrix, self.buildName(anat, "resample"))
         mrtrixMatrix = self.__transformFslToMrtrixMatrix(anat, b0, freesurferToDWIMatrix)
 
+        """ Grey matter parcellation """
         mriutil.applyRegistrationMrtrix(aparcAsegFile, mrtrixMatrix, self.buildName(aparcAsegFile, "register"))
         mriutil.applyResampleFsl(aparcAsegFile, b0, freesurferToDWIMatrix, self.buildName(aparcAsegFile, "resample"), True)
+
+        """ White matter parcellation """
+        mriutil.applyRegistrationMrtrix(wmparcFile, mrtrixMatrix, self.buildName(wmparcFile, "register"))
+        mriutil.applyResampleFsl(wmparcFile, b0, freesurferToDWIMatrix, self.buildName(wmparcFile, "resample"), True)
 
         lhRibbonRegister = mriutil.applyRegistrationMrtrix(lhRibbon, mrtrixMatrix, self.buildName(lhRibbon, "register"))
         rhRibbonRegister = mriutil.applyRegistrationMrtrix(rhRibbon, mrtrixMatrix, self.buildName(rhRibbon, "register"))
@@ -84,7 +90,8 @@ class Registration(GenericTask):
         return Images((self.getParcellationImage('anat', 'freesurfer'), 'high resolution'),
                           (self.getUpsamplingImage('b0', 'upsample'), 'b0 upsampled'),
                           (self.getParcellationImage('aparc_aseg'), 'parcellation'),
-                          (self.getParcellationImage('rh_ribbon'), 'right hemisphere ribbon'),
+                          (self.getParcellationImage('wmparc'), 'parcellation'),
+                          (self.getParcellationImage('rh_ribbon'), 'right hemisphere, ribbon'),
                           (self.getParcellationImage('lh_ribbon'), 'left hemisphere ribbon'),
                           (self.getParcellationImage('tt5'), '5tt'),
                           (self.getParcellationImage('mask'), 'brain mask'))
@@ -94,6 +101,8 @@ class Registration(GenericTask):
         return Images((self.getImage('anat', 'resample'), 'anatomical resampled'),
                   (self.getImage('aparc_aseg', 'resample'), 'parcellation atlas resample'),
                   (self.getImage('aparc_aseg', 'register'), 'parcellation atlas register'),
+                  (self.getImage('wmparc', 'resample'), 'white matter parcellation atlas resample'),
+                  (self.getImage('wmparc', 'register'), 'white matter parcellation atlas register'),
                   (self.getImage('tt5', 'register'), '5tt image register'),
                   (self.getImage('mask', 'register'), 'brain mask register'),
                   (self.getImage('tt5', 'resample'), '5tt image resample'),
@@ -109,18 +118,16 @@ class Registration(GenericTask):
         b0 = self.getUpsamplingImage('b0', 'upsample')
         brainMask = self.getImage('mask', 'resample')
         aparcAseg = self.getImage('aparc_aseg', 'resample')
-
-
-        #Build qa names
-        brainMaskPng = self.buildName(brainMask, None, 'png')
-        aparcAsegPng = self.buildName(aparcAseg, None, 'png')
+        wmparc = self.getImage('wmparc', 'resample')
 
         #Build qa images
-        self.slicerPng(b0, brainMaskPng, maskOverlay=brainMask, boundaries=brainMask)
-        self.slicerPng(b0, aparcAsegPng, segOverlay=aparcAseg, boundaries=brainMask)
+        brainMaskQa = self.plot3dVolume(b0, edges=brainMask, fov=brainMask)
+        aparcAsegQa = self.plot3dVolume(b0, segOverlay=aparcAseg, fov=brainMask)
+        wmparcQa = self.plot3dVolume(b0, segOverlay=wmparc, fov=brainMask)
 
         qaImages = Images(
-            (brainMaskPng, 'Brain mask on upsampled b0'),
-            (aparcAsegPng, 'aparcaseg segmentation on upsampled b0'))
+            (brainMaskQa, 'Brain mask on upsampled b0'),
+            (aparcAsegQa, 'aparcaseg segmentation on upsampled b0'),
+            (wmparcQa, 'white matter segmentation on upsampled b0'))
 
         return qaImages

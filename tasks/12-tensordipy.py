@@ -100,27 +100,30 @@ class TensorDipy(GenericTask):
         #mask image
         mask = self.getRegistrationImage('mask', 'resample')
 
-        #Produce tensor ellipsoids png image
+        #Produce tensor ellipsoids image
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
-        ellipsoidsPng = self.buildName(dwi, 'ellipsoids_tensor', 'png')
-        self.reconstructionPng(self.__fit, mask, cc, ellipsoidsPng, model='tensor')
-        qaImages.extend(Images((ellipsoidsPng, 'Coronal slice of tensor ellipsoids in the Corpus Callosum')))
+        ellipsoidsQa = self.plotReconstruction(
+                self.__fit, mask, cc, 'tensor', dwi)
+        qaImages.append((
+            ellipsoidsQa,
+            'Coronal slice of tensor ellipsoids in the Corpus Callosum'))
 
         #Build qa images
         tags = (
             #(['tensor', 'rgb'], 'RGB map'),
-            ('fa', 'Fractional anisotropy'),
-            ('ad', 'Axial Diffusivity'),
-            ('md', 'Mean Diffusivity'),
-            ('rd', 'Radial Diffusivity'),
+            ('fa', 0.7, 'Fractional anisotropy'),
+            ('ad', 0.005, 'Axial Diffusivity'),
+            ('md', 0.005, 'Mean Diffusivity'),
+            ('rd', 0.005, 'Radial Diffusivity'),
             )
 
-        for postfix, description in tags:
+        for postfix, vmax, description in tags:
             image = self.getImage('dwi', postfix)
             if image:
-                qaImage = self.buildName(image, softwareName, 'png')
-                self.slicerPng(image, qaImage, boundaries=mask)
-                qaImages.extend(Images((qaImage, description)))
+                imageQa = self.plot3dVolume(
+                        image, fov=mask, vmax=vmax,
+                        colorbar=True, postfix=softwareName)
+                qaImages.append((imageQa, description))
 
         return qaImages

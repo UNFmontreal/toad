@@ -16,45 +16,33 @@ class QA(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'backup')
         self.setCleanupBeforeImplement(False)
-        self.__subject = subject
+        self.subjectName = subject.getName()
 
     def implement(self):
 
-        mainTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.main.tpl')
-        imagesDir = os.path.join(self.workingDir, self.get('qa', 'images_dir'))
-
-        if not os.path.exists(imagesDir):
-            os.makedirs(imagesDir)
+        if not os.path.exists(self.qaImagesDir):
+            os.makedirs(self.qaImagesDir)
 
         #Copy logo
-        logoLink = os.path.join(self.toadDir, 'templates', 'files', 'qa_logo.png')
-        util.copy(logoLink, imagesDir, 'qa_logo.png')
+        logoName = self.config.get('qa', 'logo')
+        logoLink = os.path.join(
+                self.toadDir, 'templates', 'files', logoName)
+        util.copy(logoLink, self.qaImagesDir, logoName)
 
-        #Copy style.css
-        styleTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.style.tpl')
-        jQuery = os.path.join(self.toadDir, 'templates', 'files', self.get('general', 'jquery'))
-
-        util.copy(styleTemplate, self.workingDir, 'style.css')
-        util.copy(jQuery, self.workingDir, 'jquery.js')
-
-        #Create menu.html only for tasks with implemented QA
-        menuTemplate = os.path.join(self.toadDir, 'templates', 'files', 'qa.menu.tpl')
-        util.copy(menuTemplate, self.workingDir, 'menu.html')
+        #Copy menu, css & js
+        styleFiles = ('menu', 'css', 'jquery', 'js')
+        for tag in styleFiles:
+            fileName = self.config.get('qa', tag)
+            fileLink = os.path.join(
+                    self.toadDir, 'templates', 'files', fileName)
+            util.copy(fileLink, self.workingDir, fileName)
 
         #Create index.html
-        tags = {
-            'subject':self.__subject.getName(),
-            'taskInfo':'',
-            'parseHtmlTables':'',
-            'parseVersionTables':'',
-            }
-        htmlCode = self.parseTemplate(tags, mainTemplate)
-        util.createScript('index.html', htmlCode)
+        self.createTaskHtml({}, 'index.html')
 
 
     def meetRequirement(self, result=True):
         """
-        
         """
         return result
 
@@ -63,5 +51,6 @@ class QA(GenericTask):
         """Validate if this tasks need to be submit for implementation
 
         """
-        return Images((os.path.join(self.workingDir, 'index.html'), 'QA index.html'),
-                        (os.path.join(self.workingDir, 'jquery.js'), 'Jquery library'))
+        return Images(
+                (os.path.join(self.workingDir, 'index.html'), 'QA index.html'),
+                (os.path.join(self.workingDir, self.config.get('qa', 'jquery')), 'Jquery library'))

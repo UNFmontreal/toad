@@ -25,9 +25,6 @@ class TractographyMrtrix(GenericTask):
 
         tt5 = self.getRegistrationImage("tt5", "register")
         seed_gmwmi = self.getMaskingImage("tt5", ["register", "5tt2gmwmi"])
-        #@TODO reactivate brodmann = self.getRegistrationImage("brodmann", "resample")
-        aal2 =  self.getAtlasregistrationImage("aal2", "resample")
-        networks7 =  self.getAtlasregistrationImage("networks7", "resample")
         norm = self.getRegistrationImage("norm", "resample")
 
         mask253 = self.getMaskingImage('aparc_aseg', ['253', 'mask'])
@@ -38,43 +35,38 @@ class TractographyMrtrix(GenericTask):
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
 
-        #tensor part
-        if 'deterministic' in self.get('algorithm'):
-            tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
-            self.__plotConnectome(tckDet, aal2, "aal2_lut", "aal2")
-            self.__plotConnectome(tckDet, networks7, "networks7_lut", "networks7")
-            tckDetRoi = self.__tckedit(tckDet, mask253, self.buildName(tckDet, 'roi','tck'))
-            tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, norm, self.buildName(tckDetRoi, None, 'trk'))
-            self.__tckDetRoiTrk = tckDetRoiTrk
 
+        self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
+        if self.__nbDirections <= 45:
+            if 'deterministic' in self.get('algorithm'):
+                tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
+                tckDetRoi = self.__tckedit(tckDet, mask253, self.buildName(tckDet, 'roi','tck'))
+                tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, norm, self.buildName(tckDetRoi, None, 'trk'))
+                tckDetTrk = mriutil.tck2trk(tckDet, norm, self.buildName(tckDet, None, 'trk'))
+                self.__tckDetRoiTrk = tckDetRoiTrk
 
-        if 'probabilistic' in self.get('algorithm'):
-            tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
-            self.__plotConnectome(tckProb, aal2, "aal2_lut", "aal2")
-            self.__plotConnectome(tckProb, networks7, "networks7_lut", "networks7")
-            tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
-            tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
-            self.__tckProbRoiTrk = tckProbRoiTrk
+            if 'probabilistic' in self.get('algorithm'):
+                tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
+                tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
+                tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
+                tckProbTrk = mriutil.tck2trk(tckProb, norm , self.buildName(tckProb, None, 'trk'))
+                self.__tckProbRoiTrk = tckProbRoiTrk
 
-
-        if 'hardi' in self.get('algorithm'):
-            csd =  self.getHardimrtrixImage('dwi','csd')
-            hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
-            self.__plotConnectome(hardiTck, aal2, "aal2_lut", "aal2")
-            self.__plotConnectome(hardiTck, networks7, "networks7_lut", "networks7")
-            hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
-            tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
-            self.__tckgenRoiTrk = tckgenRoiTrk
+        else:
+            if 'hardi' in self.get('algorithm'):
+                csd =  self.getHardimrtrixImage('dwi','csd')
+                hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
+                hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
+                tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
+                hardiTrk = mriutil.tck2trk(hardiTck, norm, self.buildName(hardiTck, 'None', 'trk'))
+                self.__tckgenRoiTrk = tckgenRoiTrk
 
             if 'sift' in self.get('algorithm'):
                 tcksift = self.__tcksift(hardiTck, csd)
-                self.__plotConnectome(tcksift, aal2, "aal2_lut", "aal2")
-                self.__plotConnectome(tcksift, networks7, "networks7_lut", "networks7")
                 tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
                 tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
+                tcksiftTrk = mriutil.tck2trk(tcksift, norm, self.buildName(tcksift, 'None', 'trk'))
                 self.__tcksiftRoiTrk = tcksiftRoiTrk
-
-
 
     def __tckedit(self, source, roi, target, downsample= "2"):
         """ perform various editing operations on track files.
@@ -208,7 +200,7 @@ class TractographyMrtrix(GenericTask):
             self.info('Source file: {}'.format(source))
             self.info('Atlas file: {}'.format(atlas))
             self.info('Lut file location: {}'.format(lutFile))
-             
+
         connectome = self.__tck2connectome(source, atlas, self.buildName(source, [ prefix , 'connectome'], 'csv'))
         connectomeNormalize = self.__normalizeConnectome(connectome, self.buildName(connectome, 'normalize', 'csv'))
         pngImage = mriutil.plotConnectome(connectomeNormalize, self.buildName(connectomeNormalize, None, "png"), lutFile)
@@ -276,9 +268,6 @@ class TractographyMrtrix(GenericTask):
         return Images((self.getUpsamplingImage('dwi','upsample'), 'upsampled diffusion weighted'),
                   (self.getUpsamplingImage('grad', None, 'b'), '.b gradient encoding file'),
                   (self.getRegistrationImage("mask", "resample"), 'mask resampled'),
-                  (self.getAtlasregistrationImage("brodmann", "resample"), 'resampled brodmann area'),
-                  (self.getAtlasregistrationImage("aal2", "resample"), 'resampled aal2 area'),
-                  (self.getAtlasregistrationImage("networks7", "resample"), 'resampled seven networks area'),
                   (self.getRegistrationImage("norm", "resample"), 'brain resampled'),
                   (self.getMaskingImage('aparc_aseg',['253','mask']), 'area 253 from aparc_aseg'),
                   (self.getRegistrationImage("tt5", "register"),'5tt register'),
@@ -289,24 +278,20 @@ class TractographyMrtrix(GenericTask):
     def isDirty(self):
 
         images = Images()
-        if 'deterministic' in self.get('algorithm'):
-            images.extend(Images((self.getImage('dwi', 'tensor_det', 'tck'), "deterministic tensor connectome matrix from a streamlines"),
-                  (self.getImage('dwi', ['tensor_det','aal2', 'connectome', 'normalize'], 'csv'), "Aal2 normalize deterministic tensor connectome matrix from a streamlines csv"),
-                  (self.getImage('dwi', ['tensor_det', 'networks7' ,'connectome', 'normalize'], 'csv'), "Seven networks normalize deterministic tensor connectome matrix from a streamlines csv")))
 
-        if 'probabilistic' in self.get('algorithm'):
-            images.extend(Images((self.getImage('dwi', 'tensor_prob', 'tck'), "probabilistic tensor connectome matrix from a streamlines"),
-                  (self.getImage('dwi', ['tensor_prob', 'aal2', 'connectome', 'normalize'], 'csv'), "Aal2 normalize probabilistic tensor connectome matrix from a streamlines csv"),
-                  (self.getImage('dwi', ['tensor_prob', 'networks7' ,'connectome', 'normalize'], 'csv'), "Seven networks normalize probabilistic tensor connectome matrix from a streamlines csv")))
+        if self.__nbDirections <= 45:
+            if 'deterministic' in self.get('algorithm'):
+                images.extend(Images((self.getImage('dwi', 'tensor_det', 'tck'), "deterministic tensor connectome matrix from a streamlines")))
 
-        if 'hardi' in self.get('algorithm'):
-            images.append((self.getImage('dwi', 'hardi_prob', 'tck'), "tckgen hardi probabilistic streamlines tractography"))
+            if 'probabilistic' in self.get('algorithm'):
+                images.extend(Images((self.getImage('dwi', 'tensor_prob', 'tck'), "probabilistic tensor connectome matrix from a streamlines")))
 
+        else:
+            if 'hardi' in self.get('algorithm'):
+                images.append((self.getImage('dwi', 'hardi_prob', 'tck'), "tckgen hardi probabilistic streamlines tractography"))
 
-        if 'sift' in self.get('algorithm'):
-            images.extend(Images((self.getImage('dwi', 'tcksift', 'tck'), 'tcksift'),
-                  (self.getImage('dwi', ['tcksift', 'aal2', 'connectome', 'normalize'], 'csv'), 'Aal2 normalize connectome matrix from a tcksift csv'),
-                  (self.getImage('dwi', ['tcksift', 'networks7', 'connectome', 'normalize'], 'csv'), 'Seven networks normalize connectome matrix from a tcksift csv')))
+            if 'sift' in self.get('algorithm'):
+                images.extend(Images((self.getImage('dwi', 'tcksift', 'tck'), 'tcksift')))
 
         return images
 
@@ -316,7 +301,11 @@ class TractographyMrtrix(GenericTask):
         """
         qaImages = Images()
 
-        information = 'Warning: due to storage restriction streamlines were downsampled. Even if there is no difference in structural connectivity you should be careful if you want to compute metrics along streamlines.'
+        information = "Warning: due to storage restriction, streamlines were " \
+                "downsampled. Even if there is no difference in structural " \
+                "connectivity, you should be careful before computing any " \
+                "metrics along these streamlines.\n To run toad without this " \
+                "downsampling, please refer to the documentation."
         qaImages.setInformation(information)
 
         #get images
@@ -324,41 +313,24 @@ class TractographyMrtrix(GenericTask):
         mask253 = self.getMaskingImage('aparc_aseg',['253','mask'])
 
         #images production
-        if self.__tckDetRoiTrk is not None:
-            tensorDetPng = self.createVtkPng(self.__tckDetRoiTrk, norm, mask253)#self.getImage('dwi', ['tensor_det', 'roi'], 'png')
-            tensorAal2DetPlot = self.getImage('dwi', ['tensor_det', 'aal2', 'connectome', 'normalize'], 'png')
-            tensorNetworks7DetPlot = self.getImage('dwi', ['tensor_det', 'networks7', 'connectome', 'normalize'], 'png')
+        if self.__nbDirections <= 45:
+            tags = (
+                (self.__tckDetRoiTrk,
+                'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),
+                (self.__tckProbRoiTrk,
+                'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
+                )
+        else:
+            tags = (
+                (self.__tckgenRoiTrk,
+                'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines'),
+                (self.__tcksiftRoiTrk,
+                'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
+                )
 
-            qaImages.extend(Images((tensorDetPng, 'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),
-                    (tensorAal2DetPlot,'Aal2 normalize connectome matrix from a deterministic tensor streamlines'),
-                    (tensorNetworks7DetPlot,'Seven networks normalize connectome matrix from a deterministic tensor streamlines')))
-
-        if self.__tckProbRoiTrk is not None:
-            tensorProbPng = self.createVtkPng(self.__tckProbRoiTrk, norm, mask253)#self.getImage('dwi', ['tensor_prob', 'roi'], 'png')
-            tensorAal2ProbPlot = self.getImage('dwi', ['tensor_prob', 'aal2', 'connectome', 'normalize'], 'png')
-            tensorNetworks7ProbPlot = self.getImage('dwi', ['tensor_prob', 'networks7', 'connectome', 'normalize'], 'png')
-
-            qaImages.extend(Images((tensorProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
-                    (tensorAal2ProbPlot,'Aal2 normalize connectome matrix from a probabilistic tensor streamlines'),
-                    (tensorNetworks7ProbPlot,'Seven networks normalize connectome matrix from a probabilistic tensor streamlines')))
-
-        if self.__tckgenRoiTrk is not None:
-            hardiProbPng = self.createVtkPng(self.__tckgenRoiTrk, norm, mask253)#self.getImage('dwi', ['hardi_prob', 'roi'], 'png')
-            hardiAal2ProbPlot = self.getImage('dwi', ['hardi_prob', 'aal2', 'connectome', 'normalize'], 'png')
-            hardiNetworks7ProbPlot = self.getImage('dwi', ['hardi_prob', 'networks7', 'connectome', 'normalize'], 'png')
-
-            qaImages.extend(Images((hardiProbPng, 'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines'),
-                    (hardiAal2ProbPlot, 'Aal2 normalize connectome matrix from a probabilistic hardi streamlines'),
-                    (hardiNetworks7ProbPlot, 'Seven networks normalize connectome matrix from a probabilistic hardi streamlines')))
-
-        if self.__tcksiftRoiTrk is not None:
-
-            tcksiftPng = self.createVtkPng(self.__tcksiftRoiTrk, norm, mask253)#self.getImage('dwi', ['tcksift', 'roi'], 'png')
-            tcksiftAal2Plot = self.getImage('dwi', ['tcksift', 'aal2', 'connectome', 'normalize'], 'png')
-            tcksiftNetworks7Plot = self.getImage('dwi', ['tcksift', 'networks7', 'connectome', 'normalize'], 'png')
-
-            qaImages.extend(Images((tcksiftPng, 'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
-                    (tcksiftAal2Plot, 'Aal2 tcksift'),
-                    (tcksiftNetworks7Plot, 'Seven networks tcksift')))
+        for data, description in tags:
+            if data is not None:
+                imageQa = self.plotTrk(data, norm, mask253)
+                qaImages.append((imageQa, description))
 
         return qaImages

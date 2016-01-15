@@ -123,21 +123,22 @@ class HardiDipy(GenericTask):
         qaImages = Images()
         softwareName = 'dipy'
 
-        #mask images
-        mask = self.getRegistrationImage('mask', 'resample')
-
-        #Produce hardi odfs png image
+        #Get images
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
-        data = {'dwiData':self.__dwiData, 'csdModel':self.__csdModel}
-        odfsPng = self.buildName(dwi, 'hardi_odf', 'png')
-        self.reconstructionPng(data, mask, cc, odfsPng, model='hardi_odf')
-        qaImages.extend(Images((odfsPng, 'Coronal slice of hardi CSD ODFs in the Corpus Callosum')))
+        mask = self.getRegistrationImage('mask', 'resample')
 
-        #Produce hardi peaks png image
-        peaksPng = self.buildName(dwi, 'hardi_peak', 'png')
-        self.reconstructionPng(self.__csdPeaks, mask, cc, peaksPng, model='hardi_peak')
-        qaImages.extend(Images((peaksPng, 'Coronal slice of hardi CSD Peaks in the Corpus Callosum')))
+        #Produce hardi odfs image
+        data = {'dwiData':self.__dwiData, 'csdModel':self.__csdModel}
+        odfsQa = self.plotReconstruction(data, mask, cc, 'hardi_odf', dwi)
+        qaImages.append((
+            odfsQa, 'Coronal slice of hardi CSD ODFs in the Corpus Callosum'))
+
+        #Produce hardi peaks image
+        peaksQa = self.plotReconstruction(
+                self.__csdPeaks, mask, cc, 'hardi_peak', dwi)
+        qaImages.append((
+            peaksQa, "Coronal slice of hardi CSD Peaks in the Corpus Callosum"))
 
         #Build qa images
         tags = (
@@ -148,8 +149,8 @@ class HardiDipy(GenericTask):
         for postfix, description in tags:
             image = self.getImage('dwi', postfix)
             if image:
-                qaImage = self.buildName(image, softwareName, 'png')
-                self.slicerPng(image, qaImage, boundaries=mask)
-                qaImages.extend(Images((qaImage, description)))
+                imageQa = self.plot3dVolume(
+                        image, fov=mask, postfix=softwareName)
+                qaImages.append((imageQa, description))
 
         return qaImages

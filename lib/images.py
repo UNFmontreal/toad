@@ -35,6 +35,9 @@ class Images(object):
     def getData(self):
         return self.__images
 
+    def setInformation(self, information):
+        self.__information = information
+
     def getInformation(self):
         return self.__information
 
@@ -49,9 +52,6 @@ class Images(object):
 
     def insert(self, index, tupleItem):
         self.__images.insert(index, tupleItem)
-
-    def setInformation(self, information):
-        self.__information = information
 
     def isSomeImagesMissing(self):
         """Iterate over a structure to see if all image exists

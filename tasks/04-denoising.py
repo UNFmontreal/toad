@@ -165,20 +165,22 @@ class Denoising(GenericTask):
         qaImages = Images()
 
         #Information on denoising algorithm
-        information = 'Algorithm {} is set'.format(self.algorithm)
+        information = 'Denoising was done using the {} algorithm'.format(self.algorithm)
 
         if self.algorithm == "nlmeans" and \
             self.config.get("denoising", "number_array_coil") == "32":
-            information = "NLMEANS algorithm is not yet implement for 32 " \
+            information = "NLMEANS algorithm is not yet implemented for 32 " \
                 "coils channels images, "
             if self.config.getboolean("general", "matlab_available"):
-                information += "set algorithm to lpca or aonlm or "
-            information += "set ignore: True into [denoising] section of your config.cfg"
+                information += "set algorithm to `lpca` or `aonlm` or "
+            information += "set `ignore: True` into the [denoising] section " \
+                    "of your config.cfg file."
 
         if self.matlabWarning:
-            information = "Algorithm aonlm or lpca is set but matlab is not " \
-                "available for this server. Please configure matlab or set " \
-                "ignore: True into [denoising] section of your config.cfg."
+            information = "Algorithm `aonlm` or `lpca` was set for the " \
+                    "denoising, but Matlab is not available for this server. "\
+                    "Please install and configure Matlab or set `ignore: True`"\
+                    " into the [denoising] section of your config.cfg file."
             qaImages.extend(Images((False, 'Denoised diffusion image')))
 
         qaImages.setInformation(information)
@@ -192,24 +194,24 @@ class Denoising(GenericTask):
 
         #Build qa images
         if dwiDenoised:
-            dwiDenoisedGif = self.buildName(dwiDenoised, None, 'gif')
-            dwiCompareGif = self.buildName(dwiDenoised, 'compare', 'gif')
-            self.slicerGif(dwiDenoised, dwiDenoisedGif, boundaries=brainMask)
-            self.slicerGifCompare(dwi, dwiDenoised, dwiCompareGif, boundaries=brainMask)
-            qaImages.extend(Images(
-                (dwiDenoisedGif, 'Denoised diffusion image'),
-                (dwiCompareGif, 'Before and after denoising'),
-                ))
+
+            dwiDenoisedQa = self.plot4dVolume(dwiDenoised, fov=brainMask)
+            qaImages.append((dwiDenoisedQa, 'Denoised diffusion image'))
+
+            dwiCompareQa = self.compare4dVolumes(
+                    dwi, dwiDenoised, fov=brainMask)
+            qaImages.append((dwiCompareQa, 'Before and after denoising'))
+
             if self.algorithm == "nlmeans":
                 if self.sigmaVector != None:
-                    sigmaPng = self.buildName(dwiDenoised, 'sigma', 'png')
-                    self.plotSigma(self.sigmaVector, sigmaPng)
-                    qaImages.extend(
-                        Images(sigmaPng,'Sigmas from nlmeans algorithm'))
+                    sigmaQa = self.plotSigma(self.sigmaVector, dwiDenoised)
+                    qaImages.append(
+                            (sigmaQa, 'Sigmas from the nlmeans algorithm'))
 
                 if noiseMask:
-                    noiseMaskPng = self.buildName(noiseMask, None, 'png')
-                    self.slicerPng(b0, noiseMaskPng, maskOverlay=noiseMask, boundaries=noiseMask)
-                    qaImages.extend(
-                        Images(noiseMaskPng, 'Noise mask from nlmeans algorithm'))
+                    noiseMaskQa = self.plot3dVolume(
+                            b0, edges=noiseMask, fov=noiseMask)
+                    qaImages.append(
+                            (noiseMaskQa, 'Noise mask from the nlmeans algorithm'))
+
         return qaImages
