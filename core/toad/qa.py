@@ -112,7 +112,7 @@ class Qa(object):
     def plotTrk(self, source, anatomical, roi):
         """
         """
-        target = source.replace(".trk", self.qaImagesFormat)
+        target = self.buildName(source, None, ext=self.qaImagesFormat)
         qautil.plotTrk(source, target, anatomical, roi)
         return target
 
