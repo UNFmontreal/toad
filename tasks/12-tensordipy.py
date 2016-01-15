@@ -112,17 +112,18 @@ class TensorDipy(GenericTask):
         #Build qa images
         tags = (
             #(['tensor', 'rgb'], 'RGB map'),
-            ('fa', 'Fractional anisotropy'),
-            ('ad', 'Axial Diffusivity'),
-            ('md', 'Mean Diffusivity'),
-            ('rd', 'Radial Diffusivity'),
+            ('fa', 0.7, 'Fractional anisotropy'),
+            ('ad', 0.005, 'Axial Diffusivity'),
+            ('md', 0.005, 'Mean Diffusivity'),
+            ('rd', 0.005, 'Radial Diffusivity'),
             )
 
-        for postfix, description in tags:
+        for postfix, vmax, description in tags:
             image = self.getImage('dwi', postfix)
             if image:
                 imageQa = self.plot3dVolume(
-                        image, fov=mask, postfix=softwareName)
+                        image, fov=mask, vmax=vmax,
+                        colorbar=True, postfix=softwareName)
                 qaImages.append((imageQa, description))
 
         return qaImages
