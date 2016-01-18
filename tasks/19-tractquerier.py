@@ -4,7 +4,7 @@ from core.toad.generictask import GenericTask
 from lib import mriutil
 
 
-class TractographyPont(GenericTask):
+class Tractquerier(GenericTask):
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'tensormrtrix', 'preparation', 'hardimrtrix', 'registration', 'tractographymrtrix', 'qa')
@@ -16,19 +16,22 @@ class TractographyPont(GenericTask):
         # Load images
         dwi = self.getPreparationImage('dwi')
         hardiTck = self.getTractographymrtrixImage('dwi', 'hardi_prob', 'tck')
+        if not hardiTck:
+            hardiTck = self.getTractographymrtrixImage(
+                    'dwi', 'tensor_prob', 'tck')
         norm = self.getRegistrationImage('norm', 'resample')
         aparcAsegResample = self.getRegistrationImage('aparc_aseg', 'resample')
 
         # conversion tck > trk
-        hardiTrk = self.__tck2trk(hardiTck, norm)
+        #hardiTrk = self.__tck2trk(hardiTck, norm)
 
         # tract_querier
         qryFile = '/data/gosselin_n/cbedetti/TRAUMASOMMEIL/lpca_nocorrection/tract_queries_pont.qry'
-        self.__tractQuerier(hardiTrk, aparcAsegResample, qryFile)
+        #self.__tractQuerier(hardiTrk, aparcAsegResample, qryFile)
 
         # tckmap
         tags = ['brainstem2thalamus', 'brainstem2ventraldc']
-        #self.__launchTckmap(tags, norm):
+        self.__launchTckmap(tags, norm):
 
         self.dirty = False
 
@@ -44,10 +47,10 @@ class TractographyPont(GenericTask):
 
     def __tck2trk(self, hardiTck, norm):
         trk = self.buildName(hardiTck, None, 'trk')
-        if os.path.isfile(trk):
-            target = self.getImage('dwi', 'hardi_prob', 'trk')
-        else:
-            target = mriutil.tck2trk(hardiTck, norm , trk)
+        #if os.path.isfile(trk):
+        #target = self.getImage('dwi', 'hardi_prob', 'trk')
+        #else:
+        target = mriutil.tck2trk(hardiTck, norm , trk)
         return target
 
 
