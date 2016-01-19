@@ -16,7 +16,7 @@ class Outputs(GenericTask):
         self.__finished = False
 
     def implement(self):
-        """
+
         structs = {'dwi': self.getUpsamplingImage('dwi'),
                     'anat': self.getRegistrationImage('anat', ['freesurfer', 'resample']),
                     'mask': self.getRegistrationImage('mask', 'resample')}
@@ -31,7 +31,6 @@ class Outputs(GenericTask):
 
         self.__copyMetrics(['mrtrix', 'dipy', 'fsl'], ['fa','ad','rd','md'], 'tensor')
         self.__copyMetrics(['mrtrix', 'dipy'], ['nufo','csd','gfa'], 'hardi')
-        """
         self.__finished = True
 
 
