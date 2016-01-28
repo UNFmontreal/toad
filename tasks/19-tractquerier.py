@@ -31,7 +31,7 @@ class Tractquerier(GenericTask):
 
         # tckmap
         tags = ['brainstem2thalamus', 'brainstem2ventraldc']
-        self.__launchTckmap(tags, norm):
+        self.__launchTckmap(tags, norm)
 
         self.dirty = False
 
