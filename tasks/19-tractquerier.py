@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 import os.path
 from core.toad.generictask import GenericTask
-from lib import mriutil
+from lib import mriutil, util
 
 
 class Tractquerier(GenericTask):
-
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'upsampling', 'registration', 'tractographymrtrix', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
-
 
     def implement(self):
 
@@ -24,17 +22,32 @@ class Tractquerier(GenericTask):
         else:
             tractographyTrk = self.getTractographymrtrixImage('dwi', 'hardi_prob', 'trk')
 
-        atlasResample = self.getRegistrationImage('wm', 'resample')
+        ### Find query
+        if os.path.exists(self.getBackupImage(None, 'query', 'qry')):
+            util.symlink() ### Create symlink
+        else:
+            util.copy(os.path.join(self.toadDir, "templates", "tract_queries", self.get("qryDict")), self.workingDir)
+
+        ### Find dictionnary
+        if os.path.exists(self.getBackupImage(None, 'dict', 'qry')):
+            util.symlink() ### Create symlink
+        else:
+            util.copy(os.path.join(self.toadDir, "templates", "tract_queries", self.get("qryFile")), self.workingDir)
+
+        qryFile = self.getTractQuerierImage(None, 'query', 'qry')
+        qryDict = self.getTractQuerierImage(None, 'dict', 'qry')
 
 
-        # tract_querier
-
-        qryFile = os.path.join(self.toadDir, "templates", "tract_queries", self.get("qryFile"))
-        qryDict = os.path.join(self.toadDir, "templates", "tract_queries", self.get("qryDict"))
+        ### Get atlas to refere to
+        if os.path.exists(self.getAtlasRegistrationImage(self.get('atlas'),'resample')):
+            atlasResample = self.getAtlasRegistrationImage(self.get('atlas'),'resample')
+        else:
+            atlasResample = self.getRegistrationImage(self.get('atlas'),'resample')
 
         self.__tractQuerier(tractographyTrk, atlasResample, qryDict, qryFile)
 
         self.dirty = False
+
 
     def __tractQuerier(self, trk, atlas, qryDict, qryFile):
 
@@ -44,14 +57,12 @@ class Tractquerier(GenericTask):
         cmd = cmd.format(trk, atlas, qryDict, qryFile, output)
         self.launchCommand(cmd)
 
-
     def meetRequirement(self):
         """Validate if all requirements have been met prior to launch the task
         Returns:
             True if all requirement are meet, False otherwise
         """
         return True
-
 
     def isDirty(self):
         """Validate if this tasks need to be submit during the execution
