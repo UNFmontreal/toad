@@ -6,21 +6,24 @@ from lib import mriutil, util
 
 class Tractquerier(GenericTask):
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'tractographymrtrix', 'qa')
+        GenericTask.__init__(
+                self, subject,
+                'upsampling', 'registration', 'tractographymrtrix', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
     def implement(self):
 
         dwi = self.getUpsamplingImage('dwi', 'upsample')
-
-        self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
+        nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
 
         # Load tractography
-        if self.__nbDirections <= 45:
-            tractographyTrk = self.getTractographymrtrixImage('dwi', 'tensor_prob', 'trk')
+        if nbDirections <= 45:
+            postfixTractography = 'tensor_prob'
         else:
-            tractographyTrk = self.getTractographymrtrixImage('dwi', 'hardi_prob', 'trk')
+            postfixTractography = 'hardi_prob'
+        tractographyTrk = self.getTractographymrtrixImage(
+                'dwi', postfixTractography, 'trk')
 
         ### Find query
         if os.path.exists(self.getBackupImage(None, 'query', 'qry')):
@@ -51,11 +54,13 @@ class Tractquerier(GenericTask):
 
     def __tractQuerier(self, trk, atlas, qryDict, qryFile):
 
-        output = self.buildName(trk, None, 'trk')
+        target = self.buildName(trk, None, 'trk')
 
         cmd = "tract_querier -t {} -a {} -I {} -q {} -o {}"
-        cmd = cmd.format(trk, atlas, qryDict, qryFile, output)
+        cmd = cmd.format(trk, atlas, qryDict, qryFile, target)
         self.launchCommand(cmd)
+        return target
+
 
     def meetRequirement(self):
         """Validate if all requirements have been met prior to launch the task
