@@ -8,7 +8,8 @@ class Tractquerier(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(
                 self, subject,
-                'upsampling', 'registration', 'tractographymrtrix', 'qa')
+                'backup', 'upsampling', 'registration', 'atlasregistration',
+                'tractographymrtrix', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
@@ -25,39 +26,50 @@ class Tractquerier(GenericTask):
         tractographyTrk = self.getTractographymrtrixImage(
                 'dwi', postfixTractography, 'trk')
 
-        ### Find query
-        if os.path.exists(self.getBackupImage(None, 'query', 'qry')):
-            qryFileBackup = os.path.join(self.BackupDir, self.getBackupImage(None, 'query', 'qry'))
-            util.symlink(qryFileBackup, self.getBackupImage(None, 'query', 'qry')) ### Create symlink
-        else:
-            util.copy(os.path.join(self.toadDir, "templates", "tract_queries", self.get("qryDict")), self.workingDir)
+        ### Get atlas to refere to
+        atlasResample = self.__getAtlas()
 
         ### Find dictionnary
-        if os.path.exists(self.getBackupImage(None, 'dict', 'qry')):
-            qryDictBackup = os.path.join(self.BackupDir, self.getBackupImage(None, 'dict', 'qry'))
-            util.symlink(qryDictBackup, self.getBackupImage(None, 'dict', 'qry')) ### Create symlink
-        else:
-            util.copy(os.path.join(self.toadDir, "templates", "tract_queries", self.get("qryFile")), self.workingDir)
+        qryDict = self.__getTractquerierFile('tq_dict', 'qryDict')
 
-        qryFile = self.getTractQuerierImage(None, 'query', 'qry')
-        qryDict = self.getTractQuerierImage(None, 'dict', 'qry')
+        ### Find query
+        qryFile = self.__getTractquerierFile('query', 'qryFile')
 
-
-        ### Get atlas to refere to
-        if os.path.exists(self.getAtlasRegistrationImage(self.get('atlas'),'resample')):
-            atlasResample = self.getAtlasRegistrationImage(self.get('atlas'),'resample')
-        else:
-            atlasResample = self.getRegistrationImage(self.get('atlas'),'resample')
-
+        # Launch tract_querier
         self.__tractQuerier(tractographyTrk, atlasResample, qryDict, qryFile)
 
         self.dirty = False
 
 
+    def __getAtlas(self):
+        atlas = self.get('atlas')
+        target = self.getAtlasRegistrationImage(atlas, 'resample')
+        if not target:
+            target = self.getRegistrationImage(atlas, 'resample')
+        else:
+            print "No atlas resample found in tractquerier task"
+        return target
+
+
+    def __getTractquerierFile(self, prefix, defaultFile):
+        target = self.getBackupImage(prefix, None, 'qry')
+        if target:
+            util.symlink(target, self.buildName(target, None, 'qry'))
+        else:
+            defaultFileName = self.get(defaultFile)
+            defaultFileLink = os.path.join(
+                    self.toadDir,
+                    "templates",
+                    "tract_queries",
+                    defaultFileName,
+                    )
+            target = defaultFileLink
+            util.copy(defaultFileLink, self.workingDir, self.get(defaultFile))
+        return target
+
+
     def __tractQuerier(self, trk, atlas, qryDict, qryFile):
-
         target = self.buildName(trk, None, 'trk')
-
         cmd = "tract_querier -t {} -a {} -I {} -q {} -o {}"
         cmd = cmd.format(trk, atlas, qryDict, qryFile, target)
         self.launchCommand(cmd)
