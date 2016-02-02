@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os.path
 from core.toad.generictask import GenericTask
 from lib import mriutil, util
 
