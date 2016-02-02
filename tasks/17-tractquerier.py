@@ -27,13 +27,15 @@ class Tractquerier(GenericTask):
 
         ### Find query
         if os.path.exists(self.getBackupImage(None, 'query', 'qry')):
-            util.symlink() ### Create symlink
+            qryFileBackup = os.path.join(self.BackupDir, self.getBackupImage(None, 'query', 'qry'))
+            util.symlink(qryFileBackup, self.getBackupImage(None, 'query', 'qry')) ### Create symlink
         else:
             util.copy(os.path.join(self.toadDir, "templates", "tract_queries", self.get("qryDict")), self.workingDir)
 
         ### Find dictionnary
         if os.path.exists(self.getBackupImage(None, 'dict', 'qry')):
-            util.symlink() ### Create symlink
+            qryDictBackup = os.path.join(self.BackupDir, self.getBackupImage(None, 'dict', 'qry'))
+            util.symlink(qryDictBackup, self.getBackupImage(None, 'dict', 'qry')) ### Create symlink
         else:
             util.copy(os.path.join(self.toadDir, "templates", "tract_queries", self.get("qryFile")), self.workingDir)
 
