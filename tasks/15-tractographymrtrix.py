@@ -58,14 +58,14 @@ class TractographyMrtrix(GenericTask):
                 hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
                 hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
                 tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
-                hardiTrk = mriutil.tck2trk(hardiTck, norm, self.buildName(hardiTck, 'None', 'trk'))
+                hardiTrk = mriutil.tck2trk(hardiTck, norm, self.buildName(hardiTck, None, 'trk'))
                 self.__tckgenRoiTrk = tckgenRoiTrk
 
             if 'sift' in self.get('algorithm'):
                 tcksift = self.__tcksift(hardiTck, csd)
                 tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
                 tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
-                tcksiftTrk = mriutil.tck2trk(tcksift, norm, self.buildName(tcksift, 'None', 'trk'))
+                tcksiftTrk = mriutil.tck2trk(tcksift, norm, self.buildName(tcksift, None, 'trk'))
                 self.__tcksiftRoiTrk = tcksiftRoiTrk
 
     def __tckedit(self, source, roi, target, downsample= "2"):
@@ -279,7 +279,9 @@ class TractographyMrtrix(GenericTask):
 
         images = Images()
 
-        if self.__nbDirections <= 45:
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+
+        if mriutil.getNbDirectionsFromDWI(dwi) <= 45:
             if 'deterministic' in self.get('algorithm'):
                 images.append((
                     self.getImage('dwi', 'tensor_det', 'trk'),
