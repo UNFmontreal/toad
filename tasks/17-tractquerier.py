@@ -33,7 +33,7 @@ class Tractquerier(GenericTask):
         qryDict = self.__getTractquerierFile('tq_dict', 'qryDict')
 
         ### Find query
-        qryFile = self.__getTractquerierFile('query', 'qryFile')
+        qryFile = self.__getTractquerierFile('queries', 'qryFile')
 
         # Launch tract_querier
         self.__tractQuerier(tractographyTrk, atlasResample, self.workingDir, qryFile)
