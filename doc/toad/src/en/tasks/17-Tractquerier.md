@@ -25,13 +25,13 @@ The tractquerier step extract specific bundles of streamlines using WMQL .
 
 - `atlas: wmparc`
 
-Atlas used to segment bundles of streamlines
+Query dictionnary
 
-- `qryDict: Freesurfer.qry`
+- `qryDict: tq_dict_freesurfer.qry`
 
-Desired number of tracks
+Queries
 
-- `qryFile: query_freesurfer.qry`
+- `qryFile: queries_freesurfer.qry`
 
 Downsample factor to reduce output file size
 
@@ -42,6 +42,15 @@ Downsample factor to reduce output file size
 ### 1- Tract_querier 
 
 <a href="http://tract-querier.readthedocs.org/en/latest/" target="_blank">WMQL documentation</a>
+
+### 2- Use your own queries and atlases
+
+If you want to use your own queries and atlas the first thing you need to do it's to provide a dictionnary of your atlas starting with tq_dict, queries starting with queries and finally if you are using another atlas you need to change config file 
+
+[tractquerier]
+atlas: wmparc -> atlas: myatlas
+
+This atlas should be in atlasregistration step or registration step.
 
 ## Expected result(s) - Quality Assessment (QA)
 
