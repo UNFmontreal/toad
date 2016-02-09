@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from core.toad.generictask import GenericTask
 from lib import mriutil, util
 
@@ -35,7 +36,7 @@ class Tractquerier(GenericTask):
         qryFile = self.__getTractquerierFile('query', 'qryFile')
 
         # Launch tract_querier
-        self.__tractQuerier(tractographyTrk, atlasResample, qryDict, qryFile)
+        self.__tractQuerier(tractographyTrk, atlasResample, self.workingDir, qryFile)
 
         self.dirty = False
 
