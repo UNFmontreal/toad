@@ -20,9 +20,13 @@ class Toadinfo(Dicom):
         msg = ""
         msg_error = ""
         if self.isSiemens():
-            phaseEncodingDirection = self.getPhaseEncodingDirection()  # Set Phase encoding direction
-            phase = ["P>>A", " A>>P", "R>>L", "L>>R"]
-            msg +="\tPhase encoding: {}, {}\n".format(phaseEncodingDirection, phase[phaseEncodingDirection])
+
+            if self.getPhaseEncodingDirection() is not None:
+                phaseEncodingDirection =  self.getPhaseEncodingDirection() # Set Phase encoding direction
+                phase = ["P>>A", " A>>P", "R>>L", "L>>R"]
+                msg +="\tPhase encoding: {}, {}\n".format(phaseEncodingDirection, phase[phaseEncodingDirection])
+            else:
+                msg_error += "\t Phase encoding has not been correctly set\n"
 
             if self.getEpiFactor() is not None: # Set epiFactor
                 msg +="\tEPIFactor: {}\n".format(self.getEpiFactor())
