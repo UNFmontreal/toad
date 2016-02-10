@@ -62,10 +62,11 @@ class Toadinfo(Dicom):
             config.add_section("correction")
 
         if self.isSiemens():
-            phaseEncodingDirection = self.getPhaseEncodingDirection()
-            phase = ["posterior to anterior", "anterior to Posterior", "right to left", "left to right"]
-            config.set("correction", "#The phase encoding is from {}".format(phase[phaseEncodingDirection]))
-            config.set("correction", "phase_enc_dir", phaseEncodingDirection)
+            if self.getPhaseEncodingDirection() is not None:
+                phaseEncodingDirection = self.getPhaseEncodingDirection()
+                phase = ["posterior to anterior", "anterior to Posterior", "right to left", "left to right"]
+                config.set("correction", "#The phase encoding is from {}".format(phase[phaseEncodingDirection]))
+                config.set("correction", "phase_enc_dir", phaseEncodingDirection)
 
             if self.getEpiFactor() is not None:
                 config.set("correction", "epi_factor", self.getEpiFactor())
