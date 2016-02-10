@@ -60,7 +60,7 @@ class Toadinfo(Dicom):
                 config.set('denoising', 'number_array_coil', self.getNumberArrayCoil())
             else:
                 config.set('denoising', '#Number_array_coil has not been found')
-                config.set('denoising', '#number_array_coil')
+                config.set('denoising', '#number_array_coil =')
 
         if not config.has_section("correction"):
             config.add_section("correction")
@@ -73,19 +73,19 @@ class Toadinfo(Dicom):
                 config.set("correction", "phase_enc_dir", phaseEncodingDirection)
             else:
                 config.set("correction", "#The phase encoding has not been found")
-                config.set("correction", "#phase_enc_dir")
+                config.set("correction", "#phase_enc_dir =")
 
             if self.getEpiFactor() is not None:
                 config.set("correction", "epi_factor", self.getEpiFactor())
             else:
                 config.set("correction", "#The EPI factor has not been found")
-                config.set("correction", "#epi_factor")
+                config.set("correction", "#epi_factor =")
 
         if self.getEchoSpacing() is not None:
             config.set("correction", "echo_spacing", self.getEchoSpacing())
         else:
             config.set("correction", "#Echo spacing has not been found",)
-            config.set("correction", "#echo_spacing")
+            config.set("correction", "#echo_spacing =")
 
         if self.getEchoTime() is not None:
             if not config.has_section("correction"):
@@ -93,7 +93,7 @@ class Toadinfo(Dicom):
             config.set("correction", "echo_time_dwi", self.getEchoTime())
         else:
             config.set("correction", "Echo time dwi has not been found")
-            config.set("correction", "echo_time_dwi")
+            config.set("correction", "echo_time_dwi =")
 
         with open(source, 'w') as w:
            config.write(w)
