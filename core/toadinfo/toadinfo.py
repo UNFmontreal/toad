@@ -56,7 +56,8 @@ class Toadinfo(Dicom):
             if not config.has_section("denoising"):
                 config.add_section("denoising")
 
-            config.set('denoising', 'number_array_coil', self.getNumberArrayCoil())
+            if self.getNumberArrayCoil() is not None:
+                config.set('denoising', 'number_array_coil', self.getNumberArrayCoil())
 
         if not config.has_section("correction"):
             config.add_section("correction")
