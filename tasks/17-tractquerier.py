@@ -40,7 +40,6 @@ class Tractquerier(GenericTask):
 
         self.dirty = False
 
-
     def __getAtlas(self):
         atlas = self.get('atlas')
         target = self.getAtlasRegistrationImage(atlas, 'resample')
@@ -49,7 +48,6 @@ class Tractquerier(GenericTask):
         else:
             print "No atlas resample found in tractquerier task"
         return target
-
 
     def __getTractquerierFile(self, prefix, defaultFile):
         target = self.getBackupImage(prefix, None, 'qry')
@@ -66,7 +64,6 @@ class Tractquerier(GenericTask):
             target = defaultFileLink
             util.copy(defaultFileLink, self.workingDir, self.get(defaultFile))
         return target
-
 
     def __tractQuerier(self, trk, atlas, qryDict, qryFile):
         target = self.buildName(trk, None, 'trk')
