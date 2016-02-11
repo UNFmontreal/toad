@@ -109,11 +109,11 @@ class Qa(object):
         return target
 
 
-    def plotTrk(self, source, anatomical, roi):
+    def plotTrk(self, source, anatomical, roi, xSlice, ySlice, zSlice, xRot, yRot, zRot):
         """
         """
         target = self.buildName(source, None, ext=self.qaImagesFormat)
-        qautil.plotTrk(source, target, anatomical, roi)
+        qautil.plotTrk(source, target, anatomical, roi, xSlice, ySlice, zSlice,xRot, yRot, zRot)
         return target
 
 
