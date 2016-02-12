@@ -77,15 +77,15 @@ class Tractquerier(GenericTask):
         return target
 
     def __buildNameTractQuerierOutputs(self):
-        self.queries = [self.tractographyTrk[:-4] + '_corpus_callosum.trk',
-                        self.tractographyTrk[:-4] + '_cortico_spinal.left.trk)',
-                        self.tractographyTrk[:-4] + '_cortico_spinal.right.trk)',
-                        self.tractographyTrk[:-4] + '_inferior_fronto_occipital.left.trk)',
-                        self.tractographyTrk[:-4] + '_inferior_fronto_occipital.right.trk)',
-                        self.tractographyTrk[:-4] + '_inferior_longitudinal_fasciculus.left.trk)',
-                        self.tractographyTrk[:-4] + '_inferior_longitudinal_fasciculus.right.trk)',
-                        self.tractographyTrk[:-4] + '_uncinate_fasciculus.left.trk)',
-                        self.tractographyTrk[:-4] + '_uncinate_fasciculus.right.trk)']
+        self.queries = [self.getTractquerierImage('dwi', None, '_corpus_callosum.trk'),
+                        self.getTractquerierImage('dwi', None, '_cortico_spinal.left.trk'),
+                        self.getTractquerierImage('dwi', None, '_cortico_spinal.right.trk'),
+                        self.getTractquerierImage('dwi', None, '_inferior_fronto_occipital.left.trk'),
+                        self.getTractquerierImage('dwi', None, '_inferior_fronto_occipital.right.trk'),
+                        self.getTractquerierImage('dwi', None, '_inferior_longitudinal_fasciculus.left.trk'),
+                        self.getTractquerierImage('dwi', None, '_inferior_longitudinal_fasciculus.right.trk'),
+                        self.getTractquerierImage('dwi', None, '_uncinate_fasciculus.left.trk'),
+                        self.getTractquerierImage('dwi', None, '_uncinate_fasciculus.right.trk')]
 
     def meetRequirement(self):
         """Validate if all requirements have been met prior to launch the task
