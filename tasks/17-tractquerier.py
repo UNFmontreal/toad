@@ -122,7 +122,10 @@ class Tractquerier(GenericTask):
             tags = (
                 (self.queries[0],
                  'Corpus Callosum',
-                 None, 60, None, -80, 0, 160))#,
+                 None, 60, None, -80, 0, 160),
+                (self.queries[0],
+                 'Corpus Callosum',
+                 None, 60, None, -80, 0, 160))
                 #(self.queries[1],
 #                 'Corticospinal tract Left',
 #                 95, 80, 40, -90, 0, 160),
