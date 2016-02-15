@@ -77,15 +77,15 @@ class Tractquerier(GenericTask):
         return target
 
     def __buildNameTractQuerierOutputs(self):
-        self.queries = [self.getImage('dwi', '_corpus_callosum', 'trk')],
-                        #self.getImage('dwi', '_cortico_spinal.left.', 'trk'),
-                        #self.getImage('dwi', '_cortico_spinal.right.', 'trk'),
-                        #self.getImage('dwi', '_inferior_fronto_occipital.left.', 'trk'),
-                        #self.getImage('dwi', '_inferior_fronto_occipital.right.', 'trk'),
-                        #self.getImage('dwi', '_inferior_longitudinal_fasciculus.left.', 'trk'),
-                        #self.getImage('dwi', '_inferior_longitudinal_fasciculus.right.', 'trk'),
-                        #self.getImage('dwi', '_uncinate_fasciculus.left.', 'trk'),
-                        #self.getImage('dwi', '_uncinate_fasciculus.right.', 'trk')]
+        self.queries = [self.getImage('dwi', '_corpus_callosum', 'trk'),
+                        self.getImage('dwi', '_cortico_spinal.left.', 'trk'),
+                        self.getImage('dwi', '_cortico_spinal.right.', 'trk'),
+                        self.getImage('dwi', '_inferior_fronto_occipital.left.', 'trk'),
+                        self.getImage('dwi', '_inferior_fronto_occipital.right.', 'trk'),
+                        self.getImage('dwi', '_inferior_longitudinal_fasciculus.left.', 'trk'),
+                        self.getImage('dwi', '_inferior_longitudinal_fasciculus.right.', 'trk'),
+                        self.getImage('dwi', '_uncinate_fasciculus.left.', 'trk'),
+                        self.getImage('dwi', '_uncinate_fasciculus.right.', 'trk')]
 
     def meetRequirement(self):
         """Validate if all requirements have been met prior to launch the task
@@ -123,33 +123,30 @@ class Tractquerier(GenericTask):
                 (self.queries[0],
                  'Corpus Callosum',
                  None, 60, None, -80, 0, 160),
-                (self.queries[0],
-                 'Corpus Callosum',
-                 None, 60, None, -80, 0, 160))
-                #(self.queries[1],
-#                 'Corticospinal tract Left',
-#                 95, 80, 40, -90, 0, 160),
-#                (self.queries[2],
-#                 'Corticospinal tract right',
-#                 95, 80, 40, -90, 0, 200),
-#                (self.queries[3],
-#                 'Inferior Fronto Occipital tract left',
-#                 95, 80, 40, -90, 0, 90),
-#                (self.queries[4],
-#                 'Inferior Fronto Occipital tract right',
-#                 95, 80, 40, -90, 0, -90),
-#                (self.queries[5],
-#                 'inferior Longitudinal Fasciculus left',
-#                 95, 80, 40, -90, 0, 90),
-#                (self.queries[6],
-#                 'Inferior Longitudinal Fasciculus right',
-#                 95, 80, 40, -90, 0, -90),
-#                (self.queries[7],
-#                 'Uncinate Fasciculus left',
-#                 95, 80, 40, -90, 0, 90),
-#                (self.queries[8],
-#                 'Uncinate Fasciculus right',
-#                 95, 80, 40, -90, 0, -90))
+                (self.queries[1],
+                 'Corticospinal tract Left',
+                 95, 80, 40, -90, 0, 160),
+                (self.queries[2],
+                 'Corticospinal tract right',
+                 95, 80, 40, -90, 0, 200),
+                (self.queries[3],
+                 'Inferior Fronto Occipital tract left',
+                 95, 80, 40, -90, 0, 90),
+                (self.queries[4],
+                 'Inferior Fronto Occipital tract right',
+                 95, 80, 40, -90, 0, -90),
+                (self.queries[5],
+                 'inferior Longitudinal Fasciculus left',
+                 95, 80, 40, -90, 0, 90),
+                (self.queries[6],
+                 'Inferior Longitudinal Fasciculus right',
+                 95, 80, 40, -90, 0, -90),
+                (self.queries[7],
+                 'Uncinate Fasciculus left',
+                 95, 80, 40, -90, 0, 90),
+                (self.queries[8],
+                 'Uncinate Fasciculus right',
+                 95, 80, 40, -90, 0, -90))
 
             for data, description, xSlice, ySlice, zSlice, xRot, yRot, zRot in tags:
                 if data is not None:
