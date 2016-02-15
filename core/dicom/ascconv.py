@@ -10,12 +10,12 @@ class Ascconv(object):
     def __init__(self, filename):
         self.__fileName = filename
         self.__ascconvFound = False
-        self.__phaseEncodingDirection = 1
-        self.__patFactor = 1
-        self.__epiFactor = 1
-        self.__phaseResolution = 1
-        self.__phaseOversampling = 1
-        self.__numberArrayCoil = 0
+        self.__phaseEncodingDirection = None # 1
+        self.__patFactor = None # 1
+        self.__epiFactor = None # 1
+        self.__phaseResolution = None # 1
+        self.__phaseOversampling = None # 1
+        self.__numberArrayCoil = None # 0
         self.__initialize()
 
     def __repr__(self):
