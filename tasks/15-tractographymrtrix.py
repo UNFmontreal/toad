@@ -338,12 +338,12 @@ class TractographyMrtrix(GenericTask):
                 (self.__tckgenRoiTrk,
                 'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines'),
                 (self.__tcksiftRoiTrk,
-                'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
+                'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines with sift'),
                 )
 
         for data, description in tags:
             if data is not None:
-                imageQa = self.plotTrk(data, norm, mask253)
+                imageQa = self.plotTrk(data, norm, mask253, None, None, 65, -70, 2.5, 185)
                 qaImages.append((imageQa, description))
 
         return qaImages

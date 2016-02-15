@@ -31,7 +31,7 @@ def __parseArguments():
     parser = arguments.Parser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description ="""\n
         Pipeline that realize your dream,
-        Please consult the documentation at http://unf-montreal.ca/donotexistsyet
+        Please consult the documentation at http://unf-montreal.ca/toad
         for furthers informations""",
                                 epilog= """\n
 
