@@ -590,7 +590,7 @@ def plotTrk(source, target, anatomical, roi=None, xSlice=None, ySlice=None, zSli
 
         anatomicalActor = dipy.viz.fvtk.slicer(
             anatomicalImage.get_data(), voxsz=(1.0, 1.0, 1.0),
-            plane_i=xSlice, plane_j=ySlice, plane_k=[zSlice], outline=False)
+            plane_i=[xSlice], plane_j=[ySlice], plane_k=[zSlice], outline=False)
     except ValueError:
         return False
 
