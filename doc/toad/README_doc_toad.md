@@ -2,7 +2,7 @@
 
 **Organization:** Unité Fonctionnelle de Neuroimagerie ([UNF](http://www.unf-montreal.ca)), Centre de recherche de l’institut Universitaire de Gériatrie de Montréal ([CRIUGM](http://criugm.qc.ca/))
 
-**Maintainer:** [Mathieu Desrosiers](mailto:mathieu.desrosiers@criugm.qc.ca)  
+**Maintainer:** [Arnaud Boré and Christophe Bedetti](mailto:toadunf.criugm@gmail.com)
 
 *Warning: the project is under active development and should not be used to process real data at this time.*
 

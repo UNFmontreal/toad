@@ -58,7 +58,7 @@ def imageSlicer(image3dData, minNbrSlices, fov=None):
     # Number of slices in each dimension
     x = widthSize / imageToSlice.shape[1]
     y = widthSize / imageToSlice.shape[0]
-    z = y
+    z = widthSize / imageToSlice.shape[0]
     numberOfSlices = (x, y, z)
 
     # Compute slices indices
@@ -125,7 +125,7 @@ class Plot3dVolume(object):
                 instead of a link (True or False)
                 default=False
         """
-        self.height = 6 # Figure height in inches, x100 px with default dpi
+        self.width = 14 # Figure height in inches, x100 px with default dpi
         self.minNbrSlices = 7
         self.source = source
         self.fov = fov
@@ -176,7 +176,7 @@ class Plot3dVolume(object):
         maxWidthPx = numpy.max([xShape[0], yShape[0], zShape[0]])
         totalHeightPx = xShape[1] + yShape[1] + zShape[1]
         ratio = maxWidthPx / float(totalHeightPx)
-        return (self.height * ratio, self.height)
+        return (self.width, self.width / ratio)
 
 
     def initImshow(self):
@@ -229,10 +229,10 @@ class Plot3dVolume(object):
         matplotlib.pyplot.subplots_adjust(
                 left=0, right=1, bottom=0, top=1, hspace=0.001)
         if smallSize:
-            self.fig.set_size_inches([_ / 2 for _ in self.figsize])
+            self.fig.set_size_inches([_ / 1.5 for _ in self.figsize])
         else:
             self.fig.set_size_inches(self.figsize)
-        self.__showColorbar()
+        if self.colorbar: self.__showColorbar()
         self.fig.savefig(target, facecolor='black')
         matplotlib.pyplot.close()
 
@@ -260,10 +260,7 @@ class Plot3dVolume(object):
 
 
     def __showGrid(self, dim):
-        try:
-            step = int(min(self.imageData.shape) / 5)
-        except ValueError:
-            step = 16
+        step = numpy.floor(max(self.imageData.shape) / 5)
         xAxisTicks = numpy.arange(step, self.slices[dim].shape[0], step)
         yAxisTicks = numpy.arange(step, self.slices[dim].shape[1], step)
         self.ax.xaxis.set_ticks(xAxisTicks)
@@ -280,12 +277,14 @@ class Plot3dVolume(object):
 
 
     def __showColorbar(self):
-        if self.colorbar:
-            self.fig.subplots_adjust(right=0.8)
-            cbar_ax = self.fig.add_axes([0.85, 0.15, 0.05, 0.7])
-            cbar = self.fig.colorbar(self.im, cax=cbar_ax)
-            #cbar.outline.set_color('w')
-            #cbar.ax.yaxis.set_tick_params(color='w')
+        #give space for the colorbar
+        self.fig.subplots_adjust(right=0.9)
+        #description: add_axes([left, bottom, width, height])
+        cbar_ax = self.fig.add_axes([0.91, 0.15, 0.01, 0.7])
+        cbar = self.fig.colorbar(self.im, cax=cbar_ax)
+        #set colorbar to white
+        for t in cbar_ax.get_yticklabels():
+            t.set_color("w")
 
 
 class Plot4dVolume(object):
