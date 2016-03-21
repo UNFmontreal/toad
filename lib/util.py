@@ -284,12 +284,23 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
     """
 
     parts = []
-    #determine target name
+    #determine target name - Has to be re-written -
     if config.has_option('prefix', source):
         targetName = config.get('prefix', source)
     else:
         parts = os.path.basename(source).split(os.extsep)
-        targetName = parts.pop(0)
+        if 'nii' in parts:
+            indExt = parts.index('nii')
+            if indExt>1:
+                targetName = '.'.join(parts[:indExt-1])
+                parts = parts[indExt:]
+            else:
+                targetName = parts.pop(0)
+        elif len(parts)>2:
+            targetName = '.'.join(parts[:-1])
+            parts = parts[-1]
+        else:
+            targetName = parts.pop(0)
 
     #add postfix to target name
     if (postfix is not None) and postfix != "":
@@ -324,6 +335,9 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
 
     if absolute:
         targetName = os.path.join(target, targetName)
+
+    print('FinalName: '+targetName )
+
     return "'{}'".format(targetName)
 
 

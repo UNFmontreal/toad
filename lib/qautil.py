@@ -612,4 +612,6 @@ def plotTrk(source, target, anatomical, roi=None, xSlice=None, ySlice=None, zSli
     dipy.viz.fvtk.camera(
             ren, pos=(0,0,1), focal=(0,0,0), viewup=(0,1,0), verbose=False)
 
+    print(target)
+
     dipy.viz.fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
