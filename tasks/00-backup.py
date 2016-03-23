@@ -40,7 +40,9 @@ class Backup(GenericTask):
                        (self.getSubjectImage('grad', None, 'b'), ""),
                        (self.getSubjectImage('grad', None, 'bvals'), ""),
                        (self.getSubjectImage('grad', None, 'bvecs'), ""),
-                       (self.getSubjectImage('config', None, 'cfg'), ""))
+                       (self.getSubjectImage('tq_dict', None, 'qry'), ""),
+                       (self.getSubjectImage('queries', None, 'qry'), ""),
+                       (self.getSubjectImage('config', None, 'cfg'), ""),)
 
         for image, description in images.getData():
             if image:
@@ -71,3 +73,4 @@ class Backup(GenericTask):
                 else:
                     shutil.move(source, self.subjectDir)
             os.rmdir(self.workingDir)
+

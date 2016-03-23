@@ -109,7 +109,6 @@ class Parcellation(GenericTask):
 
         subjectDir = os.path.join(self.workingDir, self.id)
         aparcAseg = self.__findImageInDirectory("aparc+aseg.mgz", subjectDir)
-	wmparc = self.__findImageInDirectory("wmparc.mgz", subjectDir)
         lhWhite = self.__findImageInDirectory("lh.white", subjectDir)
         rhWhite = self.__findImageInDirectory("rh.white", subjectDir)
         lhPial = self.__findImageInDirectory("lh.pial", subjectDir)
