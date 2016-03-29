@@ -1,3 +1,5 @@
+# Références fondamentales
+
 Avant de commencer à utiliser TOAD, nous vous recommandons de lire les articles suivant afin de mieux comprendre les analyses utilisées par le pipeline :
 
 - [Jones, D. K., & Cercignani, M. (2010). Twenty-five pitfalls in the analysis of diffusion MRI data. *NMR in Biomedicine, 23(7)*, 803–820.](http://www.ncbi.nlm.nih.gov/pubmed/20886566)
