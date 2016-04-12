@@ -262,7 +262,13 @@ class Correction(GenericTask):
                     dims.append([dimensions[0], dimensions[1], dimensions[2]])
                 else:
                     dims.append(dimensions)
-                    sizes.append(mriutil.getMriVoxelSize(source))
+                    # sourceSize sanitization
+                    sourceSize = mriutil.getMriVoxelSize(source)
+                    try:
+                        sourceSize = ["{:.1f}".format(float(val)) for val in sourceSize]
+                    except ValueError:
+                        self.error("Error during sourceSize sanitization")
+                    sizes.append(sourceSize)
 
         if not dims[1:] == dims[:-1]:
             self.error("Dimension for each scale mismatch found between images: {}".format(", ".join(names)))
