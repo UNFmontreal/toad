@@ -53,7 +53,7 @@ class Snr(GenericTask):
 
 
     def isIgnore(self):
-        return  self.get("ignore")
+        return True#self.get("ignore")
 
 
     def meetRequirement(self):
