@@ -56,3 +56,7 @@ class Outputs(GenericTask):
 
     def isDirty(self):
         return not self.__finished
+
+    def isIgnore(self):
+        return self.get("ignore")
+

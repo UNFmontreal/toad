@@ -567,30 +567,30 @@ def plotReconstruction(data, mask, cc, target, model):
     dipy.viz.fvtk.clear(ren)
 
 
-def plotTrk(source, target, anatomical, roi=None, xSlice=None, ySlice=None, zSlice=None,
-                                                  xRot=None, yRot=None, zRot=None):
+def plotTrk(source, target, anatomical, roi=None,
+        xSlice=None, ySlice=None, zSlice=None,
+        xRot=None, yRot=None, zRot=None):
 
     if roi is not None:
         roiImage= nibabel.load(roi)
         roiActor = dipy.viz.fvtk.contour(
                 roiImage.get_data(), levels=[1],
                 colors=[(1., 1., 0.)], opacities=[1.])
-
         roiActor.RotateX(xRot)
         roiActor.RotateY(yRot)
         roiActor.RotateZ(zRot)
 
     try:
         anatomicalImage = nibabel.load(anatomical)
-
         sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
-
         sourceActor = dipy.viz.fvtk.streamtube(
                 sourceImage, dipy.viz.colormap.line_colors(sourceImage))
-
+        if xSlice is not None: xSlice = [xSlice]
+        if ySlice is not None: ySlice = [ySlice]
+        if zSlice is not None: zSlice = [zSlice]
         anatomicalActor = dipy.viz.fvtk.slicer(
             anatomicalImage.get_data(), voxsz=(1.0, 1.0, 1.0),
-            plane_i=xSlice, plane_j=ySlice, plane_k=[zSlice], outline=False)
+            plane_i=xSlice, plane_j=ySlice, plane_k=zSlice, outline=False)
     except ValueError:
         return False
 
@@ -613,3 +613,4 @@ def plotTrk(source, target, anatomical, roi=None, xSlice=None, ySlice=None, zSli
             ren, pos=(0,0,1), focal=(0,0,0), viewup=(0,1,0), verbose=False)
 
     dipy.viz.fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
+
