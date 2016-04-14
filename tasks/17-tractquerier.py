@@ -14,34 +14,37 @@ class Tractquerier(GenericTask):
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
+
     def implement(self):
 
+        self.defaultQuery = False
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
 
         # Load tractography
-        if nbDirections <= 45:
-            postfixTractography = 'tensor_prob'
-        else:
-            postfixTractography = 'hardi_prob'
-        self.tractographyTrk = self.getTractographymrtrixImage(
-            'dwi', postfixTractography, 'trk')
-
-        self.defaultQuery = False
+        self.tractographyTrk = self.__getTractography(nbDirections)
 
         ### Get atlas to refere to
         atlasResample = self.__getAtlas()
 
         ### Find dictionnary
-        qryDict = self.__getTractquerierFile('tq_dict', 'qryDict')
+        qryDict = self.__getTractquerierFile('tq_dict', 'tq_dict_freesurfer')
 
         ### Find query
-        qryFile = self.__getTractquerierFile('queries', 'qryFile')
+        qryFile = self.__getTractquerierFile('queries', 'queries_freesurfer')
 
         # Launch tract_querier
         self.__tractQuerier(self.tractographyTrk, atlasResample, self.workingDir, qryFile)
-
         self.dirty = False
+
+
+    def __getTractography(self, nbDirections):
+        if nbDirections <= 45:
+            postfixTractography = 'tensor_prob'
+        else:
+            postfixTractography = 'hardi_prob'
+        return self.getTractographymrtrixImage('dwi', postfixTractography, 'trk')
+
 
     def __getAtlas(self):
         atlas = self.get('atlas')
@@ -49,15 +52,16 @@ class Tractquerier(GenericTask):
         if not target:
             target = self.getRegistrationImage(atlas, 'resample')
         else:
-            print "No atlas resample found in tractquerier task"
+            self.info("No atlas resample found in tractquerier task")
         return target
+
 
     def __getTractquerierFile(self, prefix, defaultFile):
         target = self.getBackupImage(prefix, None, 'qry')
         if target:
             util.symlink(target, self.buildName(target, None, 'qry'))
         else:
-            defaultFileName = self.get(defaultFile)
+            defaultFileName = '{}.qry'.format(defaultFile)
             defaultFileLink = os.path.join(
                 self.toadDir,
                 "templates",
@@ -65,9 +69,10 @@ class Tractquerier(GenericTask):
                 defaultFileName,
             )
             target = defaultFileLink
-            util.copy(defaultFileLink, self.workingDir, self.get(defaultFile))
+            util.copy(defaultFileLink, self.workingDir, defaultFileName)
             self.defaultQuery = True
         return target
+
 
     def __tractQuerier(self, trk, atlas, qryDict, qryFile):
         target = self.buildName(trk, None, 'trk')
@@ -76,23 +81,35 @@ class Tractquerier(GenericTask):
         self.launchCommand(cmd)
         return target
 
+
     def __buildNameTractQuerierOutputs(self):
-        self.queries = [self.getImage('dwi', '_corpus_callosum', 'trk'),
-                        self.getImage('dwi', '_cortico_spinal.left.', 'trk'),
-                        self.getImage('dwi', '_cortico_spinal.right.', 'trk'),
-                        self.getImage('dwi', '_inferior_fronto_occipital.left.', 'trk'),
-                        self.getImage('dwi', '_inferior_fronto_occipital.right.', 'trk'),
-                        self.getImage('dwi', '_inferior_longitudinal_fasciculus.left.', 'trk'),
-                        self.getImage('dwi', '_inferior_longitudinal_fasciculus.right.', 'trk'),
-                        self.getImage('dwi', '_uncinate_fasciculus.left.', 'trk'),
-                        self.getImage('dwi', '_uncinate_fasciculus.right.', 'trk')]
+        self.queries = [self.getImage('dwi', 'corpus_callosum', 'trk'),
+                        self.getImage('dwi', 'cortico_spinal.left', 'trk'),
+                        self.getImage('dwi', 'cortico_spinal.right', 'trk'),
+                        self.getImage('dwi', 'inferior_fronto_occipital.left', 'trk'),
+                        self.getImage('dwi', 'inferior_fronto_occipital.right', 'trk'),
+                        self.getImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk'),
+                        self.getImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk'),
+                        self.getImage('dwi', 'uncinate_fasciculus.left', 'trk'),
+                        self.getImage('dwi', 'uncinate_fasciculus.right', 'trk')]
+
+
+    def isIgnore(self):
+        return self.get("ignore")
+
 
     def meetRequirement(self):
         """Validate if all requirements have been met prior to launch the task
         Returns:
             True if all requirement are meet, False otherwise
         """
-        return True
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
+        return Images(
+                (self.__getTractography(nbDirections), 'Connectome tractography'),
+                (self.__getAtlas(), "Upsampled atlas in diffusion space"),
+                )
+
 
     def isDirty(self):
         """Validate if this tasks need to be submit during the execution
@@ -100,6 +117,7 @@ class Tractquerier(GenericTask):
             True if any expected file or resource is missing, False otherwise
         """
         return self.dirty
+
 
     def qaSupplier(self):
         """Create and supply images for the report generated by qa task
@@ -154,6 +172,6 @@ class Tractquerier(GenericTask):
                     qaImages.append((imageQa, description))
         else:
             # Add message about QA
-            None
+            pass
 
         return qaImages

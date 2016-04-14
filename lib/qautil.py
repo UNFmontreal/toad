@@ -585,9 +585,12 @@ def plotTrk(source, target, anatomical, roi=None,
         sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
         sourceActor = dipy.viz.fvtk.streamtube(
                 sourceImage, dipy.viz.colormap.line_colors(sourceImage))
+        if xSlice is not None: xSlice = [xSlice]
+        if ySlice is not None: ySlice = [ySlice]
+        if zSlice is not None: zSlice = [zSlice]
         anatomicalActor = dipy.viz.fvtk.slicer(
             anatomicalImage.get_data(), voxsz=(1.0, 1.0, 1.0),
-            plane_i=xSlice, plane_j=ySlice, plane_k=[zSlice], outline=False)
+            plane_i=xSlice, plane_j=ySlice, plane_k=zSlice, outline=False)
     except ValueError:
         return False
 
