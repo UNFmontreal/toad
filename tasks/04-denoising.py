@@ -115,9 +115,9 @@ class Denoising(GenericTask):
 
 
     def __launchMatlabExecution(self, pyscript):
-
+        timeOut = 18000 #5hours
         self.info("Launch DWIDenoisingLPCA from matlab.")
-        self.launchMatlabCommand(pyscript, None, None, 10800)
+        self.launchMatlabCommand(pyscript, None, None, timeOut)
 
 
     def __computeSigmaAndNoiseMask(self, data):

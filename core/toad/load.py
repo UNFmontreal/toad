@@ -58,7 +58,7 @@ class Load(object):
                 nTreads = 5
 
         except ValueError:
-            nTreads = 1
+            nTreads = 5
         return str(nTreads)
 
 
