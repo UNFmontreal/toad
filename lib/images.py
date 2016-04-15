@@ -66,7 +66,6 @@ class Images(object):
             True if some image do not exists, False otherwise
         """
         result = False
-        print(self.__images)
         for image, description in self.__images:
             if not image:
                 result = True

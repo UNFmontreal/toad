@@ -284,23 +284,15 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
     """
 
     parts = []
-    #determine target name - Has to be re-written -
+    #determine target name
     if config.has_option('prefix', source):
         targetName = config.get('prefix', source)
     else:
         parts = os.path.basename(source).split(os.extsep)
-        if 'nii' in parts:
-            indExt = parts.index('nii')
-            if indExt>1:
-                targetName = '.'.join(parts[:indExt-1])
-                parts = parts[indExt:]
-            else:
-                targetName = parts.pop(0)
-        elif len(parts)>2:
-            targetName = '.'.join(parts[:-1])
-            parts = parts[-1]
-        else:
-            targetName = parts.pop(0)
+        targetName = parts.pop(0)
+        # tractquerier exception
+        if any(parts[0] in s for s in ['left', 'right']):
+            targetName += ".{}".format(part[0])
 
     #add postfix to target name
     if (postfix is not None) and postfix != "":
@@ -335,8 +327,6 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
 
     if absolute:
         targetName = os.path.join(target, targetName)
-
-    print('FinalName: '+targetName )
 
     return "'{}'".format(targetName)
 
@@ -464,3 +454,4 @@ def rawInput(message):
     sys.stdout.flush()
     termios.tcflush(sys.stdin, termios.TCIOFLUSH)
     return raw_input(message)
+

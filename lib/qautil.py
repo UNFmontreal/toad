@@ -591,7 +591,6 @@ def plotTrk(source, target, anatomical, roi=None,
         anatomicalActor = dipy.viz.fvtk.slicer(
             anatomicalImage.get_data(), voxsz=(1.0, 1.0, 1.0),
             plane_i=xSlice, plane_j=ySlice, plane_k=zSlice, outline=False)
-
     except ValueError:
         return False
 
@@ -612,8 +611,6 @@ def plotTrk(source, target, anatomical, roi=None,
 
     dipy.viz.fvtk.camera(
             ren, pos=(0,0,1), focal=(0,0,0), viewup=(0,1,0), verbose=False)
-
-    print(target)
 
     dipy.viz.fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
 

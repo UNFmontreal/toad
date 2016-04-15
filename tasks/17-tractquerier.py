@@ -93,6 +93,7 @@ class Tractquerier(GenericTask):
                         self.getImage('dwi', 'uncinate_fasciculus.left', 'trk'),
                         self.getImage('dwi', 'uncinate_fasciculus.right', 'trk')]
 
+
     def isIgnore(self):
         return self.get("ignore")
 
@@ -118,6 +119,7 @@ class Tractquerier(GenericTask):
                 (self.__getAtlas(),'Atlas'))
 
         return images
+
 
     def isDirty(self):
         """Validate if this tasks need to be submit during the execution
