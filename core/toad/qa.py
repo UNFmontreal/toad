@@ -49,7 +49,7 @@ class Qa(object):
         Wrapper of the class Plot4dVolume of qautil
         """
         target = self.buildName(source, None, ext='gif')
-	frameFormat = ".{}".format(self.qaImagesFormat)
+        frameFormat = ".{}".format(self.qaImagesFormat)
         qaPlot = qautil.Plot4dVolume(source, fov=fov, frameFormat=frameFormat)
         qaPlot.save(target)
         return target
@@ -60,7 +60,7 @@ class Qa(object):
         Wrapper of the class Plot4dVolume of qautil
         """
         target = self.buildName(source1, 'compare', ext='gif')
-	frameFormat = ".{}".format(self.qaImagesFormat)
+        frameFormat = ".{}".format(self.qaImagesFormat)
         qaPlot = qautil.Plot4dVolume(
 		source1, source2=source2, fov=fov, frameFormat=frameFormat)
         qaPlot.save(target)
@@ -83,7 +83,7 @@ class Qa(object):
         """
         """
         target = self.buildName(basename, 'vectors', ext='gif')
-	frameFormat = ".{}".format(self.qaImagesFormat)
+        frameFormat = ".{}".format(self.qaImagesFormat)
         qautil.plotVectors(
 		bvecsFile, bvecsCorrected, target, frameFormat=frameFormat)
         return target
