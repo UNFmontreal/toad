@@ -290,6 +290,9 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
     else:
         parts = os.path.basename(source).split(os.extsep)
         targetName = parts.pop(0)
+        # tractquerier exception
+        if any(parts[0] in s for s in ['left', 'right']):
+            targetName += ".{}".format(part[0])
 
     #add postfix to target name
     if (postfix is not None) and postfix != "":
@@ -324,6 +327,7 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
 
     if absolute:
         targetName = os.path.join(target, targetName)
+
     return "'{}'".format(targetName)
 
 
@@ -450,3 +454,4 @@ def rawInput(message):
     sys.stdout.flush()
     termios.tcflush(sys.stdin, termios.TCIOFLUSH)
     return raw_input(message)
+

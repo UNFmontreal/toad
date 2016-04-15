@@ -103,12 +103,22 @@ class Tractquerier(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
+
+        images = Images()
+
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
-        return Images(
-                (self.__getTractography(nbDirections), 'Connectome tractography'),
-                (self.__getAtlas(), "Upsampled atlas in diffusion space"),
-                )
+
+        # Load tractography
+        if nbDirections <= 45:
+            postfixTractography = 'tensor_prob'
+        else:
+            postfixTractography = 'hardi_prob'
+
+        Images((self.getTractographymrtrixImage('dwi', postfixTractography, 'trk'),'Tractography file'),
+                (self.__getAtlas(),'Atlas'))
+
+        return images
 
 
     def isDirty(self):
@@ -116,7 +126,31 @@ class Tractquerier(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        return self.dirty
+
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
+
+        # Which tractography
+        if nbDirections <= 45:
+            postfixTractography = 'tensor_prob'
+        else:
+            postfixTractography = 'hardi_prob'
+
+        target_queries = self.getBackupImage('queries', None, 'qry')
+        target_dict = self.getBackupImage('tq_dict', None, 'qry')
+
+        if not target_queries and not target_dict:
+            return Images((self.getImage('dwi', postfixTractography+'_corpus_callosum', 'trk'),'CC'),
+                           (self.getImage('dwi', postfixTractography+'_cortico_spinal.left', 'trk'),'CS_left'),
+                           (self.getImage('dwi', postfixTractography+'_cortico_spinal.right', 'trk'),'CS_right'),
+                           (self.getImage('dwi', postfixTractography+'_inferior_fronto_occipital.left', 'trk'),'IFO_left'),
+                           (self.getImage('dwi', postfixTractography+'_inferior_fronto_occipital.right', 'trk'),'IFO_right'),
+                           (self.getImage('dwi', postfixTractography+'_inferior_longitudinal_fasciculus.left', 'trk'),'ILF_left'),
+                           (self.getImage('dwi', postfixTractography+'_inferior_longitudinal_fasciculus.right', 'trk'),'ILF_right'),
+                           (self.getImage('dwi', postfixTractography+'_uncinate_fasciculus.left', 'trk'),'UF_left'),
+                           (self.getImage('dwi', postfixTractography+'_uncinate_fasciculus.right', 'trk'),'UH_right'))
+
+        return True
 
 
     def qaSupplier(self):
@@ -141,7 +175,7 @@ class Tractquerier(GenericTask):
             tags = (
                 (self.queries[0],
                  'Corpus Callosum',
-                 None, 60, None, -80, 0, 160),
+                 95, 60, 40, -80, 0, 160),
                 (self.queries[1],
                  'Corticospinal tract Left',
                  95, 80, 40, -90, 0, 160),
