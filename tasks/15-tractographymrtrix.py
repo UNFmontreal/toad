@@ -15,11 +15,13 @@ class TractographyMrtrix(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'hardimrtrix', 'masking', 'registration', 'atlasregistration' ,'qa')
+        GenericTask.__init__(self, subject, 'upsampling', 'hardimrtrix',
+                'masking', 'registration', 'atlasregistration' ,'qa')
         self.__tckDetRoiTrk = None
         self.__tckProbRoiTrk = None
         self.__tckgenRoiTrk = None
         self.__tcksiftRoiTrk = None
+        self.__nbDirections = None
 
     def implement(self):
 
@@ -39,34 +41,51 @@ class TractographyMrtrix(GenericTask):
         self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
         if self.__nbDirections <= 45:
             if 'deterministic' in self.get('algorithm'):
-                tckDet = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_det', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
-                tckDetRoi = self.__tckedit(tckDet, mask253, self.buildName(tckDet, 'roi','tck'))
-                tckDetRoiTrk = mriutil.tck2trk(tckDetRoi, norm, self.buildName(tckDetRoi, None, 'trk'))
-                tckDetTrk = mriutil.tck2trk(tckDet, norm, self.buildName(tckDet, None, 'trk'))
+                tckDet = self.__tckgenTensor(
+                        dwi, self.buildName(dwi, 'tensor_det', 'tck'),
+                        mask, tt5, seed_gmwmi, bFile, 'Tensor_Det')
+                tckDetTrk = mriutil.tck2trk(
+                        tckDet, norm, self.buildName(tckDet, None, 'trk'))
+                tckDetRoi = self.__tckedit(
+                        tckDet, mask253, self.buildName(tckDet, 'roi', 'tck'))
+                tckDetRoiTrk = mriutil.tck2trk(
+                        tckDetRoi, norm, self.buildName(tckDetRoi, None, 'trk'))
                 self.__tckDetRoiTrk = tckDetRoiTrk
 
             if 'probabilistic' in self.get('algorithm'):
-                tckProb = self.__tckgenTensor(dwi, self.buildName(dwi, 'tensor_prob', 'tck'), mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
-                tckProbRoi = self.__tckedit(tckProb, mask253, self.buildName(tckProb, 'roi','tck'))
-                tckProbRoiTrk = mriutil.tck2trk(tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
-                tckProbTrk = mriutil.tck2trk(tckProb, norm , self.buildName(tckProb, None, 'trk'))
+                tckProb = self.__tckgenTensor(
+                        dwi, self.buildName(dwi, 'tensor_prob', 'tck'),
+                        mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
+                tckProbTrk = mriutil.tck2trk(
+                        tckProb, norm , self.buildName(tckProb, None, 'trk'))
+                tckProbRoi = self.__tckedit(
+                        tckProb, mask253, self.buildName(tckProb, 'roi', 'tck'))
+                tckProbRoiTrk = mriutil.tck2trk(
+                        tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
                 self.__tckProbRoiTrk = tckProbRoiTrk
 
         else:
             if 'hardi' in self.get('algorithm'):
-                csd =  self.getHardimrtrixImage('dwi','csd')
-                hardiTck = self.__tckgenHardi(csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
-                hardiTckRoi = self.__tckedit(hardiTck, mask253, self.buildName(hardiTck, 'roi','tck'))
-                tckgenRoiTrk = mriutil.tck2trk(hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
-                hardiTrk = mriutil.tck2trk(hardiTck, norm, self.buildName(hardiTck, 'None', 'trk'))
+                csd =  self.getHardimrtrixImage('dwi', 'csd')
+                hardiTck = self.__tckgenHardi(
+                        csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
+                hardiTrk = mriutil.tck2trk(
+                        hardiTck, norm, self.buildName(hardiTck, None, 'trk'))
+                hardiTckRoi = self.__tckedit(
+                        hardiTck, mask253, self.buildName(hardiTck, 'roi', 'tck'))
+                tckgenRoiTrk = mriutil.tck2trk(
+                        hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
                 self.__tckgenRoiTrk = tckgenRoiTrk
 
-            if 'sift' in self.get('algorithm'):
-                tcksift = self.__tcksift(hardiTck, csd)
-                tcksiftRoi = self.__tckedit(tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
-                tcksiftRoiTrk = mriutil.tck2trk(tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
-                tcksiftTrk = mriutil.tck2trk(tcksift, norm, self.buildName(tcksift, 'None', 'trk'))
-                self.__tcksiftRoiTrk = tcksiftRoiTrk
+                if 'sift' in self.get('algorithm'):
+                    tcksift = self.__tcksift(hardiTck, csd)
+                    tcksiftTrk = mriutil.tck2trk(
+                            tcksift, norm, self.buildName(tcksift, None, 'trk'))
+                    tcksiftRoi = self.__tckedit(
+                            tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
+                    tcksiftRoiTrk = mriutil.tck2trk(
+                            tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
+                    self.__tcksiftRoiTrk = tcksiftRoiTrk
 
     def __tckedit(self, source, roi, target, downsample= "2"):
         """ perform various editing operations on track files.
@@ -279,21 +298,34 @@ class TractographyMrtrix(GenericTask):
 
         images = Images()
 
-        if self.__nbDirections <= 45:
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+
+        if mriutil.getNbDirectionsFromDWI(dwi) <= 45:
             if 'deterministic' in self.get('algorithm'):
-                images.extend(Images((self.getImage('dwi', 'tensor_det', 'tck'), "deterministic tensor connectome matrix from a streamlines")))
+                images.append((
+                    self.getImage('dwi', 'tensor_det', 'trk'),
+                    "deterministic tensor connectome matrix from a streamlines"
+                    ))
 
             if 'probabilistic' in self.get('algorithm'):
-                images.extend(Images((self.getImage('dwi', 'tensor_prob', 'tck'), "probabilistic tensor connectome matrix from a streamlines")))
+                images.append((
+                    self.getImage('dwi', 'tensor_prob', 'trk'),
+                    "probabilistic tensor connectome matrix from a streamlines"
+                    ))
 
         else:
             if 'hardi' in self.get('algorithm'):
-                images.append((self.getImage('dwi', 'hardi_prob', 'tck'), "tckgen hardi probabilistic streamlines tractography"))
+                images.append((
+                    self.getImage('dwi', 'hardi_prob', 'trk'),
+                    "tckgen hardi probabilistic streamlines tractography"
+                    ))
 
             if 'sift' in self.get('algorithm'):
-                images.extend(Images((self.getImage('dwi', 'tcksift', 'tck'), 'tcksift')))
+                images.append((
+                    self.getImage('dwi', 'tcksift', 'trk'), 'tcksift'))
 
         return images
+
 
     def qaSupplier(self):
         """Create and supply images for the report generated by qa task
@@ -325,12 +357,12 @@ class TractographyMrtrix(GenericTask):
                 (self.__tckgenRoiTrk,
                 'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines'),
                 (self.__tcksiftRoiTrk,
-                'fiber crossing aparc_aseg area 253 from a probabilistic tensor streamlines'),
+                'fiber crossing aparc_aseg area 253 from a probabilistic hardi streamlines with sift'),
                 )
 
         for data, description in tags:
             if data is not None:
-                imageQa = self.plotTrk(data, norm, mask253)
+                imageQa = self.plotTrk(data, norm, mask253, None, None, 65, -70, 2.5, 185)
                 qaImages.append((imageQa, description))
 
         return qaImages

@@ -1,0 +1,124 @@
+#Nothing
+import FreeSurfer.qry
+
+HEMISPHERE.left |= '*.left'
+HEMISPHERE.right |= '*.right'
+
+corpus_callosum |= '*orpus_callosum*'
+cerebellum |= 'Cerebellum_*'
+ventricles |= choroid_plexus.left or choroid_plexus.right or '*Ventricle*' or '*ventricle*'
+
+middlefrontalgyrus.side |= (
+			rostralmiddlefrontal.side or
+			caudalmiddlefrontal.side
+                      ) 
+inferiorfrontalgyrus.side |= (
+			parsopercularis.side or
+			parstriangularis.side or
+			parsorbitalis.side
+                    )
+orbitofrontalgyrus.side |= (
+			lateralorbitofrontal.side or
+			medialorbitofrontal.side
+                    )
+frontal.side |= 	(
+			superiorfrontal.side or
+			middlefrontalgyrus.side or
+			inferiorfrontalgyrus.side or
+			orbitofrontalgyrus.side or
+			frontalpole.side or
+			precentral.side or
+                          paracentral.side
+        )
+
+
+cingular.side |= (caudalanteriorcingulate.side or isthmuscingulate.side or
+         posteriorcingulate.side or rostralanteriorcingulate.side or corpuscallosum.side)
+
+cingular_cortex.side |= (ctx_caudalanteriorcingulate.side or ctx_isthmuscingulate.side or
+         ctx_posteriorcingulate.side or ctx_rostralanteriorcingulate.side or ctx_corpuscallosum.side)
+
+temporal.side |= (
+        (entorhinal.side or parahippocampal.side or temporalpole.side or
+         fusiform.side or superiortemporal.side or middletemporal.side or
+         inferiortemporal.side or transversetemporal.side or bankssts.side)  
+     )
+
+temporal_frontal.side |= (entorhinal.side or temporalpole.side or
+         fusiform.side or superiortemporal.side or middletemporal.side or
+         inferiortemporal.side) 
+
+
+parietal.side |= postcentral.side or precuneus.side or supramarginal.side or superiorparietal.side or inferiorparietal.side
+
+superior_parietal_lobule.side |= postcentral.side or precuneus.side or superiorparietal.side 
+inferior_parietal_lobule.side |= supramarginal.side or inferiorparietal.side
+
+occipital.side |= lingual.side or pericalcarine.side or cuneus.side or lateraloccipital.side or lingual.side or pericalcarine.side or cuneus.side or lateraloccipital.side
+
+
+subcortical.side |= VentralDC.side or Thalamus_Proper.side or Pallidum.side or Putamen.side or Amygdala.side or Brain_Stem or choroid_plexus.side
+
+frontal_frontal_section.side |= medialorbitofrontal.side or parsorbitalis.side
+
+precentral_postcentral.side |= only(precentral.side and postcentral.side and centrum_semiovale.side)
+
+inferior_frontal_gyrus.side |= parsopercularis.side or parstriangularis.side or parsorbitalis.side
+
+middle_frontal_gyrus.side |= caudalmiddlefrontal.side or rostralmiddlefrontal.side 
+
+####################################
+## Queries
+
+# Inferior longitudinal fasciculus #
+inferior_longitudinal_fasciculus.side = endpoints_in(temporal.side and anterior_of(hippocampus.side)) and endpoints_in(occipital.side)
+
+# Corpus Callosum #
+cc_1 |= endpoints_in(orbitofrontalgyrus.left) and endpoints_in(orbitofrontalgyrus.right)
+cc_2 |= endpoints_in(parstriangularis.left or parsorbitalis.left or superiorfrontal.left or rostralmiddlefrontal.left or frontalpole.left) and  endpoints_in(parstriangularis.right or parsorbitalis.right or superiorfrontal.right or rostralmiddlefrontal.right or frontalpole.right)
+cc_3 |= endpoints_in(rostralanteriorcingulate.left or caudalanteriorcingulate.left or caudalmiddlefrontal.left or parsopercularis.left) and  endpoints_in(rostralanteriorcingulate.right or caudalanteriorcingulate.right or caudalmiddlefrontal.right or parsopercularis.right)
+cc_4 |= endpoints_in(precentral.left) and endpoints_in(precentral.right)
+cc_5 |= endpoints_in(postcentral.left or posteriorcingulate.left or paracentral.left) and endpoints_in(postcentral.right or posteriorcingulate.right or paracentral.right) and corpuscallosum.left and corpuscallosum.right
+cc_6 |= endpoints_in(precuneus.left or supramarginal.left or superiorparietal.left or inferiorparietal.left or superiortemporal.left or middletemporal.left or bankssts.left or transversetemporal.left or isthmuscingulate.left) and endpoints_in(precuneus.right or supramarginal.right or superiorparietal.right or inferiorparietal.right or superiortemporal.right or middletemporal.right or bankssts.right or transversetemporal.right or isthmuscingulate.right) and corpuscallosum.left and corpuscallosum.right
+cc_7 |= endpoints_in(occipital.left or fusiform.left or lingual.left or inferiortemporal.left) and endpoints_in(occipital.right or fusiform.right or lingual.right or inferiortemporal.right)
+
+corpus_callosum = cc_1 or cc_2 or cc_3 or cc_4 or cc_5 or cc_6 or cc_7
+
+# uncinate fasciculus #
+# updated uf per nikos' suggestions by adding a general definition for the middle_frontal_gyrus.side  and inferior_frontal_gyrus.side and adding them to UF definition, also added IOFF as exclusion
+uncinate_fasciculus.side = (
+	(
+	(orbitofrontalgyrus.side or middle_frontal_gyrus.side  or inferior_frontal_gyrus.side)
+	and endpoints_in(temporal.side and anterior_of(amygdala.side))
+	and insula.side
+	)
+	not in occipital.side
+	not in parietal.side
+	not in cingular.side
+    not in posterior_of(putamen.side)
+	not in HEMISPHERE.opposite)
+
+# cortico-spinal #
+cst_pre.side |= ((precentral.side and brain_stem)
+	not in superiorfrontal.side
+	not in cerebellum_white_matter.side not in thalamus_proper.side
+	not in hemisphere.opposite)
+
+cst_post.side |= ((postcentral.side and brain_stem)
+	not in superiorfrontal.side
+	not in cerebellum_white_matter.side not in thalamus_proper.side
+	not in hemisphere.opposite)
+
+cortico_spinal.side = cst_pre.side or cst_post.side
+
+
+# Inferior fronto-occipital #
+
+inferior_fronto_occipital.side = (
+            (lateralorbitofrontal.side and occipital.side)
+            and temporal.side
+        not in subcortical.side
+	not in cingular.side
+	not in superior_parietal_lobule.side
+	not in hemisphere.opposite
+)

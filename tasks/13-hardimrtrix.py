@@ -112,14 +112,15 @@ class HardiMrtrix(GenericTask):
 
         #Build qa images
         tags = (
-            ('nufo', 'nufo'),
+            ('nufo', 5, 'nufo'),
             )
 
-        for postfix, description in tags:
+        for postfix, vmax, description in tags:
             image = self.getImage('dwi', postfix)
             if image:
                 imageQa = self.plot3dVolume(
-                        image, fov=mask, postfix=softwareName)
+                        image, fov=mask, vmax=vmax,
+                        colorbar=True, postfix=softwareName)
                 qaImages.append((imageQa, description))
 
         return qaImages

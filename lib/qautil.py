@@ -567,39 +567,50 @@ def plotReconstruction(data, mask, cc, target, model):
     dipy.viz.fvtk.clear(ren)
 
 
-def plotTrk(source, target, anatomical, roi):
-    roiImage= nibabel.load(roi)
-    anatomicalImage = nibabel.load(anatomical)
+def plotTrk(source, target, anatomical, roi=None,
+        xSlice=None, ySlice=None, zSlice=None,
+        xRot=None, yRot=None, zRot=None):
 
-    sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
-    try:
-        sourceActor = dipy.viz.fvtk.streamtube(
-                sourceImage, dipy.viz.colormap.line_colors(sourceImage))
+    if roi is not None:
+        roiImage= nibabel.load(roi)
         roiActor = dipy.viz.fvtk.contour(
                 roiImage.get_data(), levels=[1],
                 colors=[(1., 1., 0.)], opacities=[1.])
+        roiActor.RotateX(xRot)
+        roiActor.RotateY(yRot)
+        roiActor.RotateZ(zRot)
+
+    try:
+        anatomicalImage = nibabel.load(anatomical)
+        sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
+        sourceActor = dipy.viz.fvtk.streamtube(
+                sourceImage, dipy.viz.colormap.line_colors(sourceImage))
+        if xSlice is not None: xSlice = [xSlice]
+        if ySlice is not None: ySlice = [ySlice]
+        if zSlice is not None: zSlice = [zSlice]
         anatomicalActor = dipy.viz.fvtk.slicer(
             anatomicalImage.get_data(), voxsz=(1.0, 1.0, 1.0),
-            plane_i=None, plane_j=None, plane_k=[65], outline=False)
+            plane_i=xSlice, plane_j=ySlice, plane_k=zSlice, outline=False)
     except ValueError:
         return False
 
-    sourceActor.RotateX(-70)
-    sourceActor.RotateY(2.5)
-    sourceActor.RotateZ(185)
+    sourceActor.RotateX(xRot)
+    sourceActor.RotateY(yRot)
+    sourceActor.RotateZ(zRot)
 
-    roiActor.RotateX(-70)
-    roiActor.RotateY(2.5)
-    roiActor.RotateZ(185)
-
-    anatomicalActor.RotateX(-70)
-    anatomicalActor.RotateY(2.5)
-    anatomicalActor.RotateZ(185)
+    anatomicalActor.RotateX(xRot)
+    anatomicalActor.RotateY(yRot)
+    anatomicalActor.RotateZ(zRot)
 
     ren = dipy.viz.fvtk.ren()
     dipy.viz.fvtk.add(ren, sourceActor)
-    dipy.viz.fvtk.add(ren, roiActor)
     dipy.viz.fvtk.add(ren, anatomicalActor)
+
+    if roi is not None:
+        dipy.viz.fvtk.add(ren, roiActor)
+
     dipy.viz.fvtk.camera(
             ren, pos=(0,0,1), focal=(0,0,0), viewup=(0,1,0), verbose=False)
+
     dipy.viz.fvtk.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
+
