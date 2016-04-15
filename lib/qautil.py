@@ -290,7 +290,8 @@ class Plot3dVolume(object):
 class Plot4dVolume(object):
 
     def __init__(
-            self, source, source2=None, gifSpeed=30, vmax=None, fov=None):
+            self, source, source2=None, gifSpeed=30, vmax=None, fov=None,
+            frameFormat='.jpg'):
         """Create a animated gif from a 4d NIfTI image
         Args:
             source: 4D NIfTI image
@@ -301,6 +302,7 @@ class Plot4dVolume(object):
         self.fov = fov
         self.imageData = nibabel.load(source).get_data()
         self.vmax = self.initVmax(vmax)
+        self.frameFormat = frameFormat
         self.compareVolumes = False
         if source2 != None:
             self.gifSpeed = 100
@@ -339,7 +341,7 @@ class Plot4dVolume(object):
     def __createFrames(self):
         frameList = []
         for num in range(self.imageData.shape[-1]):
-            frame = tempfile.NamedTemporaryFile(suffix='.jpg')
+            frame = tempfile.NamedTemporaryFile(suffix=self.frameFormat)
             plot = Plot3dVolume(
                     self.imageData[:,:,:,num], vmax=self.vmax,
                     sourceIsData=True, fov=self.fov, grid=True)
@@ -352,7 +354,7 @@ class Plot4dVolume(object):
         frameList = []
         for imageData, textData in (
                 [self.imageData, 'before'], [self.imageData2, 'after']):
-            frame = tempfile.NamedTemporaryFile(suffix='.jpg')
+            frame = tempfile.NamedTemporaryFile(suffix=self.frameFormat)
             volume = imageData[:,:,:,2]
             plot = Plot3dVolume(
                     volume, vmax=self.vmax,
@@ -389,7 +391,7 @@ def plotMovement(parametersFile, targetTranslations, targetRotations):
     matplotlib.pyplot.close()
 
 
-def plotVectors(bvecsFile, bvecsCorrected, target):
+def plotVectors(bvecsFile, bvecsCorrected, target, frameFormat='.jpg'):
     """
     """
     fig = matplotlib.pyplot.figure(figsize=(4,4))
@@ -420,7 +422,7 @@ def plotVectors(bvecsFile, bvecsCorrected, target):
 
     frameList = []
     for num in range(0,360,3):
-        frame = tempfile.NamedTemporaryFile(suffix='.jpg')
+        frame = tempfile.NamedTemporaryFile(suffix=frameFormat)
         ax.view_init(elev=10., azim=num)
         matplotlib.pyplot.savefig(frame.name)
         frameList.append(frame)
