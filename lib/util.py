@@ -292,7 +292,7 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
         targetName = parts.pop(0)
         # tractquerier exception
         if any(parts[0] in s for s in ['left', 'right']):
-            targetName += ".{}".format(part[0])
+            targetName += ".{}".format(parts[0])
 
     #add postfix to target name
     if (postfix is not None) and postfix != "":
