@@ -72,7 +72,6 @@ class Preparation(GenericTask):
         else:
             self.info("Linking {} to {}".format(bEncs, util.symlink(bEncs, self.workingDir)))
 
-
         if not bVecs or not bVals:
 
             self.info(mriutil.mrtrixToFslEncoding(dwi,

@@ -674,3 +674,30 @@ def applyRegistrationMrtrix(source , matrix, target):
     cmd = "mrtransform  {} -linear {} {} -quiet".format(source, matrix, target)
     util.launchCommand(cmd)
     return target
+
+
+def setWorkingDirTractometry(workingDir, sourceDirBundles=None, sourceDirMetrics=None):
+    """ Preparation for tractometry script from scilpy scil_run_tractometry
+    :param workingDir: Current working Folder
+    :param sourceDirBundles: Usually 17-tractquerier
+    :param sourceDirMetrics:
+    :return: Nothing
+    """
+    rawDir = workingDir + os.path.sep + 'raw' + os.path.sep
+    bundlesDir = rawDir + 'bundles'
+    metricsDir = rawDir + 'metrics'
+
+    if not sourceDirBundles is None:
+        os.mkdir(bundlesDir)
+        util.symlink(sourceDirBundles, bundlesDir)
+
+    if not sourceDirMetrics is None:
+        os.mkdir(metricsDir)
+        if type(sourceDirMetrics) is list:
+            for sourceDirMetric in sourceDirMetrics:
+                util.symlink(sourceDirMetric, metricsDir)
+
+
+def runTractometry(config, source, target):
+    cmd = "scil_run_tractometry.py --config_file {} {} -v -f ".format(config, source, target)
+    util.launchCommand(cmd)
