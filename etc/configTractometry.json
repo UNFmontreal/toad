@@ -1,0 +1,120 @@
+{
+  "global": {
+    "tasks": ["pruning", "outliers", "counttracts", "volume", "meanstd",
+      "centroids", "assignmentmaps", "meanstdperpoint",
+      "tractprofiles", "histogram"],
+    "bundles_subfolder": "bundles",
+    "metrics_subfolder": "metrics",
+    "num_points": 20,
+    "array_export_format": "npy",
+    "version": "0.1.0"
+  },
+  "pruning": {
+    "output_subfolders": ["pruned_tracts"],
+    "bundle_specific": {
+      "slf3": {
+        "min_length": 40,
+        "max_length": 150
+      },
+      "mdlf": {
+        "min_length": 80,
+        "max_length": 150
+      },
+      "cst": {
+        "min_length": 120,
+        "max_length": 200
+      },
+      "cc": {
+        "min_length": 80,
+        "max_length": 120
+      },
+      "uf": {
+        "min_length": 0,
+        "max_length": 150
+      },
+      "ifof": {
+        "min_length": 100,
+        "max_length": 200
+      }
+    },
+    "min_length": 100,
+    "max_length": 150
+  },
+  "outliers": {
+    "output_subfolders": ["outlier_cleaned_tracts", "outliers"],
+    "alpha": 0.6,
+    "bundle_specific": {
+      "or": {
+        "alpha": 0.4
+      },
+      "cc_?7": {
+        "alpha": 0.4
+      },
+      "ifof": {
+        "alpha": 0.2
+      },
+      "ilf": {
+        "alpha": 0.2
+      }
+    }
+  },
+  "meanstd": {
+    "output_subfolders": ["mean_std_outlier_cleaned_tracts"],
+    "aggregation_outputs": ["mean.csv", "std.csv"],
+    "export_aggregated": true,
+    "density_weighting": true
+  },
+  "centroids": {
+    "output_subfolders": ["centroids_advanced"],
+    "distance_threshold": 200,
+    "centroid_points": 20
+  },
+  "assignmentmaps": {
+    "output_subfolders": ["assignment_maps"],
+    "centroids_subfolder": "centroids_advanced",
+    "image_suffix": "_assignment_map",
+    "save_image": true
+  },
+  "geodesicmaps": {
+    "output_subfolders": ["geodesic_maps"],
+    "centroids_subfolder": "centroids_advanced",
+    "assignment_maps_subfolder": "assignment_maps",
+    "radius": 0.2
+  },
+  "tractprofiles": {
+    "output_subfolders": ["resampled_tracts", "tracts_profiles",
+      "mean_std_tracts_profiles"],
+    "aggregation_outputs": ["profiles.mat", "profile_mean.csv",
+      "profile_std.csv"],
+    "export_aggregated": true
+  },
+  "meanstdperpoint": {
+    "output_subfolders": ["mean_std_per_point"],
+    "aggregation_outputs": ["mean_perpoint.csv", "std_perpoint.csv"],
+    "assignment_maps_subfolder": "assignment_maps",
+    "export_aggregated": true,
+    "density_weighting": true,
+    "save_plot": true,
+    "plot_bgcolor": "yellow"
+  },
+  "histogram": {
+    "output_subfolders": ["histograms"]
+  },
+  "volume": {
+    "output_subfolders": ["volumes"],
+    "aggregation_outputs": ["volume.csv"],
+    "export_aggregated": true
+  },
+  "counttracts": {
+    "output_subfolders": ["tract_counts"],
+    "aggregation_outputs": ["count.csv"],
+    "export_aggregated": true
+  },
+  "volumeperpoint": {
+    "output_subfolders": ["volumes_per_point"],
+    "assignment_maps_subfolder": "centroids_advanced",
+    "aggregation_outputs": ["volume_perpoint.csv"],
+    "export_aggregated": true
+  }
+}
+
