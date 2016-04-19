@@ -14,7 +14,6 @@ class Tractquerier(GenericTask):
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
-
     def implement(self):
 
         self.defaultQuery = False
@@ -36,7 +35,6 @@ class Tractquerier(GenericTask):
         # Launch tract_querier
         self.__tractQuerier(self.tractographyTrk, atlasResample, self.workingDir, qryFile)
         self.dirty = False
-
 
     def __getTractography(self, nbDirections):
         if nbDirections <= 45:
