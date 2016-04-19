@@ -17,8 +17,8 @@ class Tractometry(GenericTask):
     def implement(self):
         pass
         #mriutil.setWorkingDirTractometry(self.workingDir,
-                                         self.getTractFilteringImage(None, None, 'trk'),
-                                         self.__buildListMetrics())
+#                                         self.getTractFilteringImage(None, None, 'trk'),
+#                                         self.__buildListMetrics())
 
         #mriutil.runTractometry(configTractometry, filteredTractographies, self.workingDir)
 
