@@ -676,7 +676,7 @@ def applyRegistrationMrtrix(source , matrix, target):
     return target
 
 
-def setWorkingDirTractometry(workingDir, sourceDirBundles=None, sourceDirMetrics=None):
+def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None):
     """ Preparation for tractometry script from scilpy scil_run_tractometry
     :param workingDir: Current working Folder
     :param sourceDirBundles: Usually 17-tractquerier
@@ -693,19 +693,18 @@ def setWorkingDirTractometry(workingDir, sourceDirBundles=None, sourceDirMetrics
     targetBundlesDir = os.path.join(workingDir, bundlesDir)
     targetMetricsDir = os.path.join(workingDir, metricsDir)
 
-    print sourceDirBundles
-
-    if not sourceDirBundles is None:
+    if sourceBundles is not None:
         if not os.path.exists(bundlesDir):
             os.mkdir(bundlesDir)
-            util.symlink(sourceDirBundles, targetBundlesDir)
+            for bundle in sourceBundles:
+                util.symlink(bundle, targetBundlesDir)
 
-    if not sourceDirMetrics is None:
+    if sourceMetrics is not None:
         if not os.path.exists(metricsDir):
             os.mkdir(metricsDir)
-            if type(sourceDirMetrics) is list:
-                for sourceDirMetric in sourceDirMetrics:
-                    util.symlink(sourceDirMetric, targetMetricsDir)
+            if type(sourceMetrics) is list:
+                for metric in sourceMetrics:
+                    util.symlink(metric, targetMetricsDir)
 
 
 def runTractometry(config, source, target):
