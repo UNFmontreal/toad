@@ -67,8 +67,6 @@ class TractographyMrtrix(GenericTask):
         else:
             if 'hardi' in self.get('algorithm'):
                 csd =  self.getHardimrtrixImage('dwi', 'csd')
-                print 'TRUC'
-                print csd
                 hardiTck = self.__tckgenHardi(
                         csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
                 hardiTrk = mriutil.tck2trk(

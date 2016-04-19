@@ -281,7 +281,7 @@ def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
 
     """
 
-    images = getImages(config, dir, prefix, postfix=None, extension="nii.gz")
+    images = getImages(config, dir, prefix, postfix, extension)
     if images:
         return images.pop()
     return False
