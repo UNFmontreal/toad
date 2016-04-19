@@ -266,7 +266,7 @@ def getImages(config, dir, prefix, postfix=None, extension="nii.gz"):
     return False
 
 
-def getImage(config, dir, prefix, postfix=None, extension="nii.gz")
+def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
     """A simple utility function that return an mri image given certain criteria
 
     Args:
