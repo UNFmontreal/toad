@@ -693,7 +693,7 @@ def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None)
     targetBundlesDir = os.path.join(workingDir, bundlesDir)
     targetMetricsDir = os.path.join(workingDir, metricsDir)
 
-
+    print targetBundlesDir
 
 
     if sourceBundles is not None:
