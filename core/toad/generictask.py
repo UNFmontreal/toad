@@ -159,6 +159,20 @@ class GenericTask(Logger, Load, Qa):
                 arguments = [self.config, directory] + list(args)
                 return util.getImage(*arguments)
             return wrapper
+        elif items.startswith('get') and items.endswith('Images'):
+            if "getImages" in items:
+                directory = self.workingDir
+            else:
+                taskName = items[3:-5].lower()
+                directory = getattr(self, "{}Dir".format(taskName))
+                if not directory:
+                    self.warning("method {} request into task {} but {} dependencies not found,  "
+                                 .format(items, self.getName(),taskName))
+
+            def wrapper(*args):
+                arguments = [self.config, directory] + list(args)
+                return util.getImages(*arguments)
+            return wrapper
         else:
             return False
 
