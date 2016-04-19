@@ -693,13 +693,18 @@ def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None)
     targetBundlesDir = os.path.join(workingDir, bundlesDir)
     targetMetricsDir = os.path.join(workingDir, metricsDir)
 
+
+
+
     if sourceBundles is not None:
+        print sourceBundles
         if not os.path.exists(bundlesDir):
             os.mkdir(bundlesDir)
             for bundle in sourceBundles:
                 util.symlink(bundle, targetBundlesDir)
 
     if sourceMetrics is not None:
+        print sourceMetrics
         if not os.path.exists(metricsDir):
             os.mkdir(metricsDir)
             if type(sourceMetrics) is list:
