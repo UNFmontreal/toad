@@ -5,7 +5,7 @@ from lib import mriutil, util
 from lib.images import Images
 
 
-class TractFiltering(GenericTask):
+class Tractometry(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(
             self, subject, 'tensorfsl', 'tensormrtrix', 'tensordipy',
