@@ -13,11 +13,8 @@ class TractFiltering(GenericTask):
 
     def implement(self):
 
-        im =  self.getTractQuerierImages('dwi', None, 'trk')
-        print 'allo'
-        print im
-        #mriutil.setWorkingDirTractometry(self.workingDir,
-        #                                 self.getTractQuerierImages('dwi', None, 'trk'))
+        mriutil.setWorkingDirTractometry(self.workingDir,
+                                         self.getTractQuerierImages('dwi', None, 'trk'))
 
 
         #self._trkAnalysed = self.getTractQuerierImage(None, None, 'trk')
