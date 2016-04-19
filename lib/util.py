@@ -218,7 +218,7 @@ def arrayOfString(source):
     return __arrayOf(source, 'String')
 
 
-def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
+def getImages(config, dir, prefix, postfix=None, extension="nii.gz"):
     """A simple utility function that return an mri image given certain criteria
 
     Args:
@@ -229,7 +229,7 @@ def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
         extension:     name of the extension of the filename. defaults: nii.gz
 
     Returns:
-        the absolute filename if found, False otherwise
+        A list of filenames if found, False otherwise
 
     """
 
@@ -260,14 +260,31 @@ def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
         criterias = "{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, extension)
         images = glob.glob(criterias)
 
-    if len(images) == 1: # Found One image
-        return images.pop()
-    elif len(images) > 1: # Found Multiple images
-        print images
+    if len(images) > 0: # Found at least one image
         return images
 
     return False
 
+
+def getImage(config, dir, prefix, postfix=None, extension="nii.gz")
+    """A simple utility function that return an mri image given certain criteria
+
+    Args:
+        config:  a ConfigParser object
+        dir:     the directory where looking for the image
+        prefix:  an expression that the filename should start with
+        postfix: an expression that the filename should end with (excluding the extension)
+        extension:     name of the extension of the filename. defaults: nii.gz
+
+    Returns:
+        the absolute filename if found, False otherwise
+
+    """
+
+    images = getImages(config, dir, prefix, postfix=None, extension="nii.gz")
+    if images:
+        return images.pop()
+    return False
 
 def buildName(config, target, source, postfix=None, extension=None, absolute=True):
     """A simple utility function that return a file name that contain the postfix and the current working directory
