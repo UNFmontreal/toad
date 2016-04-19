@@ -683,9 +683,9 @@ def setWorkingDirTractometry(workingDir, sourceDirBundles=None, sourceDirMetrics
     :param sourceDirMetrics:
     :return: Nothing
     """
-    rawDir = workingDir + os.path.sep + 'raw' + os.path.sep
-    bundlesDir = 'bundles'
-    metricsDir = 'metrics'
+    rawDir = 'raw' + os.path.sep
+    bundlesDir = rawDir + 'bundles' + os.path.sep
+    metricsDir = rawDir + 'metrics' + os.path.sep
 
     print rawDir
     print bundlesDir
