@@ -687,6 +687,10 @@ def setWorkingDirTractometry(workingDir, sourceDirBundles=None, sourceDirMetrics
     bundlesDir = rawDir + 'bundles'
     metricsDir = rawDir + 'metrics'
 
+    print rawDir
+    print bundlesDir
+    print metricsDir
+
     if not sourceDirBundles is None:
         os.mkdir(bundlesDir)
         util.symlink(sourceDirBundles, bundlesDir)
