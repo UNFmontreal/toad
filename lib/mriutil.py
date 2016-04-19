@@ -687,19 +687,22 @@ def setWorkingDirTractometry(workingDir, sourceDirBundles=None, sourceDirMetrics
     bundlesDir = rawDir + 'bundles' + os.path.sep
     metricsDir = rawDir + 'metrics' + os.path.sep
 
+    targetBundlesDir = workingDir + os.path.sep + bundlesDir
+    targetMetricsDir = workingDir + os.path.sep + metricsDir
+
     print rawDir
     print bundlesDir
     print metricsDir
 
     if not sourceDirBundles is None:
         os.mkdir(bundlesDir)
-        util.symlink(sourceDirBundles, bundlesDir)
+        util.symlink(sourceDirBundles, targetBundlesDir)
 
     if not sourceDirMetrics is None:
         os.mkdir(metricsDir)
         if type(sourceDirMetrics) is list:
             for sourceDirMetric in sourceDirMetrics:
-                util.symlink(sourceDirMetric, metricsDir)
+                util.symlink(sourceDirMetric, targetMetricsDir)
 
 
 def runTractometry(config, source, target):
