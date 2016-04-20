@@ -29,6 +29,8 @@ def symlink(source, targetDir, targetName=None):
 
     """
     if not os.path.exists(source):  # if source doesnt exist
+        print 'source : ' + str(source)
+        print 'targetDir : '+ str(targetDir)
         return False
 
     if not os.path.isabs(source):  # Get absolute path source
