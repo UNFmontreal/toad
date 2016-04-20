@@ -51,6 +51,10 @@ def symlink(source, targetDir, targetName=None):
     sourceSplit = os.path.split(source)  # Split with os.path.sep
 
     # Get common Path
+
+    print 'targetSplit : '+ str(targetSplit)
+    print 'sourceSplit : '+ str(sourceSplit)
+
     commonPath = os.path.sep + os.path.join(*os.path.commonprefix((sourceSplit, targetSplit))) + os.path.sep
 
     source = source.replace(commonPath, '')  # Get ride of the commonPath
