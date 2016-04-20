@@ -34,8 +34,8 @@ def symlink(source, targetDir, targetName=None):
     if not os.path.isabs(source):  # Get absolute path source
         source = os.path.abspath(source)
 
-    if not os.path.isabs(targetDir):  # Get absolute path targetDir
-        targetDir = os.path.abspath(targetDir)
+    #if not os.path.isabs(targetDir):  # Get absolute path targetDir
+        #targetDir = os.path.abspath(targetDir)
 
     if targetName is None:
         targetName = os.path.basename(source)
@@ -59,7 +59,7 @@ def symlink(source, targetDir, targetName=None):
     substring = '..'+os.path.sep  # Substring ../
 
     source = substring*deep + source  # Relative link
-    target = os.path.abspath(target)
+
 
     print source
     print target
