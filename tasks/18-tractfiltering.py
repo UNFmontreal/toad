@@ -19,7 +19,7 @@ class TractFiltering(GenericTask):
 
         configFile = self.__getConfigFile('configTractFiltering', 'configTractFiltering_default')
 
-        mriutil.runTractometry(configFile, self.workingDir, os.path.join(self.workingDir,'output'))
+        mriutil.runTractometry(configFile, self.workingDir, self.workingDir)
 
     def isIgnore(self):
         return self.get("ignore")
