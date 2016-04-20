@@ -7,7 +7,7 @@ from lib.images import Images
 
 class TractFiltering(GenericTask):
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'tractquerier', 'qa')
+        GenericTask.__init__(self, subject, 'backup','tractquerier', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
