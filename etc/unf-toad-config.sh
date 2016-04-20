@@ -77,4 +77,4 @@ export FSLDIR PATH
 export PATH=$TOADDIR/bin:$APPDIR/matlab/R2012b/bin:$APPDIR/mrtrix3/bin:$APPDIR/mrtrix3/scripts:$APPDIR/tract_querier:$PATH
 export PATH=$FREESURFER_HOME/mni/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$PATH
 
-export $PYTHONPATH=/home/bore/softs/scilpy:$PYTHONPATH
+export PYTHONPATH=/home/bore/softs/scilpy:$PYTHONPATH
