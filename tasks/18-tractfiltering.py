@@ -14,7 +14,8 @@ class TractFiltering(GenericTask):
     def implement(self):
 
         mriutil.setWorkingDirTractometry(self.workingDir,
-                                         self.getTractQuerierImages('dwi', None, 'trk'))
+                                         self.getTractQuerierImages('dwi', None, 'trk'),
+                                         [(self.getTensorFSLImage('dwi', 'fa'),'fsl_fa.nii.gz')])
 
         configFile = self.__getConfigFile('configTractFiltering', 'configTractFiltering_default')
         print 'configFile : ' + str(configFile)
