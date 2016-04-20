@@ -16,29 +16,52 @@ __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 
 
-def symlink(source, target):
+def symlink(source, targetDir, targetName=None):
     """link a file into the target directory. the link name is the same as the file
 
     Args:
-        source:  name of the source file
-        target:  destination directory
+        source: name of the source file
+        targetDir: destination directory
+        targetName: link name
 
     Returns:
         the relative link name created
 
     """
-    if os.path.exists(os.path.join(target, os.path.basename(source))):
-        src = source
-    else:
-        if not os.path.isabs(source):
-            source = os.path.abspath(source)
-        [dir, name] = os.path.split(source)
-        src = "../{}/{}".format(os.path.basename(os.path.normpath(dir)), name)
-        if os.path.exists(name):
-            os.remove(name)
-        os.symlink(src, name)
+    if not os.path.exists(source):  # if source doesnt exist
+        return False
 
-    return src
+    if not os.path.isabs(source):  # Get absolute path source
+        source = os.path.abspath(source)
+
+    if not os.path.isabs(targetDir):  # Get absolute path targetDir
+        targetDir = os.path.abspath(targetDir)
+
+    if targetName is None:
+        targetName = os.path.basename(source)
+
+    target = os.path.join(targetDir, targetName) # Create full path to target
+
+    if os.path.exists(target):  # Delete target if exist
+        os.remove(target)
+
+    targetSplit = target.split(os.path.sep)  # Split with os.path.sep
+    sourceSplit = source.split(os.path.sep)  # Split with os.path.sep
+
+    # Get common Path
+    commonPath = os.path.sep + os.path.join(*os.path.commonprefix((sourceSplit, targetSplit))) + os.path.sep
+
+    source = source.replace(commonPath, '')  # Get ride of the commonPath
+    target = target.replace(commonPath, '')  # Get ride of the commonPath
+
+    deep = target.count(os.path.sep) + 1  # Number of sub_folders
+
+    substring = '..'+os.path.sep  # Substring ../
+
+    source = substring*deep + source  # Relative link
+
+    os.symlink(source, target)
+    return source
 
 
 def copy(source, destination, name):
