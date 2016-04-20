@@ -708,6 +708,6 @@ def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None)
 
 
 def runTractometry(config, source, target):
-    cmd = "scil_run_tractometry.py --config_file {} {} -v -f ".format(config, source, target)
+    cmd = "scil_run_tractometry.py --config_file {} {} {} -v -f ".format(config, source, target)
     print 'RunTractometry : '+ str(cmd)
     util.launchCommand(cmd)
