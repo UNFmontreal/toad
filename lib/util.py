@@ -256,7 +256,7 @@ def getImages(config, dir, prefix, postfix=None, extension="nii.gz", subdir=None
         A list of filenames if found, False otherwise
 
     """
-
+    print 'subdir : ' + str(subdir)
     if subdir is not None:
         if os.path.exists(os.path.join(dir, subdir)):
             dir = os.path.join(dir, subdir)
