@@ -256,14 +256,10 @@ def getImages(config, dir, prefix, postfix=None, extension="nii.gz", subdir=None
         A list of filenames if found, False otherwise
 
     """
-    print 'subdir : ' + str(subdir)
-    print 'dir : ' + str(dir)
 
     if subdir is not None:
         if os.path.exists(os.path.join(dir, subdir)):
             dir = os.path.join(dir, subdir)
-
-    print 'dir after : ' + str(dir)
 
     if extension.find('.') == 0:
         extension=extension.replace(".", "", 1)
