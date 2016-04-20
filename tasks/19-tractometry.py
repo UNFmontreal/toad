@@ -16,23 +16,15 @@ class Tractometry(GenericTask):
 
     def implement(self):
         pass
-        #mriutil.setWorkingDirTractometry(self.workingDir,
-#                                         self.getTractFilteringImage(None, None, 'trk'),
-#                                         self.__buildListMetrics())
+        mriutil.setWorkingDirTractometry(self.workingDir,
+                                         None,
+                                         self.__buildListMetrics())
 
         #mriutil.runTractometry(configTractometry, filteredTractographies, self.workingDir)
 
 
-#    def __buildListMetrics(self):
-#        return [self.getImage('dwi', 'corpus_callosum', 'trk'),
-#                self.getImage('dwi', 'cortico_spinal.left', 'trk'),
-#                self.getImage('dwi', 'cortico_spinal.right', 'trk'),
-#                self.getImage('dwi', 'inferior_fronto_occipital.left', 'trk'),
-#                self.getImage('dwi', 'inferior_fronto_occipital.right', 'trk'),
-#                self.getImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk'),
-#                self.getImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk'),
-#                self.getImage('dwi', 'uncinate_fasciculus.left', 'trk'),
-#                self.getImage('dwi', 'uncinate_fasciculus.right', 'trk')]
+    def __buildListMetrics(self):
+        return [self.getTensorFSLImage('dwi', 'fa')]
 
 
     def isIgnore(self):
