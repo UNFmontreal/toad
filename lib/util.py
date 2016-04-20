@@ -34,10 +34,10 @@ def symlink(source, targetDir, targetName=None):
     if not os.path.isabs(source):  # Get absolute path source
         source = os.path.abspath(source)
 
+    targetDir = targetDir.replace(os.getcwd(), '')
 
-
-    #if not os.path.isabs(targetDir):  # Get absolute path targetDir
-        #targetDir = os.path.abspath(targetDir)
+    if not os.path.isabs(targetDir):  # Get absolute path targetDir
+        targetDir = os.path.abspath(targetDir)
 
     if targetName is None:
         targetName = os.path.basename(source)
@@ -54,7 +54,7 @@ def symlink(source, targetDir, targetName=None):
     commonPath = os.path.sep + os.path.join(*os.path.commonprefix((sourceSplit, targetSplit))) + os.path.sep
 
     source = source.replace(commonPath, '')  # Get ride of the commonPath
-    target = target.replace(os.getcwd(), '') # Get ride of the commonPath
+    target = target.replace(commonPath, '') # Get ride of the commonPath
 
     deep = target.count(os.path.sep) + 1  # Number of sub_folders
 
