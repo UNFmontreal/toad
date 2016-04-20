@@ -36,10 +36,12 @@ def symlink(source, targetDir, targetName=None):
 
     targetDir = targetDir.replace(os.getcwd(), '')
 
-    print targetDir
-
     if not os.path.isabs(targetDir):  # Get absolute path targetDir
         targetDir = os.path.abspath(targetDir)
+
+    print 'targetDir'
+    print targetDir
+
 
     if targetName is None:
         targetName = os.path.basename(source)
@@ -53,7 +55,7 @@ def symlink(source, targetDir, targetName=None):
     sourceSplit = os.path.split(source)  # Split with os.path.sep
 
     # Get common Path
-    commonPath = 't'  # os.path.sep + os.path.join(*os.path.commonprefix([sourceSplit, targetSplit])) + os.path.sep
+    commonPath = 'q'  # os.path.sep + os.path.join(*os.path.commonprefix([sourceSplit, targetSplit])) + os.path.sep
 
     source = source.replace(commonPath, '')  # Get ride of the commonPath
     target = target.replace(commonPath, '') # Get ride of the commonPath
