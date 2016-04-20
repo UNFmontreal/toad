@@ -16,7 +16,7 @@ class TractFiltering(GenericTask):
         mriutil.setWorkingDirTractometry(self.workingDir,
                                          self.getTractQuerierImages('dwi', None, 'trk'))
 
-        configFile = self.__getConfigFile('configTractFiltering','configTractFiltering_default')
+        configFile = self.__getConfigFile('configTractFiltering', 'configTractFiltering_default')
         print 'configFile : ' + str(configFile)
 
         #mriutil.runTractometry(configFile, self.workingDir)
