@@ -34,8 +34,6 @@ def symlink(source, targetDir, targetName=None):
     if not os.path.isabs(source):  # Get absolute path source
         source = os.path.abspath(source)
 
-    #targetDir = targetDir.replace(os.getcwd(), '')
-
     if not os.path.isabs(targetDir):  # Get absolute path targetDir
         targetDir = os.path.abspath(targetDir)
 
@@ -51,10 +49,6 @@ def symlink(source, targetDir, targetName=None):
     sourceSplit = source.split(os.path.sep)  # Split with os.path.sep
 
     # Get common Path
-
-    print 'targetSplit : '+ str(targetSplit)
-    print 'sourceSplit : '+ str(sourceSplit)
-
     commonPath = os.path.sep + os.path.join(*os.path.commonprefix((sourceSplit, targetSplit))) + os.path.sep
 
     source = source.replace(commonPath, '')  # Get ride of the commonPath
@@ -65,9 +59,6 @@ def symlink(source, targetDir, targetName=None):
     substring = '..'+os.path.sep  # Substring ../
 
     source = substring*deep + source  # Relative link
-
-    print source
-    print target
 
     os.symlink(source, target)
     return source
