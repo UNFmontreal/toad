@@ -1,6 +1,6 @@
 {
   "global": {
-    "tasks": ["pruning", "outliers", "counttracts", "volume", "meanstd",
+    "tasks": ["counttracts", "volume", "meanstd",
       "centroids", "assignmentmaps", "meanstdperpoint",
       "tractprofiles", "histogram"],
     "bundles_subfolder": "bundles",
@@ -8,55 +8,6 @@
     "num_points": 20,
     "array_export_format": "npy",
     "version": "0.1.0"
-  },
-  "pruning": {
-    "output_subfolders": ["pruned_tracts"],
-    "bundle_specific": {
-      "slf3": {
-        "min_length": 40,
-        "max_length": 150
-      },
-      "mdlf": {
-        "min_length": 80,
-        "max_length": 150
-      },
-      "cst": {
-        "min_length": 120,
-        "max_length": 200
-      },
-      "cc": {
-        "min_length": 80,
-        "max_length": 120
-      },
-      "uf": {
-        "min_length": 0,
-        "max_length": 150
-      },
-      "ifof": {
-        "min_length": 100,
-        "max_length": 200
-      }
-    },
-    "min_length": 100,
-    "max_length": 150
-  },
-  "outliers": {
-    "output_subfolders": ["outlier_cleaned_tracts", "outliers"],
-    "alpha": 0.6,
-    "bundle_specific": {
-      "or": {
-        "alpha": 0.4
-      },
-      "cc_?7": {
-        "alpha": 0.4
-      },
-      "ifof": {
-        "alpha": 0.2
-      },
-      "ilf": {
-        "alpha": 0.2
-      }
-    }
   },
   "meanstd": {
     "output_subfolders": ["mean_std_outlier_cleaned_tracts"],
