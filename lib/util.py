@@ -59,7 +59,7 @@ def symlink(source, targetDir, targetName=None):
     substring = '..'+os.path.sep  # Substring ../
 
     source = substring*deep + source  # Relative link
-
+    target = os.path.abspath(target)
     os.symlink(source, target)
     return source
 
