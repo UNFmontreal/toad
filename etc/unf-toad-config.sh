@@ -78,3 +78,4 @@ export PATH=$TOADDIR/bin:$APPDIR/matlab/R2012b/bin:$APPDIR/mrtrix3/bin:$APPDIR/m
 export PATH=$FREESURFER_HOME/mni/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$PATH
 
 export PYTHONPATH=/home/bore/softs/scilpy:$PYTHONPATH
+export PATH=/home/bore/softs/scilpy/scripts:$PATH
