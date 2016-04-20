@@ -24,7 +24,18 @@ class Tractometry(GenericTask):
 
 
     def __buildListMetrics(self):
-        return [self.getTensorFSLImage('dwi', 'fa')]
+        return [(self.getTensorFSLImage('dwi', 'fa'),'fsl_fa.nii.gz'),
+                (self.getTensorFSLImage('dwi', 'md'),'fsl_md.nii.gz'),
+                (self.getTensorFSLImage('dwi', 'ad'),'fsl_ad.nii.gz'),
+                (self.getTensorFSLImage('dwi', 'md'),'fsl_rd.nii.gz'),
+                (self.getTensorDIPYImage('dwi', 'fa'),'dipy_fa.nii.gz'),
+                (self.getTensorDIPYImage('dwi', 'md'),'dipy_md.nii.gz'),
+                (self.getTensorDIPYImage('dwi', 'ad'),'dipy_ad.nii.gz'),
+                (self.getTensorDIPYImage('dwi', 'md'),'dipy_rd.nii.gz'),
+                (self.getTensorMRTRIXImage('dwi', 'fa'),'mrtrix_fa.nii.gz'),
+                (self.getTensorMRTRIXImage('dwi', 'md'),'mrtrix_md.nii.gz'),
+                (self.getTensorMRTRIXImage('dwi', 'ad'),'mrtrix_ad.nii.gz'),
+                (self.getTensorMRTRIXImage('dwi', 'md'),'mrtrix_rd.nii.gz')]
 
 
     def isIgnore(self):

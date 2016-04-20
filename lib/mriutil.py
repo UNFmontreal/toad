@@ -704,7 +704,7 @@ def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None)
             os.mkdir(metricsDir)
         if type(sourceMetrics) is list:
             for metric in sourceMetrics:
-                util.symlink(metric, targetMetricsDir)
+                util.symlink(metric[0], targetMetricsDir, metric[1])
 
 
 def runTractometry(config, source, target):
