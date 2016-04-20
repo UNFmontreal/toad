@@ -21,8 +21,9 @@ class Tractometry(GenericTask):
                                          self.__buildListMetrics())
 
 
+        configFile = self.__getConfigFile('configTractometry', 'configTractometry_default')
 
-        #mriutil.runTractometry(configTractometry, filteredTractographies, self.workingDir)
+        mriutil.runTractometry(configFile, self.workingDir, os.path.join(self.workingDir, 'output'))
 
 
     def __buildListMetrics(self):

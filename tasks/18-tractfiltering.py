@@ -18,9 +18,8 @@ class TractFiltering(GenericTask):
                                          [(self.getTensorFSLImage('dwi', 'fa'),'fsl_fa.nii.gz')])
 
         configFile = self.__getConfigFile('configTractFiltering', 'configTractFiltering_default')
-        print 'configFile : ' + str(configFile)
 
-        mriutil.runTractometry(configFile, self.workingDir, self.workingDir)
+        mriutil.runTractometry(configFile, self.workingDir, os.path.joint(self.workingDir,'output'))
 
     def isIgnore(self):
         return self.get("ignore")
