@@ -60,6 +60,10 @@ def symlink(source, targetDir, targetName=None):
 
     source = substring*deep + source  # Relative link
     target = os.path.abspath(target)
+
+    print source
+    print target
+
     os.symlink(source, target)
     return source
 
