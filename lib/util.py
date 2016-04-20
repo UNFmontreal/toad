@@ -58,7 +58,7 @@ def symlink(source, targetDir, targetName=None):
     commonPath = os.path.sep + os.path.join(*os.path.commonprefix((sourceSplit, targetSplit))) + os.path.sep
 
     source = source.replace(commonPath, '')  # Get ride of the commonPath
-    target = target.replace(os.getcwd(), '') # Get ride of the commonPath
+    target = target.replace(os.getcwd() + os.path.sep, '') # Get ride of the commonPath
 
     deep = target.count(os.path.sep) + 1  # Number of sub_folders
 
