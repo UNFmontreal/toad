@@ -241,20 +241,25 @@ def arrayOfString(source):
     return __arrayOf(source, 'String')
 
 
-def getImages(config, dir, prefix, postfix=None, extension="nii.gz"):
+def getImages(config, dir, prefix, postfix=None, extension="nii.gz", subdir=None):
     """A simple utility function that return an mri image given certain criteria
 
     Args:
         config:  a ConfigParser object
-        dir:     the directory where looking for the image
+        dir:     the directory where looking for image(s)
         prefix:  an expression that the filename should start with
         postfix: an expression that the filename should end with (excluding the extension)
         extension:     name of the extension of the filename. defaults: nii.gz
+        subdir: a subfolder where looking for image(s)
 
     Returns:
         A list of filenames if found, False otherwise
 
     """
+
+    if subdir is not None:
+        if os.path.exists(os.path.join(dir, subdir)):
+            dir = os.path.join(dir, subdir)
 
     if extension.find('.') == 0:
         extension=extension.replace(".", "", 1)
@@ -291,7 +296,7 @@ def getImages(config, dir, prefix, postfix=None, extension="nii.gz"):
     return False
 
 
-def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
+def getImage(config, dir, prefix, postfix=None, extension="nii.gz", subdir=None):
     """A simple utility function that return an mri image given certain criteria
 
     Args:
@@ -300,16 +305,19 @@ def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
         prefix:  an expression that the filename should start with
         postfix: an expression that the filename should end with (excluding the extension)
         extension:     name of the extension of the filename. defaults: nii.gz
+        subdir: a subfolder where looking for image(s)
 
     Returns:
         the absolute filename if found, False otherwise
 
     """
 
-    images = getImages(config, dir, prefix, postfix, extension)
+    images = getImages(config, dir, prefix, postfix, extension, subdir)
     if images:
         return images.pop()
+
     return False
+
 
 def buildName(config, target, source, postfix=None, extension=None, absolute=True):
     """A simple utility function that return a file name that contain the postfix and the current working directory
