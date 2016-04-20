@@ -47,8 +47,8 @@ def symlink(source, targetDir, targetName=None):
     if os.path.exists(target):  # Delete target if exist
         os.remove(target)
 
-    targetSplit = os.path.split(target)  # Split with os.path.sep
-    sourceSplit = os.path.split(source)  # Split with os.path.sep
+    targetSplit = target.split(os.path.sep)  # Split with os.path.sep
+    sourceSplit = source.split(os.path.sep)  # Split with os.path.sep
 
     # Get common Path
 
