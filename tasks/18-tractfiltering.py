@@ -10,6 +10,8 @@ class TractFiltering(GenericTask):
         GenericTask.__init__(self, subject, 'backup', 'tensorfsl', 'tractquerier', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
+        self.relativeOutDir = 'raw/outlier_cleaned_tracts'
+        self.absOutDir = os.path.join(self.workingDir, self.RelativeOutDir)
 
     def implement(self):
 
@@ -33,15 +35,15 @@ class TractFiltering(GenericTask):
         target_dict = self.getBackupImage('tq_dict', None, 'qry')
 
         if not target_queries and not target_dict:
-            return Images((self.getTractQuerierImage('dwi', 'corpus_callosum', 'trk'),'CC'),
-                           (self.getTractQuerierImage('dwi', 'cortico_spinal.left', 'trk'),'CS_left'),
-                           (self.getTractQuerierImage('dwi', 'cortico_spinal.right', 'trk'),'CS_right'),
-                           (self.getTractQuerierImage('dwi', 'inferior_fronto_occipital.left', 'trk'),'IFO_left'),
-                           (self.getTractQuerierImage('dwi', 'inferior_fronto_occipital.right', 'trk'),'IFO_right'),
-                           (self.getTractQuerierImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk'),'ILF_left'),
-                           (self.getTractQuerierImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk'),'ILF_right'),
-                           (self.getTractQuerierImage('dwi', 'uncinate_fasciculus.left', 'trk'),'UF_left'),
-                           (self.getTractQuerierImage('dwi', 'uncinate_fasciculus.right', 'trk'),'UH_right'))
+            return Images((self.getTractQuerierImage('dwi', 'corpus_callosum', 'trk'), 'CC'),
+                           (self.getTractQuerierImage('dwi', 'cortico_spinal.left', 'trk'), 'CS_left'),
+                           (self.getTractQuerierImage('dwi', 'cortico_spinal.right', 'trk'), 'CS_right'),
+                           (self.getTractQuerierImage('dwi', 'inferior_fronto_occipital.left', 'trk'), 'IFO_left'),
+                           (self.getTractQuerierImage('dwi', 'inferior_fronto_occipital.right', 'trk'), 'IFO_right'),
+                           (self.getTractQuerierImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk'), 'ILF_left'),
+                           (self.getTractQuerierImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk'), 'ILF_right'),
+                           (self.getTractQuerierImage('dwi', 'uncinate_fasciculus.left', 'trk'), 'UF_left'),
+                           (self.getTractQuerierImage('dwi', 'uncinate_fasciculus.right', 'trk'), 'UH_right'))
         else:
             return Images((self.getTRactQuerierImages('dwi',None,'trk')))
 
@@ -53,22 +55,19 @@ class TractFiltering(GenericTask):
         target_queries = self.getBackupImage('queries', None, 'qry')
         target_dict = self.getBackupImage('tq_dict', None, 'qry')
 
-        outDir = 'raw/outlier_cleaned_tracts'
-
         if not target_queries and not target_dict:
 
-            return Images((self.getImage('dwi', 'corpus_callosum', 'trk', outDir),'CC'),
-                           (self.getImage('dwi', 'cortico_spinal.left', 'trk', outDir),'CS_left'),
-                           (self.getImage('dwi', 'cortico_spinal.right', 'trk', outDir),'CS_right'),
-                           (self.getImage('dwi', 'inferior_fronto_occipital.left', 'trk', outDir),'IFO_left'),
-                           (self.getImage('dwi', 'inferior_fronto_occipital.right', 'trk', outDir),'IFO_right'),
-                           (self.getImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk', outDir),'ILF_left'),
-                           (self.getImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk', outDir),'ILF_right'),
-                           (self.getImage('dwi', 'uncinate_fasciculus.left', 'trk', outDir),'UF_left'),
-                           (self.getImage('dwi', 'uncinate_fasciculus.right', 'trk', outDir),'UH_right'))
+            return Images((self.getImage('dwi', 'corpus_callosum', 'trk', self.relativeOutDir), 'CC'),
+                           (self.getImage('dwi', 'cortico_spinal.left', 'trk', self.relativeOutDir), 'CS_left'),
+                           (self.getImage('dwi', 'cortico_spinal.right', 'trk', self.relativeOutDir), 'CS_right'),
+                           (self.getImage('dwi', 'inferior_fronto_occipital.left', 'trk', self.relativeOutDir), 'IFO_left'),
+                           (self.getImage('dwi', 'inferior_fronto_occipital.right', 'trk', self.relativeOutDir), 'IFO_right'),
+                           (self.getImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk', self.relativeOutDir), 'ILF_left'),
+                           (self.getImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk', self.relativeOutDir), 'ILF_right'),
+                           (self.getImage('dwi', 'uncinate_fasciculus.left', 'trk', self.relativeOutDir), 'UF_left'),
+                           (self.getImage('dwi', 'uncinate_fasciculus.right', 'trk', self.relativeOutDir), 'UH_right'))
         else:
-            outDir = os.path.join(self.workingDir, outDir)
-            return not os.path.exists(outDir)
+            return not os.path.exists(self.absOutDir)
 
     def __getConfigFile(self, prefix, defaultFile):
 
@@ -89,18 +88,72 @@ class TractFiltering(GenericTask):
         return target
 
 
-#    def qaSupplier(self):
-#        """Create and supply images for the report generated by qa task
-
-#        """
-#        qaImages = Images()
-
-#       information = "Warning: due to storage restriction, streamlines were " \
-#                      "downsampled. Even if there is no difference in structural " \
-#                      "connectivity, you should be careful before computing any " \
-#                      "metrics along these streamlines.\n To run toad without this " \
-#                      "downsampling, please refer to the documentation."
-#        qaImages.setInformation(information)
+    def __buildNameTractfilteringOutputs(self):
+        self.outputs = [self.getImage('dwi', 'corpus_callosum', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'cortico_spinal.left', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'cortico_spinal.right', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'inferior_fronto_occipital.left', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'inferior_fronto_occipital.right', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'uncinate_fasciculus.left', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'uncinate_fasciculus.right', 'trk', self.relativeOutDir)]
 
 
-#        return qaImages
+def qaSupplier(self):
+    """Create and supply images for the report generated by qa task
+
+    """
+    qaImages = Images()
+
+    information = "Warning: due to storage restriction, streamlines were " \
+                  "downsampled. Even if there is no difference in structural " \
+                  "connectivity, you should be careful before computing any " \
+                  "metrics along these streamlines.\n To run toad without this " \
+                  "downsampling, please refer to the documentation."
+
+    qaImages.setInformation(information)
+
+    if self.defaultQuery:
+        # get images
+        norm = self.getRegistrationImage("norm", "resample")
+        self.__buildNameTractfilteringOutputs()
+        # images production
+        tags = (
+            (self.outputs[0],
+             'Corpus Callosum',
+             95, 60, 40, -80, 0, 160),
+            (self.outputs[1],
+             'Corticospinal tract Left',
+             95, 80, 40, -90, 0, 160),
+            (self.outputs[2],
+             'Corticospinal tract right',
+             95, 80, 40, -90, 0, 200),
+            (self.outputs[3],
+             'Inferior Fronto Occipital tract left',
+             95, 80, 40, -90, 0, 90),
+            (self.outputs[4],
+             'Inferior Fronto Occipital tract right',
+             95, 80, 40, -90, 0, -90),
+            (self.outputs[5],
+             'inferior Longitudinal Fasciculus left',
+             95, 80, 40, -90, 0, 90),
+            (self.outputs[6],
+             'Inferior Longitudinal Fasciculus right',
+             95, 80, 40, -90, 0, -90),
+            (self.outputs[7],
+             'Uncinate Fasciculus left',
+             95, 80, 40, -90, 0, 90),
+            (self.outputs[8],
+             'Uncinate Fasciculus right',
+             95, 80, 40, -90, 0, -90))
+
+        for data, description, xSlice, ySlice, zSlice, xRot, yRot, zRot in tags:
+            if data is not None:
+                imageQa = self.plotTrk(data, norm, None, xSlice, ySlice, zSlice, xRot, yRot, zRot)
+                qaImages.append((imageQa, description))
+    else:
+        # Add message about QA
+        pass
+
+    return qaImages

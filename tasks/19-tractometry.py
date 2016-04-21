@@ -13,22 +13,18 @@ class Tractometry(GenericTask):
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
-
     def implement(self):
         pass
         mriutil.setWorkingDirTractometry(self.workingDir,
                                          self.getTractFilteringImages('dwi', None, 'trk','raw/bundles/'),
                                          self.__buildListMetrics())
 
-
         configFile = self.__getConfigFile('configTractometry', 'configTractometry_default')
 
         mriutil.runTractometry(configFile, self.workingDir, self.workingDir)
 
-
     def isIgnore(self):
         return self.get("ignore")
-
 
     def meetRequirement(self):
         """Validate if all requirements have been met prior to launch the task
