@@ -44,7 +44,7 @@ class TractFiltering(GenericTask):
         target_queries = self.getBackupImage('queries', None, 'qry')
         target_dict = self.getBackupImage('tq_dict', None, 'qry')
 
-        outDir = 'raw/outlier_cleaned_tracts'
+        outDir = 'raw/outlier_cleaned_tracts/'
 
         if not target_queries and not target_dict:
 
