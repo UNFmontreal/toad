@@ -29,12 +29,21 @@ class TractFiltering(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
+        target_queries = self.getBackupImage('queries', None, 'qry')
+        target_dict = self.getBackupImage('tq_dict', None, 'qry')
 
-        #images = Images()
-
-        #Images((self.getTractQuerierImage(None, None, 'trk'),'Tractography files'))
-
-        return True
+        if not target_queries and not target_dict:
+            return Images((self.getTractQuerierImage('dwi', 'corpus_callosum', 'trk'),'CC'),
+                           (self.getTractQuerierImage('dwi', 'cortico_spinal.left', 'trk'),'CS_left'),
+                           (self.getTractQuerierImage('dwi', 'cortico_spinal.right', 'trk'),'CS_right'),
+                           (self.getTractQuerierImage('dwi', 'inferior_fronto_occipital.left', 'trk'),'IFO_left'),
+                           (self.getTractQuerierImage('dwi', 'inferior_fronto_occipital.right', 'trk'),'IFO_right'),
+                           (self.getTractQuerierImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk'),'ILF_left'),
+                           (self.getTractQuerierImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk'),'ILF_right'),
+                           (self.getTractQuerierImage('dwi', 'uncinate_fasciculus.left', 'trk'),'UF_left'),
+                           (self.getTractQuerierImage('dwi', 'uncinate_fasciculus.right', 'trk'),'UH_right'))
+        else:
+            return Images((self.getTRactQuerierImages('dwi',None,'trk')))
 
     def isDirty(self):
         """Validate if this tasks need to be submit during the execution
