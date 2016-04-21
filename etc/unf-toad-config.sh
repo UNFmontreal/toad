@@ -1,9 +1,11 @@
+#!/usr/bin/env bash
 #Toad configuration source file
 #Copyright (C) 2014, TOAD
 #License GPL v2
 #Author Mathieu Desrosiers
-#Credits by Mathieu Desrosiers
-#Email mathieu.desrosiers@criugm.qc.ca
+#Credits by Mathieu Desrosiers, Arnaud Boré and Christophe Bedetti
+#Maintainer Arnaud Boré and Christophe Bedetti
+#Email toadunf.criugm@gmail.com
 
 #to be sourced by toad users, typically in .bash_profile or equivalent
 
@@ -36,7 +38,7 @@ case "$HOSTNAME" in
             APPDIR=/usr/local
             export TOADSERVER=local
             echo "Warning, Toad is meant to dedicated server"
-            echo "Please contact mathieu.desrosiers@criugm.qc.ca for further information"
+            echo "Please contact toadunf.criugm@gmail.com for further information"
             echo "unknown server $HOSTNAME, will guess environment!"
         else
             export TOADSERVER=mammouth
@@ -77,5 +79,6 @@ export FSLDIR PATH
 export PATH=$TOADDIR/bin:$APPDIR/matlab/R2012b/bin:$APPDIR/mrtrix3/bin:$APPDIR/mrtrix3/scripts:$APPDIR/tract_querier:$PATH
 export PATH=$FREESURFER_HOME/mni/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$PATH
 
+# SCILPY Configuration
 export PYTHONPATH=/home/bore/softs/scilpy:$PYTHONPATH
 export PATH=/home/bore/softs/scilpy/scripts:$PATH

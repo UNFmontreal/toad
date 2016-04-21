@@ -288,8 +288,6 @@ def getImages(config, dir, prefix, postfix=None, extension="nii.gz", subdir=None
         criterias = "{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, extension)
         images = glob.glob(criterias)
 
-        print criterias
-
     if len(images) > 0: # Found at least one image
         return images
 
