@@ -54,11 +54,8 @@ class Tractometry(GenericTask):
 
         outDir = 'raw/histograms'
 
-
-
         if not target_queries and not target_dict:
-            print 'Rep: ' + str(os.path.exists(outDir))
-            return os.path.exists(outDir)
+            return not os.path.exists(outDir)
 #            return Images((self.getImage('dwi', 'corpus_callosum', 'trk', outDir),'CC'),
 #                           (self.getImage('dwi', 'cortico_spinal.left', 'trk', outDir),'CS_left'),
 #                           (self.getImage('dwi', 'cortico_spinal.right', 'trk', outDir),'CS_right'),

@@ -59,7 +59,7 @@ class TractFiltering(GenericTask):
                            (self.getImage('dwi', 'uncinate_fasciculus.right', 'trk', outDir),'UH_right'))
         else:
             outDir = os.path.join(self.workingDir + outDir)
-            return os.path.exists(outDir)
+            return not os.path.exists(outDir)
 
     def __getConfigFile(self, prefix, defaultFile):
 
