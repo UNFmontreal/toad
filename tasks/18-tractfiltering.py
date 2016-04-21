@@ -41,8 +41,25 @@ class TractFiltering(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
+        target_queries = self.getBackupImage('queries', None, 'qry')
+        target_dict = self.getBackupImage('tq_dict', None, 'qry')
 
-        return True
+        outDir = 'raw/outlier_cleaned_tracts'
+
+        if not target_queries and not target_dict:
+
+            return Images((self.getImage('dwi', '_corpus_callosum', 'trk', outDir),'CC'),
+                           (self.getImage('dwi', '_cortico_spinal.left', 'trk', outDir),'CS_left'),
+                           (self.getImage('dwi', '_cortico_spinal.right', 'trk', outDir),'CS_right'),
+                           (self.getImage('dwi', '_inferior_fronto_occipital.left', 'trk', outDir),'IFO_left'),
+                           (self.getImage('dwi', '_inferior_fronto_occipital.right', 'trk', outDir),'IFO_right'),
+                           (self.getImage('dwi', '_inferior_longitudinal_fasciculus.left', 'trk', outDir),'ILF_left'),
+                           (self.getImage('dwi', '_inferior_longitudinal_fasciculus.right', 'trk', outDir),'ILF_right'),
+                           (self.getImage('dwi', '_uncinate_fasciculus.left', 'trk', outDir),'UF_left'),
+                           (self.getImage('dwi', '_uncinate_fasciculus.right', 'trk', outDir),'UH_right'))
+        else:
+            outDir = os.path.join(self.workingDir + outDir)
+            return os.path.exists(outDir)
 
     def __getConfigFile(self, prefix, defaultFile):
 
