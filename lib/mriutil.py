@@ -686,7 +686,7 @@ def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None)
     rawDir = 'raw'
 
     if os.path.exists(rawDir):
-        os.remove(rawDir)
+        os.rmdir(rawDir)
 
     os.mkdir(rawDir)
 
