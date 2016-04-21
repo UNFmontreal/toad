@@ -40,14 +40,34 @@ class Tractometry(GenericTask):
 
         return True
 
-
     def isDirty(self):
         """Validate if this tasks need to be submit during the execution
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
+        """Validate if this tasks need to be submit during the execution
+        Returns:
+            True if any expected file or resource is missing, False otherwise
+        """
+        target_queries = self.getBackupImage('queries', None, 'qry')
+        target_dict = self.getBackupImage('tq_dict', None, 'qry')
 
-        return True
+        outDir = 'raw/histograms'
+
+        if not target_queries and not target_dict:
+            return os.path.exists(outDir)
+#            return Images((self.getImage('dwi', 'corpus_callosum', 'trk', outDir),'CC'),
+#                           (self.getImage('dwi', 'cortico_spinal.left', 'trk', outDir),'CS_left'),
+#                           (self.getImage('dwi', 'cortico_spinal.right', 'trk', outDir),'CS_right'),
+#                           (self.getImage('dwi', 'inferior_fronto_occipital.left', 'trk', outDir),'IFO_left'),
+#                           (self.getImage('dwi', 'inferior_fronto_occipital.right', 'trk', outDir),'IFO_right'),
+#                           (self.getImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk', outDir),'ILF_left'),
+#                           (self.getImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk', outDir),'ILF_right'),
+#                           (self.getImage('dwi', 'uncinate_fasciculus.left', 'trk', outDir),'UF_left'),
+#                           (self.getImage('dwi', 'uncinate_fasciculus.right', 'trk', outDir),'UH_right'))
+        #else:
+            #outDir = os.path.join(self.workingDir + outDir)
+
 
     def __buildListMetrics(self):
         return [(self.getTensorFSLImage('dwi', 'fa'),'fsl_fa.nii.gz'),
