@@ -11,7 +11,7 @@ class TractFiltering(GenericTask):
         self.setCleanupBeforeImplement(False)
         self.dirty = True
         self.relativeOutDir = 'raw/outlier_cleaned_tracts'
-        self.absOutDir = os.path.join(self.workingDir, self.RelativeOutDir)
+        self.absOutDir = os.path.join(self.workingDir, self.relativeOutDir)
 
     def implement(self):
 
