@@ -8,7 +8,7 @@ site_dir: html/fr
 theme_dir: custom_theme
 use_directory_urls: false
 site_favicon: figs/toad.ico
-copyright: © TOAD 2015
+copyright: © TOAD 2016
 pages:
 - Accueil: 'index.md'
 - Tutoriel:
@@ -21,6 +21,8 @@ pages:
     - 'Vue d’ensemble': 'tasks/overview.md'
     - '00-Backup': 'tasks/00-Backup.md'
     - '00-QA': 'tasks/00-Qa.md'
+    - '00-Outputs': 'tasks/18-Outputs.md'
+    - '00-Ratio signal sur bruit': 'tasks/00-Snr.md'
     - '01-Preparation': 'tasks/01-Preparation.md'
     - '02-Parcellation': 'tasks/02-Parcellation.md'
     - '03-Atlas': 'tasks/03-Atlas.md'
@@ -37,8 +39,9 @@ pages:
     - '14-Hardi Dipy': 'tasks/14-Hardidipy.md'
     - '15-Tractography MRtrix': 'tasks/15-Tractographymrtrix.md'
     - '16-Tractography Dipy': 'tasks/16-Tractographydipy.md'
-    - '17-Signal-noise ratio': 'tasks/17-Snr.md'
-    - '18-Outputs': 'tasks/18-Outputs.md'
+    - '17-TractQuerier': 'tasks/17-Tractquerier.md'
+    - '18-Tractfiltering': 'tasks/18-Tractfiltering.md'
+    - '19-Tractometry': 'tasks/19-Tractometry.md'
 - À propos:
     - 'Conditions d’utilisation': 'about/license.md'
     - 'Versions': 'about/versions.md'
