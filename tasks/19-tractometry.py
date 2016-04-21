@@ -35,10 +35,23 @@ class Tractometry(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
+        target_queries = self.getBackupImage('queries', None, 'qry')
+        target_dict = self.getBackupImage('tq_dict', None, 'qry')
 
-        images = Images()
+        outDir = 'raw/outlier_cleaned_tracts'
 
-        return True
+        if not target_queries and not target_dict:
+            return Images((self.getTractFilteringImage('dwi', 'corpus_callosum', 'trk', outDir), 'CC'),
+                           (self.getTractFilteringImage('dwi', 'cortico_spinal.left', 'trk', outDir), 'CS_left'),
+                           (self.getTractFilteringImage('dwi', 'cortico_spinal.right', 'trk', outDir), 'CS_right'),
+                           (self.getTractFilteringImage('dwi', 'inferior_fronto_occipital.left', 'trk', outDir), 'IFO_left'),
+                           (self.getTractFilteringImage('dwi', 'inferior_fronto_occipital.right', 'trk', outDir), 'IFO_right'),
+                           (self.getTractFilteringImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk', outDir), 'ILF_left'),
+                           (self.getTractFilteringImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk', outDir), 'ILF_right'),
+                           (self.getTractFilteringImage('dwi', 'uncinate_fasciculus.left', 'trk', outDir), 'UF_left'),
+                           (self.getTractFilteringImage('dwi', 'uncinate_fasciculus.right', 'trk', outDir), 'UH_right'))
+        else:
+            return Images((self.getTractFilteringImage('dwi', None, 'trk', outDir)))
 
     def isDirty(self):
         """Validate if this tasks need to be submit during the execution
@@ -53,7 +66,6 @@ class Tractometry(GenericTask):
         target_dict = self.getBackupImage('tq_dict', None, 'qry')
 
         outDir = 'raw/histograms'
-        outDir = os.path.join(self.workingDir + outDir)
 
         if not target_queries and not target_dict:
             return not os.path.exists(outDir)
@@ -66,9 +78,9 @@ class Tractometry(GenericTask):
 #                           (self.getImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk', outDir),'ILF_right'),
 #                           (self.getImage('dwi', 'uncinate_fasciculus.left', 'trk', outDir),'UF_left'),
 #                           (self.getImage('dwi', 'uncinate_fasciculus.right', 'trk', outDir),'UH_right'))
-        #else:
-            #outDir = os.path.join(self.workingDir + outDir)
-
+        else:
+            outDir = os.path.join(self.workingDir, outDir)
+            return not os.path.exists(outDir)
 
     def __buildListMetrics(self):
         return [(self.getTensorFSLImage('dwi', 'fa'),'fsl_fa.nii.gz'),
