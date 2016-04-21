@@ -5,6 +5,7 @@ import scipy
 import numpy
 import util
 import os
+from shutil import rmtree
 from collections import OrderedDict
 
 __author__ = "Mathieu Desrosiers"
@@ -686,7 +687,7 @@ def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None)
     rawDir = 'raw'
 
     if os.path.exists(rawDir):
-        os.rmdir(rawDir)
+        rmtree(rawDir)
 
     os.mkdir(rawDir)
 
