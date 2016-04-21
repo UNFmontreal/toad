@@ -66,10 +66,12 @@ class Tractometry(GenericTask):
         target_dict = self.getBackupImage('tq_dict', None, 'qry')
 
         outDir = 'raw/histograms'
+        outDir = os.path.join(self.workingDir, outDir)
+        print 'OutDir : ' + outDir
+        return not os.path.exists(outDir)
+#        if not target_queries and not target_dict:
 
-        if not target_queries and not target_dict:
-            return not os.path.exists(outDir)
-#            return Images((self.getImage('dwi', 'corpus_callosum', 'trk', outDir),'CC'),
+#           return Images((self.getImage('dwi', 'corpus_callosum', 'trk', outDir),'CC'),
 #                           (self.getImage('dwi', 'cortico_spinal.left', 'trk', outDir),'CS_left'),
 #                           (self.getImage('dwi', 'cortico_spinal.right', 'trk', outDir),'CS_right'),
 #                           (self.getImage('dwi', 'inferior_fronto_occipital.left', 'trk', outDir),'IFO_left'),
@@ -78,9 +80,9 @@ class Tractometry(GenericTask):
 #                           (self.getImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk', outDir),'ILF_right'),
 #                           (self.getImage('dwi', 'uncinate_fasciculus.left', 'trk', outDir),'UF_left'),
 #                           (self.getImage('dwi', 'uncinate_fasciculus.right', 'trk', outDir),'UH_right'))
-        else:
-            outDir = os.path.join(self.workingDir, outDir)
-            return not os.path.exists(outDir)
+        #else:
+            #outDir = os.path.join(self.workingDir, outDir)
+            #return not os.path.exists(outDir)
 
     def __buildListMetrics(self):
         return [(self.getTensorFSLImage('dwi', 'fa'),'fsl_fa.nii.gz'),
