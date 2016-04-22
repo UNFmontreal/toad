@@ -53,7 +53,7 @@ class Tractquerier(GenericTask):
         return target
 
     def __getTractquerierFile(self, prefix, defaultFile):
-        if self.defaultQuery:
+        if not self.defaultQuery:
             target = self.getPreparationImage(prefix, None, 'qry')
             util.symlink(target, self.buildName(target, None, 'qry'))
         else:
