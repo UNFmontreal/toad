@@ -17,7 +17,6 @@ class Preparation(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'backup', 'qa')
 
-
     def implement(self):
 
         dwi = self.getBackupImage('dwi')
@@ -26,7 +25,7 @@ class Preparation(GenericTask):
         bVecs = self.getBackupImage('grad', None, 'bvecs')
 
 
-        (bEncs, bVecs, bVals) = self.__produceEncodingFiles(bEncs, bVecs, bVals, dwi)
+        (bEncs, bVecs, bVals) = self.__produceEncodingFiles(bEncs, bVecs, bVals, dwi)  # Convert bvecs bval
 
         expectedLayout = self.get('stride_orientation')
         if not mriutil.isDataStridesOrientationExpected(dwi, expectedLayout) \
@@ -62,7 +61,6 @@ class Preparation(GenericTask):
                 self.info("{} seem\'s a valid freesurfer structure: linking to {} directory".format(directory, self.workingDir))
                 util.symlink(directory, self.workingDir, self.get("parcellation", "id"))
 
-
     def __produceEncodingFiles(self, bEncs, bVecs, bVals, dwi):
 
         self.info("Produce .b .bvals and .bvecs gradient file if not existing")
@@ -85,7 +83,6 @@ class Preparation(GenericTask):
         return (self.getImage('grad', None, 'b'),
                 self.getImage('grad', None, 'bvecs'),
                 self.getImage('grad', None, 'bvals'))
-
 
     def __stride4DImage(self, source, bEncs, bVecs, bVals, layout="1,2,3"):
         """perform a reorientation of the axes and flip the image into a different layout. stride gredient encoding files
@@ -119,19 +116,18 @@ class Preparation(GenericTask):
     def meetRequirement(self, result=True):
 
         images = Images((self.getBackupImage('anat'), 'high resolution'),
-                  (self.getBackupImage('dwi'), 'diffusion weighted'))
+                        (self.getBackupImage('dwi'), 'diffusion weighted'))
 
         if images.isSomeImagesMissing():
             result = False
 
         if not (self.getBackupImage('grad', None, 'b') or
-                (self.getBackupImage('grad', None, 'bvals')
-                 and self.getBackupImage('grad', None, 'bvecs'))):
+                (self.getBackupImage('grad', None, 'bvals') and
+                    self.getBackupImage('grad', None, 'bvecs'))):
             self.error("No gradient encoding file found in {}".format(self.backupDir))
             result = False
 
         return result
-
 
     def isDirty(self):
 
