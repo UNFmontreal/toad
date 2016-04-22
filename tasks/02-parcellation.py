@@ -55,6 +55,7 @@ class Parcellation(GenericTask):
         freesurferStructure = os.path.join(self.preparationDir, self.id)
         if mriutil.isAfreesurferStructure(freesurferStructure):
            self.info("{} seem\'s a valid freesurfer structure: moving it to {} directory".format(freesurferStructure, self.workingDir))
+           print '####### Id : ' + str(self.id)
            util.symlink(freesurferStructure, self.id)
            return True
         return False

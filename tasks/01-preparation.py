@@ -60,6 +60,7 @@ class Preparation(GenericTask):
         for directory in [os.path.join(self.backupDir, directory) for directory in os.listdir(self.backupDir) if os.path.isdir(os.path.join(self.backupDir, directory))]:
             if mriutil.isAfreesurferStructure(directory):
                 self.info("{} seem\'s a valid freesurfer structure: linking to {} directory".format(directory, self.workingDir))
+                print '####### Id : ' + str(self.id)
                 os.symlink(directory, self.get("parcellation", "id"))
 
 
