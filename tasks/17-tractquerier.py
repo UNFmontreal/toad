@@ -9,15 +9,15 @@ class Tractquerier(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(
             self, subject,
-            'backup', 'upsampling', 'registration', 'atlasregistration',
+            'preparation', 'upsampling', 'registration', 'atlasregistration',
             'tractographymrtrix', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
-        target_queries = self.getBackupImage('queries', None, 'qry')  # Get queries
-        target_dict = self.getBackupImage('tq_dict', None, 'qry')  # Get queries dictionnary
+        target_queries = self.getPreparationImage('queries', None, 'qry')  # Get queries
+        target_dict = self.getPreparationImage('tq_dict', None, 'qry')  # Get queries dictionnary
 
-        if not target_queries and not target_dict:  # If default queries we should find these files in BackupFolder
+        if not target_queries and not target_dict:  # If default queries we should find these files in Preparation Folder
             self.defaultQuery = True
         else:
             self.defaultQuery = False
@@ -54,7 +54,7 @@ class Tractquerier(GenericTask):
 
     def __getTractquerierFile(self, prefix, defaultFile):
         if self.defaultQuery:
-            target = self.getBackupImage(prefix, None, 'qry')
+            target = self.getPreparationImage(prefix, None, 'qry')
             util.symlink(target, self.buildName(target, None, 'qry'))
         else:
             defaultFileName = '{}.qry'.format(defaultFile)

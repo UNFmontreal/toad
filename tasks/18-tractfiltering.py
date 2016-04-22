@@ -8,15 +8,15 @@ from lib.images import Images
 class TractFiltering(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject,
-                             'backup', 'tensorfsl', 'tractquerier', 'qa')
+                             'preparation', 'tensorfsl', 'tractquerier', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
         self.relativeOutDir = 'raw/outlier_cleaned_tracts'
         self.absOutDir = os.path.join(self.workingDir, self.relativeOutDir)
 
-        target_queries = self.getBackupImage('queries', None, 'qry')
-        target_dict = self.getBackupImage('tq_dict', None, 'qry')
+        target_queries = self.getPreparationImage('queries', None, 'qry')
+        target_dict = self.getPreparationImage('tq_dict', None, 'qry')
 
         if not target_queries and not target_dict:
             self.defaultQuery = True
@@ -81,7 +81,7 @@ class TractFiltering(GenericTask):
 
     def __getConfigFile(self, prefix, defaultFile):
 
-        target = self.getBackupImage(prefix, None, 'json')
+        target = self.getPreparationImage(prefix, None, 'json')
         if target:
             util.symlink(target, self.buildName(target, None, 'json'))
         else:
