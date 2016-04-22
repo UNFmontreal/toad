@@ -34,7 +34,7 @@ class Tractquerier(GenericTask):
         qryDict = self.__getTractquerierFile('tq_dict', 'tq_dict_freesurfer')  # Find dictionnary
         qryFile = self.__getTractquerierFile('queries', 'queries_freesurfer')  # Find query
 
-        self.__tractQuerier(self.tractographyTrk, atlasResample, qryDict, qryFile)  # Run tract_querier
+        self.__tractQuerier(self.tractographyTrk, atlasResample, self.workingDir, qryFile)  # Run tract_querier
 
     def __getTractography(self, nbDirections):
         if nbDirections <= 45:
