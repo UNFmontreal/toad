@@ -7,7 +7,8 @@ from lib.images import Images
 
 class TractFiltering(GenericTask):
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'backup', 'tensorfsl', 'tractquerier', 'qa')
+        GenericTask.__init__(self, subject,
+                             'backup', 'tensorfsl', 'tractquerier', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
@@ -54,7 +55,7 @@ class TractFiltering(GenericTask):
                           (self.getTractQuerierImage('dwi', 'uncinate_fasciculus.left', 'trk'), 'UF_left'),
                           (self.getTractQuerierImage('dwi', 'uncinate_fasciculus.right', 'trk'), 'UH_right'))
         else:
-            return Images((self.getTRactQuerierImages('dwi', None, 'trk')))
+            return Images((self.getTractQuerierImages('dwi', None, 'trk')))
 
     def isDirty(self):
         """Validate if this tasks need to be submit during the execution
