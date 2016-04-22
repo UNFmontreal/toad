@@ -8,13 +8,12 @@ from lib.images import Images
 class Tractometry(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(
-            self, subject, 'backup', 'tensorfsl', 'tensormrtrix', 'tensordipy',
+            self, subject, 'preparation', 'tensorfsl', 'tensormrtrix', 'tensordipy',
             'tractfiltering', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
 
     def implement(self):
-        pass
         mriutil.setWorkingDirTractometry(self.workingDir,
                                          self.getTractFilteringImages('dwi', None, 'trk','raw/bundles/'),
                                          self.__buildListMetrics())
