@@ -61,7 +61,8 @@ class Preparation(GenericTask):
             if mriutil.isAfreesurferStructure(directory):
                 self.info("{} seem\'s a valid freesurfer structure: linking to {} directory".format(directory, self.workingDir))
                 print '####### Id : ' + str(self.id)
-                os.symlink(directory, self.get("parcellation", "id"))
+                #os.symlink(directory, self.get("parcellation", "id"))
+                os.symlink(directory, self.workingDir, self.get("parcellation", "id"))
 
 
     def __produceEncodingFiles(self, bEncs, bVecs, bVals, dwi):
