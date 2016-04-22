@@ -62,10 +62,9 @@ class Qa(object):
         target = self.buildName(source1, 'compare', ext='gif')
         frameFormat = ".{}".format(self.qaImagesFormat)
         qaPlot = qautil.Plot4dVolume(
-		source1, source2=source2, fov=fov, frameFormat=frameFormat)
+        source1, source2=source2, fov=fov, frameFormat=frameFormat)
         qaPlot.save(target)
         return target
-
 
     def plotMovement(self, parametersFile, basename):
         """
@@ -78,16 +77,14 @@ class Qa(object):
                 parametersFile, targetTranslations, targetRotations)
         return targetTranslations, targetRotations
 
-
     def plotVectors(self, bvecsFile, bvecsCorrected, basename):
         """
         """
         target = self.buildName(basename, 'vectors', ext='gif')
         frameFormat = ".{}".format(self.qaImagesFormat)
         qautil.plotVectors(
-		bvecsFile, bvecsCorrected, target, frameFormat=frameFormat)
+        bvecsFile, bvecsCorrected, target, frameFormat=frameFormat)
         return target
-
 
     def plotSigma(self, sigma, basename):
         """
