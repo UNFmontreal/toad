@@ -571,7 +571,7 @@ def plotReconstruction(data, mask, cc, target, model):
 
 def plotTrk(source, target, anatomical, roi=None,
         xSlice=None, ySlice=None, zSlice=None,
-        xRot=None, yRot=None, zRot=None):
+        xRot=None, yRot=None, zRot=None, zoom=None):
 
     if roi is not None:
         roiImage= nibabel.load(roi)
@@ -605,6 +605,9 @@ def plotTrk(source, target, anatomical, roi=None,
     anatomicalActor.RotateZ(zRot)
 
     ren = dipy.viz.fvtk.ren()
+    if zoom is not None:
+        ren.zoom(zoom)
+
     dipy.viz.fvtk.add(ren, sourceActor)
     dipy.viz.fvtk.add(ren, anatomicalActor)
 
