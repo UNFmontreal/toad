@@ -9,7 +9,6 @@ __credits__ = ["Mathieu Desrosiers"]
 
 class Config(object):
 
-
     def __init__(self, arguments=None):
         """Configuration mechanism for the toad pipeline
 
@@ -23,7 +22,6 @@ class Config(object):
         """
         if arguments is not None:
             self.config = self.__buildConfiguration(arguments)
-
 
     def __buildConfiguration(self, arguments):
         """Read various config files and return configurations value as a dictionary
@@ -110,7 +108,6 @@ class Config(object):
 
         return config
 
-
     def getConfig(self):
         """Return this ConfigParser structures
 
@@ -119,7 +116,6 @@ class Config(object):
 
         """
         return self.config
-
 
     def __getConfigFiles(self, arguments):
         """Utility fonctions that find all configuration file that apply to a given toad subject

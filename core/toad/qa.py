@@ -5,6 +5,7 @@ import xml.dom.minidom as minidom
 from lib import qautil
 from lib import util
 
+
 __author__ = "Christophe Bedetti"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Christophe Bedetti", "Mathieu Desrosiers"]
@@ -20,7 +21,6 @@ class Qa(object):
                 self.config.get('qa', 'index_template'))
         self.qaHtml = os.path.join(
                 self.qaDir, '{}.html'.format(self.getName()))
-
 
     def plot3dVolume(
             self, source, edges=None, segOverlay=None,
@@ -43,7 +43,6 @@ class Qa(object):
         qaPlot.save(target)
         return target
 
-
     def plot4dVolume(self, source, fov=None):
         """
         Wrapper of the class Plot4dVolume of qautil
@@ -53,7 +52,6 @@ class Qa(object):
         qaPlot = qautil.Plot4dVolume(source, fov=fov, frameFormat=frameFormat)
         qaPlot.save(target)
         return target
-
 
     def compare4dVolumes(self, source1, source2, fov=None):
         """
@@ -93,7 +91,6 @@ class Qa(object):
         qautil.plotSigma(sigma, target)
         return target
 
-
     def noiseAnalysis(self, source, maskNoise, maskCc):
         """
         """
@@ -101,7 +98,6 @@ class Qa(object):
         targetHist = self.buildName(source, 'hist', ext=self.qaImagesFormat)
         qautil.noiseAnalysis(source, maskNoise, maskCc, targetSnr, targetHist)
         return targetSnr, targetHist
-
 
     def plotReconstruction(self, data, mask, cc, model, basename):
         """
@@ -116,7 +112,6 @@ class Qa(object):
         target = self.buildName(source, None, ext=self.qaImagesFormat)
         qautil.plotTrk(source, target, anatomical, roi, xSlice, ySlice, zSlice,xRot, yRot, zRot)
         return target
-
 
     def createTaskHtml(self, tags, htmlLink=None):
         """
@@ -148,7 +143,6 @@ class Qa(object):
         htmlCode = self.parseTemplate(tags, self.qaHtmlTemplate)
         util.createScript(htmlLink, htmlCode)
 
-
     def updateQaMenu(self):
         """
         This method runs at the beginning of a task with qaSupplier implemented
@@ -171,7 +165,6 @@ class Qa(object):
         #Create temporary html
         message = "Task is being processed. Refresh to check completion."
         self.createTaskHtml({'taskInfo':message})
-
 
     def createQaReport(self, images):
         """create html report for a task with qaSupplier implemented

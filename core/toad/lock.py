@@ -8,7 +8,6 @@ __credits__ = ["Mathieu Desrosiers"]
 
 class Lock(object):
 
-
     def __init__(self, logDir, name):
         """Simple lock mechanism for the toad pipeline
 
@@ -24,7 +23,6 @@ class Lock(object):
         self.__logDir = logDir
         self.__lockFile = "{}/{}.lock".format(logDir, name)
 
-
     def isLock(self):
         """Lock if this subject is currently running into an instance of a toad pipeline
 
@@ -35,7 +33,6 @@ class Lock(object):
         if os.path.exists(self.__lockFile):
             return True
         return False
-
 
     def lock(self):
         """Create a Lock for the subject that is currently running into this toad pipeline
@@ -49,7 +46,6 @@ class Lock(object):
         open(self.__lockFile, 'a').close()
         return self.__lockFile
 
-
     def removeLock(self):
         """Remove the subject lock file
 
@@ -61,7 +57,6 @@ class Lock(object):
             return False
         os.remove(self.__lockFile)
         return True
-
 
     def getLock(self):
         """return the lock file name if it exists
