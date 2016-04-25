@@ -53,7 +53,6 @@ class Correction(GenericTask):
 
         #Generate a missing b0 image if we could. --> 0 = P>>A, 1 = A>>P
         if self.get("phase_enc_dir") == "0" and b0AP and b0PA is False:
-            
             b0PA = b0
 
         if self.get("phase_enc_dir") == "1" and b0PA and b0AP is False :

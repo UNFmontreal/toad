@@ -16,29 +16,52 @@ __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 
 
-def symlink(source, target):
+def symlink(source, targetDir, targetName=None):
     """link a file into the target directory. the link name is the same as the file
 
     Args:
-        source:  name of the source file
-        target:  destination directory
+        source: name of the source file
+        targetDir: destination directory
+        targetName: link name
 
     Returns:
         the relative link name created
 
     """
-    if os.path.exists(os.path.join(target, os.path.basename(source))):
-        src = source
-    else:
-        if not os.path.isabs(source):
-            source = os.path.abspath(source)
-        [dir, name] = os.path.split(source)
-        src = "../{}/{}".format(os.path.basename(os.path.normpath(dir)), name)
-        if os.path.exists(name):
-            os.remove(name)
-        os.symlink(src, name)
+    if not os.path.exists(source):  # if source doesnt exist
+        return False
 
-    return src
+    if not os.path.isabs(source):  # Get absolute path source
+        source = os.path.abspath(source)
+
+    if not os.path.isabs(targetDir):  # Get absolute path targetDir
+        targetDir = os.path.abspath(targetDir)
+
+    if targetName is None:
+        targetName = os.path.basename(source)
+
+    target = os.path.join(targetDir, targetName) # Create full path to target
+
+    if os.path.exists(target):  # Delete target if exist
+        os.remove(target)
+
+    targetSplit = target.split(os.path.sep)  # Split with os.path.sep
+    sourceSplit = source.split(os.path.sep)  # Split with os.path.sep
+
+    # Get common Path
+    commonPath = os.path.sep + os.path.join(*os.path.commonprefix((sourceSplit, targetSplit))) + os.path.sep
+
+    source = source.replace(commonPath, '')  # Get ride of the commonPath
+    target = target.replace(os.getcwd() + os.path.sep, '') # Get ride of the commonPath
+
+    deep = target.count(os.path.sep) + 1  # Number of sub_folders
+
+    substring = '..'+os.path.sep  # Substring ../
+
+    source = substring*deep + source  # Relative link
+
+    os.symlink(source, target)
+    return source
 
 
 def copy(source, destination, name):
@@ -218,20 +241,25 @@ def arrayOfString(source):
     return __arrayOf(source, 'String')
 
 
-def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
+def getImages(config, dir, prefix, postfix=None, extension="nii.gz", subdir=None):
     """A simple utility function that return an mri image given certain criteria
 
     Args:
         config:  a ConfigParser object
-        dir:     the directory where looking for the image
+        dir:     the directory where looking for image(s)
         prefix:  an expression that the filename should start with
         postfix: an expression that the filename should end with (excluding the extension)
         extension:     name of the extension of the filename. defaults: nii.gz
+        subdir: a subfolder where looking for image(s)
 
     Returns:
-        the absolute filename if found, False otherwise
+        A list of filenames if found, False otherwise
 
     """
+
+    if subdir is not None:
+        if os.path.exists(os.path.join(dir, subdir)):
+            dir = os.path.join(dir, subdir)
 
     if extension.find('.') == 0:
         extension=extension.replace(".", "", 1)
@@ -260,8 +288,32 @@ def getImage(config, dir, prefix, postfix=None, extension="nii.gz"):
         criterias = "{}/{}*{}.{}".format(dir, config.get('prefix',prefix), pfixs, extension)
         images = glob.glob(criterias)
 
-    if len(images) > 0:
+    if len(images) > 0: # Found at least one image
+        return images
+
+    return False
+
+
+def getImage(config, dir, prefix, postfix=None, extension="nii.gz", subdir=None):
+    """A simple utility function that return an mri image given certain criteria
+
+    Args:
+        config:  a ConfigParser object
+        dir:     the directory where looking for the image
+        prefix:  an expression that the filename should start with
+        postfix: an expression that the filename should end with (excluding the extension)
+        extension:     name of the extension of the filename. defaults: nii.gz
+        subdir: a subfolder where looking for image(s)
+
+    Returns:
+        the absolute filename if found, False otherwise
+
+    """
+
+    images = getImages(config, dir, prefix, postfix, extension, subdir)
+    if images:
         return images.pop()
+
     return False
 
 
@@ -291,8 +343,9 @@ def buildName(config, target, source, postfix=None, extension=None, absolute=Tru
         parts = os.path.basename(source).split(os.extsep)
         targetName = parts.pop(0)
         # tractquerier exception
-        if any(parts[0] in s for s in ['left', 'right']):
-            targetName += ".{}".format(parts[0])
+        if len(parts) > 0:
+            if any(parts[0] in s for s in ['left', 'right']):
+                targetName += ".{}".format(parts[0])
 
     #add postfix to target name
     if (postfix is not None) and postfix != "":

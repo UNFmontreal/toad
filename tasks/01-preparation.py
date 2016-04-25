@@ -17,7 +17,6 @@ class Preparation(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'backup', 'qa')
 
-
     def implement(self):
 
         dwi = self.getBackupImage('dwi')
@@ -26,7 +25,7 @@ class Preparation(GenericTask):
         bVecs = self.getBackupImage('grad', None, 'bvecs')
 
 
-        (bEncs, bVecs, bVals) = self.__produceEncodingFiles(bEncs, bVecs, bVals, dwi)
+        (bEncs, bVecs, bVals) = self.__produceEncodingFiles(bEncs, bVecs, bVals, dwi)  # Convert bvecs bval
 
         expectedLayout = self.get('stride_orientation')
         if not mriutil.isDataStridesOrientationExpected(dwi, expectedLayout) \
@@ -60,8 +59,7 @@ class Preparation(GenericTask):
         for directory in [os.path.join(self.backupDir, directory) for directory in os.listdir(self.backupDir) if os.path.isdir(os.path.join(self.backupDir, directory))]:
             if mriutil.isAfreesurferStructure(directory):
                 self.info("{} seem\'s a valid freesurfer structure: linking to {} directory".format(directory, self.workingDir))
-                os.symlink(directory, self.get("parcellation", "id"))
-
+                util.symlink(directory, self.workingDir, self.get("parcellation", "id"))
 
     def __produceEncodingFiles(self, bEncs, bVecs, bVals, dwi):
 
@@ -71,7 +69,6 @@ class Preparation(GenericTask):
             self.info(mriutil.fslToMrtrixEncoding(dwi, bVecs, bVals, bEncs))
         else:
             self.info("Linking {} to {}".format(bEncs, util.symlink(bEncs, self.workingDir)))
-
 
         if not bVecs or not bVals:
 
@@ -86,7 +83,6 @@ class Preparation(GenericTask):
         return (self.getImage('grad', None, 'b'),
                 self.getImage('grad', None, 'bvecs'),
                 self.getImage('grad', None, 'bvals'))
-
 
     def __stride4DImage(self, source, bEncs, bVecs, bVals, layout="1,2,3"):
         """perform a reorientation of the axes and flip the image into a different layout. stride gredient encoding files
@@ -117,23 +113,21 @@ class Preparation(GenericTask):
 
         return dwiStride, bEncsStride, bVecsStride, bValsStride
 
-
     def meetRequirement(self, result=True):
 
         images = Images((self.getBackupImage('anat'), 'high resolution'),
-                  (self.getBackupImage('dwi'), 'diffusion weighted'))
+                        (self.getBackupImage('dwi'), 'diffusion weighted'))
 
         if images.isSomeImagesMissing():
             result = False
 
         if not (self.getBackupImage('grad', None, 'b') or
-                (self.getBackupImage('grad', None, 'bvals')
-                 and self.getBackupImage('grad', None, 'bvecs'))):
+                (self.getBackupImage('grad', None, 'bvals') and
+                    self.getBackupImage('grad', None, 'bvecs'))):
             self.error("No gradient encoding file found in {}".format(self.backupDir))
             result = False
 
         return result
-
 
     def isDirty(self):
 

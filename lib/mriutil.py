@@ -5,6 +5,7 @@ import scipy
 import numpy
 import util
 import os
+from shutil import rmtree
 from collections import OrderedDict
 
 __author__ = "Mathieu Desrosiers"
@@ -674,3 +675,40 @@ def applyRegistrationMrtrix(source , matrix, target):
     cmd = "mrtransform  {} -linear {} {} -quiet".format(source, matrix, target)
     util.launchCommand(cmd)
     return target
+
+
+def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None):
+    """ Preparation for tractometry script from scilpy scil_run_tractometry
+    :param workingDir: Current working Folder
+    :param sourceDirBundles: Usually 17-tractquerier
+    :param sourceDirMetrics:
+    :return: Nothing
+    """
+    rawDir = 'raw'
+
+    if os.path.exists(rawDir):
+        rmtree(rawDir)
+
+    os.mkdir(rawDir)
+
+    bundlesDir = os.path.join(rawDir,'bundles')
+    metricsDir = os.path.join(rawDir,'metrics')
+
+    targetBundlesDir = os.path.join(workingDir, bundlesDir) + os.path.sep
+    targetMetricsDir = os.path.join(workingDir, metricsDir) + os.path.sep
+
+    if sourceBundles is not None:
+        os.mkdir(bundlesDir)
+        for bundle in sourceBundles:
+            util.symlink(bundle, targetBundlesDir)
+
+    if sourceMetrics is not None:
+        os.mkdir(metricsDir)
+        if type(sourceMetrics) is list:
+            for metric in sourceMetrics:
+                util.symlink(metric[0], targetMetricsDir, metric[1])
+
+
+def runTractometry(config, source, target):
+    cmd = "scil_run_tractometry.py --config_file {} {} {} -v -f ".format(config, source, target)
+    util.launchCommand(cmd)

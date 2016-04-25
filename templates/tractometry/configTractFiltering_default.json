@@ -1,0 +1,29 @@
+{
+  "global": {
+    "tasks": ["outliers"],
+    "bundles_subfolder": "bundles",
+    "metrics_subfolder": "metrics",
+    "num_points": 20,
+    "array_export_format": "npy",
+    "version": "0.1.0"
+  },
+  "outliers": {
+    "output_subfolders": ["outlier_cleaned_tracts", "outliers"],
+    "alpha": 0.6,
+    "bundle_specific": {
+      "or": {
+        "alpha": 0.4
+      },
+      "cc_?7": {
+        "alpha": 0.4
+      },
+      "ifof": {
+        "alpha": 0.2
+      },
+      "ilf": {
+        "alpha": 0.2
+      }
+    }
+  }
+}
+

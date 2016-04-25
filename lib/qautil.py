@@ -605,6 +605,7 @@ def plotTrk(source, target, anatomical, roi=None,
     anatomicalActor.RotateZ(zRot)
 
     ren = dipy.viz.fvtk.ren()
+
     dipy.viz.fvtk.add(ren, sourceActor)
     dipy.viz.fvtk.add(ren, anatomicalActor)
 
