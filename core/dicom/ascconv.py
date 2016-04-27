@@ -99,7 +99,7 @@ class Ascconv(object):
                 elif "skspace.dphaseoversamplingfordialog" in line:
                     try:
                         # 1 + phase oversampling (ex: 1 + 0.25)
-                        self.__phaseOversampling = 1 + int(line.split("=")[-1].strip())
+                        self.__phaseOversampling = 1 + float(line.split("=")[-1].strip())
                     except ValueError:
                         pass
 
