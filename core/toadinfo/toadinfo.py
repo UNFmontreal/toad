@@ -92,6 +92,7 @@ class Toadinfo(DicomFile):
 
             config.set('methodology', 'dwi_bValue', self.getbValue())  # B Value
             config.set('methodology', 'dwi_numDirections', self.getNumberDirections())  # Num Directions
+            config.set('methodology', 'dwi_patfactor', self.getPatFactor())
 
             if self.getPhaseEncodingDirection() is not None:
                 phaseEncodingDirection = self.getPhaseEncodingDirection()
