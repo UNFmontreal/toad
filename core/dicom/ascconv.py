@@ -10,16 +10,19 @@ class Ascconv(object):
     def __init__(self, filename):
         self.__fileName = filename
         self.__ascconvFound = False
-        self.__phaseEncodingDirection = None # 1
-        self.__patFactor = None # 1
-        self.__epiFactor = None # 1
-        self.__phaseResolution = None # 1
-        self.__phaseOversampling = None # 1
-        self.__numberArrayCoil = None # 0
+        self.__phaseEncodingDirection = None  # 1
+        self.__patFactor = None  # Always available PAT Factor
+        self.__epiFactor = None  # Always available Epi Factor
+        self.__phaseResolution = None  # 1
+        self.__phaseOversampling = 1  # otherwise 1 + __phaseOversampling
+        self.__numberArrayCoil = 0  # 0
+        self.__numDirections = None
+        self.__bValue = None
         self.__initialize()
 
     def __repr__(self):
-        return "filename={}, phaseEncodingDirection={}, patFactor={}, epiFactor={}, phaseResolution={}, phaseOversampling ={}" \
+        return "filename={}, phaseEncodingDirection={}, patFactor={}, epiFactor={}, " \
+               "phaseResolution={}, phaseOversampling ={}" \
                     .format(self.__fileName,
                             self.__phaseEncodingDirection,
                             self.__patFactor,
@@ -51,6 +54,11 @@ class Ascconv(object):
     def getNumberArrayCoil(self):
         return self.__numberArrayCoil
 
+    def getbValue(self):
+        return self.__bValue
+
+    def getNumberDirections(self):
+        return self.__numDirections
 
     def __initialize(self):
         with open(self.__fileName, 'r') as f:
@@ -90,9 +98,23 @@ class Ascconv(object):
 
                 elif "skspace.dphaseoversamplingfordialog" in line:
                     try:
-                        self.__phaseOversampling = int(line.split("=")[-1].strip())
+                        # 1 + phase oversampling (ex: 1 + 0.25)
+                        self.__phaseOversampling = 1 + int(line.split("=")[-1].strip())
                     except ValueError:
                         pass
+
+                elif "sdiffusion.albvalue[1]" in line:
+                    try:
+                        self.__bValue = int(line.split("=")[-1].strip())
+                    except ValueError:
+                        pass
+
+                elif "diffusion.ldiffdirections" in line:
+                    try:
+                        self.__numDirections = int(line.split("=")[-1].strip())
+                    except ValueError:
+                        pass
+
 
     def __returnPhaseEncodingDirection(self, line):
 

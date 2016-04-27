@@ -3,17 +3,17 @@ import os
 import sys
 import ConfigParser
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from core.dicom.dicom import Dicom
+#sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+from core.dicom.dicomfile import DicomFile
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 
 
-class Toadinfo(Dicom):
+class Toadinfo(DicomFile):
 
     def __init__(self, filename):
-        Dicom.__init__(self, filename)
+        DicomFile.__init__(self, filename)
 
     def __repr__(self): # Need to be re-written
 
@@ -24,48 +24,75 @@ class Toadinfo(Dicom):
             if self.getPhaseEncodingDirection() is not None:
                 phaseEncodingDirection =  self.getPhaseEncodingDirection() # Set Phase encoding direction
                 phase = ["P>>A", " A>>P", "R>>L", "L>>R"]
-                msg +="\tPhase encoding: {}, {}\n".format(phaseEncodingDirection, phase[phaseEncodingDirection])
+                msg += "\tPhase encoding: {}, {}\n".format(phaseEncodingDirection, phase[phaseEncodingDirection])
             else:
-                msg += "\t Phase encoding has not been correctly set\n"
+                msg += "\tPhase encoding has not been correctly set\n"
 
             if self.getEpiFactor() is not None: # Set epiFactor
-                msg +="\tEPIFactor: {}\n".format(self.getEpiFactor())
+                msg += "\tEPIFactor: {}\n".format(self.getEpiFactor())
             else:
-                msg += "\t EPIFactor has not been correctly set\n"
+                msg += "\tEPIFactor has not been correctly set\n"
 
         if self.getEchoSpacing() is not None:  # Set Echo Spacing
-            msg +="\tEchoSpacing: {} ms\n".format(self.getEchoSpacing())
+            msg += "\tEchoSpacing: {} ms\n".format(self.getEchoSpacing())
         else:
-            msg +="\tEchoSpacing has not been correctly set\n".format(self.getEchoSpacing())
+            msg += "\tEchoSpacing has not been correctly set\n".format(self.getEchoSpacing())
 
         if self.getEchoTime() is not None:  # Set Echo Time
-            msg +="\tEchoTime: {} ms\n".format(self.getEchoTime())
+            msg += "\tEchoTime: {} ms\n".format(self.getEchoTime())
         else:
-            msg +="\tEchoTime has not been correctly set\n".format(self.getEchoTime())
+            msg += "\tEchoTime has not been correctly set\n".format(self.getEchoTime())
 
         return msg
 
-
     def writeToadConfig(self, source):
 
-        config = ConfigParser.ConfigParser(allow_no_value = True)
+        config = ConfigParser.ConfigParser(allow_no_value=True)
         if os.path.exists(source):
             config.read(source)
 
-        if self.isSiemens():
-            if not config.has_section("denoising"):
-                config.add_section("denoising")
+        if not config.has_section("methodology"):  # Add information: Methodology
+            config.add_section("methodology")
 
-            if self.getNumberArrayCoil() is not None:
+            if self.getSequenceName() == 'Diffusion':  # Save information about diffusion
+                config.set('methodology', 'dwi_tr', self.getRepetitionTime())
+                config.set('methodology', 'dwi_te', self.getEchoTime())
+                config.set('methodology', 'dwi_flipangle', self.getFlipAngle())
+                config.set('methodology', 'dwi_voxesize', self.getVoxelSize())
+                config.set('methodology', 'dwi_matrixsize', self.getMatrixSize())
+                config.set('methodology', 'dwi_fov', self.getFOV())
+
+            elif self.getSequenceName() == 'Structural T1':  # Save information about anatomic T1
+                config.set('methodology', 't1_tr', self.getRepetitionTime())
+                config.set('methodology', 't1_te', self.getEchoTime())
+                config.set('methodology', 't1_flipangle', self.getFlipAngle())
+                config.set('methodology', 't1_voxesize', self.getVoxelSize())
+                config.set('methodology', 't1_matrixsize', self.getMatrixSize())
+                config.set('methodology', 't1_fov', self.getFOV())
+
+        if not config.has_section("correction"):  # Add information about correction step
+            config.add_section("correction")
+
+        if self.getEchoSpacing() is not None:  # Add information about echo spacing if not None
+            config.set("correction", "echo_spacing", self.getEchoSpacing())
+        else:
+            config.set("correction", "#Echo spacing has not been found",)
+            config.set("correction", "#echo_spacing =")
+
+        if not config.has_section("denoising"):  # Add information about denoising
+            config.add_section("denoising")
+
+            if self.getNumberArrayCoil() is not 0:
                 config.set('denoising', 'number_array_coil', self.getNumberArrayCoil())
             else:
                 config.set('denoising', '#Number_array_coil has not been found')
                 config.set('denoising', '#number_array_coil =')
 
-        if not config.has_section("correction"):
-            config.add_section("correction")
+        if self.isSiemens():  # If Siemens add information about number of coils
 
-        if self.isSiemens():
+            config.set('methodology', 'dwi_bValue', self.getbValue())  # B Value
+            config.set('methodology', 'dwi_numDirections', self.getNumberDirections())  # Num Directions
+
             if self.getPhaseEncodingDirection() is not None:
                 phaseEncodingDirection = self.getPhaseEncodingDirection()
                 phase = ["posterior to anterior", "anterior to Posterior", "right to left", "left to right"]
@@ -81,19 +108,7 @@ class Toadinfo(Dicom):
                 config.set("correction", "#The EPI factor has not been found")
                 config.set("correction", "#epi_factor =")
 
-        if self.getEchoSpacing() is not None:
-            config.set("correction", "echo_spacing", self.getEchoSpacing())
-        else:
-            config.set("correction", "#Echo spacing has not been found",)
-            config.set("correction", "#echo_spacing =")
 
-        if self.getEchoTime() is not None:
-            if not config.has_section("correction"):
-                config.add_section("correction")
-            config.set("correction", "echo_time_dwi", self.getEchoTime())
-        else:
-            config.set("correction", "Echo time dwi has not been found")
-            config.set("correction", "echo_time_dwi =")
 
         with open(source, 'w') as w:
-           config.write(w)
+            config.write(w)
