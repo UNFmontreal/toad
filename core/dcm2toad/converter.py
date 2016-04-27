@@ -45,7 +45,6 @@ class Converter(object):
             else:
                 self.__convert(sequence, session, target)
 
-
     def __convert(self, sequence, session, target):
         filename = util.buildName(self.__configParser, target, sequence.getPrefix().getValue(), session.getName(), 'nii.gz')
 
@@ -58,6 +57,12 @@ class Converter(object):
         print cmd
         util.launchCommand(cmd)
 
+        if not self.__arguments.noConfig:
+            dicoms = glob.glob("{}/*.dcm".format(sequence.getDirectory()))
+            if len(dicoms) > 0:
+                toadinfo = Toadinfo(dicoms.pop())
+                print 'Write convert'
+                toadinfo.writeToadConfig(self.__configFilename)
 
     def __convertDwi(self, sequence, session, target):
         """ Convert a dwi dicom images into nifti
@@ -83,9 +88,8 @@ class Converter(object):
             dicoms = glob.glob("{}/*.dcm".format(sequence.getDirectory()))
             if len(dicoms) > 0:
                 toadinfo = Toadinfo(dicoms.pop())
+                print 'Write convert dwi'
                 toadinfo.writeToadConfig( self.__configFilename)
-                util.launchCommand(cmd)
-
 
     def __convertMagnitude(self, sequence, session, target):
         """ Convert a magnitude fieldmap dicom images into nifti
@@ -135,7 +139,6 @@ class Converter(object):
             cmd += " -stride 1,2,3 "
         print cmd
         util.launchCommand(cmd)
-
 
     def __initializeConfigFile(self, sequences, target):
 

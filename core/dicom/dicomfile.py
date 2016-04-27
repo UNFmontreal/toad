@@ -90,9 +90,9 @@ class DicomFile(Ascconv):
                 self.__SequenceName = 'Diffusion'
             elif 'DIFFUSION' in header.ImageType:  # If b0 Acquistion
                 self.__SequenceName = 'b0'
-            elif 'M' and 'NORME' in header.ImageType:  # If T1 Acquisition
+            elif 'M' and 'NORM' in header.ImageType:  # If T1 Acquisition
                 self.__SequenceName = 'Structural T1'
-                self.__TI = float(header.InversionTime)
+                self.__ti = float(header.InversionTime)
             elif 'P' in header.ImageType:  # If Phase acquisition
                 self.__SequenceName = 'Phase'
             else:  #  If Magnitude acquisition

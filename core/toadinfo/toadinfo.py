@@ -47,40 +47,32 @@ class Toadinfo(DicomFile):
 
     def writeToadConfig(self, source):
 
-        config = ConfigParser.ConfigParser(allow_no_value=True)
+        config = ConfigParser.ConfigParser()
         if os.path.exists(source):
             config.read(source)
 
         if not config.has_section("methodology"):  # Add information: Methodology
             config.add_section("methodology")
 
-            if self.getSequenceName() == 'Diffusion':  # Save information about diffusion
-                config.set('methodology', 'dwi_tr', self.getRepetitionTime())
-                config.set('methodology', 'dwi_te', self.getEchoTime())
-                config.set('methodology', 'dwi_flipangle', self.getFlipAngle())
-                config.set('methodology', 'dwi_voxesize', self.getVoxelSize())
-                config.set('methodology', 'dwi_matrixsize', self.getMatrixSize())
-                config.set('methodology', 'dwi_fov', self.getFOV())
+        if self.getSequenceName() == 'Diffusion':  # Save information about diffusion
+            config.set('methodology', 'dwi_tr', self.getRepetitionTime())
+            config.set('methodology', 'dwi_te', self.getEchoTime())
+            config.set('methodology', 'dwi_flipangle', self.getFlipAngle())
+            config.set('methodology', 'dwi_voxesize', self.getVoxelSize())
+            config.set('methodology', 'dwi_matrixsize', self.getMatrixSize())
+            config.set('methodology', 'dwi_fov', self.getFOV())
 
-            elif self.getSequenceName() == 'Structural T1':  # Save information about anatomic T1
-                config.set('methodology', 't1_tr', self.getRepetitionTime())
-                config.set('methodology', 't1_te', self.getEchoTime())
-                config.set('methodology', 't1_flipangle', self.getFlipAngle())
-                config.set('methodology', 't1_voxesize', self.getVoxelSize())
-                config.set('methodology', 't1_matrixsize', self.getMatrixSize())
-                config.set('methodology', 't1_fov', self.getFOV())
+            if not config.has_section("correction"):  # Add information about correction step
+                config.add_section("correction")
 
-        if not config.has_section("correction"):  # Add information about correction step
-            config.add_section("correction")
+            if self.getEchoSpacing() is not None:  # Add information about echo spacing if not None
+                config.set("correction", "echo_spacing", self.getEchoSpacing())
+            else:
+                config.set("correction", "#Echo spacing has not been found", )
+                config.set("correction", "#echo_spacing =")
 
-        if self.getEchoSpacing() is not None:  # Add information about echo spacing if not None
-            config.set("correction", "echo_spacing", self.getEchoSpacing())
-        else:
-            config.set("correction", "#Echo spacing has not been found",)
-            config.set("correction", "#echo_spacing =")
-
-        if not config.has_section("denoising"):  # Add information about denoising
-            config.add_section("denoising")
+            if not config.has_section("denoising"):  # Add information about denoising
+                config.add_section("denoising")
 
             if self.getNumberArrayCoil() is not 0:
                 config.set('denoising', 'number_array_coil', self.getNumberArrayCoil())
@@ -88,28 +80,39 @@ class Toadinfo(DicomFile):
                 config.set('denoising', '#Number_array_coil has not been found')
                 config.set('denoising', '#number_array_coil =')
 
-        if self.isSiemens():  # If Siemens add information about number of coils
+        elif self.getSequenceName() == 'Structural T1':  # Save information about anatomic T1
+            config.set('methodology', 't1_tr', self.getRepetitionTime())
+            config.set('methodology', 't1_te', self.getEchoTime())
+            config.set('methodology', 't1_ti', self.getInversionTime())
+            config.set('methodology', 't1_flipangle', self.getFlipAngle())
+            config.set('methodology', 't1_voxesize', self.getVoxelSize())
+            config.set('methodology', 't1_matrixsize', self.getMatrixSize())
+            config.set('methodology', 't1_fov', self.getFOV())
+
+        # If Siemens add information about number of coils
+        if self.isSiemens() and self.getSequenceName() == 'Diffusion':
 
             config.set('methodology', 'dwi_bValue', self.getbValue())  # B Value
             config.set('methodology', 'dwi_numDirections', self.getNumberDirections())  # Num Directions
             config.set('methodology', 'dwi_patfactor', self.getPatFactor())
 
-            if self.getPhaseEncodingDirection() is not None:
-                phaseEncodingDirection = self.getPhaseEncodingDirection()
-                phase = ["posterior to anterior", "anterior to Posterior", "right to left", "left to right"]
-                config.set("correction", "#The phase encoding is from {}".format(phase[phaseEncodingDirection]))
-                config.set("correction", "phase_enc_dir", phaseEncodingDirection)
+            if not config.has_section("correction"):  # Add information about correction step
+                config.add_section("correction")
             else:
-                config.set("correction", "#The phase encoding has not been found")
-                config.set("correction", "#phase_enc_dir =")
+                if self.getPhaseEncodingDirection() is not None:
+                    phaseEncodingDirection = self.getPhaseEncodingDirection()
+                    phase = ["posterior to anterior", "anterior to Posterior", "right to left", "left to right"]
+                    config.set("correction", "#The phase encoding is from {}".format(phase[phaseEncodingDirection]))
+                    config.set("correction", "phase_enc_dir", phaseEncodingDirection)
+                else:
+                    config.set("correction", "#The phase encoding has not been found")
+                    config.set("correction", "#phase_enc_dir =")
 
-            if self.getEpiFactor() is not None:
-                config.set("correction", "epi_factor", self.getEpiFactor())
-            else:
-                config.set("correction", "#The EPI factor has not been found")
-                config.set("correction", "#epi_factor =")
-
-
+                if self.getEpiFactor() is not None:
+                    config.set("correction", "epi_factor", self.getEpiFactor())
+                else:
+                    config.set("correction", "#The EPI factor has not been found")
+                    config.set("correction", "#epi_factor =")
 
         with open(source, 'w') as w:
             config.write(w)
