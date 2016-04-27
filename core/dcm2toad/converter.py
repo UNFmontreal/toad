@@ -61,7 +61,6 @@ class Converter(object):
             dicoms = glob.glob("{}/*.dcm".format(sequence.getDirectory()))
             if len(dicoms) > 0:
                 toadinfo = Toadinfo(dicoms.pop())
-                print 'Write convert'
                 toadinfo.writeToadConfig(self.__configFilename)
 
     def __convertDwi(self, sequence, session, target):
@@ -88,7 +87,6 @@ class Converter(object):
             dicoms = glob.glob("{}/*.dcm".format(sequence.getDirectory()))
             if len(dicoms) > 0:
                 toadinfo = Toadinfo(dicoms.pop())
-                print 'Write convert dwi'
                 toadinfo.writeToadConfig( self.__configFilename)
 
     def __convertMagnitude(self, sequence, session, target):
