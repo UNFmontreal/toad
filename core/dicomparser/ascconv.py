@@ -64,9 +64,9 @@ class Ascconv(object):
         with open(self.__fileName, 'r') as f:
             ascconv = []
             for line in f.readlines():
-                if "### ASCCONV BEGIN ###" in line:
+                if "### ASCCONV BEGIN " in line:
                     self.__ascconvFound = True
-                if "### ASCCONV END ###" in line:
+                if "### ASCCONV END " in line:
                     break
                 if self.__ascconvFound:
                     ascconv.append(line)
@@ -87,12 +87,13 @@ class Ascconv(object):
                         pass
                 elif "skspace.lphaseencodinglines" in line:
                     try:
-                        self.__epiFactor = int(line.split("=")[-1].strip())
+                        self.__epiFactor = float(line.split("=")[-1].strip())
                     except ValueError:
                         pass
                 elif "skspace.dphaseresolution" in line:
+                    print line
                     try:
-                        self.__phaseResolution= int(line.split("=")[-1].strip())
+                        self.__phaseResolution= float(line.split("=")[-1].strip())
                     except ValueError:
                         pass
 
