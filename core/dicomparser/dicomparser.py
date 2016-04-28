@@ -116,7 +116,7 @@ class DicomParser(Ascconv):
                     try:
                         self.__bandwidthPerPixelPhaseEncode = float(val)
                     except ValueError:
-                        # some data have wrong VR in dicom, try to unpack
+                        # some data have wrong VR in dicomparser, try to unpack
                         self.__bandwidthPerPixelPhaseEncode = struct.unpack('d', val)[0]
 
                 self.__echoSpacing = 1/(self.__bandwidthPerPixelPhaseEncode* self.getEpiFactor()) *1000.0 * \
