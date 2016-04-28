@@ -78,7 +78,9 @@ class DicomParser(Ascconv):
             self.__flipAngle = float(header.FlipAngle)  # Flip Angle
 
             self.__matrixSize = [value for value in header.AcquisitionMatrix if value != 0]  # Matrix Size
-            self.__voxelSize = map(float, header.PixelSpacing)  # Voxel size
+            self.__voxelSize = map(float, [header.PixelSpacing[0],  # Voxel size
+                                           header.PixelSpacing[1],
+                                           header.SliceThickness])
             self.__fov = self.__matrixSize[0] * self.__voxelSize[0]  # Compute FOV
 
             self.__isDicom = True
