@@ -82,7 +82,7 @@ class Toadinfo(DicomParser):
             if self.getNumberArrayCoil() is not 0:
                 config.set('denoising', 'number_array_coil', self.getNumberArrayCoil())
             else:
-                config.set('denoising', '#Number_array_coil has not been found')
+                config.set('denoising', '#Number_array_coil has not been found' , '')
                 config.set('denoising', '#number_array_coil')
 
         elif self.getSequenceName() == 'Structural T1':  # Save information about anatomic T1
@@ -110,13 +110,13 @@ class Toadinfo(DicomParser):
                     config.set("correction", "#The phase encoding is from {}".format(phase[phaseEncodingDirection]))
                     config.set("correction", "phase_enc_dir", phaseEncodingDirection)
                 else:
-                    config.set("correction", "#The phase encoding has not been found")
+                    config.set("correction", "#The phase encoding has not been found", '')
                     config.set("correction", "#phase_enc_dir")
 
                 if self.getEpiFactor() is not None:
                     config.set("correction", "epi_factor", self.getEpiFactor())
                 else:
-                    config.set("correction", "#The EPI factor has not been found")
+                    config.set("correction", "#The EPI factor has not been found", '')
                     config.set("correction", "#epi_factor")
 
         with open(source, 'w') as w:
