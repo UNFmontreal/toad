@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 import ConfigParser
 
-#sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from core.dicom.dicomparser import DicomParser
-__author__ = "Mathieu Desrosiers"
-__copyright__ = "Copyright (C) 2014, TOAD"
-__credits__ = ["Mathieu Desrosiers"]
+__author__ = "Mathieu Desrosiers, Arnaud Bore"
+__copyright__ = "Copyright (C) 2016, TOAD"
+__credits__ = ["Mathieu Desrosiers", "Arnaud Bore"]
 
 
 class Toadinfo(DicomParser):

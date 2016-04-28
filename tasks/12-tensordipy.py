@@ -10,18 +10,15 @@ from core.toad.generictask import GenericTask
 from lib.images import Images
 
 
-__author__ = "Mathieu Desrosiers"
-__copyright__ = "Copyright (C) 2014, TOAD"
-__credits__ = ["Mathieu Desrosiers"]
-
+__author__ = "Mathieu Desrosiers, Arnaud Bore"
+__copyright__ = "Copyright (C) 2016, TOAD"
+__credits__ = ["Mathieu Desrosiers", "Arnaud Bore"]
 
 class TensorDipy(GenericTask):
-
 
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking', 'qa')
         self.__fit = None
-
 
     def implement(self):
         dwi = self.getUpsamplingImage('dwi', 'upsample')
@@ -29,10 +26,11 @@ class TensorDipy(GenericTask):
         bVecsFile = self.getUpsamplingImage('grad', None, 'bvecs')
         mask = self.getRegistrationImage('mask', 'resample')
 
-        self.__fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask)
+        fitMethod = self.get('tensordipy', 'fitMethod')  # Can be WLS, LS, NLLS or RT
 
+        self.__fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask, fitMethod)
 
-    def __produceTensors(self, source, bValsFile, bVecsFile, mask):
+    def __produceTensors(self, source, bValsFile, bVecsFile, mask, fitMethod):
         self.info("Starting tensors creation from dipy on {}".format(source))
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
@@ -43,40 +41,55 @@ class TensorDipy(GenericTask):
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
 
         model = dipy.reconst.dti.TensorModel(gradientTable)
-        fit = model.fit(dwiData)
+        fit = model.fit(dwiData, fit_method=fitMethod)  # Fitting method
         tensorsValues = dipy.reconst.dti.lower_triangular(fit.quadratic_form)
-        correctOrder = [0,1,3,2,4,5]
-        tensorsValuesReordered = tensorsValues[:,:,:,correctOrder]
+        correctOrder = [0, 1, 3, 2, 4, 5]
+        tensorsValuesReordered = tensorsValues[:, :, :, correctOrder]
         tensorsImage = nibabel.Nifti1Image(tensorsValuesReordered.astype(numpy.float32), dwiImage.get_affine())
         nibabel.save(tensorsImage, self.buildName(source, "tensor"))
 
-        nibabel.save(nibabel.Nifti1Image(fit.fa.astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "fa"))
-        nibabel.save(nibabel.Nifti1Image(fit.ad.astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "ad"))
-        nibabel.save(nibabel.Nifti1Image(fit.rd.astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "rd"))
-        nibabel.save(nibabel.Nifti1Image(fit.md.astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "md"))
-        nibabel.save(nibabel.Nifti1Image(fit.evecs[0].astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "v1"))
-        nibabel.save(nibabel.Nifti1Image(fit.evecs[1].astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "v2"))
-        nibabel.save(nibabel.Nifti1Image(fit.evecs[2].astype(numpy.float32), dwiImage.get_affine()), self.buildName(source, "v3"))
-        #nibabel.save(nibabel.Nifti1Image(fit.adc(dipy.data.get_sphere('symmetric724')).astype(numpy.float32),
-        #                                 dwiImage.get_affine()), self.buildName(target, "adc"))
+        nibabel.save(nibabel.Nifti1Image(fit.fa.astype(numpy.float32),
+                                         dwiImage.get_affine()),
+                                            self.buildName(source, "fa"))
+
+        nibabel.save(nibabel.Nifti1Image(fit.ad.astype(numpy.float32),
+                                         dwiImage.get_affine()),
+                                            self.buildName(source, "ad"))
+        nibabel.save(nibabel.Nifti1Image(fit.rd.astype(numpy.float32),
+                                         dwiImage.get_affine()),
+                                            self.buildName(source, "rd"))
+
+        nibabel.save(nibabel.Nifti1Image(fit.md.astype(numpy.float32),
+                                         dwiImage.get_affine()),
+                                            self.buildName(source, "md"))
+
+        nibabel.save(nibabel.Nifti1Image(fit.evecs[0].astype(numpy.float32),
+                                         dwiImage.get_affine()),
+                                             self.buildName(source, "v1"))
+
+        nibabel.save(nibabel.Nifti1Image(fit.evecs[1].astype(numpy.float32),
+                                         dwiImage.get_affine()),
+                                            self.buildName(source, "v2"))
+
+        nibabel.save(nibabel.Nifti1Image(fit.evecs[2].astype(numpy.float32),
+                                         dwiImage.get_affine()),
+                                            self.buildName(source, "v3"))
 
         faColor = numpy.clip(fit.fa, 0, 1)
         rgb = dipy.reconst.dti.color_fa(faColor, fit.evecs)
-        nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'), dwiImage.get_affine()), self.buildName(source, "tensor_rgb"))
+        nibabel.save(nibabel.Nifti1Image(numpy.array(255 * rgb, 'uint8'),
+                                         dwiImage.get_affine()),
+                                            self.buildName(source, "tensor_rgb"))
         return fit
-
 
     def isIgnore(self):
         return self.get("ignore")
-
 
     def meetRequirement(self):
         return Images((self.getUpsamplingImage('dwi', 'upsample'), "upsampled diffusion"),
                   (self.getUpsamplingImage('grad', None, 'bvals'), "gradient value bvals encoding file"),
                   (self.getUpsamplingImage('grad', None, 'bvecs'), "gradient vector bvecs encoding file"),
                   (self.getRegistrationImage('mask', 'resample'), 'brain  mask'))
-
-
 
     def isDirty(self):
         return Images((self.getImage("dwi", "tensor"), "dipy tensor"),

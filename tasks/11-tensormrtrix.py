@@ -2,9 +2,9 @@
 from core.toad.generictask import GenericTask
 from lib.images import Images
 
-__author__ = "Mathieu Desrosiers"
-__copyright__ = "Copyright (C) 2014, TOAD"
-__credits__ = ["Mathieu Desrosiers"]
+__author__ = "Mathieu Desrosiers, Arnaud Bore"
+__copyright__ = "Copyright (C) 2016, TOAD"
+__credits__ = ["Mathieu Desrosiers", "Arnaud Bore"]
 
 
 class TensorMrtrix(GenericTask):
@@ -16,22 +16,22 @@ class TensorMrtrix(GenericTask):
 
     def implement(self):
 
-        dwi = self.getUpsamplingImage('dwi','upsample')
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
         bFile = self.getUpsamplingImage('grad',  None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
 
+        iterWLS = self.get('tensormrtrix', 'iter')  # Number of iteration for tensor estimations
 
-        tensorsMrtrix = self.__produceTensors(dwi, bFile, mask)
+        tensorsMrtrix = self.__produceTensors(dwi, bFile, iterWLS, mask)
         self.__produceMetrics(tensorsMrtrix, mask, dwi)
 
-
     # convert diffusion-weighted images to tensor images.
-    def __produceTensors(self, source, encodingFile, mask=None):
-        self.info("Starting DWI2Tensor from mrtrix")
+    def __produceTensors(self, source, encodingFile, iterWLS, mask=None):
+        self.info("Starting DWI2Tensor from mrtrix using weighted linear least squares estimator.")
 
         tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "tensor")
-        cmd = "dwi2tensor {} {} -grad {} -nthreads {} -quiet ".format(source, tmp, encodingFile, self.getNTreadsMrtrix())
+        cmd = "dwi2tensor {} {} -iter {} -grad {} -nthreads {} -quiet ".format(source, tmp, iterWLS, encodingFile, self.getNTreadsMrtrix())
         if mask is not None:
             cmd += "-mask {}".format(mask)
 
