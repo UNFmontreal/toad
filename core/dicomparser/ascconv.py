@@ -91,7 +91,6 @@ class Ascconv(object):
                     except ValueError:
                         pass
                 elif "skspace.dphaseresolution" in line:
-                    print line
                     try:
                         self.__phaseResolution= float(line.split("=")[-1].strip())
                     except ValueError:

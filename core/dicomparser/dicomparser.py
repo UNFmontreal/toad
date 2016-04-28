@@ -124,13 +124,6 @@ class DicomParser(Ascconv):
             except (KeyError, IndexError, TypeError, ValueError):
                 self.__echoSpacing = None
 
-            print 'bw', self.__bandwidthPerPixelPhaseEncode
-            print 'epi', self.getEpiFactor()
-            print 'pat',self.getPatFactor()
-            print 'over',self.getPhaseOversampling()
-            print 'phaseRes',self.getPhaseResolution()
-
-
     def getFileName(self):
         return self.__filename
 
