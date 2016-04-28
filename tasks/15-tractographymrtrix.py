@@ -37,6 +37,9 @@ class TractographyMrtrix(GenericTask):
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
 
+        if self.get('step') is None:  # If step is None set Step = voxelSize/2
+            self.set('step', self.__configMethod.get('methodology', 'voxelSize')[0] * 0.5)
+
         self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
         if self.__nbDirections <= 45:
 
@@ -155,8 +158,7 @@ class TractographyMrtrix(GenericTask):
         self.launchCommand(cmd)
         return self.rename(tmp, target)
 
-
-    def __tckgenHardi(self, source, target, act = None, bFile = None, algorithm = "iFOD2"):
+    def __tckgenHardi(self, source, target, act=None, bFile=None, algorithm="iFOD2"):
         """
          perform streamlines tractography.
 
@@ -183,9 +185,12 @@ class TractographyMrtrix(GenericTask):
         self.info("Starting tckgen creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
         cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} \
-                    -algorithm {} -backtrack -downsample {} -nthreads {} -quiet"\
+                    -algorithm {} -downsample {} -nthreads {} -quiet"\
             .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'number_tracks'),
                     algorithm, self.get('downsample'), self.getNTreadsMrtrix())
+
+        if self.get('backtrack'):
+            cmd += ' -backtrack '
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)
