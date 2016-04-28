@@ -4,7 +4,7 @@ import sys
 import ConfigParser
 
 #sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from core.dicom.dicomfile import DicomFile
+from core.dicom.dicomparser import DicomFile
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
