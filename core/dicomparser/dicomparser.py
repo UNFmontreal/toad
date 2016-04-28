@@ -182,7 +182,7 @@ class DicomParser(Ascconv):
         return self.__manufacturer
 
     def getMRModel(self):
-        return self.__mrModel()
+        return self.__mrModel
 
     def isDicom(self):
         return self.__isDicom
