@@ -54,6 +54,10 @@ class Toadinfo(DicomFile):
         if not config.has_section("methodology"):  # Add information: Methodology
             config.add_section("methodology")
 
+        config.set('methodology', 'manufacturer', self.getManufacturer())
+        config.set('methodology', 'magneticfieldstrenght', self.getMagneticFieldStrength())
+        config.set('methodology', 'mrmodel', self.getMRModel())
+
         if self.getSequenceName() == 'Diffusion':  # Save information about diffusion
             config.set('methodology', 'dwi_tr', self.getRepetitionTime())
             config.set('methodology', 'dwi_te', self.getEchoTime())

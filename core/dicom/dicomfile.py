@@ -21,6 +21,8 @@ class DicomFile(Ascconv):
         self.__instanceNumber = None
         self.__SequenceName = None
         self.__channel = None
+        self.__mrModel = None
+        self.__magneticFieldStrength = None
 
         self.__bandwidthPerPixelPhaseEncode = None
         self.__echoSpacing = None
@@ -63,6 +65,8 @@ class DicomFile(Ascconv):
             self.__seriesDescription = util.slugify(header.SeriesDescription)
             self.__seriesNumber = header.SeriesNumber
             self.__instanceNumber = header.InstanceNumber
+            self.__mrModel = header.ManufacturerModelName
+            self.__magneticFieldStrength = header.MagneticFieldStrength
 
             self.__tr = float(header.RepetitionTime)  # TR Repetition Time
             self.__te = float(header.EchoTime)  # TE Echo Time
@@ -166,6 +170,15 @@ class DicomFile(Ascconv):
 
     def getNumDirections(self):
         return self.__numDirections
+
+    def getMagneticFieldStrength(self):
+        return self.__magneticFieldStrength
+
+    def getManufacturer(self):
+        return self.__manufacturer
+
+    def getMRModel(self):
+        return self.__mrModel()
 
     def isDicom(self):
         return self.__isDicom
