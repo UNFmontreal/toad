@@ -1,5 +1,8 @@
+import os
+import sys
 import struct
 
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from dicom.filereader import read_file
 from dicom.tag import Tag
 from dicom.errors import InvalidDicomError

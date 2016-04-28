@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+
 import os
 import ConfigParser
+import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 
 from core.dicom.dicomparser import DicomParser
 __author__ = "Mathieu Desrosiers, Arnaud Bore"
