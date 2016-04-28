@@ -14,7 +14,6 @@ manufacturers = ['Philips', 'GE', 'SIEMENS']  # Different manufacturers
 
 
 class DicomParser(Ascconv):
-
     def __init__(self, filename):
         self.__filename = filename
         self.__isDicom = False
@@ -43,10 +42,10 @@ class DicomParser(Ascconv):
 
     def __repr__(self):
         return "filename = {}, manufacturer ={}, patientName={}, seriesDescription={}, seriesNumber={}," \
-               " instanceNumber={}, echoTime={}, channel={}, isDicom = {}"\
-                .format(self.__filename, self.__manufacturer, self.__patientName,
-                        self.__seriesDescription, self.__seriesNumber, self.__instanceNumber,
-                        self.__te, self.__channel, self.__isDicom)
+               " instanceNumber={}, echoTime={}, channel={}, isDicom = {}" \
+            .format(self.__filename, self.__manufacturer, self.__patientName,
+                    self.__seriesDescription, self.__seriesNumber, self.__instanceNumber,
+                    self.__te, self.__channel, self.__isDicom)
 
     def __initialized(self):
 
@@ -58,7 +57,7 @@ class DicomParser(Ascconv):
             return
         try:
 
-            #find the manufacturer
+            # find the manufacturer
             self.__manufacturer = 'UNKNOWN'
             if 'Manufacturer' in header:
                 for manufacturer in manufacturers:
@@ -77,7 +76,7 @@ class DicomParser(Ascconv):
             self.__flipAngle = float(header.FlipAngle)  # Flip Angle
 
             self.__matrixSize = [value for value in header.AcquisitionMatrix if value != 0]  # Matrix Size
-            self.__voxelSize = map(int, header.PixelSpacing)  # Voxel size
+            self.__voxelSize = map(float, header.PixelSpacing)  # Voxel size
             self.__fov = self.__matrixSize[0] * self.__voxelSize[0]  # Compute FOV
 
             self.__isDicom = True
@@ -90,10 +89,9 @@ class DicomParser(Ascconv):
                 except KeyError as k:
                     self.__isDicom = False
             else:
-                 self.__isDicom = False
+                self.__isDicom = False
 
         if self.isSiemens():
-
             if 'DIFFUSION' and 'MOSAIC' in header.ImageType:  # If Diffusion Acquistion
                 self.__SequenceName = 'Diffusion'
             elif 'DIFFUSION' in header.ImageType:  # If b0 Acquistion
@@ -103,10 +101,10 @@ class DicomParser(Ascconv):
                 self.__ti = float(header.InversionTime)
             elif 'P' in header.ImageType:  # If Phase acquisition
                 self.__SequenceName = 'Phase'
-            else:  #  If Magnitude acquisition
+            else:  # If Magnitude acquisition
                 self.__SequenceName = 'Magnitude'
 
-            #inherith Siemens ascconv properties
+            # inherith Siemens ascconv properties
             Ascconv.__init__(self, self.__filename)
             bandwidthPerPixelPhaseEncodeTag = Tag((0x0019, 0x1028))
 
@@ -119,12 +117,18 @@ class DicomParser(Ascconv):
                         # some data have wrong VR in dicomparser, try to unpack
                         self.__bandwidthPerPixelPhaseEncode = struct.unpack('d', val)[0]
 
-                self.__echoSpacing = 1/(self.__bandwidthPerPixelPhaseEncode* self.getEpiFactor()) *1000.0 * \
-                              self.getPatFactor() * self.getPhaseResolution() * \
-                              self.getPhaseOversampling()
+                self.__echoSpacing = 1 / (self.__bandwidthPerPixelPhaseEncode * self.getEpiFactor()) * 1000.0 * \
+                                     self.getPatFactor() * self.getPhaseResolution() * \
+                                     self.getPhaseOversampling()
 
             except (KeyError, IndexError, TypeError, ValueError):
                 self.__echoSpacing = None
+
+            print 'bw', self.__bandwidthPerPixelPhaseEncode
+            print 'epi', self.getEpiFactor()
+            print 'pat',self.getPatFactor()
+            print 'over',self.getPhaseOversampling()
+            print 'phaseRes',self.getPhaseResolution()
 
 
     def getFileName(self):
