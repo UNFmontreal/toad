@@ -37,7 +37,6 @@ class Logger(object):
                 f.write("\n")
                 f.write("#########################################################################\n")
 
-
     def getTimestamp(self):
         """Return the current time and date formated as %Y%m%d %Hh%M
 
@@ -49,7 +48,6 @@ class Logger(object):
 
         """
         return datetime.datetime.now().strftime("%Y%m%d %Hh%M")
-
 
     def logHeader(self, methodName):
         """Format and write a user friendly header message into the log file
@@ -65,7 +63,6 @@ class Logger(object):
             self.info("Looking if all requirement are met prior submitting the task {}.".format(self.getName()))
         elif methodName == "implement":
             self.info("Starting task {} at {}.".format(self.getName(), self.getTimestamp()))
-
 
     def logFooter(self, methodName, result=False):
         """Format and write a user friendly footer message into the log file
@@ -92,7 +89,6 @@ class Logger(object):
             self.info("Finish task {} at {}.".format(self.getName(), self.getTimestamp()))
             self.info("-------------------------------------------------------------------------\n")
 
-
     def __log(self, message, level):
         """Write a user friendly message into the console and into the log file
 
@@ -118,7 +114,6 @@ class Logger(object):
             with open(self.filename,'a') as f:
                 f.write(message)
 
-
     def info(self, message):
         """Wrapper for  user friendly message that have info level
 
@@ -127,7 +122,6 @@ class Logger(object):
 
         """
         self.__log(message, 'INFO')
-
 
     def debug(self, message, pause = False):
         """Wrapper for user friendly message that have debug level
@@ -140,7 +134,6 @@ class Logger(object):
         if pause:
             util.rawInput("Press Enter to continue...")
 
-
     def warning(self, message, pause = False):
         """Wrapper for user friendly message that have warning level
 
@@ -151,7 +144,6 @@ class Logger(object):
         self.__log(message, 'WARNING')
         if pause:
             util.rawInput("Press Enter to continue...")
-
 
     def error(self, message):
         """Wrapper for user friendly message that have warning level
@@ -174,7 +166,6 @@ class Logger(object):
             self.__log(message, 'INFO')
         sys.exit()
 
-
     def getLogger(self):
         """Return that class instance
 
@@ -184,7 +175,6 @@ class Logger(object):
         """
         return self
 
-
     def getLogFileName(self):
         """Return the filename of the log file
 
@@ -193,7 +183,6 @@ class Logger(object):
 
         """
         return self.filename
-
 
     def closeLog(self, handle):
         """Close the handle of the file
@@ -223,7 +212,6 @@ class Logger(object):
                 else:
                     with open(target, 'w') as w:
                         w.write(logText)
-
 
     def __commandFormatter(self, (cmd, output, error)):
         """Format a 3 elements tuples representing the command execute, the standards output and the standard error

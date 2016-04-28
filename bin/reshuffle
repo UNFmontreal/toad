@@ -6,7 +6,7 @@ import shutil
 import argparse
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from core.dicom.dicom import Dicom
+from core.dicom.dicomparser import DicomFile
 from lib import arguments
 
 
@@ -45,7 +45,7 @@ class Reshuffler(object):
     def __initialized(self):
         for root, directories, filenames in os.walk(self.__source):
             for filename in filenames:
-                dcm = Dicom(os.path.join(root, filename))
+                dcm = DicomFile(os.path.join(root, filename))
                 if dcm.isDicom():
                     self.__appendDicom(dcm)
 

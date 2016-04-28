@@ -35,7 +35,6 @@ def parseArguments():
 
 if __name__ == '__main__':
 
-
     arguments = parseArguments()
     toadinfo = Toadinfo(arguments.dicomFile)
 

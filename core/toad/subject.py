@@ -2,6 +2,7 @@
 import shutil
 import os
 import xml.dom.minidom
+import ConfigParser
 
 from core.toad.validation import Validation
 from logger import Logger
@@ -34,6 +35,12 @@ class Subject(Logger, Lock, Validation):
         Logger.__init__(self)
         Lock.__init__(self, self.__logDir, self.__name)
         Validation.__init__(self, self.__subjectDir, self.__config)
+
+        self.__configMethod = ConfigParser.ConfigParser()
+        self.__configMethod.read("{}/etc/configMethods.cfg".format(self.getDir('arguments', 'toad_dir')))
+
+        self.__configReferences = ConfigParser.ConfigParser()
+        self.__configReferences.read("{}/etc/configReferences.cfg".format(self.getDir('arguments', 'toad_dir')))
 
 
     def __repr__(self):
