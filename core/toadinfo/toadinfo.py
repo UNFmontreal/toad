@@ -82,7 +82,7 @@ class Toadinfo(DicomParser):
             if self.getNumberArrayCoil() is not 0:
                 config.set('denoising', 'number_array_coil', self.getNumberArrayCoil())
             else:
-                config.set('denoising', '#Number_array_coil has not been found' , '')
+                config.set('denoising', '#Number_array_coil has not been found', '')
                 config.set('denoising', '#number_array_coil')
 
         elif self.getSequenceName() == 'Structural T1':  # Save information about anatomic T1
