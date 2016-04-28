@@ -81,9 +81,9 @@ class Correction(GenericTask):
 
 
         self.info("create a suitable mask for the dwi")
-        extraArgs = ""
-        if self.get("parcellation", "intrasubject"):
-            extraArgs += " -usesqform -dof 6"
+        extraArgs = " -dof 6 "  # same subject
+        if self.get("parcellation", "intrasession"):
+            extraArgs += " -usesqform "
 
         mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
                                                     norm,

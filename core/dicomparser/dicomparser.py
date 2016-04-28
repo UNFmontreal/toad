@@ -27,6 +27,7 @@ class DicomParser(Ascconv):
         self.__mrModel = None
         self.__magneticFieldStrength = None
 
+        self.__studyUID = None
         self.__bandwidthPerPixelPhaseEncode = None
         self.__echoSpacing = None
         self.__tr = None  # Repetition time
@@ -70,6 +71,7 @@ class DicomParser(Ascconv):
             self.__instanceNumber = header.InstanceNumber
             self.__mrModel = header.ManufacturerModelName
             self.__magneticFieldStrength = header.MagneticFieldStrength
+            self.__studyUID = header.StudyInstanceUID
 
             self.__tr = float(header.RepetitionTime)  # TR Repetition Time
             self.__te = float(header.EchoTime)  # TE Echo Time
@@ -180,6 +182,9 @@ class DicomParser(Ascconv):
 
     def getMRModel(self):
         return self.__mrModel
+
+    def getStudyUID(self):
+        return self.__studyUID
 
     def isDicom(self):
         return self.__isDicom

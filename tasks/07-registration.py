@@ -27,9 +27,9 @@ class Registration(GenericTask):
         tt5 = self.getParcellationImage("tt5")
         mask = self.getParcellationImage("mask")
 
-        extraArgs = ""
-        if self.get("parcellation", "intrasubject"):
-            extraArgs += " -usesqform -dof 6"
+        extraArgs = " -dof 6 " # Because same subject
+        if self.get("methodology", "intrassession"):
+            extraArgs += " -usesqform "
 
         freesurferToDWIMatrix = self.__freesurferToDWITransformation(b0, norm, extraArgs)
         mriutil.applyResampleFsl(anat, b0, freesurferToDWIMatrix, self.buildName(anat, "resample"))

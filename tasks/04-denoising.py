@@ -38,16 +38,15 @@ class Denoising(GenericTask):
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
         self.info("create a suitable mask for the dwi")
-        extraArgs = ""
-        if self.get("parcellation", "intrasubject"):
-            extraArgs += " -usesqform -dof 6"
+        extraArgs = " -dof 6 "
+        if self.get("parcellation", "intrasession"):
+            extraArgs += " -usesqform "
 
         mask = mriutil.computeDwiMaskFromFreesurfer(b0,
                                                     norm,
                                                     parcellationMask,
                                                     self.buildName(parcellationMask, 'resample'),
                                                     extraArgs)
-
 
         target = self.buildName(dwi, "denoise")
 

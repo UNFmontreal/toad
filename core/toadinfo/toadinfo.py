@@ -66,6 +66,7 @@ class Toadinfo(DicomParser):
             config.set('methodology', 'dwi_voxesize', self.getVoxelSize())
             config.set('methodology', 'dwi_matrixsize', self.getMatrixSize())
             config.set('methodology', 'dwi_fov', self.getFOV())
+            config.set('methodology', 'dwi_studyUID', self.getStudyUID())
 
             if not config.has_section("correction"):  # Add information about correction step
                 config.add_section("correction")
@@ -93,6 +94,14 @@ class Toadinfo(DicomParser):
             config.set('methodology', 't1_voxesize', self.getVoxelSize())
             config.set('methodology', 't1_matrixsize', self.getMatrixSize())
             config.set('methodology', 't1_fov', self.getFOV())
+            config.set('methodology', 't1_studyUID', self.getStudyUID())
+
+        #  Set intersession option
+        if config.has_option('methodology', 't1_studyUID') and config.has_option('methodology', 'dwi_studyUID'):
+            if config.get('methodology','t1_studyUID') == config.get('methodology','dwi_studyUID'):
+                config.set('methodology', 'intersession', True)
+            else:
+                config.set('methodology', 'intersession', False)
 
         # If Siemens add information about number of coils
         if self.isSiemens() and self.getSequenceName() == 'Diffusion':
