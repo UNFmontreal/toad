@@ -4,16 +4,16 @@ import sys
 import ConfigParser
 
 #sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from core.dicom.dicomparser import DicomFile
+from core.dicom.dicomparser import DicomParser
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
 __credits__ = ["Mathieu Desrosiers"]
 
 
-class Toadinfo(DicomFile):
+class Toadinfo(DicomParser):
 
     def __init__(self, filename):
-        DicomFile.__init__(self, filename)
+        DicomParser.__init__(self, filename)
 
     def __repr__(self): # Need to be re-written
 

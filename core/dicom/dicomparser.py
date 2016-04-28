@@ -9,7 +9,8 @@ from lib import util
 
 manufacturers = ['Philips', 'GE', 'SIEMENS']  # Different manufacturers
 
-class DicomFile(Ascconv):
+
+class DicomParser(Ascconv):
 
     def __init__(self, filename):
         self.__filename = filename
