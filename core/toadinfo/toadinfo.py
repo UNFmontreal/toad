@@ -74,7 +74,7 @@ class Toadinfo(DicomParser):
                 config.set("correction", "echo_spacing", self.getEchoSpacing())
             else:
                 config.set("correction", "#Echo spacing has not been found", )
-                config.set("correction", "#echo_spacing =")
+                config.set("correction", "#echo_spacing")
 
             if not config.has_section("denoising"):  # Add information about denoising
                 config.add_section("denoising")
@@ -83,7 +83,7 @@ class Toadinfo(DicomParser):
                 config.set('denoising', 'number_array_coil', self.getNumberArrayCoil())
             else:
                 config.set('denoising', '#Number_array_coil has not been found')
-                config.set('denoising', '#number_array_coil =')
+                config.set('denoising', '#number_array_coil')
 
         elif self.getSequenceName() == 'Structural T1':  # Save information about anatomic T1
             config.set('methodology', 't1_tr', self.getRepetitionTime())
@@ -111,13 +111,13 @@ class Toadinfo(DicomParser):
                     config.set("correction", "phase_enc_dir", phaseEncodingDirection)
                 else:
                     config.set("correction", "#The phase encoding has not been found")
-                    config.set("correction", "#phase_enc_dir =")
+                    config.set("correction", "#phase_enc_dir")
 
                 if self.getEpiFactor() is not None:
                     config.set("correction", "epi_factor", self.getEpiFactor())
                 else:
                     config.set("correction", "#The EPI factor has not been found")
-                    config.set("correction", "#epi_factor =")
+                    config.set("correction", "#epi_factor")
 
         with open(source, 'w') as w:
             config.write(w)
