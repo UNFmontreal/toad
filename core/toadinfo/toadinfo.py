@@ -96,13 +96,6 @@ class Toadinfo(DicomParser):
             config.set('methodology', 't1_fov', self.getFOV())
             config.set('methodology', 't1_studyUID', self.getStudyUID())
 
-        #  Set intersession option
-        if config.has_option('methodology', 't1_studyUID') and config.has_option('methodology', 'dwi_studyUID'):
-            if config.get('methodology','t1_studyUID') == config.get('methodology','dwi_studyUID'):
-                config.set('methodology', 'intersession', True)
-            else:
-                config.set('methodology', 'intersession', False)
-
         # If Siemens add information about number of coils
         if self.isSiemens() and self.getSequenceName() == 'Diffusion':
 
@@ -127,6 +120,13 @@ class Toadinfo(DicomParser):
                 else:
                     config.set("correction", "#The EPI factor has not been found", '')
                     config.set("correction", "#epi_factor")
+
+        #  Set intersession option
+        if config.has_option('methodology', 't1_studyUID') and config.has_option('methodology', 'dwi_studyUID'):
+            if config.get('methodology','t1_studyUID') == config.get('methodology','dwi_studyUID'):
+                config.set('methodology', 'intersession', True)
+            else:
+                config.set('methodology', 'intersession', False)
 
         with open(source, 'w') as w:
             config.write(w)
