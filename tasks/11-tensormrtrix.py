@@ -20,7 +20,7 @@ class TensorMrtrix(GenericTask):
         bFile = self.getUpsamplingImage('grad',  None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
 
-        iterWLS = self.get('tensormrtrix', 'iter')  # Number of iteration for tensor estimations
+        iterWLS = self.get('iter')  # Number of iteration for tensor estimations
 
         tensorsMrtrix = self.__produceTensors(dwi, bFile, iterWLS, mask)
         self.__produceMetrics(tensorsMrtrix, mask, dwi)

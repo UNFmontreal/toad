@@ -26,7 +26,7 @@ class TensorDipy(GenericTask):
         bVecsFile = self.getUpsamplingImage('grad', None, 'bvecs')
         mask = self.getRegistrationImage('mask', 'resample')
 
-        fitMethod = self.get('tensordipy', 'fitMethod')  # Can be WLS, LS, NLLS or RT
+        fitMethod = self.get('fitMethod')  # Can be WLS, LS, NLLS or RT
 
         self.__fit = self.__produceTensors(dwi, bValsFile, bVecsFile, mask, fitMethod)
 
@@ -110,10 +110,10 @@ class TensorDipy(GenericTask):
         qaImages = Images()
         softwareName = 'dipy'
 
-        #mask image
+        #  mask image
         mask = self.getRegistrationImage('mask', 'resample')
 
-        #Produce tensor ellipsoids image
+        #  Produce tensor ellipsoids image
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         cc = self.getMaskingImage('aparc_aseg', ['253','mask'])
         ellipsoidsQa = self.plotReconstruction(
@@ -122,7 +122,7 @@ class TensorDipy(GenericTask):
             ellipsoidsQa,
             'Coronal slice of tensor ellipsoids in the Corpus Callosum'))
 
-        #Build qa images
+        #  Build qa images
         tags = (
             #(['tensor', 'rgb'], 'RGB map'),
             ('fa', 0.7, 'Fractional anisotropy'),

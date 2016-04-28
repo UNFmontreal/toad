@@ -53,7 +53,7 @@ class TensorFsl(GenericTask):
         self.info("Starting dtifit from fsl")
         target = self.buildName(source, None,  '')
 
-        fitMethod = self.get('fsltensor', 'fitMethod')  # Fitting method
+        fitMethod = self.get('fitMethod')  # Fitting method
 
         cmd = "dtifit -k {} -o {} -r {} -b {} --save_tensor --sse ".format(source, target,
                                                                            bVecs, bVals, fitMethod)
