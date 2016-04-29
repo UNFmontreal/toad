@@ -39,7 +39,7 @@ class Denoising(GenericTask):
 
         self.info("create a suitable mask for the dwi")
         extraArgs = " -dof 6 "
-        if self.get("parcellation", "intrasession"):
+        if self.get("methodology", "intrasession"):
             extraArgs += " -usesqform "
 
         mask = mriutil.computeDwiMaskFromFreesurfer(b0,
