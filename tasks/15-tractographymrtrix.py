@@ -38,6 +38,8 @@ class TractographyMrtrix(GenericTask):
         mask = self.getRegistrationImage('mask', 'resample')
 
         if self.get('step') is None:  # If step is None set Step = voxelSize/2
+            print 'TOTOTO'
+            print self.__configMethod.get('methodology', 'voxelSize')[0] * 0.5
             self.set('step', self.__configMethod.get('methodology', 'voxelSize')[0] * 0.5)
         
         print self.get('step')
