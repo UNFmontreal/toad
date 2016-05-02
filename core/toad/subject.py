@@ -38,7 +38,6 @@ class Subject(Logger, Lock, Validation):
 
         self.__configMethod = ConfigParser.ConfigParser()
         self.__configMethod.read("{}/etc/configMethods.cfg".format(self.__config.get('arguments', 'toad_dir')))
-
         self.__configReferences = ConfigParser.ConfigParser()
         self.__configReferences.read("{}/etc/configReferences.cfg".format(self.__config.get('arguments', 'toad_dir')))
 

@@ -37,8 +37,9 @@ class TractographyMrtrix(GenericTask):
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
 
-        if self.get('methodology', 'step') is None:  # If step is None set Step = voxelSize/2
-            self.set('methodology', 'step', self.__configMethod.get('methodology', 'voxelSize')[0] * 0.5)
+        if self.get('step') == 'None':  # If step is None set Step = voxelSize/2
+            voxelSize = [float(x) for x in self.get('methodology', 't1_voxelsize')[1:-1].split(',')]
+            self.set('step', str(float(voxelSize[0]) * 0.5))
 
         self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
         if self.__nbDirections <= 45:
