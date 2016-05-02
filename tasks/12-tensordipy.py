@@ -40,8 +40,8 @@ class TensorDipy(GenericTask):
 
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
 
-        model = dipy.reconst.dti.TensorModel(gradientTable)
-        fit = model.fit(dwiData, fit_method=fitMethod)  # Fitting method
+        model = dipy.reconst.dti.TensorModel(gradientTable, fit_method=fitMethod)
+        fit = model.fit(dwiData)  # Fitting method
         tensorsValues = dipy.reconst.dti.lower_triangular(fit.quadratic_form)
         correctOrder = [0, 1, 3, 2, 4, 5]
         tensorsValuesReordered = tensorsValues[:, :, :, correctOrder]
