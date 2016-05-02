@@ -39,6 +39,8 @@ class TractographyMrtrix(GenericTask):
 
         if self.get('step') is None:  # If step is None set Step = voxelSize/2
             self.set('step', self.__configMethod.get('methodology', 'voxelSize')[0] * 0.5)
+        
+        print self.get('step')
 
         self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
         if self.__nbDirections <= 45:

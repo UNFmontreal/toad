@@ -28,7 +28,7 @@ class Registration(GenericTask):
         mask = self.getParcellationImage("mask")
 
         extraArgs = " -dof 6 " # Because same subject
-        if self.get("methodology", "intrassession"):
+        if self.get("methodology", "intrasession"):
             extraArgs += " -usesqform "
 
         freesurferToDWIMatrix = self.__freesurferToDWITransformation(b0, norm, extraArgs)

@@ -82,7 +82,7 @@ class Correction(GenericTask):
 
         self.info("create a suitable mask for the dwi")
         extraArgs = " -dof 6 "  # same subject
-        if self.get("parcellation", "intrasession"):
+        if self.get("methodology", "intrasession"):
             extraArgs += " -usesqform "
 
         mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
@@ -202,7 +202,9 @@ class Correction(GenericTask):
 
         try:
             echoSpacing = float(self.get('echo_spacing'))
-            epiFactor = int(self.get('epi_factor'))
+            print echoSpacing
+            epiFactor = float(self.get('epi_factor'))
+            print epiFactor
             factor = (epiFactor-1) * (echoSpacing/1000)
 
         except ValueError:
@@ -338,8 +340,8 @@ class Correction(GenericTask):
         self.info('Coregistring magnitude image with the anatomical image produce by freesurfer')
         fieldmapToAnat = self.__coregisterFieldmapToAnat(mag, freesurferAnat)
 
-        extraArgs = ""
-        if self.get("parcellation", "intrasubject"):
+        extraArgs = " -dof 6 "
+        if self.get("methodology", "intrasession"):
             extraArgs += " -usesqform  -dof 6"
 
         interpolateMask = mriutil.computeDwiMaskFromFreesurfer(mag,
@@ -390,7 +392,7 @@ class Correction(GenericTask):
 
     def __getDwiEchoTime(self):
         try:
-            echo = float(self.get("echo_time_dwi"))/1000.0
+            echo = float(self.get("methodology", "dwi_te"))/1000.0  # Get Echo time
             return str(echo)
 
         except ValueError:
@@ -549,7 +551,7 @@ class Correction(GenericTask):
 
     def meetRequirement(self):
 
-        images = Images((self.getCorrectionImage("dwi", 'corrected'), 'corrected'),
+        images = Images((self.getCorrectionImage("dwi", 'corrected'), 'corrected'),  # Doesnt make sense ??
                        (self.getPreparationImage("dwi"), 'diffusion weighted'))
 
         if not images.isAtLeastOneImageExists():
