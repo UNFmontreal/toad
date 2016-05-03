@@ -186,7 +186,7 @@ class TractographyMrtrix(GenericTask):
         cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} \
                     -algorithm {} -downsample {} -nthreads {} -quiet"\
             .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'number_tracks'),
-                    algorithm, self.get('downsample'), 25)#self.getNTreadsMrtrix())
+                    algorithm, self.get('downsample'), self.getNTreadsMrtrix())
 
         if self.get('backtrack'):
             cmd += ' -backtrack '
