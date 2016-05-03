@@ -36,15 +36,8 @@ class Subject(Logger, Lock, Validation):
         Lock.__init__(self, self.__logDir, self.__name)
         Validation.__init__(self, self.__subjectDir, self.__config)
 
-        self.__configMethod = ConfigParser.ConfigParser()
-        self.__configMethod.read("{}/etc/configMethods.cfg".format(self.__config.get('arguments', 'toad_dir')))
-        self.__configReferences = ConfigParser.ConfigParser()
-        self.__configReferences.read("{}/etc/configReferences.cfg".format(self.__config.get('arguments', 'toad_dir')))
-
-
     def __repr__(self):
         return self.__name
-
 
     def getName(self):
         """get the name of that instance
@@ -54,7 +47,6 @@ class Subject(Logger, Lock, Validation):
 
         """
         return self.__name
-
 
     def getLogDir(self):
         """get the name of the log directory
@@ -76,14 +68,12 @@ class Subject(Logger, Lock, Validation):
             os.mkdir(self.__logDir)
         Logger.__init__(self, self.__logDir)
 
-
     def removeLogDir(self):
         """Utility function that delete the subject log directory
 
         """
         if os.path.exists(self.__logDir):
             shutil.rmtree(self.__logDir)
-
 
     def getConfig(self):
         """Utility function that return the ConfigParser 
@@ -93,7 +83,6 @@ class Subject(Logger, Lock, Validation):
         """
         return self.__config
 
-
     def setConfigItem(self, section, item, value):
         """Utility function that register a value into the config parser
 
@@ -101,7 +90,6 @@ class Subject(Logger, Lock, Validation):
             the ConfigParser
         """
         self.__config.set(section, item, value)
-
 
     def getDir(self):
         """get the name of the subject directory
@@ -111,7 +99,6 @@ class Subject(Logger, Lock, Validation):
 
         """
         return self.__subjectDir
-
 
     def createXmlSoftwareVersionConfig(self, xmlSoftwaresTags):
         """ Write software versions into a source filename
