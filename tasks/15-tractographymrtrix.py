@@ -44,8 +44,7 @@ class TractographyMrtrix(GenericTask):
         self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
         if self.__nbDirections <= 45:
 
-            if not self.__configMethod.has_section("tractographymrtrix"):  # Set Method tractography
-                self.__configMethod.set('tractographymrtrix', 'methodReconstruction', 'tenseur')
+            self.set('methodReconstruction', 'tenseur')
 
             if 'deterministic' in self.get('algorithm'):
                 tckDet = self.__tckgenTensor(
@@ -59,7 +58,7 @@ class TractographyMrtrix(GenericTask):
                         tckDetRoi, norm, self.buildName(tckDetRoi, None, 'trk'))
                 self.__tckDetRoiTrk = tckDetRoiTrk
 
-                self.__configMethod.set('tractographymrtrix', 'algorithm', 'determinist')  # Set Method tractography Det
+                self.set('algorithm', 'determinist')  # Set Method tractography Det
 
             if 'probabilistic' in self.get('algorithm'):
                 tckProb = self.__tckgenTensor(
@@ -73,7 +72,7 @@ class TractographyMrtrix(GenericTask):
                         tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
                 self.__tckProbRoiTrk = tckProbRoiTrk
 
-                self.__configMethod.set('tractographymrtrix', 'algorithm', 'probabilist')  # Set Method tractography Prob
+                self.set('algorithm', 'probabilist')  # Set Method tractography Prob
 
         else:
             if 'hardi' in self.get('algorithm'):
@@ -88,9 +87,8 @@ class TractographyMrtrix(GenericTask):
                         hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
                 self.__tckgenRoiTrk = tckgenRoiTrk
 
-                if not self.__configMethod.has_section('tractographymrtrix'):    # Set Method tractography
-                    self.__configMethod.set('tractographymrtrix', 'methodReconstruction', 'hardi')
-                    self.__configMethod.set('tractographymrtrix', 'algorithm', 'probabilist')
+                self.set('methodReconstruction', 'hardi')
+                self.set('algorithm', 'probabilist')
 
                 if 'sift' in self.get('algorithm'):
                     tcksift = self.__tcksift(hardiTck, csd)
@@ -102,7 +100,7 @@ class TractographyMrtrix(GenericTask):
                             tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
                     self.__tcksiftRoiTrk = tcksiftRoiTrk
 
-                    self.__configMethod.set('tractographymrtrix', 'siftmethod', True)  # Set Method tractography
+                    self.set('siftmethod', True)  # Set Method tractography
 
     def __tckedit(self, source, roi, target, downsample= "2"):
         """ perform various editing operations on track files.
@@ -213,7 +211,7 @@ class TractographyMrtrix(GenericTask):
         """
         tmp = self.buildName(source, "tmp", "tck")
         target = self.buildName(source, 'tcksift','.tck')
-        self.info("Starting tcksift creation from mrtrix on {}".format(source))
+        selfinfo("Starting tcksift creation from mrtrix on {}".format(source))
 
         cmd = "tcksift {} {} {} -nthreads {} -quiet".format(source, csd, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
