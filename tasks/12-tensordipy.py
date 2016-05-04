@@ -41,8 +41,8 @@ class TensorDipy(GenericTask):
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
 
         if fitMethod.lower() is ('restore' or 'rt'):
-            import dipy.denoise.noise_estimate as ne
-            sigma = ne.estimate_sigma(dwiData)
+            import dipy.denoise.noise_estimate as noise_estimate
+            sigma = noise_estimate.estimate_sigma(dwiData)
             model = dipy.reconst.dti.TensorModel(gradientTable, fit_method=fitMethod, sigma=sigma)
         else:
             model = dipy.reconst.dti.TensorModel(gradientTable, fit_method=fitMethod)
