@@ -40,7 +40,13 @@ class TensorDipy(GenericTask):
 
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
 
-        model = dipy.reconst.dti.TensorModel(gradientTable, fit_method=fitMethod)
+        if fitMethod.lower() is ('restore' or 'rt'):
+            import dipy.denoise.noise_estimate as ne
+            sigma = ne.estimate_sigma(dwiData)
+            model = dipy.reconst.dti.TensorModel(gradientTable, fit_method=fitMethod, sigma=sigma)
+        else:
+            model = dipy.reconst.dti.TensorModel(gradientTable, fit_method=fitMethod)
+
         fit = model.fit(dwiData)  # Fitting method
         tensorsValues = dipy.reconst.dti.lower_triangular(fit.quadratic_form)
         correctOrder = [0, 1, 3, 2, 4, 5]
