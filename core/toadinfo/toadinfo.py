@@ -124,9 +124,9 @@ class Toadinfo(DicomParser):
         #  Set intersession option
         if config.has_option('methodology', 't1_studyUID') and config.has_option('methodology', 'dwi_studyUID'):
             if config.get('methodology','t1_studyUID') == config.get('methodology','dwi_studyUID'):
-                config.set('methodology', 'intersession', True)
+                config.set('methodology', 'intrasession', True)
             else:
-                config.set('methodology', 'intersession', False)
+                config.set('methodology', 'intrasession', False)
 
         with open(source, 'w') as w:
             config.write(w)
