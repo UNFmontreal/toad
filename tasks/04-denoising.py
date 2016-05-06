@@ -60,7 +60,10 @@ class Denoising(GenericTask):
             noiseMask = mriutil.computeNoiseMask(mask, self.buildName(mask, 'noise_mask'))
             noiseMaskImage = nibabel.load(noiseMask)
             noiseMaskData  = noiseMaskImage.get_data()
-            sigma = numpy.std(dwiData[noiseMaskData > 0])
+
+            #sigma = numpy.std(dwiData[noiseMaskData > 0])
+            import dipy.denoise.noise_estimate as noise_estimate
+            sigma = noise_estimate.estimate_sigma(dwiData)
             self.info("sigma value that will be apply into nlmeans = {}".format(sigma))
             denoisingData = dipy.denoise.nlmeans.nlmeans(dwiData, sigma)
 
