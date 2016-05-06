@@ -187,9 +187,7 @@ class Correction(GenericTask):
 
         try:
             echoSpacing = float(self.get('echo_spacing'))
-            print echoSpacing
             epiFactor = float(self.get('epi_factor'))
-            print epiFactor
             factor = (epiFactor - 1) * (echoSpacing / 1000)
 
         except ValueError:
