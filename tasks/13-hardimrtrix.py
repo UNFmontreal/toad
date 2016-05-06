@@ -13,10 +13,9 @@ class HardiMrtrix(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking', 'qa')
 
-
     def implement(self):
 
-        #@TODO produce "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
+        # TODO produce "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
