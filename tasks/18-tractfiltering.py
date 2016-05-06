@@ -14,6 +14,9 @@ class TractFiltering(GenericTask):
 
         self.relativeOutDir = 'raw/outlier_cleaned_tracts'
         self.absOutDir = os.path.join(self.workingDir, self.relativeOutDir)
+        self.defaultQuery = True
+
+    def implement(self):
 
         target_queries = self.getPreparationImage('queries', None, 'qry')
         target_dict = self.getPreparationImage('tq_dict', None, 'qry')
@@ -22,8 +25,6 @@ class TractFiltering(GenericTask):
             self.defaultQuery = True
         else:
             self.defaultQuery = False
-
-    def implement(self):
 
         mriutil.setWorkingDirTractometry(self.workingDir,
                                          self.getTractQuerierImages('dwi', None, 'trk'),

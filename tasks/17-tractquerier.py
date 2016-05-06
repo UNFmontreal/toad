@@ -13,6 +13,9 @@ class Tractquerier(GenericTask):
             'tractographymrtrix', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
+        self.defaultQuery = True
+
+    def implement(self):
 
         target_queries = self.getPreparationImage('queries', None, 'qry')  # Get queries
         target_dict = self.getPreparationImage('tq_dict', None, 'qry')  # Get queries dictionnary
@@ -22,8 +25,6 @@ class Tractquerier(GenericTask):
         else:
             self.defaultQuery = False
 
-
-    def implement(self):
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         nbDirections = mriutil.getNbDirectionsFromDWI(dwi)  # Get number of directions
 
