@@ -42,7 +42,7 @@ class TractographyMrtrix(GenericTask):
             self.set('step', str(float(voxelSize[0]) * 0.5))
 
         self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
-        if self.__nbDirections <= 45:
+        if self.__nbDirections <= 45 and not self.get('forceHardi'):
 
             self.set('methodReconstruction', 'tenseur')
 
@@ -211,7 +211,7 @@ class TractographyMrtrix(GenericTask):
         """
         tmp = self.buildName(source, "tmp", "tck")
         target = self.buildName(source, 'tcksift','.tck')
-        selfinfo("Starting tcksift creation from mrtrix on {}".format(source))
+        self.info("Starting tcksift creation from mrtrix on {}".format(source))
 
         cmd = "tcksift {} {} {} -nthreads {} -quiet".format(source, csd, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
@@ -320,7 +320,7 @@ class TractographyMrtrix(GenericTask):
 
         dwi = self.getUpsamplingImage('dwi', 'upsample')
 
-        if mriutil.getNbDirectionsFromDWI(dwi) <= 45:
+        if mriutil.getNbDirectionsFromDWI(dwi) <= 45  and not self.get('forceHardi'):
             if 'deterministic' in self.get('algorithm'):
                 images.append((
                     self.getImage('dwi', 'tensor_det', 'trk'),
@@ -365,7 +365,7 @@ class TractographyMrtrix(GenericTask):
         mask253 = self.getMaskingImage('aparc_aseg',['253','mask'])
 
         #images production
-        if self.__nbDirections <= 45:
+        if self.__nbDirections <= 45 and not self.get('forceHardi'):
             tags = (
                 (self.__tckDetRoiTrk,
                 'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),
