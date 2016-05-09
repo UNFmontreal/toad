@@ -292,7 +292,7 @@ class Validation(object):
                 result = False
 
             for index, line in enumerate(lines):
-                if len(line.split()) != 4:
+                if len(line.split(",")) != 4:
                     self.warning("Expecting 4 elements at line {} of file {}, counting {}"
                                         .format(index+1, encoding, len(line.split())))
                     result = False
