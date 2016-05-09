@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | tractographymrtrix                                    |
 |**Goal**        | Run tractography on tensors and constrained spherical deconvolution using tckgen from MRtrix |
-|**Config file** | `step` <br> `maxlength` <br> `number_tracks` <br> `downsample` <br> `ignore`|
+|**Config file** | `forceHardi` <br>`step` <br> `maxlength` <br> `number_tracks` <br> `downsample` <br> `ignore`|
 |**Time**        | About 2 hours                                         |
 |**Output**      | - Probabilistic tensor tractography and connectome <br> - Probabilistic tensor tractography and connectome <br> - Probabilistic "sifted" csd tractography and connectome |
 
@@ -26,6 +26,10 @@ It also creates connectomes from anatomical segmentations.
 - Atlas (brodmann, aal2) optional
 
 ## Config files parameter
+
+If you've got less than 45 directions we compute tractography using tensors but if you really want to use hardi reconstruction you have to set forceHardi to True
+
+- `forceHardi: False`
 
 We use default paramaters suggested in the MRtrix documentation.
 

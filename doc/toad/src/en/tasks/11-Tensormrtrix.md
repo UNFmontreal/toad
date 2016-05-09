@@ -5,21 +5,22 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | tensormrtrix                                          |
 |**Goal**        | Reconstruction of the tensor using MRtrix dwi2tensor  |
-|**Config file** | `modulate` <br> `ignore`                              |
+|**Config file** | `ìter` <br> `modulate` <br> `ignore`                              |
 |**Time**        | About 10 minutes                                      |
-|**Output**      | Tensor image <br> Fractional anisotropy (fa) <br> Mean diffusivity (md) <br> Axial diffusivity (ad) <br> Radial diffusivity (rd) <br> 1st, 2nd and 3rd eigenvector (v1, v2 and v3) <br> 1st, 2nd and 3rd value (l1, l2 and l3)<br> Mode of the anisotropy (mo) <br> Raw T2 signal with no diffusion weighting (so) <br> Sum of square errors (sse) |
+|**Output**      | Tensor image <br> Fractional anisotropy (fa) <br> Mean diffusivity (md) <br> Axial diffusivity (ad) <br> Radial diffusivity (rd) <br> 1st, 2nd and 3rd eigenvector (v1, v2 and v3) <br> 1st, 2nd and 3rd value (l1, l2 and l3)<br> Mode of the anisotropy (mo) <br> Raw T2 signal with no diffusion weighting (so)|
 
 #
 
 ## Goal
 
 The tensormrtrix step reconstructs tensors from diffusion-weighted images and extracts tensor metrics such as fractional anisotropy (FA) or mean diffusivity (MD). 
-This step uses the `dtfit` command line from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor" target="_blank">MRtrix</a>]
+This step uses the `dwi2tensor` command line from MRtrix [ref: <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2tensor" target="_blank">MRtrix</a>]
 
 ## Config file
 
-- Method used to fit the `tensor: non-linear` (check MRtrix default parameters)<br>
-- Strength of the regularisation term on the magnitude of the tensor elements: 5000 (check MRtrix default parameters)
+Number of iterations for estimation of the tensor using WLS - default 2 if 0 then ordinary LS
+
+- `iter: 2`
 
 Specify how to modulate the magnitude of the eigenvectors {none, FA, eval}
 

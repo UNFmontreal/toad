@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | tractfiltering                                    |
 |**Goal**        | Remove outliers |
-|**Config file** | qryDict` <br> `qryFile` <br> `ignore`|
+|**Config file** | `qryDict` <br> `qryFile` <br> `ignore`|
 |**Time**        | About 5 minutes                                         |
 |**Output**      | -  Each bundles extracted from tractquerier <br>|
 
@@ -14,7 +14,6 @@
 ## Goal
 
 The tractfiltering step remove outliers from bundles previously extracted.
-
 
 ## Requirements
 

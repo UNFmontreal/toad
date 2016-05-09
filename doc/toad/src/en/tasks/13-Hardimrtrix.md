@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | hardimrtrix                                           |
 |**Goal**        | Perform constrained spherical deconvolution using MRtrix dwi2fod |
-|**Config file** | `ignore`                                              |
+|**Config file** | `algorithmResponseFunction` <br> `ignore`                                              |
 |**Time**        | About 1 hour                                          |
 |**Output**      | Fiber orientation distribution (fod, csd) <br> Number of fiber orientations (nufo) <br> |
 
@@ -21,6 +21,10 @@ This step uses the `dwi2fod` command from MRtrix [ref: <a href="https://github.c
 We provide default parameters as they are suggested in <a href="https://github.com/MRtrix3/mrtrix3/wiki/dwi2fod" target="_blank">MRtrix wiki</a>
 
 ## Config file parameters
+
+Algorithm to be used to derive the response function
+
+- `algorithmResponseFunction: tournier`
 
 Ignore hardimrtrix task: **not recommended**
 
