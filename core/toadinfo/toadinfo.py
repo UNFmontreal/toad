@@ -23,7 +23,7 @@ class Toadinfo(DicomParser):
         if self.isSiemens():
 
             if self.getPhaseEncodingDirection() is not None:
-                phaseEncodingDirection =  self.getPhaseEncodingDirection() # Set Phase encoding direction
+                phaseEncodingDirection = self.getPhaseEncodingDirection() # Set Phase encoding direction
                 phase = ["P>>A", " A>>P", "R>>L", "L>>R"]
                 msg += "\tPhase encoding: {}, {}\n".format(phaseEncodingDirection, phase[phaseEncodingDirection])
             else:

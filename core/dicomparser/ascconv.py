@@ -10,7 +10,11 @@ class Ascconv(object):
     def __init__(self, filename):
         self.__fileName = filename
         self.__ascconvFound = False
-        self.__phaseEncodingDirection = None  # 1
+
+        # If the phase encoding direction is AP won't find anything to set __phaseEncodingDirection
+        # otherwise it will be set correctly
+        self.__phaseEncodingDirection = 1
+
         self.__patFactor = None  # Always available PAT Factor
         self.__epiFactor = None  # Always available Epi Factor
         self.__phaseResolution = None  # 1
