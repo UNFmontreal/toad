@@ -39,8 +39,8 @@ class HardiMrtrix(GenericTask):
         self.info("Starting dwi2response creation from mrtrix on {}".format(source))
 
         if self.get('algorithmResponseFunction') == 'tournier':
-            cmd = "dwi2response tournier {} {} -grad {} -nthreads {} -quiet"\
-                .format(source, tmp, bFile, self.getNTreadsMrtrix())
+            cmd = "dwi2response -nthreads {} -quiet tournier {} {} -grad {}"\
+                .format(self.getNTreadsMrtrix(), source, tmp, bFile)
         else:
             self.info("This algorithm {} has not been implemented. If you want to use it please send us a message"\
                       .format(self.get('algorithmResponseFunction')))
