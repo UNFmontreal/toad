@@ -37,8 +37,14 @@ class HardiMrtrix(GenericTask):
         tmp = self.buildName(source, "tmp",'txt')
 
         self.info("Starting dwi2response creation from mrtrix on {}".format(source))
-        cmd = "dwi2response {} {} {} -mask {} -grad {} -nthreads {} -quiet"\
-            .format(self.get('algorithmResponseFunction'), source, tmp, mask, bFile, self.getNTreadsMrtrix())
+
+        if self.get('algorithmResponseFunction') == 'tournier':
+            cmd = "dwi2response {} {} -mask {} -grad {} -nthreads {} -quiet"\
+                .format(source, tmp, bFile, self.getNTreadsMrtrix())
+        else:
+            self.info("This algorithm {} has not been implemented. If you want to use it please send us a message"\
+                      .format(self.get('algorithmResponseFunction')))
+
         self.launchCommand(cmd)
         return self.rename(tmp, target)
 
