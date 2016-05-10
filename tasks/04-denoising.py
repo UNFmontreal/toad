@@ -167,15 +167,6 @@ class Denoising(GenericTask):
         #Information on denoising algorithm
         information = 'Denoising was done using the {} algorithm'.format(self.algorithm)
 
-        if self.algorithm == "nlmeans" and \
-            self.config.get("denoising", "number_array_coil") == "32":
-            information = "NLMEANS algorithm is not yet implemented for 32 " \
-                "coils channels images, "
-            if self.config.getboolean("general", "matlab_available"):
-                information += "set algorithm to `lpca` or `aonlm` or "
-            information += "set `ignore: True` into the [denoising] section " \
-                    "of your config.cfg file."
-
         if self.matlabWarning:
             information = "Algorithm `aonlm` or `lpca` was set for the " \
                     "denoising, but Matlab is not available for this server. "\
