@@ -39,6 +39,8 @@ class TensorDipy(GenericTask):
         dwiData = dipy.segment.mask.applymask(dwiData, maskData)
 
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
+        self.info('WARNING: We need to flip the x direction due to MRtrix new way to extract bvecs')
+        gradientTable.bvecs = gradientTable.bvecs * numpy.array([-1,1,1])
 
         if fitMethod.lower() is ('restore' or 'rt'):
             import dipy.denoise.noise_estimate as noise_estimate
