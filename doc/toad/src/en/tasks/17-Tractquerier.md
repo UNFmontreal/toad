@@ -13,7 +13,7 @@
 
 ## Goal
 
-The tractquerier step extract specific bundles of streamlines using WMQL .
+The tractquerier step extracts specific bundles of streamlines using WMQL .
 
 
 ## Requirements
@@ -48,6 +48,7 @@ Downsample factor to reduce output file size
 If you want to use your own queries and atlas the first thing you need to do it's to provide a dictionnary of your atlas starting with tq_dict, queries starting with queries and finally if you are using another atlas you need to change config file 
 
 [tractquerier]
+
 atlas: wmparc -> atlas: myatlas
 
 This atlas should be in atlasregistration step or registration step.

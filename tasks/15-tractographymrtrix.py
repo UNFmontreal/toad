@@ -6,9 +6,9 @@ from lib import mriutil
 from lib.images import Images
 
 
-__author__ = "Mathieu Desrosiers"
-__copyright__ = "Copyright (C) 2014, TOAD"
-__credits__ = ["Mathieu Desrosiers"]
+__author__ = "Mathieu Desrosiers, Arnaud Bore"
+__copyright__ = "Copyright (C) 2016, TOAD"
+__credits__ = ["Mathieu Desrosiers", "Arnaud Bore"]
 
 
 class TractographyMrtrix(GenericTask):
@@ -30,16 +30,22 @@ class TractographyMrtrix(GenericTask):
         norm = self.getRegistrationImage("norm", "resample")
 
         mask253 = self.getMaskingImage('aparc_aseg', ['253', 'mask'])
-        mask1024= self.getMaskingImage('aparc_aseg', ['1024', 'mask'])
+        # mask1024= self.getMaskingImage('aparc_aseg', ['1024', 'mask'])
 
         dwi = self.getUpsamplingImage('dwi', 'upsample')
 
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
 
+        if self.get('step') == 'None':  # If step is None set Step = voxelSize/2
+            voxelSize = [float(x) for x in self.get('methodology', 't1_voxelsize')[1:-1].split(',')]
+            self.set('step', str(float(voxelSize[0]) * 0.5))
 
         self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
-        if self.__nbDirections <= 45:
+        if self.__nbDirections <= 45 and not self.get('forceHardi'):
+
+            self.set('methodReconstruction', 'tenseur')
+
             if 'deterministic' in self.get('algorithm'):
                 tckDet = self.__tckgenTensor(
                         dwi, self.buildName(dwi, 'tensor_det', 'tck'),
@@ -52,6 +58,8 @@ class TractographyMrtrix(GenericTask):
                         tckDetRoi, norm, self.buildName(tckDetRoi, None, 'trk'))
                 self.__tckDetRoiTrk = tckDetRoiTrk
 
+                self.set('algorithm', 'determinist')  # Set Method tractography Det
+
             if 'probabilistic' in self.get('algorithm'):
                 tckProb = self.__tckgenTensor(
                         dwi, self.buildName(dwi, 'tensor_prob', 'tck'),
@@ -63,6 +71,8 @@ class TractographyMrtrix(GenericTask):
                 tckProbRoiTrk = mriutil.tck2trk(
                         tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
                 self.__tckProbRoiTrk = tckProbRoiTrk
+
+                self.set('algorithm', 'probabilist')  # Set Method tractography Prob
 
         else:
             if 'hardi' in self.get('algorithm'):
@@ -77,6 +87,9 @@ class TractographyMrtrix(GenericTask):
                         hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
                 self.__tckgenRoiTrk = tckgenRoiTrk
 
+                self.set('methodReconstruction', 'hardi')
+                self.set('algorithm', 'probabilist')
+
                 if 'sift' in self.get('algorithm'):
                     tcksift = self.__tcksift(hardiTck, csd)
                     tcksiftTrk = mriutil.tck2trk(
@@ -86,6 +99,8 @@ class TractographyMrtrix(GenericTask):
                     tcksiftRoiTrk = mriutil.tck2trk(
                             tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
                     self.__tcksiftRoiTrk = tcksiftRoiTrk
+
+                    self.set('siftmethod', True)  # Set Method tractography
 
     def __tckedit(self, source, roi, target, downsample= "2"):
         """ perform various editing operations on track files.
@@ -105,8 +120,7 @@ class TractographyMrtrix(GenericTask):
         mriutil.tckedit(source, roi, tmp, downsample)
         return self.rename(tmp, target)
 
-
-    def __tckgenTensor(self, source, target, mask = None, act = None , seed_gmwmi = None, bFile = None, algorithm = "iFOD2"):
+    def __tckgenTensor(self, source, target, mask=None, act=None , seed_gmwmi=None, bFile=None, algorithm="iFOD2"):
         """ perform streamlines tractography.
 
              the image containing the source data. The type of data
@@ -132,8 +146,10 @@ class TractographyMrtrix(GenericTask):
         """
         self.info("Starting tckgen creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
-        cmd = "tckgen {} {}  -mask {} -act {} -seed_gmwmi {} -number {} -algorithm {} -downsample {} -nthreads {} -quiet"\
-            .format(source, tmp, mask,  act, seed_gmwmi, self.get('number_tracks'), algorithm, self.get('downsample'), self.getNTreadsMrtrix())
+        cmd = "tckgen {} {} -mask {} -act {} -seed_gmwmi {} \
+                -number {} -algorithm {} -downsample {} -nthreads {} -quiet"\
+                    .format(source, tmp, mask,  act, seed_gmwmi,
+                            self.get('number_tracks'), algorithm, self.get('downsample'), self.getNTreadsMrtrix())
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)
@@ -141,8 +157,7 @@ class TractographyMrtrix(GenericTask):
         self.launchCommand(cmd)
         return self.rename(tmp, target)
 
-
-    def __tckgenHardi(self, source, target, act = None, bFile = None, algorithm = "iFOD2"):
+    def __tckgenHardi(self, source, target, act=None, bFile=None, algorithm="iFOD2"):
         """
          perform streamlines tractography.
 
@@ -168,8 +183,13 @@ class TractographyMrtrix(GenericTask):
 
         self.info("Starting tckgen creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
-        cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} -algorithm {} -backtrack -downsample {} -nthreads {} -quiet"\
-            .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'number_tracks'), algorithm, self.get('downsample'), self.getNTreadsMrtrix())
+        cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} \
+                    -algorithm {} -downsample {} -nthreads {} -quiet"\
+            .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'number_tracks'),
+                    algorithm, self.get('downsample'), self.getNTreadsMrtrix())
+
+        if self.get('backtrack'):
+            cmd += ' -backtrack '
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)
@@ -300,7 +320,7 @@ class TractographyMrtrix(GenericTask):
 
         dwi = self.getUpsamplingImage('dwi', 'upsample')
 
-        if mriutil.getNbDirectionsFromDWI(dwi) <= 45:
+        if mriutil.getNbDirectionsFromDWI(dwi) <= 45  and not self.get('forceHardi'):
             if 'deterministic' in self.get('algorithm'):
                 images.append((
                     self.getImage('dwi', 'tensor_det', 'trk'),
@@ -345,7 +365,7 @@ class TractographyMrtrix(GenericTask):
         mask253 = self.getMaskingImage('aparc_aseg',['253','mask'])
 
         #images production
-        if self.__nbDirections <= 45:
+        if self.__nbDirections <= 45 and not self.get('forceHardi'):
             tags = (
                 (self.__tckDetRoiTrk,
                 'fiber crossing aparc_aseg area 253 from a deterministic tensor streamlines'),

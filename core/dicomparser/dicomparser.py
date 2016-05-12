@@ -1,5 +1,8 @@
+import os
+import sys
 import struct
 
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from dicom.filereader import read_file
 from dicom.tag import Tag
 from dicom.errors import InvalidDicomError
@@ -11,7 +14,6 @@ manufacturers = ['Philips', 'GE', 'SIEMENS']  # Different manufacturers
 
 
 class DicomParser(Ascconv):
-
     def __init__(self, filename):
         self.__filename = filename
         self.__isDicom = False
@@ -25,6 +27,7 @@ class DicomParser(Ascconv):
         self.__mrModel = None
         self.__magneticFieldStrength = None
 
+        self.__studyUID = None
         self.__bandwidthPerPixelPhaseEncode = None
         self.__echoSpacing = None
         self.__tr = None  # Repetition time
@@ -40,10 +43,10 @@ class DicomParser(Ascconv):
 
     def __repr__(self):
         return "filename = {}, manufacturer ={}, patientName={}, seriesDescription={}, seriesNumber={}," \
-               " instanceNumber={}, echoTime={}, channel={}, isDicom = {}"\
-                .format(self.__filename, self.__manufacturer, self.__patientName,
-                        self.__seriesDescription, self.__seriesNumber, self.__instanceNumber,
-                        self.__te, self.__channel, self.__isDicom)
+               " instanceNumber={}, echoTime={}, channel={}, isDicom = {}" \
+            .format(self.__filename, self.__manufacturer, self.__patientName,
+                    self.__seriesDescription, self.__seriesNumber, self.__instanceNumber,
+                    self.__te, self.__channel, self.__isDicom)
 
     def __initialized(self):
 
@@ -55,7 +58,7 @@ class DicomParser(Ascconv):
             return
         try:
 
-            #find the manufacturer
+            # find the manufacturer
             self.__manufacturer = 'UNKNOWN'
             if 'Manufacturer' in header:
                 for manufacturer in manufacturers:
@@ -68,13 +71,16 @@ class DicomParser(Ascconv):
             self.__instanceNumber = header.InstanceNumber
             self.__mrModel = header.ManufacturerModelName
             self.__magneticFieldStrength = header.MagneticFieldStrength
+            self.__studyUID = header.StudyInstanceUID
 
             self.__tr = float(header.RepetitionTime)  # TR Repetition Time
             self.__te = float(header.EchoTime)  # TE Echo Time
             self.__flipAngle = float(header.FlipAngle)  # Flip Angle
 
             self.__matrixSize = [value for value in header.AcquisitionMatrix if value != 0]  # Matrix Size
-            self.__voxelSize = map(int, header.PixelSpacing)  # Voxel size
+            self.__voxelSize = map(float, [header.PixelSpacing[0],  # Voxel size
+                                           header.PixelSpacing[1],
+                                           header.SliceThickness])
             self.__fov = self.__matrixSize[0] * self.__voxelSize[0]  # Compute FOV
 
             self.__isDicom = True
@@ -87,10 +93,9 @@ class DicomParser(Ascconv):
                 except KeyError as k:
                     self.__isDicom = False
             else:
-                 self.__isDicom = False
+                self.__isDicom = False
 
         if self.isSiemens():
-
             if 'DIFFUSION' and 'MOSAIC' in header.ImageType:  # If Diffusion Acquistion
                 self.__SequenceName = 'Diffusion'
             elif 'DIFFUSION' in header.ImageType:  # If b0 Acquistion
@@ -100,10 +105,10 @@ class DicomParser(Ascconv):
                 self.__ti = float(header.InversionTime)
             elif 'P' in header.ImageType:  # If Phase acquisition
                 self.__SequenceName = 'Phase'
-            else:  #  If Magnitude acquisition
+            else:  # If Magnitude acquisition
                 self.__SequenceName = 'Magnitude'
 
-            #inherith Siemens ascconv properties
+            # inherith Siemens ascconv properties
             Ascconv.__init__(self, self.__filename)
             bandwidthPerPixelPhaseEncodeTag = Tag((0x0019, 0x1028))
 
@@ -113,16 +118,15 @@ class DicomParser(Ascconv):
                     try:
                         self.__bandwidthPerPixelPhaseEncode = float(val)
                     except ValueError:
-                        # some data have wrong VR in dicom, try to unpack
+                        # some data have wrong VR in dicomparser, try to unpack
                         self.__bandwidthPerPixelPhaseEncode = struct.unpack('d', val)[0]
 
-                self.__echoSpacing = 1/(self.__bandwidthPerPixelPhaseEncode* self.getEpiFactor()) *1000.0 * \
-                              self.getPatFactor() * self.getPhaseResolution() * \
-                              self.getPhaseOversampling()
+                self.__echoSpacing = 1 / (self.__bandwidthPerPixelPhaseEncode * self.getEpiFactor()) * 1000.0 * \
+                                     self.getPatFactor() * self.getPhaseResolution() * \
+                                     self.getPhaseOversampling()
 
             except (KeyError, IndexError, TypeError, ValueError):
                 self.__echoSpacing = None
-
 
     def getFileName(self):
         return self.__filename
@@ -179,7 +183,10 @@ class DicomParser(Ascconv):
         return self.__manufacturer
 
     def getMRModel(self):
-        return self.__mrModel()
+        return self.__mrModel
+
+    def getStudyUID(self):
+        return self.__studyUID
 
     def isDicom(self):
         return self.__isDicom

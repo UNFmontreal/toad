@@ -64,7 +64,7 @@ class Converter(object):
                 toadinfo.writeToadConfig(self.__configFilename)
 
     def __convertDwi(self, sequence, session, target):
-        """ Convert a dwi dicom images into nifti
+        """ Convert a dwi dicomparser images into nifti
 
         the name of the resulting image will be:
             prefix_subjectName.nii.gz
@@ -90,7 +90,7 @@ class Converter(object):
                 toadinfo.writeToadConfig( self.__configFilename)
 
     def __convertMagnitude(self, sequence, session, target):
-        """ Convert a magnitude fieldmap dicom images into nifti
+        """ Convert a magnitude fieldmap dicomparser images into nifti
 
         the name of the resulting image will be:
             prefix_subjectName.nii.gz

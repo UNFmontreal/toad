@@ -38,16 +38,15 @@ class Denoising(GenericTask):
         self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
 
         self.info("create a suitable mask for the dwi")
-        extraArgs = ""
-        if self.get("parcellation", "intrasubject"):
-            extraArgs += " -usesqform -dof 6"
+        extraArgs = " -dof 6 "
+        if self.get("methodology", "intrasession"):
+            extraArgs += " -usesqform "
 
         mask = mriutil.computeDwiMaskFromFreesurfer(b0,
                                                     norm,
                                                     parcellationMask,
                                                     self.buildName(parcellationMask, 'resample'),
                                                     extraArgs)
-
 
         target = self.buildName(dwi, "denoise")
 
@@ -167,15 +166,6 @@ class Denoising(GenericTask):
 
         #Information on denoising algorithm
         information = 'Denoising was done using the {} algorithm'.format(self.algorithm)
-
-        if self.algorithm == "nlmeans" and \
-            self.config.get("denoising", "number_array_coil") == "32":
-            information = "NLMEANS algorithm is not yet implemented for 32 " \
-                "coils channels images, "
-            if self.config.getboolean("general", "matlab_available"):
-                information += "set algorithm to `lpca` or `aonlm` or "
-            information += "set `ignore: True` into the [denoising] section " \
-                    "of your config.cfg file."
 
         if self.matlabWarning:
             information = "Algorithm `aonlm` or `lpca` was set for the " \

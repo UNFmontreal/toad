@@ -225,22 +225,6 @@ class Validation(object):
                     self.warning("Remove this subject from the list?")
                     return False
 
-            if self.config.get('denoising', 'algorithm') == "nlmeans"  and \
-                self.config.get('denoising', 'number_array_coil') == "32" and \
-                    not self.config.getboolean('denoising', 'ignore'):
-
-                msg = "NLMEANS algorithm is not yet implemented for 32 coils channels images.\n" \
-
-                if self.config.getboolean('general', 'matlab_available'):
-                    msg += "set algorithm to lpca or aonlm into [denoising] section of your config.cfg.\nOtherwise " \
-
-                msg += "set ignore: True into [denoising] section of your config.cfg.\n" \
-                        "This subject will probably failed"
-
-                if not util.displayYesNoMessage(msg, "Continue anyway? (y or n)"):
-                    self.warning("Remove this subject from the list?")
-                    return False
-
         return True
 
 
@@ -292,7 +276,7 @@ class Validation(object):
                 result = False
 
             for index, line in enumerate(lines):
-                if len(line.split()) != 4:
+                if len(line.split(",")) != 4:
                     self.warning("Expecting 4 elements at line {} of file {}, counting {}"
                                         .format(index+1, encoding, len(line.split())))
                     result = False
