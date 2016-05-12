@@ -10,7 +10,11 @@ class Ascconv(object):
     def __init__(self, filename):
         self.__fileName = filename
         self.__ascconvFound = False
-        self.__phaseEncodingDirection = None  # 1
+
+        # If the phase encoding direction is AP won't find anything to set __phaseEncodingDirection
+        # otherwise it will be set correctly
+        self.__phaseEncodingDirection = 1
+
         self.__patFactor = None  # Always available PAT Factor
         self.__epiFactor = None  # Always available Epi Factor
         self.__phaseResolution = None  # 1
@@ -64,9 +68,9 @@ class Ascconv(object):
         with open(self.__fileName, 'r') as f:
             ascconv = []
             for line in f.readlines():
-                if "### ASCCONV BEGIN ###" in line:
+                if "### ASCCONV BEGIN " in line:
                     self.__ascconvFound = True
-                if "### ASCCONV END ###" in line:
+                if "### ASCCONV END " in line:
                     break
                 if self.__ascconvFound:
                     ascconv.append(line)
@@ -87,12 +91,12 @@ class Ascconv(object):
                         pass
                 elif "skspace.lphaseencodinglines" in line:
                     try:
-                        self.__epiFactor = int(line.split("=")[-1].strip())
+                        self.__epiFactor = float(line.split("=")[-1].strip())
                     except ValueError:
                         pass
                 elif "skspace.dphaseresolution" in line:
                     try:
-                        self.__phaseResolution= int(line.split("=")[-1].strip())
+                        self.__phaseResolution= float(line.split("=")[-1].strip())
                     except ValueError:
                         pass
 

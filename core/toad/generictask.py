@@ -429,6 +429,30 @@ class GenericTask(Logger, Load, Qa):
         else:
             return value
 
+    def set(self, *args):
+        """Utility that return a config element value from config.cfg base on superclass name as section
+
+        Args:
+           args: list of arguments as positional arguments.
+            if only 1 arguments is provide, the section will be the class name (the current class). and the argument will be the options name as specify in config.cfg
+            if more arguments is provide, the first arguments will be the section and de second argument will be the the options name as specify in config.cfg
+
+        Returns:
+            If value is equal to True or False return a boolean, return a string otherwise
+            A string value
+
+        """
+        if len(args) < 3:
+            value = self.config.set(self.getName(), args[0], args[1])
+        else:
+            value = self.config.get(args[0], args[1], args[2])
+        if value in ["True", "true"]:
+            return True
+        elif value in ["False", "false"]:
+            return False
+        else:
+            return value
+
 
     def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=None, nice=0):
         """Execute a program in a new process

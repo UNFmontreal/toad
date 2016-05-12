@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-import os
-import sys
-import ConfigParser
 
-#sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from core.dicom.dicomparser import DicomParser
-__author__ = "Mathieu Desrosiers"
-__copyright__ = "Copyright (C) 2014, TOAD"
-__credits__ = ["Mathieu Desrosiers"]
+import os
+import ConfigParser
+import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+
+from core.dicomparser.dicomparser import DicomParser
+__author__ = "Mathieu Desrosiers, Arnaud Bore"
+__copyright__ = "Copyright (C) 2016, TOAD"
+__credits__ = ["Mathieu Desrosiers", "Arnaud Bore"]
 
 
 class Toadinfo(DicomParser):
@@ -22,7 +23,7 @@ class Toadinfo(DicomParser):
         if self.isSiemens():
 
             if self.getPhaseEncodingDirection() is not None:
-                phaseEncodingDirection =  self.getPhaseEncodingDirection() # Set Phase encoding direction
+                phaseEncodingDirection = self.getPhaseEncodingDirection() # Set Phase encoding direction
                 phase = ["P>>A", " A>>P", "R>>L", "L>>R"]
                 msg += "\tPhase encoding: {}, {}\n".format(phaseEncodingDirection, phase[phaseEncodingDirection])
             else:
@@ -65,6 +66,7 @@ class Toadinfo(DicomParser):
             config.set('methodology', 'dwi_voxesize', self.getVoxelSize())
             config.set('methodology', 'dwi_matrixsize', self.getMatrixSize())
             config.set('methodology', 'dwi_fov', self.getFOV())
+            config.set('methodology', 'dwi_studyUID', self.getStudyUID())
 
             if not config.has_section("correction"):  # Add information about correction step
                 config.add_section("correction")
@@ -73,7 +75,7 @@ class Toadinfo(DicomParser):
                 config.set("correction", "echo_spacing", self.getEchoSpacing())
             else:
                 config.set("correction", "#Echo spacing has not been found", )
-                config.set("correction", "#echo_spacing =")
+                config.set("correction", "#echo_spacing")
 
             if not config.has_section("denoising"):  # Add information about denoising
                 config.add_section("denoising")
@@ -81,17 +83,18 @@ class Toadinfo(DicomParser):
             if self.getNumberArrayCoil() is not 0:
                 config.set('denoising', 'number_array_coil', self.getNumberArrayCoil())
             else:
-                config.set('denoising', '#Number_array_coil has not been found')
-                config.set('denoising', '#number_array_coil =')
+                config.set('denoising', '#Number_array_coil has not been found', '')
+                config.set('denoising', '#number_array_coil')
 
         elif self.getSequenceName() == 'Structural T1':  # Save information about anatomic T1
             config.set('methodology', 't1_tr', self.getRepetitionTime())
             config.set('methodology', 't1_te', self.getEchoTime())
             config.set('methodology', 't1_ti', self.getInversionTime())
             config.set('methodology', 't1_flipangle', self.getFlipAngle())
-            config.set('methodology', 't1_voxesize', self.getVoxelSize())
+            config.set('methodology', 't1_voxelsize', self.getVoxelSize())
             config.set('methodology', 't1_matrixsize', self.getMatrixSize())
             config.set('methodology', 't1_fov', self.getFOV())
+            config.set('methodology', 't1_studyUID', self.getStudyUID())
 
         # If Siemens add information about number of coils
         if self.isSiemens() and self.getSequenceName() == 'Diffusion':
@@ -109,14 +112,21 @@ class Toadinfo(DicomParser):
                     config.set("correction", "#The phase encoding is from {}".format(phase[phaseEncodingDirection]))
                     config.set("correction", "phase_enc_dir", phaseEncodingDirection)
                 else:
-                    config.set("correction", "#The phase encoding has not been found")
-                    config.set("correction", "#phase_enc_dir =")
+                    config.set("correction", "#The phase encoding has not been found", '')
+                    config.set("correction", "#phase_enc_dir")
 
                 if self.getEpiFactor() is not None:
                     config.set("correction", "epi_factor", self.getEpiFactor())
                 else:
-                    config.set("correction", "#The EPI factor has not been found")
-                    config.set("correction", "#epi_factor =")
+                    config.set("correction", "#The EPI factor has not been found", '')
+                    config.set("correction", "#epi_factor")
+
+        #  Set intersession option
+        if config.has_option('methodology', 't1_studyUID') and config.has_option('methodology', 'dwi_studyUID'):
+            if config.get('methodology','t1_studyUID') == config.get('methodology','dwi_studyUID'):
+                config.set('methodology', 'intrasession', True)
+            else:
+                config.set('methodology', 'intrasession', False)
 
         with open(source, 'w') as w:
             config.write(w)

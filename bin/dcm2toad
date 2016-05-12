@@ -31,7 +31,6 @@ class Dcm2Toad(object):
 
     __fieldmap =[prefix.Prefix('mag', "Magnitude fieldmap", 'mag'), prefix.Prefix('phase', "Phase fieldmap", 'phase')]
 
-
     def __init__(self):
         self.__softwaresXmlTags = self.__validateToadDependencies()
         self.__arguments = self.__parseArguments()
@@ -44,7 +43,6 @@ class Dcm2Toad(object):
         self.__outputDirectory = self.__initializeOutputDirectory()
         self.__xmlFilename = os.path.join(self.__outputDirectory, ".dcm2toad.xml")
         self.__initializeSessionFromXmlFile()
-
 
     def __parseArguments(self):
         """Prepare and parse user friendly command line arguments for sys.argv.
@@ -73,14 +71,11 @@ class Dcm2Toad(object):
         args = parser.parse_args()
         return args
 
-
     def getArguments(self):
         return self.__arguments
 
-
     def getOutputDirectory(self):
         return self.__outputDirectory
-
 
     def __initializeOutputDirectory(self):
         directory = "toad_data"
@@ -90,7 +85,6 @@ class Dcm2Toad(object):
             os.makedirs(directory)
         self.__arguments.dirName = directory
         return self.__arguments.dirName
-
 
     def __initializeNamesFromUser(self):
         def checkInput(line):
@@ -107,13 +101,11 @@ class Dcm2Toad(object):
             if name in namesFromUser.keys():
                 session.setNameFromUser(namesFromUser[name])
 
-
     def getMriSessions(self, key):
         if isinstance(key, sessionmri.SessionMRI):
             for session in self.__mriSessions:
                 if session == key:
                     return session
-
 
     def setChecked(self, sessionToCheck):
         for index, session in enumerate(self.__mriSessions):
@@ -121,17 +113,12 @@ class Dcm2Toad(object):
                 session.setChecked(True)
                 self.__mriSessions[index] = session
 
-
     def getComparableSessions(self, aSession):
         sessions = []
         for session in self.__mriSessions:
             if session.isComparable(aSession):
                 sessions.append(session)
         return sessions
-
-
-
-
 
     def __initializeMRISessions(self, directories = None, archiveName = None):
 
@@ -170,7 +157,6 @@ class Dcm2Toad(object):
                         sessions.append(session)
         return sessions
 
-
     def __initializeSessionFromXmlFile(self):
         """Update sessions from attribute comming from an xml document.
 
@@ -188,7 +174,6 @@ class Dcm2Toad(object):
                         if session.getDirectory() == directory:
                             session.setChecked(True)
                             self.__mriSessions[index] = session
-
 
     def __initializeEffectivePrefixs(self):
         """read various config file to initialize prefix"""
@@ -214,7 +199,6 @@ class Dcm2Toad(object):
             effectivePrefixs.append(prefix)
         return effectivePrefixs
 
-
     def writeXml(self):
 
         xmlDocument = minidom.Document()
@@ -228,7 +212,6 @@ class Dcm2Toad(object):
                 sessionsTag.appendChild(xmlhelper.createSessionNameDirectoryTag(session.getName(), session.getDirectory()))
         with open(self.__xmlFilename, 'w') as w:
             unftoadTag.writexml(w)
-
 
     def updateEffectivePrefixValues(self, dummySession):
         """ Utility function that ask users if they want to change images prefix
@@ -260,7 +243,6 @@ class Dcm2Toad(object):
                 break
         return dummySession
 
-
     def __validateToadDependencies(self):
         """verify environments variables and lib importations for prior utilisation
             program will exit if those conditions are not meet
@@ -289,7 +271,6 @@ class Dcm2Toad(object):
             softwaresTags.appendChild(xmlhelper.createSoftwareNameVersionTag('mrconvert', version))
 
         return softwaresTags
-
 
     def selectASessions(self, question):
         """Ask user to choose a session from a list of session
@@ -330,7 +311,6 @@ class Dcm2Toad(object):
             return sessionmri.SessionMRI(self.__mriSessions[int(choice)-1]), False
         else:
             sys.exit()
-
 
     def selectASequences(self, mriSession, prefix, question):
         """Ask user to choose a sequences from a session
@@ -382,7 +362,6 @@ class Dcm2Toad(object):
                 return value
         return False
 
-
     def selectSequences(self, mriSession):
         for index, prefix in enumerate(self.__effectivePrefixs):
             sequence = self.selectASequences(self.getMriSessions(mriSession), prefix, "Please select the {} image\n".format(prefix.getDescription()))
@@ -390,13 +369,11 @@ class Dcm2Toad(object):
                 mriSession.appendSequence(sequence)
         return mriSession
 
-
     def askToConvertComparableSessions(self, sessions):
         message = "Warning: thoses subjects seem\'s to share exactly the same layout?:\n\n    {} "\
             .format(",\n    ".join([session.getName() for session in sessions]))
         self.__printQuestion()
         return util.displayYesNoMessage(message, "\nConvert them all at the same time (y or n)? Default y :", "yes")
-
 
     def __printQuestion(self, question=None):
         """Print user friendly message into prompts
@@ -407,7 +384,6 @@ class Dcm2Toad(object):
         print("\n\n"+45*"-")
         if question is not None:
             print question
-
 
     def updateName(self, sessionOrSessions):
         """Ask user to define a new name for each sessions submit for conversion
@@ -437,7 +413,6 @@ class Dcm2Toad(object):
                 sessions.append(__changeSessionName(session))
             return sessions
 
-
 if __name__ == '__main__':
 
     #@TODO test optionnal config file location
@@ -446,7 +421,7 @@ if __name__ == '__main__':
     interface = Dcm2Toad()
     converter = converter.Converter(interface.getArguments())
 
-    while(True):
+    while True:
         copyOfChooseSession, exitAfterConversion = interface.selectASessions("Please choose a session to convert")
         comparableSessions = interface.getComparableSessions(copyOfChooseSession)
         copyOfChooseSession = interface.selectSequences(copyOfChooseSession)

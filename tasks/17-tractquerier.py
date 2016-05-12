@@ -13,6 +13,9 @@ class Tractquerier(GenericTask):
             'tractographymrtrix', 'qa')
         self.setCleanupBeforeImplement(False)
         self.dirty = True
+        self.defaultQuery = True
+
+    def implement(self):
 
         target_queries = self.getPreparationImage('queries', None, 'qry')  # Get queries
         target_dict = self.getPreparationImage('tq_dict', None, 'qry')  # Get queries dictionnary
@@ -22,8 +25,6 @@ class Tractquerier(GenericTask):
         else:
             self.defaultQuery = False
 
-
-    def implement(self):
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         nbDirections = mriutil.getNbDirectionsFromDWI(dwi)  # Get number of directions
 
@@ -37,7 +38,7 @@ class Tractquerier(GenericTask):
         self.__tractQuerier(self.tractographyTrk, atlasResample, self.workingDir, qryFile)  # Run tract_querier
 
     def __getTractography(self, nbDirections):
-        if nbDirections <= 45:
+        if nbDirections <= 45 and not self.get('tractographymrtrix', 'forceHardi'):
             postfixTractography = 'tensor_prob'
         else:
             postfixTractography = 'hardi_prob'
@@ -100,7 +101,7 @@ class Tractquerier(GenericTask):
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         nbDirections = mriutil.getNbDirectionsFromDWI(dwi)  # Get number of directions
 
-        if nbDirections <= 45:
+        if nbDirections <= 45 and not self.get('tractographymrtrix', 'forceHardi'):
             postfixTractography = 'tensor_prob'
         else:
             postfixTractography = 'hardi_prob'
@@ -120,7 +121,7 @@ class Tractquerier(GenericTask):
         nbDirections = mriutil.getNbDirectionsFromDWI(dwi)  # Get number of directions
 
         # Which tractography
-        if nbDirections <= 45:
+        if nbDirections <= 45 and not self.get('tractographymrtrix', 'forceHardi'):
             postfixTractography = 'tensor_prob'
         else:
             postfixTractography = 'hardi_prob'
