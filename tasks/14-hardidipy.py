@@ -36,7 +36,7 @@ class HardiDipy(GenericTask):
 
 
     def __produceMetrics(self, source, bValsFile, bVecsFile, mask):
-        self.info("Starting tensors creation from dipy on {}".format(source))
+        self.info("Starting fODF creation from dipy on {}".format(source))
 
         dwiImage = nibabel.load(source)
         maskImage = nibabel.load(mask)
@@ -46,6 +46,9 @@ class HardiDipy(GenericTask):
         dwiData = dipy.segment.mask.applymask(dwiData, maskData)
 
         gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
+        self.info('WARNING: We need to flip the x direction due to MRtrix new way to extract bvecs')
+        gradientTable.gradients = gradientTable.gradients * numpy.array([-1,1,1])
+
         sphere = dipy.data.get_sphere(self.get("triangulated_spheres"))
 
         response, ratio = dipy.reconst.csdeconv.auto_response(gradientTable, dwiData, roi_radius=10, fa_thr=0.7)
