@@ -65,6 +65,7 @@ class Toadinfo(DicomParser):
             config.set('methodology', 'dwi_flipangle', self.getFlipAngle())
             config.set('methodology', 'dwi_voxelsize', self.getVoxelSize())
             config.set('methodology', 'dwi_matrixsize', self.getMatrixSize())
+            config.set('methodology', 'dwi_numberslices', self.getNumberSlices())
             config.set('methodology', 'dwi_fov', self.getFOV())
             config.set('methodology', 'dwi_studyUID', self.getStudyUID())
 
@@ -93,6 +94,7 @@ class Toadinfo(DicomParser):
             config.set('methodology', 't1_flipangle', self.getFlipAngle())
             config.set('methodology', 't1_voxelsize', self.getVoxelSize())
             config.set('methodology', 't1_matrixsize', self.getMatrixSize())
+            config.set('methodology', 't1_numberslices', self.getNumberSlices())
             config.set('methodology', 't1_fov', self.getFOV())
             config.set('methodology', 't1_studyUID', self.getStudyUID())
 
