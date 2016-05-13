@@ -53,5 +53,7 @@ Ignore tensordipy task: **not recommended**
 
 - Basser, P. J., Mattiello, J., & LeBihan, D. (1994). MR diffusion tensor spectroscopy and imaging. *Biophysical journal, 66(1)*, 259-267. [<a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?artid=1275686&tool=pmcentrez&rendertype=abstract" target="_blank">Link to the article</a>] 
 
+- [WLS, OLS] Chung, S., Lu, Y., & Henry, R. G. (2006). Comparison of bootstrap approaches for estimation of uncertainties of DTI parameters. NeuroImage, 33(2), 531–541. doi:10.1016/j.neuroimage.2006.07.001. [<a href="http://www.sciencedirect.com/science/article/pii/S1053811906007403" target="_blank">Link to the article</a>]
 
+- [NLLS, RE] Chang, L.-C., Jones, D. K., & Pierpaoli, C. (2005). RESTORE: robust estimation of tensors by outlier rejection. Magnetic Resonance in Medicine, 53(5), 1088–95. doi:10.1002/mrm.20426 [<a href="http://onlinelibrary.wiley.com/doi/10.1002/mrm.20426/epdf" target="_blank">Link to the article</a>] 
 
