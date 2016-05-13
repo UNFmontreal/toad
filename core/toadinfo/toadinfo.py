@@ -63,7 +63,7 @@ class Toadinfo(DicomParser):
             config.set('methodology', 'dwi_tr', self.getRepetitionTime())
             config.set('methodology', 'dwi_te', self.getEchoTime())
             config.set('methodology', 'dwi_flipangle', self.getFlipAngle())
-            config.set('methodology', 'dwi_voxesize', self.getVoxelSize())
+            config.set('methodology', 'dwi_voxelsize', self.getVoxelSize())
             config.set('methodology', 'dwi_matrixsize', self.getMatrixSize())
             config.set('methodology', 'dwi_fov', self.getFOV())
             config.set('methodology', 'dwi_studyUID', self.getStudyUID())
