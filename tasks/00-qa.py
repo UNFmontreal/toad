@@ -79,6 +79,10 @@ class QA(GenericTask):
         for key in methodologyKeys:
             tags[key] = self.__configGet('methodology', key)
 
+        # Special case for 3T Tim Trio
+        if tags['magneticfieldstrenght'] == '3' and tags['mrmodel'] == 'TrioTim' and tags['number_array_coil'] == '4':
+            tags['number_array_coil'] = 12
+
         # ----------------------------------------------------
         # PREPROCESSING
         # ----------------------------------------------------
