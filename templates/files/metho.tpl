@@ -4,7 +4,7 @@
 a {{number_array_coil}}-channel head coil and a {{magneticfieldstrenght}}T {{manufacturer}} {{mrmodel}} magnetic resonance
 imaging system (T1: TR= {{t1_tr}} ms, TE = {{t1_te}} ms, TI = {{t1_ti}} ms, Flip Angle =
 {{t1_flipangle}} &deg;, {{t1_slices}} slices, FoV = {{t1_fov}} mm<sup>2</sup>, matrix size = {{t1_mat}}, voxel size = {{t1_voxelsize}}
- mm<sup>3</sup>; DWI: TR = {{dwi_tr}} ms, TE = {{dwi_te}} ms, Flip Angle = {{dwiflipangle}} &deg;, voxel size:
+ mm<sup>3</sup>; DWI: TR = {{dwi_tr}} ms, TE = {{dwi_te}} ms, Flip Angle = {{dwi_flipangle}} &deg;, voxel size:
 {{dwi_voxelsize}} mm<sup>3</sup>, no gap). The DWI corresponded to a high angular resolution
 diffusion MRI (HARDI) acquisition using spin echo EPI diffusion-encoded
 images was performed along {{dwi_numdirections}} independent directions, with b-value of {{dwi_bvalue}}
