@@ -57,6 +57,8 @@ class Correction(GenericTask):
 
         [dwi, b0, b0AP, b0PA] = self.__oddEvenNumberOfSlices(dwi, b0, b0AP, b0PA)
 
+        self.set('correctionMethod', None)
+
         if b0AP is False or b0PA is False:
             topupBaseName = None
             b0Image = b0
@@ -74,6 +76,7 @@ class Correction(GenericTask):
             [topupBaseName, topupImage] = self.__topup(concatenateB0Image, acqpTopup, self.get('b02b0_filename'))
             b0Image = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
             self.__topupCorrection = True
+            self.set('correctionMethod', 'topup')
 
         self.info("create a suitable mask for the dwi")
         extraArgs = " -dof 6 "  # same subject
@@ -109,6 +112,7 @@ class Correction(GenericTask):
             # OutputImage is now used for fieldmap correction
             outputImage = self.__computeFieldmap(outputImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
             self.__fieldmapCorrection = True
+            self.set('correctionMethod', 'fieldmap')
 
         # Produce a valid b0 and mask for QA
         b0Corrected = self.buildName(b0, 'corrected')
@@ -513,7 +517,7 @@ class Correction(GenericTask):
 
     def meetRequirement(self):
 
-        images = Images((self.getCorrectionImage("dwi", 'corrected'), 'corrected'),  # Doesnt make sense ??
+        images = Images((self.getDenoisingImage("dwi", 'denoise'), 'denoise'),
                         (self.getPreparationImage("dwi"), 'diffusion weighted'))
 
         if not images.isAtLeastOneImageExists():
