@@ -74,7 +74,7 @@ class QA(GenericTask):
         methodologyKeys = [
                 'manufacturer', 'magneticfieldstrenght', 'mrmodel',
                 't1_tr', 't1_te', 't1_ti', 't1_flipangle', 't1_fov', 't1_mat',
-                't1_slices', 't1_voxelsize', 'dwi_tr', 'dwi_te', 'dwiflipangle',
+                't1_slices', 't1_voxelsize', 'dwi_tr', 'dwi_te', 'dwi_flipangle',
                 'dwi_voxelsize', 'dwi_numdirections', 'dwi_bvalue']
         for key in methodologyKeys:
             tags[key] = self.__configGet('methodology', key)
