@@ -52,6 +52,7 @@ def __parseArguments():
         Then a subject completed will look like this
         sujN--\\
               |- 00-backup
+              |- 00-outputs
               |- 00-qa
               |- 01-preparation
               |- 02-parcellation
@@ -69,8 +70,9 @@ def __parseArguments():
               |- 14-hardidipymrtrix
               |- 15-tractographymrtrix
               |- 16-tractographydipy
-              |- 17-snr
-              |- 18-outputs
+              |- 17-tractquerier
+              |- 18-tractfiltering
+              |- 19-tractometry           
               |- 99-logs
 
 
