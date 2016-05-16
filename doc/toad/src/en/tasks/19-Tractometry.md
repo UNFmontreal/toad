@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | tractometry                            |
 |**Goal**        | Remove outliers |
-|**Config file** | qryDict` <br> `qryFile` <br> `ignore`|
+|**Config file** | `qryDict` <br> `qryFile` <br> `ignore`|
 |**Time**        | About 5 minutes                                         |
 |**Output**      | -  Each bundles extracted from tractquerier <br>|
 
