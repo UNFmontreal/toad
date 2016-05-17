@@ -3,6 +3,8 @@ $( document ).ready( function() {
 
     $( '#nav' ).load( 'menu.html' );
 
+    $( '#metho' ).load( 'metho.html' );
+
     $( "#hide-versions-href" ).hide();
 
     if ( $( "applications" ).length == 0) {
@@ -19,19 +21,5 @@ $( document ).ready( function() {
         */
         $("#timestamp").html("<strong>Toad launch at:</strong> "+$formatTimestamp);
         $("versions").html($lastApplicationTag);
-        $("versions").hide();
-        $("#show-versions-href" ).show();
         }
-
-    $("#show-versions-href" ).click(function( event ) {
-        $("versions").show();
-        $( this ).hide();
-        $("#hide-versions-href" ).show();
-        });
-
-    $("#hide-versions-href" ).click(function( event ) {
-        $("versions").hide();
-        $("#show-versions-href" ).show();
-        $(this).hide();
-        });
     });
