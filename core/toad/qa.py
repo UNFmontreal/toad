@@ -2,6 +2,7 @@
 import os
 import shutil
 import xml.dom.minidom as minidom
+from jinja2 import Environment, FileSystemLoader
 from lib import qautil
 from lib import util
 
@@ -121,8 +122,11 @@ class Qa(object):
                 subject, taskInfo, taskName, parseHtmlTables, parseVersionTables
                 Script fills missing keys
         """
-        versions = minidom.parse(os.path.join(
-                self.logDir, self.get('general','versions_file_name')))
+        versions = ''
+        if self.getName() == 'qa':
+            versions = minidom.parse(os.path.join(
+                    self.logDir, self.get('general','versions_file_name')))
+            versions = versions.toprettyxml()
 
         if htmlLink == None:
             htmlLink = self.qaHtml
@@ -134,7 +138,7 @@ class Qa(object):
                 'taskName': self.getName(),
                 'taskInfo': '',
                 'parseHtmlTables': '',
-                'parseVersionTables': versions.toprettyxml()
+                'parseVersionTables': versions,
                 }
         for key, value in baseTags.iteritems():
             if not tags.has_key(key): tags[key] = value
@@ -165,6 +169,7 @@ class Qa(object):
         #Create temporary html
         message = "Task is being processed. Refresh to check completion."
         self.createTaskHtml({'taskInfo':message})
+
 
     def createQaReport(self, images):
         """create html report for a task with qaSupplier implemented
@@ -226,3 +231,91 @@ class Qa(object):
                 'parseHtmlTables':tablesCode
                 }
         self.createTaskHtml(tags)
+
+
+    def createMethoHtml(self):
+        templateDir = os.path.join(self.toadDir, 'templates', 'files')
+        jinja2Env = Environment(
+                loader=FileSystemLoader(templateDir), trim_blocks=True)
+        tpl = jinja2Env.get_template('metho.tpl')
+        tags_metho = self.__getTags()
+        htmlCode = tpl.render(**tags_metho)
+        util.createScript(os.path.join(self.qaDir,'metho.html'), htmlCode)
+
+
+    def configGet(self, section, key):
+        try:
+            value = self.config.get(section, key)
+        except:
+            value = None
+        return value
+
+
+    def __getTags(self):
+        tags = {}
+
+        # ----------------------------------------------------
+        # PREPARATION SECTION
+        # ----------------------------------------------------
+        denoisingKeys = ['number_array_coil']
+        for key in denoisingKeys:
+            tags[key] = self.configGet('denoising', key)
+
+        methodologyKeys = [
+                'manufacturer', 'magneticfieldstrenght', 'mrmodel',
+                't1_tr', 't1_te', 't1_ti', 't1_flipangle', 't1_fov', 't1_matrixsize`',
+                't1_slices', 't1_voxelsize', 'dwi_tr', 'dwi_te', 'dwi_flipangle',
+                'dwi_voxelsize', 'dwi_numdirections', 'dwi_bvalue']
+        for key in methodologyKeys:
+            tags[key] = self.configGet('methodology', key)
+
+        # Special case for 3T Tim Trio
+        if tags['magneticfieldstrenght'] == '3' and tags['mrmodel'] == 'TrioTim' and tags['number_array_coil'] == '4':
+            tags['number_array_coil'] = 12
+
+        # ----------------------------------------------------
+        # PREPROCESSING
+        # ----------------------------------------------------
+        # Add the FSL references
+        refs = [self.configGet('references', 'fsl')]
+        tags['fsl_vers']= None # parser.get('', '')
+        tags['fsl_ref'] = "[{}]".format(len(refs))
+
+        # Prepare the text for the denoising section
+        if self.configGet('denoising', 'ignore') in ['True', 'true']:
+            tags['denoising'] = False
+        else:
+            tags['denoising'] = True
+            method = self.configGet('denoising', 'algorithm')
+            tags['algorithm'] = method
+            refs.append(self.configGet('references', method))
+            tags['denoising_ref'] = len(refs)
+
+        # Prepare the text for the correction section
+        if self.configGet('correction', 'ignore') in ['True', 'true']:
+            tags['correction'] = False
+        else:
+            tags['correction'] = True
+            tags['correctionMethod'] = self.configGet('correction', 'correctionMethod')
+
+        # Add the trilinear interpolation references
+        refs.append(self.configGet('references', 'tri1'))
+        refs.append(self.configGet('references', 'tri2'))
+        tags['tri_ref']= "[{}, {}]".format(len(refs)-1, len(refs))
+
+        # Add the FDT reference
+        refs.append(self.configGet('references', 'fdt'))
+        tags['fdt_ref']= "[{}]".format(len(refs))
+
+        # Add Freesurfer segmentation/label references
+        refs.append(self.configGet('references', 'segfreesurfer'))
+        refs.append(self.configGet('references', 'labfreesurfer'))
+        tags['seg_ref']= "[{}, {}]".format(len(refs)-1, len(refs))
+
+        refTxt = []
+        for idx, ref in enumerate(refs):
+            refTxt.append("<p>[{}] {}</p></ br>".format(idx+1, ref))
+        tags['references']= refTxt
+
+        return tags
+

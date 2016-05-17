@@ -29,24 +29,10 @@
 
     <div id="wrapper">
       <h1>$taskName</h1>
-    
-        <div id="timestamp"></div>
-     
-        <div class='taskInfo'>$taskInfo</div>
-
-        <section id="results">
-          $parseHtmlTables
-        </section>
-
-        <a href="#" id="show-versions-href">Show Software Versions</a>
-        <a href="#" id="hide-versions-href">Hide Software Versions</a>
-
-        <versions></versions>
-
-        <div hidden id="dataVersions">
-          $parseVersionTables
-        </div>
-
+      <div id="timestamp"></div>
+      <div class='taskInfo'>$taskInfo</div>
+      <section id="results">$parseHtmlTables</section>
+      <div id="dataVersions">$parseVersionTables</div>
     </div>
     <footer></footer>
   </body>

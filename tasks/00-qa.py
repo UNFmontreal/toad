@@ -38,8 +38,8 @@ class QA(GenericTask):
             util.copy(fileLink, self.workingDir, fileName)
 
         #Create index.html
-        self.createTaskHtml({}, 'index.html')
-
+        self.createTaskHtml(
+                {'parseHtmlTables':'<div id="metho">Methodology when correction step done</div>'}, 'index.html')
 
     def meetRequirement(self, result=True):
         """
