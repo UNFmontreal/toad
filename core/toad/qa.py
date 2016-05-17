@@ -123,7 +123,6 @@ class Qa(object):
                 Script fills missing keys
         """
         versions = ''
-        print self.getName()
         if self.getName() == 'qa':
             versions = minidom.parse(os.path.join(
                     self.logDir, self.get('general','versions_file_name')))
