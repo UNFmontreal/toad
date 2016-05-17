@@ -18,8 +18,6 @@ matplotlib.use('Agg')
 class Correction(GenericTask):
     def __init__(self, subject):
         GenericTask.__init__(self, subject, 'preparation', 'parcellation', 'denoising', 'qa')
-        self.__topupCorrection = False
-        self.__fieldmapCorrection = False
 
     def implement(self):
 
@@ -75,7 +73,6 @@ class Correction(GenericTask):
             # Run topup on concatenate B0 image
             [topupBaseName, topupImage] = self.__topup(concatenateB0Image, acqpTopup, self.get('b02b0_filename'))
             b0Image = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
-            self.__topupCorrection = True
             self.set('correctionMethod', 'topup')
 
         self.info("create a suitable mask for the dwi")
@@ -111,7 +108,6 @@ class Correction(GenericTask):
         if mag and phase and not self.__topupCorrection:
             # OutputImage is now used for fieldmap correction
             outputImage = self.__computeFieldmap(outputImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
-            self.__fieldmapCorrection = True
             self.set('correctionMethod', 'fieldmap')
 
         # Produce a valid b0 and mask for QA
@@ -573,13 +569,16 @@ class Correction(GenericTask):
 
         # Information on distorsion correction
         information = "Eddy movement corrections were applied to the images "
-        if self.__topupCorrection:
+        correctionMethod = self.get('correctionMethod')
+        if correctionMethod == 'topup':
             information += "and distortion corrections were conducted on the " \
                            "AP and PA images."
-        elif self.__fieldmapCorrection:
+        elif correctionMethod == 'fieldmap':
             information += "using the fieldmap images."
         else:
             information += "with no distortion correction"
         qaImages.setInformation(information)
+
+        self.createMethoHtml()
 
         return qaImages

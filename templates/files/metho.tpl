@@ -19,7 +19,7 @@ s/mm<sup>2</sup>.</p>
 {% endif %}
 
 {% if correction %}
-<p>DWI images were corrected using the {{correction_method}} method.</p>
+<p>DWI images were corrected using {{correctionMethod}} method.</p>
 {% else %}
 <p>DWI images were not corrected.</p>
 {% endif %}
