@@ -263,7 +263,7 @@ class Qa(object):
 
         methodologyKeys = [
                 'manufacturer', 'magneticfieldstrenght', 'mrmodel',
-                't1_tr', 't1_te', 't1_ti', 't1_flipangle', 't1_fov', 't1_mat',
+                't1_tr', 't1_te', 't1_ti', 't1_flipangle', 't1_fov', 't1_matrixsize`',
                 't1_slices', 't1_voxelsize', 'dwi_tr', 'dwi_te', 'dwi_flipangle',
                 'dwi_voxelsize', 'dwi_numdirections', 'dwi_bvalue']
         for key in methodologyKeys:
