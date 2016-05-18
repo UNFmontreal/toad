@@ -34,7 +34,10 @@ class Upsampling(GenericTask):
         bVecs = util.symlink(bVecs, self.workingDir)
         bEnc = util.symlink(bEnc, self.workingDir)
 
-        dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
+        voxelSize = self.get('methodology','t1_voxelsize') # Get t1 voxel size to upsample
+        voxelSize = voxelSize.translate(None, '[],') # Remove specific caracteres 
+
+        dwiUpsample= self.__upsampling(dwi, voxelSize, self.buildName(dwi, "upsample"))
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
 
