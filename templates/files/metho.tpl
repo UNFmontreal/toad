@@ -9,7 +9,7 @@ Single shot diffusion weighted spin echo-planar imaging data was acquired using 
 <h3>Prepocessing</h3>
 
 <p>
-{% if not denoising_ignore %}First, DWI were denoised using {{algorithm}} method [{{denoising_ref}}].{%endif%}{%if not correction_ignore and not denoising_ignore%} Then, they {%elif not correction_ignore%} First, DWI{%endif%}{%if not correction_ignore%} were corrected using {{denoising_algo}} method {{denoising_ref}}.{%endif%}{%if not correction_ignore%}Gradient directions were corrected corresponding to motion correction parameters.{%endif%}{%if not correction_ignore%} Motion-corrected images {%else%} DWI {%endif%}were upsampled using trilinear interpolation (upsampled to anatomical resolution).
+{% if not denoising_ignore %}First, DWI were denoised using {{denoising_algo}} method [{{denoising_ref}}].{%endif%}{%if not correction_ignore and not denoising_ignore%} Then, they {%elif not correction_ignore%} First, DWI{%endif%}{%if not correction_ignore%} were corrected using {{correction_algo}} method {{correction_ref}}.{%endif%}{%if not correction_ignore%}Gradient directions were corrected corresponding to motion correction parameters.{%endif%}{%if not correction_ignore%} Motion-corrected images {%else%} DWI {%endif%}were upsampled using {{upsampling_interp}} interpolation (upsampled to anatomical resolution).
 
 Anatomical image went through Freesurfer's pipeline {{seg_ref}} in order to be used in the Anatomically-Constrained Tractography (ACT). T1 image was registered to the DWI {%if correction%}motion-corrected {%endif%}images. 
 
@@ -18,9 +18,9 @@ Anatomical image went through Freesurfer's pipeline {{seg_ref}} in order to be u
 {%if not hardimrtrix_ignore or not hardidipy_ignore%}Fiber orientation distribution function (fODF) reconstruction was done using{%if not hardidipy_ignore%} DIPY{%elif not hardimrtrix_ignore%} MRtrix.{%endif%}{%if not hardimrtrix_ignore and not hardidipy_ignore%} and using MRtrix.{%endif%}{%endif%}
 
 
-{%if not hardidipy_ignore%}MRtrix method: The response function for a single fibre population was estimated using {{hardidipy_fitMethod}} algorithm {{hardidipy_fitMethodAlgorithm}}. This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) {{hardidipy_reconstructionMethod_ref}} with a maximum spherical harmonic order lmax of {{hardidipy_lmax}}.{%endif%}
+{%if not hardidipy_ignore%}MRtrix method: The response function for a single fibre population was estimated using '{{hardidipy_algorithmresponsefunction}}' algorithm {{hardidipy_algorithmresponsefunction_ref}}. This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) {{hardidipy_reconstructionmethod_ref}} with a maximum spherical harmonic order lmax of {{hardidipy_lmax}}.{%endif%}
 
-{%if not hardimrtrix_ignore%}MRtrix method: The response function for a single fibre population was estimated using {{hardimrtrix_fitMethod}} algorithm {{hardimrtrix_algorithResponseFunction}}. This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) {{hardimrtrix_reconstructionMethod_ref}} with a maximum spherical harmonic order lmax of {{hardimrtrix_lmax}}.{%endif%}
+{%if not hardimrtrix_ignore%}MRtrix method: The response function for a single fibre population was estimated using '{{hardimrtrix_algorithmresponsefunction}}' algorithm {{hardimrtrix_algorithmresponsefunction_ref}}. This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) {{hardimrtrix_reconstructionmethod_ref}} with a maximum spherical harmonic order lmax of {{hardimrtrix_lmax}}.{%endif%}
 
 
 TractographyBlabla tractography, tractometer, tractofiltering

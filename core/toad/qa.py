@@ -5,7 +5,7 @@ import xml.dom.minidom as minidom
 from jinja2 import Environment, FileSystemLoader
 from lib import qautil
 from lib import util
-
+import bibtexparser
 
 __author__ = "Christophe Bedetti"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -22,6 +22,10 @@ class Qa(object):
                 self.config.get('qa', 'index_template'))
         self.qaHtml = os.path.join(
                 self.qaDir, '{}.html'.format(self.getName()))
+        self.bibtex = os.path.join(
+                self.toadDir, 'templates',
+                self.config.get('qa', 'bibtex'))
+
 
     def plot3dVolume(
             self, source, edges=None, segOverlay=None,
@@ -288,61 +292,19 @@ class Qa(object):
         methodology = self.configFillSection('methodology') # Fill tags with config file informations
         denoising = self.configFillSection('denoising', True)
         correction = self.configFillSection('correction', True)
+        upsampling = self.configFillSection('upsampling', True)
         tensorfsl = self.configFillSection('tensorfsl', True)
         tensordipy = self.configFillSection('tensordipy', True)
         tensormrtrix = self.configFillSection('tensormrtrix', True)
         hardimrtrix = self.configFillSection('hardimrtrix', True)
         hardidipy = self.configFillSection('hardidipy', True)
 
-        tags = util.merge_dicts(methodology, denoising, denoising, correction, tensorfsl, tensordipy, tensormrtrix, hardimrtrix, hardidipy)
+        tags = util.merge_dicts(methodology, denoising, denoising, correction, upsampling, 
+                                tensorfsl, tensordipy, tensormrtrix, hardimrtrix, hardidipy)
 
         # Special case for 3T Tim Trio
         if tags['magneticfieldstrenght'] == '3' and tags['mrmodel'] == 'TrioTim' and tags['denoising_number_array_coil'] == '4':
             tags['denoising_number_array_coil'] = 12
-
-        # ---------------------------------------------------
-        # PREPROCESSING
-        # ----------------------------------------------------
-        # Add the FSL references
-        refs = [self.configGet('references', 'fsl')]
-        tags['fsl_vers']= None # parser.get('', '')
-        tags['fsl_ref'] = "[{}]".format(len(refs))
-
-        # Prepare the text for the denoising section
-        if self.configGet('denoising','ignore').lower() is True:
-            tags['denoising'] = False
-        else:
-            tags['denoising'] = True
-            method = self.configGet('denoising', 'algorithm')
-            tags['algorithm'] = method
-            refs.append(self.configGet('references', method))
-            tags['denoising_ref'] = len(refs)
-
-        # Prepare the text for the correction section
-        if self.configGet('correction', 'ignore') in ['True', 'true']:
-            tags['correction'] = False
-        else:
-            tags['correction'] = True
-            tags['correctionMethod'] = self.configGet('correction', 'correctionMethod')
-
-        # Add the trilinear interpolation references
-        refs.append(self.configGet('references', 'tri1'))
-        refs.append(self.configGet('references', 'tri2'))
-        tags['tri_ref']= "[{}, {}]".format(len(refs)-1, len(refs))
-
-        # Add the FDT reference
-        refs.append(self.configGet('references', 'fdt'))
-        tags['fdt_ref']= "[{}]".format(len(refs))
-
-        # Add Freesurfer segmentation/label references
-        refs.append(self.configGet('references', 'segfreesurfer'))
-        refs.append(self.configGet('references', 'labfreesurfer'))
-        tags['seg_ref']= "[{}, {}]".format(len(refs)-1, len(refs))
-
-        refTxt = []
-        for idx, ref in enumerate(refs):
-            refTxt.append("<p>[{}] {}</p></ br>".format(idx+1, ref))
-        tags['references']= refTxt
 
         return tags
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from core.toad.generictask import GenericTask
 from lib.images import Images
+from lib.mriutil import getlmax
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -20,6 +21,8 @@ class HardiMrtrix(GenericTask):
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
         wmMask = self.getMaskingImage('tt5', ['resample','wm', 'mask'])
+
+        self.set('lmax', getlmax(dwi))
 
         outputDwi2Response = self.__dwi2response(dwi, wmMask, bFile)
 
@@ -85,7 +88,6 @@ class HardiMrtrix(GenericTask):
         cmd = "fixel2voxel {} count {} -nthreads {} -quiet".format(source, tmp,  self.getNTreadsMrtrix())
         self.launchCommand(cmd)
         return self.rename(tmp, target)
-        
 
     def isIgnore(self):
         return self.get("ignore")

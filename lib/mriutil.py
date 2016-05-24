@@ -626,6 +626,18 @@ def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, ex
     util.launchCommand(cmd)
     return target
 
+def getlmax(dwi):
+
+    numDirs = getNbDirectionsFromDWI(dwi)
+    order = 2
+    numParameters = (order + 1)*(order + 2) / 2
+    while numParameters < numDirs
+        order = order + 2
+        numParameters = (order + 1)*(order + 2) / 2
+
+    order -= 2
+
+    return order
 
 def computeNoiseMask(source, target):
     brainImage = nibabel.load(source)
