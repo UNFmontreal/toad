@@ -60,7 +60,7 @@ class TractographyMrtrix(GenericTask):
 
                 self.set('algorithm', 'determinist')  # Set Method tractography Det
 
-            if 'probabilistic' in self.get('algorithm'):
+            elif 'probabilistic' in self.get('algorithm'):
                 tckProb = self.__tckgenTensor(
                         dwi, self.buildName(dwi, 'tensor_prob', 'tck'),
                         mask, tt5, seed_gmwmi, bFile, 'Tensor_Prob')
@@ -75,32 +75,31 @@ class TractographyMrtrix(GenericTask):
                 self.set('algorithm', 'probabilist')  # Set Method tractography Prob
 
         else:
-            if 'hardi' in self.get('algorithm'):
-                csd =  self.getHardimrtrixImage('dwi', 'csd')
-                hardiTck = self.__tckgenHardi(
-                        csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
-                hardiTrk = mriutil.tck2trk(
-                        hardiTck, norm, self.buildName(hardiTck, None, 'trk'))
-                hardiTckRoi = self.__tckedit(
-                        hardiTck, mask253, self.buildName(hardiTck, 'roi', 'tck'))
-                tckgenRoiTrk = mriutil.tck2trk(
-                        hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
-                self.__tckgenRoiTrk = tckgenRoiTrk
+            csd =  self.getHardimrtrixImage('dwi', 'csd')
+            hardiTck = self.__tckgenHardi(
+                    csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
+            hardiTrk = mriutil.tck2trk(
+                    hardiTck, norm, self.buildName(hardiTck, None, 'trk'))
+            hardiTckRoi = self.__tckedit(
+                    hardiTck, mask253, self.buildName(hardiTck, 'roi', 'tck'))
+            tckgenRoiTrk = mriutil.tck2trk(
+                    hardiTckRoi, norm , self.buildName(hardiTckRoi, None, 'trk'))
+            self.__tckgenRoiTrk = tckgenRoiTrk
 
-                self.set('methodReconstruction', 'hardi')
-                self.set('algorithm', 'probabilist')
+            self.set('methodReconstruction', 'hardi')
+            self.set('algorithm', 'probabilist')
 
-                if 'sift' in self.get('algorithm'):
-                    tcksift = self.__tcksift(hardiTck, csd)
-                    tcksiftTrk = mriutil.tck2trk(
-                            tcksift, norm, self.buildName(tcksift, None, 'trk'))
-                    tcksiftRoi = self.__tckedit(
-                            tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
-                    tcksiftRoiTrk = mriutil.tck2trk(
-                            tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
-                    self.__tcksiftRoiTrk = tcksiftRoiTrk
+            if 'sift' in self.get('algorithm'):
+                tcksift = self.__tcksift(hardiTck, csd)
+                tcksiftTrk = mriutil.tck2trk(
+                    tcksift, norm, self.buildName(tcksift, None, 'trk'))
+                tcksiftRoi = self.__tckedit(
+                    tcksift, mask253, self.buildName(tcksift, 'roi', 'tck'))
+                tcksiftRoiTrk = mriutil.tck2trk(
+                    tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
+                self.__tcksiftRoiTrk = tcksiftRoiTrk
 
-                    self.set('siftmethod', True)  # Set Method tractography
+                self.set('siftmethod', True)  # Set Method tractography
 
     def __tckedit(self, source, roi, target, downsample= "2"):
         """ perform various editing operations on track files.

@@ -250,20 +250,6 @@ class Qa(object):
             value = None
         return value
 
-    def configFillAll(self):
-
-        tags = {}
-
-        for section in self.config.sections():
-            items = self.config.items(section)
-            tmpDict = {}
-            for item in items:
-                tmpDict[item[0]] = item[1]
-
-            tags[section] = tmpDict
-
-        return tags
-
     def configFillSection(self, section, withName = False):
         tags = {}
         items = self.config.items(section)
@@ -274,8 +260,10 @@ class Qa(object):
             prefix = ''
 
         for item in items:
-            if item[1]==('True' or 'False'):
-                tags[prefix + item[0]] = item[1]
+            if item[1].lower() == 'true':
+                tags[prefix + item[0]] = True
+            elif item[1].lower() == 'false':
+                tags[prefix + item[0]] = False
             elif 'voxelsize' in item[0].lower():
                 tags[prefix + item[0] + '_1'] = float(item[1].translate(None,'[],').split()[0])
                 tags[prefix + item[0] + '_2'] = float(item[1].translate(None,'[],').split()[1])
@@ -295,17 +283,6 @@ class Qa(object):
 
         return tags
 
-    def merge_dicts(self, *dict_args):
-        '''
-        Given any number of dicts, shallow copy and merge into a new dict,
-        precedence goes to key value pairs in latter dicts.
-        '''
-        result = {}
-        for dictionary in dict_args:
-            result.update(dictionary)
-        return result
-
- 
     def __getTags(self):
 
         methodology = self.configFillSection('methodology') # Fill tags with config file informations
@@ -314,8 +291,10 @@ class Qa(object):
         tensorfsl = self.configFillSection('tensorfsl', True)
         tensordipy = self.configFillSection('tensordipy', True)
         tensormrtrix = self.configFillSection('tensormrtrix', True)
+        hardimrtrix = self.configFillSection('hardimrtrix', True)
+        hardidipy = self.configFillSection('hardidipy', True)
 
-        tags = self.merge_dicts(methodology, denoising, denoising, correction, tensorfsl, tensordipy, tensormrtrix)
+        tags = util.merge_dicts(methodology, denoising, denoising, correction, tensorfsl, tensordipy, tensormrtrix, hardimrtrix, hardidipy)
 
         # Special case for 3T Tim Trio
         if tags['magneticfieldstrenght'] == '3' and tags['mrmodel'] == 'TrioTim' and tags['denoising_number_array_coil'] == '4':
