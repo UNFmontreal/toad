@@ -38,6 +38,7 @@ class GenericTask(Logger, Load, Qa):
         self.__moduleName = self.__class__.__module__.split(".")[-1]
         self.__cleanupBeforeImplement = True
         self.config = subject.getConfig()
+        self.configRunning = 0
         self.subject = subject
         self.subjectDir = self.subject.getDir()
         self.toadDir = self.config.get('arguments', 'toad_dir')
@@ -189,6 +190,9 @@ class GenericTask(Logger, Load, Qa):
             self.info("Creating {} directory".format(self.workingDir))
             os.mkdir(self.workingDir)
 
+        #Open ConfigRunning File
+        self.configRunning = open( os.path.join(self.subjectDir, '00-backup' + os.path.sep + 'configRunnin.cfg'), 'w')
+
         if self.config.has_option("arguments", "stop_before_task"):
             if (self.config.get("arguments", "stop_before_task") == self.__name or
                 self.config.get("arguments", "stop_before_task") == self.__moduleName.lower()):
@@ -198,7 +202,15 @@ class GenericTask(Logger, Load, Qa):
         util.symlink(self.getLogFileName(), self.workingDir)
         if "qaSupplier" in dir(self):
             self.updateQaMenu()
+
+
         self.implement()
+
+        # Close ConfigRunning File
+        self.config.write(self.configRunning)
+        self.configRunning.close()
+
+
         self.info("Create and supply images to the qa report ")
         if "qaSupplier" in dir(self):
             self.createQaReport(self.qaSupplier())
@@ -445,7 +457,8 @@ class GenericTask(Logger, Load, Qa):
         if len(args) < 3:
             value = self.config.set(self.getName(), args[0], args[1])
         else:
-            value = self.config.get(args[0], args[1], args[2])
+            value = self.config.set(args[0], args[1], args[2])
+
         if value in ["True", "true"]:
             return True
         elif value in ["False", "false"]:

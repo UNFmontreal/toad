@@ -40,6 +40,7 @@ class TractographyMrtrix(GenericTask):
         if self.get('step') == 'None':  # If step is None set Step = voxelSize/2
             voxelSize = [float(x) for x in self.get('methodology', 't1_voxelsize')[1:-1].split(',')]
             self.set('step', str(float(voxelSize[0]) * 0.5))
+            self.set('angle', str(90 * float(self.get('step')) / float(voxelSize[0])))
 
         self.__nbDirections = mriutil.getNbDirectionsFromDWI(dwi)
         if self.__nbDirections <= 45 and not self.get('forceHardi'):
@@ -58,7 +59,7 @@ class TractographyMrtrix(GenericTask):
                         tckDetRoi, norm, self.buildName(tckDetRoi, None, 'trk'))
                 self.__tckDetRoiTrk = tckDetRoiTrk
 
-                self.set('algorithm', 'determinist')  # Set Method tractography Det
+                self.set('algorithm', 'Determinist')  # Set Method tractography Det
 
             elif 'probabilistic' in self.get('algorithm'):
                 tckProb = self.__tckgenTensor(
@@ -72,7 +73,7 @@ class TractographyMrtrix(GenericTask):
                         tckProbRoi, norm , self.buildName(tckProbRoi, None, 'trk'))
                 self.__tckProbRoiTrk = tckProbRoiTrk
 
-                self.set('algorithm', 'probabilist')  # Set Method tractography Prob
+                self.set('algorithm', 'Probabilist')  # Set Method tractography Prob
 
         else:
             csd =  self.getHardimrtrixImage('dwi', 'csd')
@@ -87,9 +88,9 @@ class TractographyMrtrix(GenericTask):
             self.__tckgenRoiTrk = tckgenRoiTrk
 
             self.set('methodReconstruction', 'hardi')
-            self.set('algorithm', 'probabilist')
+            self.set('algorithm', 'Probabilist')
 
-            if 'sift' in self.get('algorithm'):
+            if self.get('sift'):
                 tcksift = self.__tcksift(hardiTck, csd)
                 tcksiftTrk = mriutil.tck2trk(
                     tcksift, norm, self.buildName(tcksift, None, 'trk'))
@@ -98,8 +99,6 @@ class TractographyMrtrix(GenericTask):
                 tcksiftRoiTrk = mriutil.tck2trk(
                     tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
                 self.__tcksiftRoiTrk = tcksiftRoiTrk
-
-                self.set('siftmethod', True)  # Set Method tractography
 
     def __tckedit(self, source, roi, target, downsample= "2"):
         """ perform various editing operations on track files.
@@ -114,7 +113,7 @@ class TractographyMrtrix(GenericTask):
         Returns:
             the output track file
         """
-        self.info("Starting tckedit creation from mrtrix on {}".format(source))
+        self.info("Startiig tckedit creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
         mriutil.tckedit(source, roi, tmp, downsample)
         return self.rename(tmp, target)
@@ -148,7 +147,7 @@ class TractographyMrtrix(GenericTask):
         cmd = "tckgen {} {} -mask {} -act {} -seed_gmwmi {} \
                 -number {} -algorithm {} -downsample {} -nthreads {} -quiet"\
                     .format(source, tmp, mask,  act, seed_gmwmi,
-                            self.get('number_tracks'), algorithm, self.get('downsample'), self.getNTreadsMrtrix())
+                            self.get('numbertracks'), algorithm, self.get('downsample'), self.getNTreadsMrtrix())
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)
@@ -184,7 +183,7 @@ class TractographyMrtrix(GenericTask):
         tmp = self.buildName(source, "tmp", "tck")
         cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} \
                     -algorithm {} -downsample {} -nthreads {} -quiet"\
-            .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'number_tracks'),
+            .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'numbertracks'),
                     algorithm, self.get('downsample'), self.getNTreadsMrtrix())
 
         if self.get('backtrack'):
@@ -333,13 +332,12 @@ class TractographyMrtrix(GenericTask):
                     ))
 
         else:
-            if 'hardi' in self.get('algorithm'):
-                images.append((
+            images.append((
                     self.getImage('dwi', 'hardi_prob', 'trk'),
                     "tckgen hardi probabilistic streamlines tractography"
                     ))
 
-            if 'sift' in self.get('algorithm'):
+            if self.get('sift'):
                 images.append((
                     self.getImage('dwi', 'tcksift', 'trk'), 'tcksift'))
 

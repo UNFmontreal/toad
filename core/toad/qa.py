@@ -188,8 +188,6 @@ class Qa(object):
                 self.toadDir, 'templates', 'files',
                 self.config.get('qa', 'table_template'))
 
-        print "createQaReport images =", images
-
         smallViewTags = [
                 '_translations',
                 '_rotations',
@@ -298,9 +296,10 @@ class Qa(object):
         tensormrtrix = self.configFillSection('tensormrtrix', True)
         hardimrtrix = self.configFillSection('hardimrtrix', True)
         hardidipy = self.configFillSection('hardidipy', True)
+        tractographymrtrix = self.configFillSection('tractographymrtrix', True)
 
         tags = util.merge_dicts(methodology, denoising, denoising, correction, upsampling, 
-                                tensorfsl, tensordipy, tensormrtrix, hardimrtrix, hardidipy)
+                                tensorfsl, tensordipy, tensormrtrix, hardimrtrix, hardidipy, tractographymrtrix)
 
         # Special case for 3T Tim Trio
         if tags['magneticfieldstrenght'] == '3' and tags['mrmodel'] == 'TrioTim' and tags['denoising_number_array_coil'] == '4':

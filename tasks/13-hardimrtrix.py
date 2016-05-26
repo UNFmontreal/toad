@@ -2,6 +2,9 @@
 from core.toad.generictask import GenericTask
 from lib.images import Images
 from lib.mriutil import getlmax
+import  tempfile
+from os import rmdir
+from os.path import exists
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -18,13 +21,19 @@ class HardiMrtrix(GenericTask):
 
         # TODO produce "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
         dwi = self.getUpsamplingImage('dwi', 'upsample')
-        bFile = self.getUpsamplingImage('grad', None, 'b')
+        bFile = self.getUpsamplingImage('grad', None, 'b') 
         mask = self.getRegistrationImage('mask', 'resample')
         wmMask = self.getMaskingImage('tt5', ['resample','wm', 'mask'])
-
+        tmpDir = tempfile.mkdtemp(prefix='tmp', dir=self.workingDir)
         self.set('lmax', getlmax(dwi))
 
-        outputDwi2Response = self.__dwi2response(dwi, wmMask, bFile)
+        try:
+            outputDwi2Response = self.__dwi2response(dwi, wmMask, bFile, tmpDir)
+        except:
+            rmdir(tmpDir)
+
+        if exists(tmpDir):
+            rmdir(tmpDir)
 
         #maskDwi2csd =  self.getImage(self.maskingDir, 'anat',['resample', 'extended', 'mask'])
         csdImage = self.__dwi2csd(dwi, outputDwi2Response, mask, bFile, self.buildName(dwi, "csd"))
@@ -34,7 +43,7 @@ class HardiMrtrix(GenericTask):
         self.__fixelPeak2nufo(fixelPeak, mask, self.buildName(dwi, 'nufo'))
 
 
-    def __dwi2response(self, source, mask, bFile):
+    def __dwi2response(self, source, mask, bFile, tmpDir):
 
         target = self.buildName(source, None, 'txt')
         tmp = self.buildName(source, "tmp",'txt')
@@ -42,8 +51,8 @@ class HardiMrtrix(GenericTask):
         self.info("Starting dwi2response creation from mrtrix on {}".format(source))
 
         if self.get('algorithmResponseFunction') == 'tournier':
-            cmd = "dwi2response -nthreads {} -quiet tournier {} {} -grad {}"\
-                .format(self.getNTreadsMrtrix(), source, tmp, bFile)
+            cmd = "dwi2response -nthreads {} -tempdir {} -quiet tournier -mask {} -grad {} {} {}"\
+                .format(self.getNTreadsMrtrix(), tmpDir, mask, bFile, source, tmp)
         else:
             self.info("This algorithm {} has not been implemented. If you want to use it please send us a message"\
                       .format(self.get('algorithmResponseFunction')))

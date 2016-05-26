@@ -631,7 +631,7 @@ def getlmax(dwi):
     numDirs = getNbDirectionsFromDWI(dwi)
     order = 2
     numParameters = (order + 1)*(order + 2) / 2
-    while numParameters < numDirs
+    while numParameters < numDirs:
         order = order + 2
         numParameters = (order + 1)*(order + 2) / 2
 

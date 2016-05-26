@@ -12,7 +12,8 @@ class Outputs(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'tensormrtrix', 'tensordipy', 'tensorfsl', 'hardidipy', 'hardimrtrix')
+        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'tensormrtrix', 'tensordipy', 'tensorfsl',
+             'hardidipy', 'hardimrtrix', 'tractographymrtrix', 'tractquerier', 'tractfiltering', 'tractometry')
         self.__finished = False
 
     def implement(self):
@@ -51,6 +52,7 @@ class Outputs(GenericTask):
                         (self.getRegistrationImage('mask', 'resample'), 'freesurfer mask resample'))
 
         #@TODO Add all metrics dependencies
+
         return images
 
 
@@ -60,3 +62,8 @@ class Outputs(GenericTask):
     def isIgnore(self):
         return self.get("ignore")
 
+    def qaSupplier(self):
+        images = Images()
+        self.createMethoHtml()
+
+        return images

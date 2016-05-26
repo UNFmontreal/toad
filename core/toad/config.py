@@ -37,7 +37,6 @@ class Config(object):
         config = ConfigParser.ConfigParser()
         config.read(self.__getConfigFiles(arguments))
 
-
         #parse command line arguments in the config file
         config.add_section('arguments')
         config.set('arguments', 'toad_dir', arguments.toadDir)
@@ -143,6 +142,11 @@ class Config(object):
                 configFile = "{}/config.cfg".format(directory)
                 if os.path.exists(configFile):
                     configFiles.append(configFile)
+
+            # Add configRunning file because every tasks
+            configFile = "{}/configRunning.cfg".format(os.path.join(arguments.subject, "00-backup"))
+            if os.path.exists(configFile):
+                configFiles.append(configFile)
 
         if arguments.config:
             for config in arguments.config:

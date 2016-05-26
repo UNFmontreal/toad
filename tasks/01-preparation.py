@@ -151,12 +151,10 @@ class Preparation(GenericTask):
             ('mag', self.plot3dVolume, 'Magnitude image'),
             ('phase', self.plot3dVolume, 'Phase image'),
             )
-        #for prefix, plotMethod, description in tags:
-        #    source = self.getImage(prefix)
-        #    if source:
-        #        qaImage = plotMethod(source)
-        #        qaImages.append((qaImage, description))
-
-        self.createMethoHtml()
+        for prefix, plotMethod, description in tags:
+            source = self.getImage(prefix)
+            if source:
+                qaImage = plotMethod(source)
+                qaImages.append((qaImage, description))
 
         return qaImages
