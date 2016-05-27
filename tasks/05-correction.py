@@ -577,8 +577,7 @@ class Correction(GenericTask):
             information += "using the fieldmap images."
         else:
             information += "with no distortion correction"
-        qaImages.setInformation(information)
 
-        self.createMethoHtml()
+        qaImages.setInformation(information)
 
         return qaImages
