@@ -30,8 +30,8 @@ class Tractometry(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
-        target_queries = self.getBackupImage('queries', None, 'qry')
-        target_dict = self.getBackupImage('tq_dict', None, 'qry')
+        target_queries = self.getPreparationImage('queries', None, 'qry')
+        target_dict = self.getPreparationImage('tq_dict', None, 'qry')
 
         outDir = 'raw/outlier_cleaned_tracts'
 

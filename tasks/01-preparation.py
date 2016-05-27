@@ -46,7 +46,9 @@ class Preparation(GenericTask):
                     (self.getBackupImage('anat', 'freesurfer'),'freesurfer anatomical'),
                     (self.getBackupImage('lh_ribbon'),'left hemisphere ribbon'),
                     (self.getBackupImage('rh_ribbon'),'right hemisphere ribbon'),
-                    (self.getBackupImage('brodmann'),'brodmann'))
+                    (self.getBackupImage('brodmann'),'brodmann'),
+                    (self.getBackupImage('tq_dict', None, 'qry'),'dictionnary'),
+                    (self.getBackupImage('queries', None , 'qry'),'queries'))
 
         for image, description in images.getData():
             if image:
