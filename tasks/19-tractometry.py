@@ -57,8 +57,8 @@ class Tractometry(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        target_queries = self.getBackupImage('queries', None, 'qry')
-        target_dict = self.getBackupImage('tq_dict', None, 'qry')
+        target_queries = self.getPreparationImage('queries', None, 'qry')
+        target_dict = self.getPreparationImage('tq_dict', None, 'qry')
 
         outDir = 'raw/histograms'
         if not target_queries and not target_dict:

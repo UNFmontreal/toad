@@ -56,7 +56,7 @@ class Toadinfo(DicomParser):
             config.add_section("methodology")
 
         config.set('methodology', 'manufacturer', self.getManufacturer())
-        config.set('methodology', 'magneticfieldstrenght', self.getMagneticFieldStrength())
+        config.set('methodology', 'magneticfieldstrength', self.getMagneticFieldStrength())
         config.set('methodology', 'mrmodel', self.getMRModel())
 
         if self.getSequenceName() == 'Diffusion':  # Save information about diffusion

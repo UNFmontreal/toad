@@ -60,6 +60,7 @@ class Correction(GenericTask):
         if b0AP is False or b0PA is False:
             topupBaseName = None
             b0Image = b0
+            self.set('correctionMethod', 'fieldmap')
         else:
             # Concatenate B0 image together
             if self.get("phase_enc_dir") == "0":

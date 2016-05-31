@@ -303,7 +303,9 @@ class Qa(object):
 
         # Special case for 3T Tim Trio
         if tags['magneticfieldstrenght'] == '3' and tags['mrmodel'] == 'TrioTim' and tags['denoising_number_array_coil'] == '4':
-            tags['denoising_number_array_coil'] = 12
+            tags['number_array_coil'] = 12
+        else:
+            tags['number_array_coil'] = tags['denoising_number_array_coil']
 
         return tags
 
