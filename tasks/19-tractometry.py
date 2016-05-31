@@ -91,7 +91,7 @@ class Tractometry(GenericTask):
 
     def __getConfigFile(self, prefix, defaultFile):
 
-        target = self.getBackupImage(prefix, None, 'json')
+        target = self.getPreparationImage(prefix, None, 'json')
         if target:
             util.symlink(target, self.buildName(target, None, 'json'))
         else:
