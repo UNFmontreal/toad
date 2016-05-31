@@ -15,7 +15,7 @@ class Ascconv(object):
         # otherwise it will be set correctly
         self.__phaseEncodingDirection = 1
 
-        self.__numberSlices = None # Always available
+        self.__numSlices = None # Always available
         self.__patFactor = None  # Always available PAT Factor
         self.__epiFactor = None  # Always available Epi Factor
         self.__phaseResolution = None  # 1
@@ -67,7 +67,7 @@ class Ascconv(object):
         return self.__numDirections
 
     def getNumberSlices(self):
-        return self.__numberSlices
+        return self.__numSlices
 
     def __initialize(self):
         with open(self.__fileName, 'r') as f:
@@ -126,7 +126,7 @@ class Ascconv(object):
 
                 elif "skspace.limagesperslab" in line:
                     try:
-                        self.__numberSlices = int(line.split("=")[-1].strip())
+                        self.__numSlices = int(line.split("=")[-1].strip())
                     except ValueError:
                         pass
 
