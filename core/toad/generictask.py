@@ -191,7 +191,7 @@ class GenericTask(Logger, Load, Qa):
             os.mkdir(self.workingDir)
 
         #Open ConfigRunning File
-        self.configRunning = open( os.path.join(self.subjectDir, '00-backup' + os.path.sep + 'configRunnin.cfg'), 'w')
+        self.configRunning = open( os.path.join(self.subjectDir, '00-backup' + os.path.sep + 'configRunning.cfg'), 'w')
 
         if self.config.has_option("arguments", "stop_before_task"):
             if (self.config.get("arguments", "stop_before_task") == self.__name or
