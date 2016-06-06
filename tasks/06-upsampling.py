@@ -36,10 +36,10 @@ class Upsampling(GenericTask):
 
         interp = self.get('interp')
         template = self.getParcellationImage('anat','freesurfer','nii.gz')
-        #voxelSize = self.get('methodology','t1_voxelsize') # Get t1 voxel size to upsample
-        #voxelSize = voxelSize.translate(None, '[],') # Remove specific caracteres 
+        voxelSize = self.get('methodology','t1_voxelsize') # Get t1 voxel size to upsample
+        voxelSize = voxelSize.translate(None, '[],') # Remove specific caracteres 
 
-        dwiUpsample= self.__upsampling(dwi, template, interp, self.buildName(dwi, "upsample"))
+        dwiUpsample= self.__upsampling(dwi, voxelSize, interp, self.buildName(dwi, "upsample"))
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
 
@@ -53,7 +53,7 @@ class Upsampling(GenericTask):
         return util.symlink(dwi, self.workingDir)
 
 
-    def __upsampling(self, source, template, interp, target):
+    def __upsampling(self, source, voxelSize, interp, target):
         """Upsample an image specify as input
 
         The upsampling value should be specified into the config.cfg file
@@ -71,8 +71,7 @@ class Upsampling(GenericTask):
         #if len(voxelSize.strip().split(" "))!=3:
         #    self.warning("Voxel size not specified correctly during upsampling")
 
-        #cmd = "mri_convert -voxsize {} --input_volume {} --output_volume {}".format(voxelSize, source, tmp)
-        cmd = "mrtransform -nthreads {} -template {} -interp {} {} {}".format(self.getNTreadsMrtrix(), template, interp, source, tmp)
+        cmd = "mri_convert -voxsize {} -rt {} --input_volume {} --output_volume {}".format(voxelSize, interp, source, tmp)
         self.launchCommand(cmd)
         return self.rename(tmp, target)
 
