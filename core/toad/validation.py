@@ -101,6 +101,10 @@ class Validation(object):
             self.warning("Directory {} does not appear to be a valid toad structure".format(self.workingDir))
             return False
 
+        if not self.__isValidConfig(): 
+            self.warning("Config file has some tags missing")
+            return False
+
         return True
 
 
@@ -285,3 +289,15 @@ class Validation(object):
             result = False
 
         return result
+
+    def __isValidConfig(self):
+
+        result = True
+
+        if not (self.config.has_option('methodology','intrasession') and self.config.has_option('methodology','t1_voxelsize')):
+            result = False
+
+        return result
+
+
+
