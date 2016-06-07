@@ -38,7 +38,8 @@ class Config(object):
         config.read(self.__getConfigFiles(arguments))
 
         #parse command line arguments in the config file
-        config.add_section('arguments')
+        if not config.has_section('arguments'):
+            config.add_section('arguments')
         config.set('arguments', 'toad_dir', arguments.toadDir)
 
         if arguments.stopBeforeTask and isinstance(arguments.stopBeforeTask, basestring):
