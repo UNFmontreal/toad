@@ -190,9 +190,6 @@ class GenericTask(Logger, Load, Qa):
             self.info("Creating {} directory".format(self.workingDir))
             os.mkdir(self.workingDir)
 
-        #Open ConfigRunning File
-        self.configRunning = open( os.path.join(self.subjectDir, '00-backup' + os.path.sep + 'configRunning.cfg'), 'w')
-
         if self.config.has_option("arguments", "stop_before_task"):
             if (self.config.get("arguments", "stop_before_task") == self.__name or
                 self.config.get("arguments", "stop_before_task") == self.__moduleName.lower()):
@@ -206,10 +203,10 @@ class GenericTask(Logger, Load, Qa):
 
         self.implement()
 
-        # Close ConfigRunning File
+        # Open ConfigRunning File
+        self.configRunning = open( os.path.join(self.subjectDir, '00-backup' + os.path.sep + 'configRunning.cfg'), 'w')
         self.config.write(self.configRunning)
         self.configRunning.close()
-
 
         self.info("Create and supply images to the qa report ")
         if "qaSupplier" in dir(self):
