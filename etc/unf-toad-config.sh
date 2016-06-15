@@ -76,7 +76,8 @@ PATH=${FSLDIR}/bin:${PATH}
 . ${FSLDIR}/etc/fslconf/fsl.sh
 export FSLDIR PATH
 
-export PATH=$TOADDIR/bin:$APPDIR/matlab/R2012b/bin:$APPDIR/mrtrix3/bin:$APPDIR/mrtrix3/scripts:$APPDIR/tract_querier:$PATH
+#export PATH=$TOADDIR/bin:$APPDIR/matlab/R2012b/bin:$APPDIR/mrtrix3/bin:$APPDIR/mrtrix3/scripts:$APPDIR/tract_querier:$PATH
+export PATH=$TOADDIR/bin:$APPDIR/matlab/R2012b/bin:/home/bore/softs/mrtrix3/release/bin:/home/bore/softs/mrtrix3/scripts:$APPDIR/tract_querier:$PATH
 export PATH=$FREESURFER_HOME/mni/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$PATH
 
 # SCILPY Configuration
