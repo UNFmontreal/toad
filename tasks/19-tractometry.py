@@ -30,8 +30,8 @@ class Tractometry(GenericTask):
         Returns:
             True if all requirement are meet, False otherwise
         """
-        target_queries = self.getBackupImage('queries', None, 'qry')
-        target_dict = self.getBackupImage('tq_dict', None, 'qry')
+        target_queries = self.getPreparationImage('queries', None, 'qry')
+        target_dict = self.getPreparationImage('tq_dict', None, 'qry')
 
         outDir = 'raw/outlier_cleaned_tracts'
 
@@ -57,8 +57,8 @@ class Tractometry(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        target_queries = self.getBackupImage('queries', None, 'qry')
-        target_dict = self.getBackupImage('tq_dict', None, 'qry')
+        target_queries = self.getPreparationImage('queries', None, 'qry')
+        target_dict = self.getPreparationImage('tq_dict', None, 'qry')
 
         outDir = 'raw/histograms'
         if not target_queries and not target_dict:
@@ -91,7 +91,7 @@ class Tractometry(GenericTask):
 
     def __getConfigFile(self, prefix, defaultFile):
 
-        target = self.getBackupImage(prefix, None, 'json')
+        target = self.getPreparationImage(prefix, None, 'json')
         if target:
             util.symlink(target, self.buildName(target, None, 'json'))
         else:

@@ -39,7 +39,7 @@ class QA(GenericTask):
 
         #Create index.html
         self.createTaskHtml(
-                {'parseHtmlTables':'<div id="metho">Methodology when correction step done</div>'}, 'index.html')
+                {'parseHtmlTables':'<div id="metho">Methodology when pipeline is finished</div>'}, 'index.html')
 
     def meetRequirement(self, result=True):
         """

@@ -34,7 +34,12 @@ class Upsampling(GenericTask):
         bVecs = util.symlink(bVecs, self.workingDir)
         bEnc = util.symlink(bEnc, self.workingDir)
 
-        dwiUpsample= self.__upsampling(dwi, self.get('voxel_size'), self.buildName(dwi, "upsample"))
+        interp = self.get('interp')
+        template = self.getParcellationImage('anat','freesurfer','nii.gz')
+        voxelSize = self.get('methodology','t1_voxelsize') # Get t1 voxel size to upsample
+        voxelSize = voxelSize.translate(None, '[],') # Remove specific caracteres 
+
+        dwiUpsample= self.__upsampling(dwi, voxelSize, interp, self.buildName(dwi, "upsample"))
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
 
@@ -48,24 +53,25 @@ class Upsampling(GenericTask):
         return util.symlink(dwi, self.workingDir)
 
 
-    def __upsampling(self, source, voxelSize, target):
+    def __upsampling(self, source, voxelSize, interp, target):
         """Upsample an image specify as input
 
         The upsampling value should be specified into the config.cfg file
 
         Args:
             source: The input file
-            voxelSize: Size of the voxel
+            template: 3D volume uses for reggriding
+            interp: Interpolation used
 
         Return:
             The resulting output file name
         """
-        self.info("Launch upsampling from freesurfer.\n")
+        self.info("Launch upsampling from MRtrix.\n")
         tmp = self.buildName(source, "tmp")
-        if len(voxelSize.strip().split(" "))!=3:
-            self.warning("Voxel size not specified correctly during upsampling")
+        #if len(voxelSize.strip().split(" "))!=3:
+        #    self.warning("Voxel size not specified correctly during upsampling")
 
-        cmd = "mri_convert -voxsize {} --input_volume {} --output_volume {}".format(voxelSize, source, tmp)
+        cmd = "mri_convert -voxsize {} -rt {} --input_volume {} --output_volume {}".format(voxelSize, interp, source, tmp)
         self.launchCommand(cmd)
         return self.rename(tmp, target)
 

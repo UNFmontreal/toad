@@ -34,7 +34,6 @@ class DicomParser(Ascconv):
         self.__te = None  # Echo time
         self.__ti = None  # Time Inversion
         self.__flipAngle = None  # FlipAngle
-        self.__numSlices = None  # Num of slices
         self.__fov = None  # FOV: Field Of View
         self.__matrixSize = None  # Matrix size
         self.__voxelSize = None  # Voxel size

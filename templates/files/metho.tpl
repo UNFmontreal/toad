@@ -1,33 +1,31 @@
 <h3>Acquisition</h3>
 
 <p>T1 and diffusion weighed images (DWI) were acquired with
-a {{number_array_coil}}-channel head coil and a {{magneticfieldstrenght}}T {{manufacturer}} {{mrmodel}} magnetic resonance
-imaging system (T1: TR= {{t1_tr}} ms, TE = {{t1_te}} ms, TI = {{t1_ti}} ms, Flip Angle =
-{{t1_flipangle}} &deg;, {{t1_slices}} slices, FoV = {{t1_fov}} mm<sup>2</sup>, matrix size = {{t1_mat}}, voxel size = {{t1_voxelsize}}
- mm<sup>3</sup>; DWI: TR = {{dwi_tr}} ms, TE = {{dwi_te}} ms, Flip Angle = {{dwi_flipangle}} &deg;, voxel size:
-{{dwi_voxelsize}} mm<sup>3</sup>, no gap). The DWI corresponded to a high angular resolution
-diffusion MRI (HARDI) acquisition using spin echo EPI diffusion-encoded
-images was performed along {{dwi_numdirections}} independent directions, with b-value of {{dwi_bvalue}}
-s/mm<sup>2</sup>.</p>
+a {{number_array_coil}}-channel head coil and a {{magneticfieldstrength}}T {{manufacturer}} {{mrmodel}} magnetic resonance
+imaging system. Anatomical images were acquired using the following parameters: FoV {{t1_fov}} mm<sup>2</sup>, matrix size {{t1_matrixsize_1}} x {{t1_matrixsize_2}},{%if t1_voxelsize_iso%} {{t1_voxelsize_1}} mm isotropic resolution {%else%} {{t1_voxelsize_1}} x {{t1_voxelsize_2}} x {{t1_voxelsize_3}} mm<sup>3</sup> voxel size {%endif%}, TE/TI/TR = {{t1_te}}/{{t1_ti}}/{{t1_tr}} ms, flip angle {{t1_flipangle}} &deg and {{t1_numberslices}} slices. 
+Single shot diffusion weighted spin echo-planar imaging data was acquired using the following parameters: FoV {{dwi_fov}} mm<sup>2</sup>, matrix size {{dwi_matrixsize_1}} x {{dwi_matrixsize_2}},{% if t1_voxelsize_iso%} {{dwi_voxelsize_1}} mm isotropic resolution{%else%} {{dwi_voxelsize_1}} x {{dwi_voxelsize_2}} x {{dwi_voxelsize_3}} mm<sup>3</sup> voxel size{%endif%}, TR/TE = {{dwi_tr}}/{{dwi_te}} ms, flip angle {{dwi_flipangle}} &deg and {{dwi_numberslices}} slices. DWI were acquired along {{dwi_numdirections}} independent directions, with a b-value of {{dwi_bvalue}}s/mm<sup>2</sup>.{%if correction_method=='topup'%} A pair of b = 0 images with no diffusion weigthing and opposite phase encode polarity were acquired to allow us susceptibility distortion correction.{%elif correction_method=='fieldmap'%} A reference image with no diffusion weighted was acquired. Fieldmaps were also acquired to correct for distortion caused by magnetic field inhomogeneities.{%endif%}
+</p>
 
 <h3>Prepocessing</h3>
 
-{% if denoising %}
-<p>Denoising of DWI was done using {{algorithm}} method [{{denoising_ref}}].</p>
-{% else %}
-<p>DWI images were not denoised.</p>
-{% endif %}
+<p>
+{% if not denoising_ignore %}First, DWI were denoised using {{denoising_algorithm}} method [{{denoising_ref}}].{%endif%}{%if not correction_ignore and not denoising_ignore%} Then, they {%elif not correction_ignore%} First, DWI{%endif%}{%if not correction_ignore%} were corrected using {{correction_algorithm}} [{{correction_ref}}].{%endif%}{%if not correction_ignore%}Gradient directions were corrected corresponding to motion correction parameters.{%endif%}{%if not correction_ignore%} Motion-corrected images {%else%} DWI {%endif%}were upsampled using {{upsampling_interp}} interpolation (upsampled to anatomical resolution).
 
-{% if correction %}
-<p>DWI images were corrected using {{correctionMethod}} method.</p>
-{% else %}
-<p>DWI images were not corrected.</p>
-{% endif %}
+Anatomical image went through Freesurfer's pipeline {{seg_ref}} in order to be used in the Anatomically-Constrained Tractography (ACT). T1 image was registered to the DWI {%if correction%}motion-corrected {%endif%}images. 
 
-<p>The FMRIB Diffusion toolbox EDDY of FSL {{fsl_vers}} {{fsl_ref}} was used to correct all images for subject movement and eddy-currents. Gradient directions were corrected corresponding to motion correction parameters.</p>
+{%if not tensorfsl_ignore or not tensordipy_ignore or not tensormrtrix_ignore%}Eigenvectors, eigenvalues, fractional anisotropy (FA), radial diffusivity (RD), axial diffusivity (AD) and mean diffusivity (MD) were extracted from tensor reconstruction using {%if not tensorfsl_ignore%} FDT toolbox from FSL {{fsl_vers}} using {{tensorfsl_fitmethod}} method.{%elif not tensordipy_ignore%} DIPY {{dipy_vers}} using {{tensordipy_fitmethod}} method {{tensordipy_ref}} {%elif not tensormrtrix_ignore%} MRtrix {{mrtrix_vers}} using {{tensormrtrix_fitmethod}} method [{{tensormrtrix_ref}}].{%endif%}{%endif%}
 
-<p>DWI were upsampled to 1mm isotropic resolution using a trilinear interpolation {{tri_ref}}. Eigenvector, eigenvalues, fractional anisotropy (FA) were finally extracted from tensor model using FDT {{fdt_ref}} toolbox from FSL.
-T1 image went through Freesurfer's pipeline {{seg_ref}} to get a segmentation of the corpus callosum. T1-weighted image was registered to the DWI using FSL.</p>
+{%if not hardimrtrix_ignore or not hardidipy_ignore%}Fiber orientation distribution function (fODF) reconstruction was done using{%if not hardidipy_ignore%} DIPY{%elif not hardimrtrix_ignore%} MRtrix.{%endif%}{%if not hardimrtrix_ignore and not hardidipy_ignore%} and using MRtrix.{%endif%}{%endif%}
+
+
+{%if not hardidipy_ignore%}Dipy method: The response function for a single fibre population was estimated using '{{hardidipy_algorithmresponsefunction}}' algorithm [{{hardidipy_algorithmresponsefunction_ref}}]. This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) [{{hardidipy_reconstructionmethod_ref}}] with a maximum spherical harmonic order lmax of {{hardidipy_lmax}}.{%endif%}
+
+{%if not hardimrtrix_ignore%}MRtrix method: The response function for a single fibre population was estimated using '{{hardimrtrix_algorithmresponsefunction}}' algorithm [{{hardimrtrix_algorithmresponsefunction_ref}}]. This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) [{{hardimrtrix_reconstructionmethod_ref}}] with a maximum spherical harmonic order lmax of {{hardimrtrix_lmax}}.{%endif%}
+
+{%if not tractographymrtrix_ignore%}{{tractographymrtrix_algorithm}} tractography was performed {%if tractographymrtrix_methodReconstruction == 'hardi'%}using the iFOD2 algorithm [{{tractographymrtrix_ref}}]{%else%} on tensor reconstructions{%endif%}.Tractograms of {{tractographymrtrix_numbertracks}} tracks were generated by .... Tracking was performed using the following parameters: step size = {{tractographymrtrix_step}} mm; maximum angle between steps = {{tractographymrtrix_angle}} &deg; maximum track length = {{tractographymrtrix_maxlength}} mm; downsample factor = {{tractographymrtrix_downsample}}.{%endif%}
+
+{%if not tractquerier_ignore%}Tractogram was then used to extract tracks of interest using [{{tractquerier_ref}}]{%endif%} {%if not tractquerier_ignore and not tractfiltering_ignore%} Then, these bundles were filtered using [{{tractofiltering_ref}}].{%endif%}
+
 
 <p>These tools were wrapped in the TOAD pipeline developed in the Functional Neuroimaging Unit (UNF) from the Centre de Recherche de l'Institut Universitaire de Geriatrie de Montreal (<a href='http://www.unf-montreal.ca/toad'>http://www.unf-montreal.ca/toad</a>)</p>
 

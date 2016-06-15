@@ -5,7 +5,7 @@ import xml.dom.minidom as minidom
 from jinja2 import Environment, FileSystemLoader
 from lib import qautil
 from lib import util
-
+import bibtexparser
 
 __author__ = "Christophe Bedetti"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -22,6 +22,10 @@ class Qa(object):
                 self.config.get('qa', 'index_template'))
         self.qaHtml = os.path.join(
                 self.qaDir, '{}.html'.format(self.getName()))
+        self.bibtex = os.path.join(
+                self.toadDir, 'templates',
+                self.config.get('qa', 'bibtex'))
+
 
     def plot3dVolume(
             self, source, edges=None, segOverlay=None,
@@ -184,8 +188,6 @@ class Qa(object):
                 self.toadDir, 'templates', 'files',
                 self.config.get('qa', 'table_template'))
 
-        print "createQaReport images =", images
-
         smallViewTags = [
                 '_translations',
                 '_rotations',
@@ -250,72 +252,60 @@ class Qa(object):
             value = None
         return value
 
+    def configFillSection(self, section, withName = False):
+        tags = {}
+        items = self.config.items(section)
+
+        if withName:
+            prefix = section + '_'
+        else:
+            prefix = ''
+
+        for item in items:
+            if item[1].lower() == 'true':
+                tags[prefix + item[0]] = True
+            elif item[1].lower() == 'false':
+                tags[prefix + item[0]] = False
+            elif 'voxelsize' in item[0].lower():
+                tags[prefix + item[0] + '_1'] = float(item[1].translate(None,'[],').split()[0])
+                tags[prefix + item[0] + '_2'] = float(item[1].translate(None,'[],').split()[1])
+                tags[prefix + item[0] + '_3'] = float(item[1].translate(None,'[],').split()[2])
+                if tags[prefix + item[0] + '_1']==tags[prefix + item[0] + '_2'] and tags[prefix + item[0] + '_1'] == tags[prefix + item[0] + '_2']:
+                    tags[prefix + item[0] + '_iso'] = True
+                    tags[prefix + item[0]] = tags[prefix + item[0] + '_1']
+                else:
+                    tags[prefix + item[0] + '_iso'] = False
+
+            elif 'matrixsize' in item[0].lower():
+                tags[prefix + item[0] + '_1'] = float(item[1].translate(None,'[],').split()[0])
+                tags[prefix + item[0] + '_2'] = float(item[1].translate(None,'[],').split()[0])
+
+            else:
+                tags[prefix + item[0]] = item[1]
+
+        return tags
 
     def __getTags(self):
-        tags = {}
 
-        # ----------------------------------------------------
-        # PREPARATION SECTION
-        # ----------------------------------------------------
-        denoisingKeys = ['number_array_coil']
-        for key in denoisingKeys:
-            tags[key] = self.configGet('denoising', key)
+        methodology = self.configFillSection('methodology') # Fill tags with config file informations
+        denoising = self.configFillSection('denoising', True)
+        correction = self.configFillSection('correction', True)
+        upsampling = self.configFillSection('upsampling', True)
+        tensorfsl = self.configFillSection('tensorfsl', True)
+        tensordipy = self.configFillSection('tensordipy', True)
+        tensormrtrix = self.configFillSection('tensormrtrix', True)
+        hardimrtrix = self.configFillSection('hardimrtrix', True)
+        hardidipy = self.configFillSection('hardidipy', True)
+        tractographymrtrix = self.configFillSection('tractographymrtrix', True)
 
-        methodologyKeys = [
-                'manufacturer', 'magneticfieldstrenght', 'mrmodel',
-                't1_tr', 't1_te', 't1_ti', 't1_flipangle', 't1_fov', 't1_matrixsize`',
-                't1_slices', 't1_voxelsize', 'dwi_tr', 'dwi_te', 'dwi_flipangle',
-                'dwi_voxelsize', 'dwi_numdirections', 'dwi_bvalue']
-        for key in methodologyKeys:
-            tags[key] = self.configGet('methodology', key)
+        tags = util.merge_dicts(methodology, denoising, denoising, correction, upsampling, 
+                                tensorfsl, tensordipy, tensormrtrix, hardimrtrix, hardidipy, tractographymrtrix)
 
         # Special case for 3T Tim Trio
-        if tags['magneticfieldstrenght'] == '3' and tags['mrmodel'] == 'TrioTim' and tags['number_array_coil'] == '4':
+        if tags['magneticfieldstrength'] == '3' and tags['mrmodel'] == 'TrioTim' and tags['denoising_number_array_coil'] == '4':
             tags['number_array_coil'] = 12
-
-        # ----------------------------------------------------
-        # PREPROCESSING
-        # ----------------------------------------------------
-        # Add the FSL references
-        refs = [self.configGet('references', 'fsl')]
-        tags['fsl_vers']= None # parser.get('', '')
-        tags['fsl_ref'] = "[{}]".format(len(refs))
-
-        # Prepare the text for the denoising section
-        if self.configGet('denoising', 'ignore') in ['True', 'true']:
-            tags['denoising'] = False
         else:
-            tags['denoising'] = True
-            method = self.configGet('denoising', 'algorithm')
-            tags['algorithm'] = method
-            refs.append(self.configGet('references', method))
-            tags['denoising_ref'] = len(refs)
-
-        # Prepare the text for the correction section
-        if self.configGet('correction', 'ignore') in ['True', 'true']:
-            tags['correction'] = False
-        else:
-            tags['correction'] = True
-            tags['correctionMethod'] = self.configGet('correction', 'correctionMethod')
-
-        # Add the trilinear interpolation references
-        refs.append(self.configGet('references', 'tri1'))
-        refs.append(self.configGet('references', 'tri2'))
-        tags['tri_ref']= "[{}, {}]".format(len(refs)-1, len(refs))
-
-        # Add the FDT reference
-        refs.append(self.configGet('references', 'fdt'))
-        tags['fdt_ref']= "[{}]".format(len(refs))
-
-        # Add Freesurfer segmentation/label references
-        refs.append(self.configGet('references', 'segfreesurfer'))
-        refs.append(self.configGet('references', 'labfreesurfer'))
-        tags['seg_ref']= "[{}, {}]".format(len(refs)-1, len(refs))
-
-        refTxt = []
-        for idx, ref in enumerate(refs):
-            refTxt.append("<p>[{}] {}</p></ br>".format(idx+1, ref))
-        tags['references']= refTxt
+            tags['number_array_coil'] = tags['denoising_number_array_coil']
 
         return tags
 
