@@ -37,7 +37,8 @@ class Preparation(GenericTask):
         else:
             self.info("Linking {} to {}".format(dwi, util.symlink(dwi, self.workingDir)))
 
-        images = Images((self.getBackupImage('anat'),'high resolution'),
+        images = Images(
+                    (self.getBackupImage('anat'),'high resolution'),
                     (self.getBackupImage('b0_pa'),'B0 posterior to anterior'),
                     (self.getBackupImage('b0_ap'),'B0 anterior to posterior'),
                     (self.getBackupImage('mag'),'MR magnitude'),
@@ -47,8 +48,7 @@ class Preparation(GenericTask):
                     (self.getBackupImage('lh_ribbon'),'left hemisphere ribbon'),
                     (self.getBackupImage('rh_ribbon'),'right hemisphere ribbon'),
                     (self.getBackupImage('brodmann'),'brodmann'),
-                    (self.getBackupImage('tq_dict', None, 'qry'),'dictionnary'),
-                    (self.getBackupImage('queries', None , 'qry'),'queries'))
+                    )
 
         for image, description in images.getData():
             if image:

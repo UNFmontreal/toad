@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta
 from datetime import datetime
+import glob
 import subprocess
 import traceback
 import shutil
@@ -53,6 +54,58 @@ class GenericTask(Logger, Load, Qa):
         self.__dependenciesDirNames = {}
         for arg in args:
             self.dependencies.append(arg)
+        self._defaultQuery = None
+
+
+    @property
+    def queries(self):
+        return self._findTractquerierFile('queries', 'queries_freesurfer')
+
+
+    @property
+    def tq_dict(self):
+        return self._findTractquerierFile('tq_dict', 'tq_dict_freesurfer')
+
+
+    @property
+    def defaultQuery(self):
+        return self._defaultQuery
+
+
+    def _findTractquerierFile(self, prefix, defaultFile):
+        """
+        Utility fonctions to find configuration file for tractquerier
+
+        File could be found into:
+            First, the root of the project
+            Second, the backup directory of the subject
+
+        Args:
+            prefix: prefix of the configuration file
+            defaultFile: file in toadDir/templates/tract_queries to use by default
+
+        Returns:
+            path of the configuration file
+        """
+        rootDir = os.path.dirname(self.subjectDir)
+        backupDir = os.path.join(self.subjectDir, '00-backup')
+        rootTarget = glob.glob('{}/{}_*'.format(rootDir, prefix))
+        backupTarget = glob.glob('{}/{}_*'.format(backupDir, prefix))
+        defaultTarget = os.path.join(
+                self.toadDir, 'templates', 'tract_queries',
+                '{}.qry'.format(defaultFile))
+
+        if len(rootTarget) == 1:
+            self._defaultQuery = False
+            target = rootTarget[0]
+        elif len(backupTarget) == 1:
+            self._defaultQuery = False
+            target = backupTarget[0]
+        else:
+            if self._defaultQuery == None:
+                self._defaultQuery = True
+            target = defaultTarget
+        return target
 
 
     def initializeDependenciesDirectories(self, tasks):
