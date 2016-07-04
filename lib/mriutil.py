@@ -719,8 +719,3 @@ def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None)
         if type(sourceMetrics) is list:
             for metric in sourceMetrics:
                 util.symlink(metric[0], targetMetricsDir, metric[1])
-
-
-def runTractometry(config, source, target):
-    cmd = "scil_run_tractometry.py --config_file {} {} {} -v -f ".format(config, source, target)
-    util.launchCommand(cmd)
