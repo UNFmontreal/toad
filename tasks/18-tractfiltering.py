@@ -24,7 +24,9 @@ class TractFiltering(GenericTask):
         configFile = self.__getConfigFile(
                 'configTractFiltering', 'configTractFiltering_default')
 
-        mriutil.runTractometry(configFile, self.workingDir, self.workingDir)
+        cmdTpl = "scil_run_tractometry.py --config_file {0} {1} {1} -v -f "
+        cmd = cmdTpl.format(configFile, self.workingDir)
+        self.launchCommand(cmd)
 
     def isIgnore(self):
         return self.get("ignore")

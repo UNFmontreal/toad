@@ -27,7 +27,9 @@ class Tractometry(GenericTask):
         configFile = self.__getConfigFile(
                 'configTractometry', 'configTractometry_default')
 
-        mriutil.runTractometry(configFile, self.workingDir, self.workingDir)
+        cmdTpl = "scil_run_tractometry.py --config_file {0} {1} {1} -v -f "
+        cmd = cmdTpl.format(configFile, self.workingDir)
+        self.launchCommand(cmd)
 
         csvToClean = [
                 ('count.csv', 'simple'),
