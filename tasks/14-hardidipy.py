@@ -7,7 +7,7 @@ import dipy.reconst.csdeconv
 
 from core.toad.generictask import GenericTask
 from lib.images import Images
-
+from lib.mriutil import getlmax
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -32,6 +32,9 @@ class HardiDipy(GenericTask):
         #Look first if there is eddy b encoding files produces
         bValsFile = self.getUpsamplingImage('grad', None, 'bvals')
         bVecsFile = self.getUpsamplingImage('grad', None, 'bvecs')
+        
+        self.set('lmax', getlmax(dwi))
+        
         self.__produceMetrics(dwi, bValsFile, bVecsFile, mask)
 
 
