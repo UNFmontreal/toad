@@ -55,16 +55,8 @@ class GenericTask(Logger, Load, Qa):
         for arg in args:
             self.dependencies.append(arg)
         self._defaultQuery = None
-
-
-    @property
-    def queries(self):
-        return self._findTractquerierFile('queries', 'queries_freesurfer')
-
-
-    @property
-    def tq_dict(self):
-        return self._findTractquerierFile('tq_dict', 'tq_dict_freesurfer')
+        self.queries = self._findTractquerierFile('queries', 'queries_freesurfer')
+        self.tq_dict = self._findTractquerierFile('tq_dict', 'tq_dict_freesurfer')
 
 
     @property
@@ -89,8 +81,8 @@ class GenericTask(Logger, Load, Qa):
         """
         rootDir = os.path.dirname(self.subjectDir)
         backupDir = os.path.join(self.subjectDir, '00-backup')
-        rootTarget = glob.glob('{}/{}_*'.format(rootDir, prefix))
-        backupTarget = glob.glob('{}/{}_*'.format(backupDir, prefix))
+        rootTarget = glob.glob('{}/{}_*qry'.format(rootDir, prefix))
+        backupTarget = glob.glob('{}/{}_*qry'.format(backupDir, prefix))
         defaultTarget = os.path.join(
                 self.toadDir, 'templates', 'tract_queries',
                 '{}.qry'.format(defaultFile))
