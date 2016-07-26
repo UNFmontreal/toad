@@ -95,12 +95,12 @@ class GenericTask(Logger, Load, Qa):
                 self.toadDir, 'templates', 'tract_queries',
                 '{}.qry'.format(defaultFile))
 
-        if len(rootTarget) == 1:
-            self._defaultQuery = False
-            target = rootTarget[0]
-        elif len(backupTarget) == 1:
+        if len(backupTarget) == 1:
             self._defaultQuery = False
             target = backupTarget[0]
+        elif len(rootTarget) == 1:
+            self._defaultQuery = False
+            target = rootTarget[0]
         else:
             if self._defaultQuery == None:
                 self._defaultQuery = True
