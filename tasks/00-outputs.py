@@ -32,8 +32,10 @@ class Outputs(GenericTask):
 
         self.__copyMetrics(['mrtrix', 'dipy', 'fsl'], ['fa','ad','rd','md'], 'tensor')
         self.__copyMetrics(['mrtrix', 'dipy'], ['nufo','csd','gfa'], 'hardi')
-        self.__finished = True
 
+        self.createMethoHtml()
+
+        self.__finished = True
 
     def __copyMetrics(self, softwares, postfixs, method):
         for software in softwares:
@@ -62,8 +64,3 @@ class Outputs(GenericTask):
     def isIgnore(self):
         return self.get("ignore")
 
-    def qaSupplier(self):
-        images = Images()
-        self.createMethoHtml()
-
-        return images
