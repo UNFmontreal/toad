@@ -17,19 +17,19 @@ class Tractquerier(GenericTask):
 
 
     def implement(self):
-        #shutil.copy(self.queries, self.workingDir)
-        #shutil.copy(self.tq_dict, self.workingDir)
+        shutil.copy(self.queries, self.workingDir)
+        shutil.copy(self.tq_dict, self.workingDir)
 
-        #dwi = self.getUpsamplingImage('dwi', 'upsample')
-        #nbDirections = mriutil.getNbDirectionsFromDWI(dwi)  # Get number of directions
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        nbDirections = mriutil.getNbDirectionsFromDWI(dwi)  # Get number of directions
 
-        #self.tractographyTrk = self.__getTractography(nbDirections)  # Load tractography
+        self.tractographyTrk = self.__getTractography(nbDirections)  # Load tractography
 
         atlasResample = self.__getAtlas()  # Get atlas to refere to
 
-        #self.__tractQuerier(
-        #        self.tractographyTrk, atlasResample,
-        #        self.workingDir, self.queries)
+        self.__tractQuerier(
+                self.tractographyTrk, atlasResample,
+                self.workingDir, self.queries)
 
 
     def __getTractography(self, nbDirections):
@@ -101,8 +101,8 @@ class Tractquerier(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        #trks = self.getImages('dwi', None, 'trk')
-        trks = []
+        trks = self.getImages('dwi', None, 'trk')
+
         if len(trks) > 0:
             return False
         else:
@@ -114,8 +114,6 @@ class Tractquerier(GenericTask):
 
         """
         qaImages = Images()
-
-        print(self.defaultQuery)
 
         information = "Warning: due to storage restriction, streamlines were " \
                       "downsampled. Even if there is no difference in structural " \
