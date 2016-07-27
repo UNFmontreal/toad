@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | tractfiltering                                    |
 |**Goal**        | Remove outliers |
-|**Config file** | `qryDict` <br> `qryFile` <br> `ignore`|
+|**Config file** | `ignore`|
 |**Time**        | About 5 minutes                                         |
 |**Output**      | -  Each bundles extracted from tractquerier <br>|
 
@@ -31,7 +31,7 @@ Configuration file to remove outliers
 
 ### 1- TractFiltering
 
-<a href="http://tract-querier.readthedocs.org/en/latest/" target="_blank">WMQL documentation</a>
+scil_run_tractometry function (If you need more information send a message to toadunf.criugm@gmail.com)
 
 ### 2- Use your own queries and atlases
 

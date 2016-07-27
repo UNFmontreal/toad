@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | tractometry                            |
 |**Goal**        | Remove outliers |
-|**Config file** | `qryDict` <br> `qryFile` <br> `ignore`|
+|**Config file** | `ignore`|
 |**Time**        | About 5 minutes                                         |
 |**Output**      | -  Each bundles extracted from tractquerier <br>|
 
@@ -13,7 +13,7 @@
 
 ## Goal
 
-The tractfiltering step remove outliers from bundles previously extracted.
+The tractometry step compute metric from HARDI and Tensor reconstruction along the bundles previously extracted.
 
 
 ## Requirements
@@ -30,13 +30,9 @@ Configuration file to remove outliers
 
 ## Implementation
 
-### 1- Tractometry
+### 1 - Tractometry
 
-<a href="http://tract-querier.readthedocs.org/en/latest/" target="_blank">WMQL documentation</a>
-
-### 2- Use your own queries and atlases
-
-If you want to use your own configuration file you need to add it in your backup or raw folder. It has to start with 'configTractFiltering' with a 'json' extension. You can find an example in /usr/local/toad/template/tractometry/configTractFiltering_default.json
+scil_run_tractometry function (If you need more information send a message to toadunf.criugm@gmail.com)
 
 ## Expected result(s) - Quality Assessment (QA)
 
@@ -50,11 +46,11 @@ Production of an image (png) for each example for the QA in order to check the r
 
 ### Associated documentation
 
-- <a href="http://scil.dinf.usherbrooke.ca/wp-content/papers/cote-etal-ismrm15.pdf" target="_blank">Tract Filtering</a>
+- <a href="http://scil.dinf.usherbrooke.ca/wp-content/papers/cote-etal-ismrm15.pdf" target="_blank">Tractometry</a>
 
 ### Articles 
 
-- TractFiltering
+- Tractometry
 
 > Cousineau, M., E. Garyfallidis, M-A. Cote, P-M. Jodoin, and M. Descoteaux. (2016) Tract-profiling and bundle statistics: a test-retest validation study. Proceedings of: International Society of Magnetic Resonance in Medicine (ISMRM), Singapore (2016).
 
