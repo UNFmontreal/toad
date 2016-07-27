@@ -32,7 +32,7 @@ Configuration file to remove outliers
 
 ### 1 - Tractometry
 
-scil_run_tractometry function (If you need more information send a message to toadunf.criugm@gmail.com)
+- function: scil_run_tractometry (If you need more information send a message to toadunf.criugm@gmail.com)
 
 ## Expected result(s) - Quality Assessment (QA)
 

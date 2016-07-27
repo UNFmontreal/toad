@@ -31,7 +31,7 @@ Configuration file to remove outliers
 
 ### 1- TractFiltering
 
-scil_run_tractometry function (If you need more information send a message to toadunf.criugm@gmail.com)
+- function: scil_run_tractometry (If you need more information send a message to toadunf.criugm@gmail.com)
 
 ### 2- Use your own queries and atlases
 
@@ -40,8 +40,9 @@ If you want to use your own configuration file you need to add it in your backup
 ## Expected result(s) - Quality Assessment (QA)
 
 It creates two folders:
+
 - outlier_cleaned_tracts: each bundle extracted
-- outliers: each bundle extracted:
+- outliers: streamlines that have been removed
 
 Production of an image (png) for each example for the QA in order to check the results.
 

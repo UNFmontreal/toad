@@ -45,9 +45,7 @@ Downsample factor to reduce output file size
 
 ### 2- Use your own queries and atlases
 
-If you want to use your own queries and atlas the first thing you need to do it's to provide a dictionnary of your atlas starting with tq_dict, queries starting with queries and finally if you are using another atlas you need to change config file 
-
-[tractquerier]
+If you want to use your own queries and atlas the first thing you need to do it's to provide a dictionnary of your atlas starting with tq_dict, queries starting with queries and finally if you are using another atlas you need to change config file.
 
 atlas: wmparc -> atlas: myatlas
 
