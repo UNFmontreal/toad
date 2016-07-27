@@ -242,7 +242,6 @@ class Qa(object):
         jinja2Env = Environment(
                 loader=FileSystemLoader(templateDir), trim_blocks=True)
         tpl = jinja2Env.get_template('metho.tpl')
-        print 'Hello !'
 
         tags_softwares = self.__getVersions()
         tags_metho = self.__getTags(tags_softwares)
@@ -473,20 +472,21 @@ class Qa(object):
             methodology += '</p>'
 
         if not tags['tractographymrtrix_ignore']:
-            methodology += '<p>Tractography</p>'
+            methodology += '<p>{} tractography was performed using ACT [{}] algorithm. Tractogram of {} streamlines was generated. Any track with length > {} mm was discarded. Because of storage restriction we had to downsample streamlines to a factor of {}. '.format(tags['tractographymrtrix_algorithm'], indexReferences, tags['tractographymrtrix_numbertracks'], tags['tractographymrtrix_maxlength'], tags['tractographymrtrix_downsample'])
+
             bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tractomrtrix']))
             indexReferences += 1
 
         if not tags['tractquerier_ignore']:
-            methodology += '<p>Tractquerier<p>'
-            bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tractomrtrix']))
+            methodology += 'Then, we used White Matter Query Language [{}] to select bundles of interest. '.format(indexReferences)
+            bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tractquerier']))
             indexReferences += 1
 
         if not tags['tractfiltering_ignore']:
-            methodology += '<p>Tractfiltering<p>'
+            methodology += 'These bundles have been filtered to remove outliers streamlines [{}]. '.format(indexReferences)
 
         if not tags['tractometry_ignore']:
-            methodology += '<p>Tractquerier<p>'
+            methodology += '<p>Finally, we use metrics from reconstruction method (HARDI and Tensor) to get these metrics along the streamlines.'.format(indexReferences-1)
             bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tractometry']))
             indexReferences += 1
 
