@@ -571,7 +571,7 @@ class Correction(GenericTask):
 
         # Information on distorsion correction
         information = "Eddy movement corrections were applied to the images "
-        correctionMethod = self.get('correctionMethod')
+        correctionMethod = self.get('method')
         if correctionMethod == 'topup':
             information += "and distortion corrections were conducted on the " \
                            "AP and PA images."
