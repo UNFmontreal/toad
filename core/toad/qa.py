@@ -365,7 +365,7 @@ class Qa(object):
         else:
             methodology += 'DWI '
 
-        methodology += 'were upsample using {} interpolation (upsample to anatomical resolution). '.format(tags['upsampling_interp'])
+        methodology += 'were upsampled using {} interpolation (upsampling to anatomical resolution). '.format(tags['upsampling_interp'])
 
         methodology += '</ br>Anatomical image went through Freesurfer pipeline [{}] in order to be used in the Anatomically-Constrained Tractography (ACT). T1 image was registered to the DWI '.format(indexReferences)
         bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_freesurfer']))
