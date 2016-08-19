@@ -37,7 +37,9 @@ class TractographyMrtrix(GenericTask):
         bFile = self.getUpsamplingImage('grad', None, 'b')
         mask = self.getRegistrationImage('mask', 'resample')
 
-        if self.get('step') == 'None':  # If step is None set Step = voxelSize/2
+        # If step is None set Step = voxelSize/2
+
+        if self.get('step') == 'None':
             voxelSize = [float(x) for x in self.get('methodology', 't1_voxelsize')[1:-1].split(',')]
             self.set('step', str(float(voxelSize[0]) * 0.5))
             self.set('angle', str(90 * float(self.get('step')) / float(voxelSize[0])))
