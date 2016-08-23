@@ -109,6 +109,10 @@ class TensorFsl(GenericTask):
         qaImages = Images()
         softwareName = 'fsl'
 
+        #Set information
+        information = "Fit method: {}".format(self.get('fitMethod'))
+        qaImages.setInformation(information)
+
         #Get images
         mask = self.getRegistrationImage('mask', 'resample')
 
