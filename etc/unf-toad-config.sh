@@ -78,7 +78,16 @@ export FSLDIR PATH
 
 #export PATH=$TOADDIR/bin:$APPDIR/matlab/R2012b/bin:$APPDIR/mrtrix3/bin:$APPDIR/mrtrix3/scripts:$APPDIR/tract_querier:$PATH
 export PATH=$TOADDIR/bin:$APPDIR/matlab/R2012b/bin:/home/bore/softs/mrtrix3/release/bin:/home/bore/softs/mrtrix3/scripts:$APPDIR/tract_querier:$PATH
+
+# Fibernavigator
+export PATH=:$APPDIR/fibernavigator/bin:$PATH
+
+# Trackvis
+export PATH=:$APPDIR/trackvis/v0.6.0.1_x86_64:$PATH
+
 export PATH=$FREESURFER_HOME/mni/bin:$FREESURFER_HOME/bin:$FREESURFER_HOME/tktools:$PATH
+
+
 
 # SCILPY Configuration
 export PYTHONPATH=/home/bore/softs/scilpy:$PYTHONPATH
