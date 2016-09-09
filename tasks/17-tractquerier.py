@@ -41,10 +41,14 @@ class Tractquerier(GenericTask):
 
 
     def __getAtlas(self):
-        atlas = self.get('atlas')
-        target = self.getAtlasRegistrationImage(atlas, 'resample')
+
+        atlasSuffix = self.get('atlasSuffix')
+        if atlasSuffix == 'None':
+            atlasSuffix = 'resample'
+
+        target = self.getAtlasRegistrationImage('wmparc', atlasSuffix)
         if not target:
-            target = self.getRegistrationImage(atlas, 'resample')
+            target = self.getRegistrationImage('wmparc', atlasSuffix)
         else:
             self.info("No atlas resample found in tractquerier task")
         return target
