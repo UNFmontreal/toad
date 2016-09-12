@@ -33,15 +33,15 @@ Nous vous conseillons également de **consulter [cette page](tuto/00-refs.md)** 
 
 <img src="figs/ABore.jpg" alt="Arnaud Boré" style="width: 50px;"/> **Arnaud Boré** : développeur et responsable scientifique du projet
 
-<img src="figs/MDesrosiers.jpg" alt="Mathieu Desrosiers" style="width: 50px;"/> **Mathieu Desrosiers** : développeur principal et mainteneur du projet
-
 <img src="figs/CBedetti.jpg" alt="Christophe Bedetti" style="width: 50px;"/> **Christophe Bedetti** : développeur et responsable de l’évaluation qualité 
-
-<img src="figs/GVallet.jpg" alt="Guillaume Vallet" style="width: 50px;"/>  **Guillaume Vallet** : responsable de la documentation et du site internet
 
 <img src="figs/JChen.jpg" alt="Jeni Chen" style="width: 50px;"/> **Jeni Chen** : traduction et documentation du projet
 
 <img src="figs/BPinsard.jpg" alt="Basile Pinsard" style="width: 50px;"/> **Basile Pinsard** : développeur et conseiller scientifique
+
+<img src="figs/GVallet.jpg" alt="Guillaume Vallet" style="width: 50px;"/>  **Guillaume Vallet** : responsable de la documentation et du site internet
+
+<img src="figs/MDesrosiers.jpg" alt="Mathieu Desrosiers" style="width: 50px;"/> **Mathieu Desrosiers** : développeur
 
 <img src="figs/AHanganu.jpg" alt="Alexandru Hanganu" style="width: 50px;"/> **Alexandru Hanganu** : conseiller scientifique
 

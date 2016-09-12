@@ -1,4 +1,4 @@
-Before you start using TOAD, we recommend reading the following articles to get acquainted what with the kind of analyses are that can be conducted within TOAD:
+Before you start using TOAD, we recommend reading the following articles to understand the kind of analyses used in TOAD:
 
 - <a href="http://scil.dinf.usherbrooke.ca/wp-content/papers/descoteaux-poupon-book-chapter.pdf" target="_blank">Descoteaux, M. and  Poupon, C. - Diffusion-weighted MRI Book chapter</a>
 

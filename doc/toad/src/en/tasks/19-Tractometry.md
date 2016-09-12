@@ -37,8 +37,10 @@ Configuration file to remove outliers
 ## Expected result(s) - Quality Assessment (QA)
 
 It creates two folders:
+
 - outlier_cleaned_tracts: each bundle extracted
-- outliers: each bundle extracted:
+
+- outliers: each bundle extracted
 
 Production of an image (png) for each example for the QA in order to check the results.
 

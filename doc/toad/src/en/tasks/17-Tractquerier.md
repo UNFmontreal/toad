@@ -25,7 +25,7 @@ The tractquerier step extracts specific bundles of streamlines using WMQL .
 
 - `atlas: wmparc`
 
-Query dictionnary
+Query dictionary
 
 - `qryDict: tq_dict_freesurfer.qry`
 
@@ -45,7 +45,7 @@ Downsample factor to reduce output file size
 
 ### 2- Use your own queries and atlases
 
-If you want to use your own queries and atlas the first thing you need to do it's to provide a dictionnary of your atlas starting with tq_dict, queries starting with queries and finally if you are using another atlas you need to change config file.
+If you want to use your own queries and atlas, the first thing you need to do is to provide a dictionary of your atlas starting with **tq_dict**, queries starting with **queries** (put these files into your toad_data folder or your subject's folder). If you are using another atlas, you need to change your config file.
 
 atlas: wmparc -> atlas: myatlas
 
