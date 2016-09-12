@@ -39,11 +39,15 @@ Nous vous conseillons également de **consulter [cette page](tuto/00-refs.md)** 
 
 <img src="figs/BPinsard.jpg" alt="Basile Pinsard" style="width: 50px;"/> **Basile Pinsard** : développeur et conseiller scientifique
 
-<img src="figs/GVallet.jpg" alt="Guillaume Vallet" style="width: 50px;"/>  **Guillaume Vallet** : responsable de la documentation et du site internet
+<img src="figs/KAurousseau.png" alt="Kristina Aurousseau" style="width: 50px;"/> **Kristina Aurousseau** : traduction, documentation du projet et gestion du groupe google TOAD
 
-<img src="figs/MDesrosiers.jpg" alt="Mathieu Desrosiers" style="width: 50px;"/> **Mathieu Desrosiers** : développeur
+## Anciens collaborateurs
 
-<img src="figs/AHanganu.jpg" alt="Alexandru Hanganu" style="width: 50px;"/> **Alexandru Hanganu** : conseiller scientifique
+<img src="figs/GVallet.jpg" alt="Guillaume Vallet" style="width: 50px;"/>  **Guillaume Vallet**
+
+<img src="figs/MDesrosiers.jpg" alt="Mathieu Desrosiers" style="width: 50px;"/> **Mathieu Desrosiers**
+
+<img src="figs/AHanganu.jpg" alt="Alexandru Hanganu" style="width: 50px;"/> **Alexandru Hanganu**
 
 
 ## Mot du directeur

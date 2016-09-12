@@ -38,6 +38,10 @@ We also recommend **visiting [this page](tuto/00-refs.md)** to help you better u
 
 <img src="figs/BPinsard.jpg" alt="Basile Pinsard" style="width: 50px;"/> **Basile Pinsard**: developer and scientific advisor
 
+<img src="figs/KAurousseau.png" alt="Kristina Aurousseau" style="width: 50px;"/> **Kristina Aurousseau** : translation, documentation of the project and manage google group TOAD
+
+## Previous collaborators
+
 <img src="figs/GVallet.jpg" alt="Guillaume Vallet" style="width: 50px;"/>  **Guillaume Vallet**: in charge of the documentation and of the website
 
 <img src="figs/MDesrosiers.jpg" alt="Mathieu Desrosiers" style="width: 50px;"/> **Mathieu Desrosiers**: developer
