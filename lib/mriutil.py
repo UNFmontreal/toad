@@ -393,7 +393,7 @@ def plotConnectome(source, target,  lutFile=None, title=None, label=None, skipro
 
     else:
         labels = [index for index in range(data.shape[0])]
- 
+
     image = ax.imshow(data, interpolation="nearest")
     colorBar = plt.colorbar(image)
     plt.setp(colorBar.ax.get_yticklabels(), visible=True)
@@ -411,13 +411,16 @@ def plotConnectome(source, target,  lutFile=None, title=None, label=None, skipro
     return target
 
 
-def transform_to_affine(streams, header, affine):
+def transform_to_trackvis_voxmm(streams, header):
+    from nibabel.volumeutils import rec2dict
+    from nibabel.streamlines.trk import get_affine_rasmm_to_trackvis
     from dipy.tracking.utils import move_streamlines
-    rotation, scale = numpy.linalg.qr(affine)
-    streams = move_streamlines(streams, rotation)
-    scale[0:3,0:3] = numpy.dot(scale[0:3,0:3], numpy.diag(1./header['voxel_size']))
-    scale[0:3,3] = abs(scale[0:3,3])
-    streams = move_streamlines(streams, scale)
+    header = rec2dict(header)
+    header['voxel_sizes'] = header['voxel_size']
+    header['voxel_to_rasmm'] = header['vox_to_ras']
+    header['dimensions'] = header['dim']
+    affine = get_affine_rasmm_to_trackvis(header)
+    streams = move_streamlines(streams, affine)
     return streams
 
 
@@ -548,7 +551,7 @@ def tck2trk(source, anatomical ,target):
     axcode = nibabel.orientations.aff2axcodes(affine)
     trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
     trk_header['vox_to_ras'] = affine
-    transformed_streamlines = transform_to_affine(streamlines, trk_header, affine)
+    transformed_streamlines = transform_to_trackvis_voxmm(streamlines, trk_header)
     trk_tracks = ((ii, None, None) for ii in transformed_streamlines)
     nibabel.trackvis.write(target, trk_tracks, trk_header)
     return target
