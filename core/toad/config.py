@@ -137,17 +137,17 @@ class Config(object):
 
         #config file could be found into the root of the project, into the subject and into the backup directory
         if arguments.subject:
+
+            configFile = "{}/configRunning.cfg".format(os.path.join(arguments.subject, "00-backup"))
+            if os.path.exists(configFile):
+                configFiles.append(configFile)
+
             for directory in [os.path.dirname(arguments.subject),
                            arguments.subject,
                            os.path.join(arguments.subject, "00-backup")]:
                 configFile = "{}/config.cfg".format(directory)
                 if os.path.exists(configFile):
                     configFiles.append(configFile)
-
-            # Add configRunning file because every tasks
-            configFile = "{}/configRunning.cfg".format(os.path.join(arguments.subject, "00-backup"))
-            if os.path.exists(configFile):
-                configFiles.append(configFile)
 
         if arguments.config:
             for config in arguments.config:

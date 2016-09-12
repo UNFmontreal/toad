@@ -118,6 +118,10 @@ class TensorDipy(GenericTask):
         qaImages = Images()
         softwareName = 'dipy'
 
+        #Set information
+        information = "Fit method: {}".format(self.get('fitMethod'))
+        qaImages.setInformation(information)
+
         #  mask image
         mask = self.getRegistrationImage('mask', 'resample')
 
