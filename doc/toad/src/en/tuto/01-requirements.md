@@ -7,8 +7,8 @@ This account could either be an individual or a team account.
 To obtain an account, or for all account-related inquiries, please contact the system administrator at the UNF [André Cyr](mailto:andre.cyr@criugm.qc.ca).
 
 ## Command line
-TOAD toolbox is command-line-based that requires entries on a terminal.
-Introduction to the use of command line and terminal is beyond the purpose of this tutorial.
+TOAD toolbox is a command-line-based pipeline that requires entries on a terminal.
+Introduction to the use of the command line and terminal is beyond the purpose of this tutorial.
 However, there are plenty of resources available for those who need to become familiar with this requirement. 
 
 For instance:

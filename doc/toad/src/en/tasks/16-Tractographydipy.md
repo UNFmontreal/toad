@@ -11,7 +11,7 @@
 
 #
 
-This task is not yet implemeted
+This task is not yet implemented
 
 ## References
 

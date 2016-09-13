@@ -37,15 +37,16 @@ The set of folders for each participant should ressemble the following table:
 |-----------------------|-------------------------------------------------------|
 |00-backup              | Raw data (Nifti)            		                |
 |00-qa                  | Quality Assessment - HTML summary pages               |
+|00-outputs             | Regroups all data outputs (denoised and resampled images, tensors, fiber tracts, ...) |                                                   |
+|00-snr                 | Disable				                |
 |01-preparation         | Image reorientation, if necessary	                |
 |02-parcellation        | Parseg and Brodmann, left/right (Freesurfer)          |
-|03-atlas               | Generation and application of atlases                 |
+|03-atlas               | Disable				                |
 |04-denoising           | Image denoising                                 	|
 |05-correction          | Motion correction, field inhomogeneity, etc.	        |
-|05-preprocessing       |                                                       |
 |06-upsampling          | Resolution upsampling	                                |
 |07-registration        | Registration T1/DWI                                   |
-|08-atlasregistration   |                                                       |
+|08-atlasregistration   | Disable                                               |
 |09-masking             | Mask generation                   	                |
 |08-snr                 | Signal to noise ratio calculation    	                |
 |10-tensorfsl           | Tensor reconstruction (FSL)                 	        |
@@ -54,10 +55,11 @@ The set of folders for each participant should ressemble the following table:
 |13-hardimrtrix         | HARDI reconstruction  (MRTRIX)                        |
 |14-hardidipy           | HARDI reconstruction (Dipy)                           |
 |15-tractographymrtrix  | Fiber tract reconstruction (MRTRIX)          	        |
-|16-tractographydipy    | Fiber tract reconstruction (Dipy)      	        |
-|17-snr                 | Signal to noise ratio calculation                     |
-|18-outputs             | Regroups all data outputs (denoised and resampled images, tensors, fiber tracts, ...) |                                                   |
-|99-logs                | Log and error files                          			
+|16-tractographydipy    | Disable				     	        |
+|17-tractquerier	| Automatic segmentation of bundles of interest using White Matter Query Language|
+|18-tractfiltering	| Automatic removal of outliers streamlines		|
+|19-tractometry		| Automatic computation of metrics along the streamlines|
+|99-logs                | Log and error files                          		|	
 
 *Note:* This organisation may change with the different versions of TOAD. Furthermore, the choice of certain parameters at the beginning of the pipeline, or the absence of certain files (e.g. B0 AP/PA) means certain tasks will not be executed.
 
