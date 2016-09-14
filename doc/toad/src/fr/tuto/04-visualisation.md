@@ -13,7 +13,7 @@ Ces deux logiciels sont librement disponibles sur Internet et ils sont égalemen
 ***Il est déterminant de vérifier vos images aux différentes étapes et non simplement les images qui serviront aux analyses. De même, et pour rappel, vous devriez toujours vérifier vos données avant de lancer une quelconque analyse ou prétraitement, y compris TOAD.*** 
 
 Pour l’ensemble des visualisations, **vous devrez vous connecter sur un des serveurs de l’UNF** (Stark ou Magma) en connection ssh : `ssh -Y username@stark.criugm.qc.ca`. 
-Les commandes présentées ci-dessous sont à exécuter depuis le répertoire de travail d’un participant donné de TOAD (par défaut le dossier `toad_data`, voir []()). 
+Les commandes présentées ci-dessous sont à exécuter depuis le répertoire de travail d’un participant donné de TOAD (par défaut le dossier `toad_data`). 
 
 <!-- FIXME add cross-ref -->
 

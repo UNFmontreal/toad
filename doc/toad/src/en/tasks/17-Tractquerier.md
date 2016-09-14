@@ -70,6 +70,4 @@ Production of an image (png) for each example for the QA in order to check the r
 
 - Tract_querier 
 
-> Jolles, D., Wassermann, D., Chokhani, R., Richardson, J., Tenison, C., Bammer, R., Fuchs, L., et al. (2015). Plasticity of left perisylvian white-matter tracts is associated with individual differences in math learning. Brain structure & function. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/25604464
-
-
+> Wassermann, D., Makris, N., Rathi, Y. et al. (2016) The white matter query language: a novel approach for describing human white matter anatomy. Brain Structural Function. doi:10.1007/s00429-015-1179-4

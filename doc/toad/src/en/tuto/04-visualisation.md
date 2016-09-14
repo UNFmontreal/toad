@@ -15,7 +15,7 @@ These two programs are available for free on the Internet and are also installed
 ***It is of the utmost importance to verify your images at each step and not only those that will serve for the analysis. As a reminder, you should always verify your data before launching an analysis or preprocessing of any kind, TOAD included.***
 
 Pour all visualizations, **you must connect via the UNF servers** (Stark ou Magma) through an ssh connection : `ssh -Y username@stark.criugm.qc.ca`.
-The commands presented below are to be executed from the walking directory of a given TOAD participant (the `toad_data` folder by default, see [] ()).
+The commands presented below are to be executed from the walking directory of a given TOAD participant (the `toad_data` folder by default).
 
 <!-- FIXME add cross-ref -->
 
