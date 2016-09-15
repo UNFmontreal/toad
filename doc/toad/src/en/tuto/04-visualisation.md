@@ -14,7 +14,7 @@ These two programs are available for free on the Internet and are also installed
 
 ***It is of the utmost importance to verify your images at each step and not only those that will serve for the analysis. As a reminder, you should always verify your data before launching an analysis or preprocessing of any kind, TOAD included.***
 
-Pour all visualizations, **you must connect via the UNF servers** (Stark ou Magma) through an ssh connection : `ssh -Y username@stark.criugm.qc.ca`.
+For all visualizations, **you must connect via the UNF servers** (Stark ou Magma) through an ssh connection : `ssh -Y username@stark.criugm.qc.ca`.
 The commands presented below are to be executed from the walking directory of a given TOAD participant (the `toad_data` folder by default).
 
 <!-- FIXME add cross-ref -->
@@ -104,7 +104,7 @@ You can visualize if the tensor reconstruction indeed corresponds to your DWI da
 freeview 10-tensorfsl/dwi_*_sse.nii.gz
 ```
 
-Vous avez ensuite plusieurs façon de visualiser les tenseurs:
+You've got different ways to visualize tensors:
 ```bash
 # FSL
 fslview 10-tensorfsl/*fa.nii.gz 10-tensorfsl/*v1.nii.gz
