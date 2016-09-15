@@ -23,9 +23,9 @@ The tractquerier step extracts specific bundles of streamlines using WMQL .
 
 ## Config files parameter
 
-- `atlas: wmparc`
+- `atlasSuffix: None`
 
-Query dictionnary
+Query dictionary
 
 - `qryDict: tq_dict_freesurfer.qry`
 
@@ -45,11 +45,11 @@ Downsample factor to reduce output file size
 
 ### 2- Use your own queries and atlases
 
-If you want to use your own queries and atlas the first thing you need to do it's to provide a dictionnary of your atlas starting with tq_dict, queries starting with queries and finally if you are using another atlas you need to change config file 
+If you want to use your own queries and atlas, the first thing you need to do is to provide a dictionary of your atlas starting with **tq_dict**, queries starting with **queries** (put these files into your toad_data folder or your subject's folder). If you are using another atlas, you need to change your config file.
 
-[tractquerier]
+Your filename should be renammed wmparc_resample_'myatlasSuffix'.nii.gz
 
-atlas: wmparc -> atlas: myatlas
+- `atlasSuffix: myatlasSuffix`
 
 This atlas should be in atlasregistration step or registration step.
 
@@ -70,6 +70,4 @@ Production of an image (png) for each example for the QA in order to check the r
 
 - Tract_querier 
 
-> Jolles, D., Wassermann, D., Chokhani, R., Richardson, J., Tenison, C., Bammer, R., Fuchs, L., et al. (2015). Plasticity of left perisylvian white-matter tracts is associated with individual differences in math learning. Brain structure & function. Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/25604464
-
-
+> Wassermann, D., Makris, N., Rathi, Y. et al. (2016) The white matter query language: a novel approach for describing human white matter anatomy. Brain Structural Function. doi:10.1007/s00429-015-1179-4

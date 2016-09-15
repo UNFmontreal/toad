@@ -37,15 +37,16 @@ L’ensemble des dossiers pour chaque sujet devrait ressembler à peu près au t
 |-----------------------|-------------------------------------------------------|
 |00-backup              | Données originales (Nifti)                            |
 |00-qa                  | Quality Assessment - pages HTML de synthèse           |
+|00-outputs             | Regroups all data outputs (denoised and resampled images, tensors, fiber tracts, ...) |                                                   |
+|00-snr                 | Étape ignorée                     |
 |01-preparation         | Réorientation des images si nécessaire                |
 |02-parcellation        | Parseg et Brodmann, gauche/droite (Freesurfer)        |
 |03-atlas               | Création et application des atlas                     |
 |04-denoising           | Débruitage des images                                 |
 |05-correction          | Correction mouvement, inhomgénéité du champs, etc.    |
-|05-preprocessing       |                                                       |
 |06-upsampling          | Mise à l’échelle des images                           |
 |07-registration        | Registration T1/DWI                                   |
-|08-atlasregistration   |                                                       |
+|08-atlasregistration   | Étape ignorée                                                      |
 |09-masking             | Création des masques                                  |
 |08-snr                 | Calcul du rapport signal sur bruit                    |
 |10-tensorfsl           | Reconstruction des tenseurs (FSL)                     |
@@ -54,10 +55,11 @@ L’ensemble des dossiers pour chaque sujet devrait ressembler à peu près au t
 |13-hardimrtrix         | Reconstruction HARDI (MRTRIX)                         |
 |14-hardidipy           | Reconstruction HARDI (Dipy)                           |
 |15-tractographymrtrix  | Reconstruction des faisceaux (MRTRIX)                 |
-|16-tractographydipy    | Reconstruction des faisceaux (Dipy)                   |
-|17-snr                 | Calcul du ratio signal sur bruit                      |
-|18-outputs             | Regroupe tous les fichiers exploitables (images débruités, resamplées, tensors, tracto, ...) |                                                  
-|99-logs                | Fichiers logs et erreurs                              |
+|16-tractographydipy    | Étape ignorée                   |
+|17-tractquerier	| Segmentation automatique des faisceaux d'intérêt en utilisation le White Matter Query Language|
+|18-tractfiltering	| Suppression automatique des fibres aberrantes		|
+|19-tractometry		| Calcule des metriques le long des fibres		|
+|99-logs                | Log and error files                          		|
 
 *Note :* Il est possible que cet arbre change avec les versions de TOAD. 
 De même, le choix de certains paramètres au lancement de TOAD ou l’absence de certains types de fichiers (comme les B0 AP/PA) font que certaines tâches ne seront pas exécutées. 

@@ -1,4 +1,4 @@
-# Tractographydipy
+# Tractographydipy - This step has been disabled
 ---
 
 |                |                                                       |
@@ -11,7 +11,7 @@
 
 #
 
-This task is not yet implemeted
+This task is not yet implemented
 
 ## References
 

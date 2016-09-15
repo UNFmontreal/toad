@@ -1,4 +1,4 @@
-# Atlas
+# Atlas - This step has been disabled
 ---
 
 |                |                                                       |
@@ -13,7 +13,7 @@
 
 ## Goal
 
-The atlas step creates the required atlas using Freesurfer functions.
+The atlas step creates the required atlas using Freesurfer functions. 
 
 ## Requirements
 

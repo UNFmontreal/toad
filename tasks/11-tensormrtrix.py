@@ -98,6 +98,10 @@ class TensorMrtrix(GenericTask):
         qaImages = Images()
         softwareName = 'mrtrix'
 
+        #Set information
+        information = "Estimation using WLS with {} iteration(s)".format(self.get('iter'))
+        qaImages.setInformation(information)
+
         #Get images
         mask = self.getRegistrationImage('mask', 'resample')
 

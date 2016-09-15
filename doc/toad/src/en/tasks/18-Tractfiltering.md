@@ -5,7 +5,7 @@
 |----------------|-------------------------------------------------------|
 |**Name**        | tractfiltering                                    |
 |**Goal**        | Remove outliers |
-|**Config file** | `qryDict` <br> `qryFile` <br> `ignore`|
+|**Config file** | `ignore`|
 |**Time**        | About 5 minutes                                         |
 |**Output**      | -  Each bundles extracted from tractquerier <br>|
 
@@ -31,17 +31,18 @@ Configuration file to remove outliers
 
 ### 1- TractFiltering
 
-<a href="http://tract-querier.readthedocs.org/en/latest/" target="_blank">WMQL documentation</a>
+- function: scil_run_tractometry (If you need more information send a message to toadunf.criugm@gmail.com)
 
 ### 2- Use your own queries and atlases
 
-If you want to use your own configuration file you need to add it in your backup or raw folder. It has to start with 'configTractFiltering' with a 'json' extension. You can find an example in /usr/local/toad/template/tractometry/configTractFiltering_default.json
+If you want to use your own configuration file you need to add it in your backup or raw folder. It has to start with **configTractFiltering** with a **.json** extension. You can find an example in /usr/local/toad/template/tractometry/configTractFiltering_default.json
 
 ## Expected result(s) - Quality Assessment (QA)
 
 It creates two folders:
+
 - outlier_cleaned_tracts: each bundle extracted
-- outliers: each bundle extracted:
+- outliers: streamlines that have been removed
 
 Production of an image (png) for each example for the QA in order to check the results.
 

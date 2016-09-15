@@ -1,7 +1,7 @@
 # Data retrieval and preparation 
 
 ## From the UNF web interface
-The easiest and most practical way to retrieve data acquired at the Unité de Neuroimagerie Fonctionnelle (UNF) is to use the platform available at the UNF website. This platform takes care of all that is necessary to prepare and reconstruct the images from the scanner into a downloadable Dicom format. To access the site: either from **the website of the [Neuroimaging unit](http://www.unf-montreal.ca)** (Menu `Services` then `MRI Data Download`), or directly from **[the download platform of the unit](https://unf-montreal.ca)**
+The easiest and most practical way to retrieve data acquired at the Unité de Neuroimagerie Fonctionnelle (UNF) is to use the platform available at the UNF website. This platform takes care of all that is necessary to prepare and reconstruct the images from the scanner into a downloadable Dicom format. You can access the site either from **the website of the [Neuroimaging unit](http://www.unf-montreal.ca)** (Menu `Services` then `MRI Data Download`), or directly from **[the download platform of the unit](https://unf-montreal.ca)**
 
 ![UNF homepage](../figs/unf_website_home.png)
 

@@ -55,12 +55,13 @@ class Correction(GenericTask):
 
         [dwi, b0, b0AP, b0PA] = self.__oddEvenNumberOfSlices(dwi, b0, b0AP, b0PA)
 
-        self.set('correctionMethod', None)
+        self.set('method', None)
+
 
         if b0AP is False or b0PA is False:
             topupBaseName = None
             b0Image = b0
-            self.set('correctionMethod', 'fieldmap')
+            self.set('method', 'fieldmap')
         else:
             # Concatenate B0 image together
             if self.get("phase_enc_dir") == "0":
@@ -74,7 +75,7 @@ class Correction(GenericTask):
             # Run topup on concatenate B0 image
             [topupBaseName, topupImage] = self.__topup(concatenateB0Image, acqpTopup, self.get('b02b0_filename'))
             b0Image = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
-            self.set('correctionMethod', 'topup')
+            self.set('method', 'topup')
 
         self.info("create a suitable mask for the dwi")
         extraArgs = " -dof 6 "  # same subject
@@ -109,7 +110,7 @@ class Correction(GenericTask):
         if mag and phase and not self.__topupCorrection:
             # OutputImage is now used for fieldmap correction
             outputImage = self.__computeFieldmap(outputImage, bVals, mag, phase, norm, parcellationMask, freesurferAnat)
-            self.set('correctionMethod', 'fieldmap')
+            self.set('method', 'fieldmap')
 
         # Produce a valid b0 and mask for QA
         b0Corrected = self.buildName(b0, 'corrected')
@@ -570,7 +571,7 @@ class Correction(GenericTask):
 
         # Information on distorsion correction
         information = "Eddy movement corrections were applied to the images "
-        correctionMethod = self.get('correctionMethod')
+        correctionMethod = self.get('method')
         if correctionMethod == 'topup':
             information += "and distortion corrections were conducted on the " \
                            "AP and PA images."

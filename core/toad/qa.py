@@ -128,6 +128,8 @@ class Qa(object):
         """
         versions = ''
         if self.getName() == 'qa':
+            print self.logDir
+            print self.get('general','versions_file_name')
             versions = minidom.parse(os.path.join(
                     self.logDir, self.get('general','versions_file_name')))
             versions = versions.toprettyxml()
@@ -240,10 +242,30 @@ class Qa(object):
         jinja2Env = Environment(
                 loader=FileSystemLoader(templateDir), trim_blocks=True)
         tpl = jinja2Env.get_template('metho.tpl')
-        tags_metho = self.__getTags()
+
+        tags_softwares = self.__getVersions()
+        tags_metho = self.__getTags(tags_softwares)
+        #  print tags_metho
         htmlCode = tpl.render(**tags_metho)
         util.createScript(os.path.join(self.qaDir,'metho.html'), htmlCode)
 
+    def __getVersions(self):
+        tags = {}
+        versions = minidom.parse(os.path.join(
+                    self.logDir, self.get('general','versions_file_name')))
+        softs = versions.getElementsByTagName('softwares')[-1].getElementsByTagName('software')
+
+        for soft in softs:
+            currentVersion = str(soft.getElementsByTagName('version')[0].firstChild.data)
+            currentSoft = str(soft.getElementsByTagName('name')[0].firstChild.data).lower()
+
+            if 'freesurfer' in currentSoft:
+                currentVersion = currentVersion.split('pub-')[1]
+
+            tags[ currentSoft + '_vers'] = currentVersion
+
+
+        return tags
 
     def configGet(self, section, key):
         try:
@@ -285,7 +307,8 @@ class Qa(object):
 
         return tags
 
-    def __getTags(self):
+    def __getTags(self, tags_softwares):
+
 
         methodology = self.configFillSection('methodology') # Fill tags with config file informations
         denoising = self.configFillSection('denoising', True)
@@ -297,15 +320,184 @@ class Qa(object):
         hardimrtrix = self.configFillSection('hardimrtrix', True)
         hardidipy = self.configFillSection('hardidipy', True)
         tractographymrtrix = self.configFillSection('tractographymrtrix', True)
+        tractquerier = self.configFillSection('tractquerier', True)
+        tractfiltering = self.configFillSection('tractfiltering', True)
+        tractometry = self.configFillSection('tractometry', True)
+
+        references = self.configFillSection('references')
 
         tags = util.merge_dicts(methodology, denoising, denoising, correction, upsampling, 
-                                tensorfsl, tensordipy, tensormrtrix, hardimrtrix, hardidipy, tractographymrtrix)
+                                tensorfsl, tensordipy, tensormrtrix, hardimrtrix, hardidipy, tractographymrtrix, tractquerier, tractfiltering, tractometry, tags_softwares)
 
         # Special case for 3T Tim Trio
         if tags['magneticfieldstrength'] == '3' and tags['mrmodel'] == 'TrioTim' and tags['denoising_number_array_coil'] == '4':
             tags['number_array_coil'] = 12
         else:
             tags['number_array_coil'] = tags['denoising_number_array_coil']
+
+        methodology = ''
+        bibReferences = []
+
+        indexReferences = 1
+        if not tags['denoising_ignore']:
+            methodology += 'First, DWI were denoised using {} method [{}]. '.format(tags['denoising_algorithm'],indexReferences)
+            if tags['denoising_algorithm'] == 'nlmeans':
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_nlmeans']))
+            elif tags['denoising_algorithm'] == 'aonlm':
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_aonlm']))
+            elif tags['denoising_algorithm'] == 'lpca':
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_lpca']))
+            indexReferences += 1
+
+        if not tags['correction_ignore']:
+            if not tags['denoising_ignore']:
+                methodology += 'Then, they were corrected using {} [{}]. '.format(tags['correction_method'],indexReferences)
+                methodology +=  'Gradient directions were corrected corresponding to motion correction parameters. '
+            else:
+                methodology += 'First, DWI were corrected using {} [{}]. '.format(tags['correction_method'],indexReferences)
+
+            methodology += 'Motion-corrected images '
+
+            bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_correction']))
+            indexReferences += 1
+
+
+        else:
+            methodology += 'DWI '
+
+        methodology += 'were upsampled using {} interpolation (upsampling to anatomical resolution). '.format(tags['upsampling_interp'])
+
+        methodology += '</ br>Anatomical image went through Freesurfer pipeline [{}] in order to be used in the Anatomically-Constrained Tractography (ACT). T1 image was registered to the DWI '.format(indexReferences)
+        bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_freesurfer']))
+        indexReferences += 1
+
+        if not (tags['tensorfsl_ignore'] and  tags['tensordipy_ignore'] and tags['tensormrtrix_ignore']):
+            methodology += '<p>Eigenvectors, eigenvalues, fractional anisotropy (FA), radial diffusivity (RD), axial diffusivity (AD) and mean diffusivity (MD) were extracted from tensor reconstruction using '
+            if not (tags['tensorfsl_ignore'] and  tags['tensordipy_ignore'] and tags['tensormrtrix_ignore']):
+                methodology += 'FDT toolbox from FSL {} using {} method [{}] '.format(tags['fsl_vers'], tags['tensorfsl_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tensorfsl']))
+                indexReferences += 1
+
+                methodology += 'and DIPY {} using {} method [{}] '.format(tags['dipy_vers'], tags['tensordipy_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_dipy']))
+                indexReferences += 1
+
+                methodology += 'and MRtrix {} using {} method [{}]. '.format(tags['mrtrix_vers'], tags['tensormrtrix_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tensormrtrix']))
+                indexReferences += 1
+
+            elif not (tags['tensorfsl_ignore'] and tags['tensordipy_ignore']):
+                methodology += 'FDT toolbox from FSL {} using {} method [{}] '.format(tags['fsl_vers'], tags['tensorfsl_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tensorfsl']))
+                indexReferences += 1
+
+                methodology += 'and DIPY {} using {} method [{}]. '.format(tags['dipy_vers'], tags['tensordipy_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_dipy']))
+                indexReferences += 1
+
+            elif not (tags['tensorfsl_ignore'] and tags['tensormrtrix_ignore']):
+                methodology += 'FDT toolbox from FSL {} using {} method [{}] '.format(tags['fsl_vers'], tags['tensorfsl_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tensorfsl']))
+                indexReferences += 1
+
+                methodology += 'and MRtrix {} using {} method [{}]. '.format(tags['mrtrix_vers'], tags['tensormrtrix_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tensormrtrix']))
+                indexReferences += 1
+
+            elif not (tags['tensordipy_ignore'] and tags['tensormrtrix_ignore']):
+                methodology += 'DIPY {} using {} method [{}]. '.format(tags['dipy_vers'], tags['tensordipy_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_dipy']))
+                indexReferences += 1
+
+                methodology += 'and MRtrix {} using {} method {}]. '.format(tags['mrtrix_vers'], tags['tensormrtrix_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tensormrtrix']))
+                indexReferences += 1
+
+            elif not tags['tensorfsl_ignore']:
+                methodology += 'FDT toolbox from FSL {} using {} method [{}]. '.format(tags['fsl_vers'], tags['tensorfsl_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tensorfsl']))
+                indexReferences += 1
+
+            elif not tags['tensordipy_ignore']:
+                methodology += 'DIPY {} using {} method [{}]. '.format(tags['dipy_vers'], tags['tensordipy_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_dipy']))
+                indexReferences += 1
+
+            elif not tags['tensormrtrix_ignore']:
+                methodology += 'MRtrix {} using {} method [{}]. '.format(tags['mrtrix_vers'], tags['tensormrtrix_fitmethod'], indexReferences)
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tensormrtrix']))
+                indexReferences += 1
+
+            methodology += '</p>'
+
+        if not (tags['hardidipy_ignore'] or tags['hardimrtrix_ignore']):
+            methodology += '<p>Fiber orientation distribution function (fODF) reconstruction was done using '
+
+        if not tags['hardidipy_ignore']:
+            methodology += 'DIPY'
+            if tags['tensordipy_ignore']:
+                methodology += ' {} [{}]'.format(tags['ref_dipy'], indexReferences)
+
+        elif not tags['hardimrtrix_ignore']:
+            methodology += 'MRtrix'
+            if tags['tensordipy_ignore']:
+                methodology += ' {} [{}]'.format(tags['ref_mrtrix'], indexReferences)
+
+        if not (tags['hardimrtrix_ignore'] and tags['hardidipy_ignore']): 
+            methodology += ' and MRtrix. '
+        else:
+            methodology += '. '
+
+        if not tags['hardidipy_ignore']:
+            methodology += 'Dipy method: The response function for a single fibre population was estimated using {}. '.format(tags['hardidipy_algorithmresponsefunction'])
+
+            methodology += 'This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) [{}] with a maximum spherical harmonic order lmax of {}. '.format(indexReferences, tags['hardidipy_lmax'])
+            bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_hardimrtrix']))
+            indexReferences += 1
+
+        if not tags['hardimrtrix_ignore']:
+            methodology += 'MRtrix method: The response function for a single fibre population was estimated using {} algorithm [{}]. '.format(tags['hardimrtrix_algorithmresponsefunction'], indexReferences)
+            if tags['hardidipy_algorithmresponsefunction'] == 'tournier':
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_estimationResponseTournier']))
+                indexReferences += 1
+            if tags['hardidipy_ignore']:
+                methodology += 'This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) [{}] with a maximum spherical harmonic order lmax of {}. '.format(indexReferences, tags['hardimrtrix_lmax'])
+
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_hardimrtrix']))
+                indexReferences += 1
+            else:
+                methodology += 'This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) [{}] with a maximum spherical harmonic order lmax of {}. '.format(indexReferences-1, tags['hardimrtrix_lmax'])
+
+        if not (tags['hardidipy_ignore'] or tags['hardimrtrix_ignore']):
+            methodology += '</p>'
+
+        if not tags['tractographymrtrix_ignore']:
+            methodology += '<p>{} tractography was performed using ACT [{}] algorithm. Tractogram of {} streamlines was generated. Any track with length > {} mm was discarded. Because of storage restriction we had to downsample streamlines to a factor of {}. '.format(tags['tractographymrtrix_algorithm'], indexReferences, tags['tractographymrtrix_numbertracks'], tags['tractographymrtrix_maxlength'], tags['tractographymrtrix_downsample'])
+
+            bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tractomrtrix']))
+            indexReferences += 1
+
+        if not tags['tractquerier_ignore']:
+            methodology += 'Then, we used White Matter Query Language [{}] to select bundles of interest. '.format(indexReferences)
+            bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tractquerier']))
+            indexReferences += 1
+
+        if not tags['tractfiltering_ignore']:
+            methodology += 'These bundles have been filtered to remove outliers streamlines [{}]. '.format(indexReferences)
+
+        if not tags['tractometry_ignore']:
+            methodology += '<p>Finally, we use metrics from reconstruction method (HARDI and Tensor) to get these metrics along the streamlines.'.format(indexReferences-1)
+            bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_tractometry']))
+            indexReferences += 1
+
+
+        tags['methodology'] = methodology
+
+        allRefs = ''
+        for ref in bibReferences:
+            allRefs = allRefs + '\n' + ref
+
+        tags['allReferences'] = allRefs
 
         return tags
 

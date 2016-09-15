@@ -2,33 +2,18 @@
 
 <p>T1 and diffusion weighed images (DWI) were acquired with
 a {{number_array_coil}}-channel head coil and a {{magneticfieldstrength}}T {{manufacturer}} {{mrmodel}} magnetic resonance
-imaging system. Anatomical images were acquired using the following parameters: FoV {{t1_fov}} mm<sup>2</sup>, matrix size {{t1_matrixsize_1}} x {{t1_matrixsize_2}},{%if t1_voxelsize_iso%} {{t1_voxelsize_1}} mm isotropic resolution {%else%} {{t1_voxelsize_1}} x {{t1_voxelsize_2}} x {{t1_voxelsize_3}} mm<sup>3</sup> voxel size {%endif%}, TE/TI/TR = {{t1_te}}/{{t1_ti}}/{{t1_tr}} ms, flip angle {{t1_flipangle}} &deg and {{t1_numberslices}} slices. 
-Single shot diffusion weighted spin echo-planar imaging data was acquired using the following parameters: FoV {{dwi_fov}} mm<sup>2</sup>, matrix size {{dwi_matrixsize_1}} x {{dwi_matrixsize_2}},{% if t1_voxelsize_iso%} {{dwi_voxelsize_1}} mm isotropic resolution{%else%} {{dwi_voxelsize_1}} x {{dwi_voxelsize_2}} x {{dwi_voxelsize_3}} mm<sup>3</sup> voxel size{%endif%}, TR/TE = {{dwi_tr}}/{{dwi_te}} ms, flip angle {{dwi_flipangle}} &deg and {{dwi_numberslices}} slices. DWI were acquired along {{dwi_numdirections}} independent directions, with a b-value of {{dwi_bvalue}}s/mm<sup>2</sup>.{%if correction_method=='topup'%} A pair of b = 0 images with no diffusion weigthing and opposite phase encode polarity were acquired to allow us susceptibility distortion correction.{%elif correction_method=='fieldmap'%} A reference image with no diffusion weighted was acquired. Fieldmaps were also acquired to correct for distortion caused by magnetic field inhomogeneities.{%endif%}
+imaging system. Anatomical images were acquired using the following parameters: FoV {{t1_fov}} mm<sup>2</sup>, matrix size {{t1_matrixsize_1}} x {{t1_matrixsize_2}},{%if t1_voxelsize_iso%} {{t1_voxelsize_1}} mm isotropic resolution {%else%} {{t1_voxelsize_1}} x {{t1_voxelsize_2}} x {{t1_voxelsize_3}} mm<sup>3</sup> voxel size {%endif%}, TE/TI/TR = {{t1_te}}/{{t1_ti}}/{{t1_tr}} ms, flip angle {{t1_flipangle}} &deg. 
+Single shot diffusion weighted spin echo-planar imaging data was acquired using the following parameters: FoV {{dwi_fov}} mm<sup>2</sup>, matrix size {{dwi_matrixsize_1}} x {{dwi_matrixsize_2}},{% if t1_voxelsize_iso%} {{dwi_voxelsize_1}} mm isotropic resolution{%else%} {{dwi_voxelsize_1}} x {{dwi_voxelsize_2}} x {{dwi_voxelsize_3}} mm<sup>3</sup> voxel size{%endif%}, TR/TE = {{dwi_tr}}/{{dwi_te}} ms, flip angle {{dwi_flipangle}} &deg. DWI were acquired along {{dwi_numdirections}} independent directions, with a b-value of {{dwi_bvalue}}s/mm<sup>2</sup>.{%if correction_method=='topup'%} A pair of b = 0 images with no diffusion weigthing and opposite phase encode polarity were acquired to allow susceptibility distortion correction.{%elif correction_method=='fieldmap'%} A reference image with no diffusion weighted was acquired. Fieldmaps were also acquired to correct for distortion caused by magnetic field inhomogeneities.{%endif%}
 </p>
 
-<h3>Prepocessing</h3>
+<h3>Preprocessing</h3>
 
 <p>
-{% if not denoising_ignore %}First, DWI were denoised using {{denoising_algorithm}} method [{{denoising_ref}}].{%endif%}{%if not correction_ignore and not denoising_ignore%} Then, they {%elif not correction_ignore%} First, DWI{%endif%}{%if not correction_ignore%} were corrected using {{correction_algorithm}} [{{correction_ref}}].{%endif%}{%if not correction_ignore%}Gradient directions were corrected corresponding to motion correction parameters.{%endif%}{%if not correction_ignore%} Motion-corrected images {%else%} DWI {%endif%}were upsampled using {{upsampling_interp}} interpolation (upsampled to anatomical resolution).
 
-Anatomical image went through Freesurfer's pipeline {{seg_ref}} in order to be used in the Anatomically-Constrained Tractography (ACT). T1 image was registered to the DWI {%if correction%}motion-corrected {%endif%}images. 
-
-{%if not tensorfsl_ignore or not tensordipy_ignore or not tensormrtrix_ignore%}Eigenvectors, eigenvalues, fractional anisotropy (FA), radial diffusivity (RD), axial diffusivity (AD) and mean diffusivity (MD) were extracted from tensor reconstruction using {%if not tensorfsl_ignore%} FDT toolbox from FSL {{fsl_vers}} using {{tensorfsl_fitmethod}} method.{%elif not tensordipy_ignore%} DIPY {{dipy_vers}} using {{tensordipy_fitmethod}} method {{tensordipy_ref}} {%elif not tensormrtrix_ignore%} MRtrix {{mrtrix_vers}} using {{tensormrtrix_fitmethod}} method [{{tensormrtrix_ref}}].{%endif%}{%endif%}
-
-{%if not hardimrtrix_ignore or not hardidipy_ignore%}Fiber orientation distribution function (fODF) reconstruction was done using{%if not hardidipy_ignore%} DIPY{%elif not hardimrtrix_ignore%} MRtrix.{%endif%}{%if not hardimrtrix_ignore and not hardidipy_ignore%} and using MRtrix.{%endif%}{%endif%}
-
-
-{%if not hardidipy_ignore%}Dipy method: The response function for a single fibre population was estimated using '{{hardidipy_algorithmresponsefunction}}' algorithm [{{hardidipy_algorithmresponsefunction_ref}}]. This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) [{{hardidipy_reconstructionmethod_ref}}] with a maximum spherical harmonic order lmax of {{hardidipy_lmax}}.{%endif%}
-
-{%if not hardimrtrix_ignore%}MRtrix method: The response function for a single fibre population was estimated using '{{hardimrtrix_algorithmresponsefunction}}' algorithm [{{hardimrtrix_algorithmresponsefunction_ref}}]. This response function was then used to estimate the FOD for each voxel using Constrained Spherical Deconvolution (CSD) [{{hardimrtrix_reconstructionmethod_ref}}] with a maximum spherical harmonic order lmax of {{hardimrtrix_lmax}}.{%endif%}
-
-{%if not tractographymrtrix_ignore%}{{tractographymrtrix_algorithm}} tractography was performed {%if tractographymrtrix_methodReconstruction == 'hardi'%}using the iFOD2 algorithm [{{tractographymrtrix_ref}}]{%else%} on tensor reconstructions{%endif%}.Tractograms of {{tractographymrtrix_numbertracks}} tracks were generated by .... Tracking was performed using the following parameters: step size = {{tractographymrtrix_step}} mm; maximum angle between steps = {{tractographymrtrix_angle}} &deg; maximum track length = {{tractographymrtrix_maxlength}} mm; downsample factor = {{tractographymrtrix_downsample}}.{%endif%}
-
-{%if not tractquerier_ignore%}Tractogram was then used to extract tracks of interest using [{{tractquerier_ref}}]{%endif%} {%if not tractquerier_ignore and not tractfiltering_ignore%} Then, these bundles were filtered using [{{tractofiltering_ref}}].{%endif%}
-
+{{methodology}}
 
 <p>These tools were wrapped in the TOAD pipeline developed in the Functional Neuroimaging Unit (UNF) from the Centre de Recherche de l'Institut Universitaire de Geriatrie de Montreal (<a href='http://www.unf-montreal.ca/toad'>http://www.unf-montreal.ca/toad</a>)</p>
 
 <h3>References</h3>
 
-{{references}}
+{{allReferences}}
