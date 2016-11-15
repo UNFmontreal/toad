@@ -422,7 +422,12 @@ class GenericTask(Logger, Load, Qa):
 
             while(attempt < nbSubmission):
                 if self.__cleanupBeforeImplement:
-                    self.__cleanup()
+                    if self.config.has_option("arguments", "stop_before_task"):
+                        if not(self.config.get("arguments", "stop_before_task") == self.__name or
+                            self.config.get("arguments", "stop_before_task") == self.__moduleName.lower()):
+                            self.__cleanup()
+                    else:
+                        self.__cleanup()
 
                 try:
                     self.__implement()
