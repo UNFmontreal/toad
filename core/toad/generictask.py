@@ -407,7 +407,7 @@ class GenericTask(Logger, Load, Qa):
                 or stopTaskName == self.__moduleName.lower()
                ):
                 msg = (
-                        "\033[93mReach {} which is the value set by "
+                        "\033[92mReach {} which is the value set by "
                         "stop_before_task. Stopping the pipeline as user "
                         "request\033[0m").format(stopTaskName)
                 self.quit(msg)
