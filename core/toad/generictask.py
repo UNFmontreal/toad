@@ -235,11 +235,6 @@ class GenericTask(Logger, Load, Qa):
             self.info("Creating {} directory".format(self.workingDir))
             os.mkdir(self.workingDir)
 
-        if self.config.has_option("arguments", "stop_before_task"):
-            if (self.config.get("arguments", "stop_before_task") == self.__name or
-                self.config.get("arguments", "stop_before_task") == self.__moduleName.lower()):
-                self.quit("Reach {} which is the value set by stop_before_task. Stopping the pipeline as user request"
-                             .format(self.config.get("arguments", "stop_before_task")))
         os.chdir(self.workingDir)
         util.symlink(self.getLogFileName(), self.workingDir)
         if "qaSupplier" in dir(self):
@@ -402,6 +397,22 @@ class GenericTask(Logger, Load, Qa):
             shutil.rmtree(self.workingDir)
 
 
+    def stopBeforeTask(self):
+        """Method to stop the pipeline before the task set by the user through
+        stop_before_task option
+        """
+        if self.config.has_option("arguments", "stop_before_task"):
+            stopTaskName = self.config.get("arguments", "stop_before_task")
+            if (   stopTaskName == self.__name
+                or stopTaskName == self.__moduleName.lower()
+               ):
+                msg = (
+                        "Reach {} which is the value set by stop_before_task. "
+                        "Stopping the pipeline as user "
+                        "request").format(stopTaskName)
+                self.quit(msg)
+
+
     def run(self):
         """Method that have the responsibility to launch the implementation
 
@@ -409,6 +420,8 @@ class GenericTask(Logger, Load, Qa):
             tasks: the list of all  qualified task for this pipeline
 
         """
+        self.stopBeforeTask()
+
         #@TODO relocate logHeader 'implements'
         attempt = 0
         self.logHeader("implement")
