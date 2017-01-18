@@ -107,10 +107,10 @@ class Tractquerier(GenericTask):
         """
         trks = self.getImages('dwi', None, 'trk')
 
-        if len(trks) > 0:
-            return False
-        else:
+        if isinstance(trks, (int, float)):
             return True
+        else:
+            return False
 
 
     def qaSupplier(self):

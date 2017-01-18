@@ -81,7 +81,7 @@ class Registration(GenericTask):
 
     def __transformFslToMrtrixMatrix(self, source, b0, matrix ):
         target = self.buildName(matrix, "mrtrix", ".mat")
-        cmd = "transformcalc {} {} {} flirt_import {} -quiet".format(matrix, source, b0, target)
+        cmd = "transformconvert {} {} {} flirt_import {} -quiet".format(matrix, source, b0, target)
         self.launchCommand(cmd)
         return target
 

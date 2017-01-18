@@ -66,7 +66,7 @@ class HardiMrtrix(GenericTask):
         self.info("Starting dwi2fod creation for csd from mrtrix on {}".format(source))
 
         tmp = self.buildName(source, "tmp")
-        cmd = "dwi2fod {} {} {} -mask {} -grad {} -nthreads {} -quiet"\
+        cmd = "dwi2fod csd {} {} {} -mask {} -grad {} -nthreads {} -quiet"\
             .format(source, dwi2response, tmp, mask, bFile, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
 
