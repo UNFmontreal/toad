@@ -59,7 +59,7 @@ def __parseArguments():
               |- 03-atlas
               |- 04-denoising
               |- 05-correction
-              |- 06-preprocessing
+              |- 06-upsampling
               |- 07-registration
               |- 08-atlasregistration
               |- 09-masking
