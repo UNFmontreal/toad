@@ -23,12 +23,15 @@ class GenericTask(Logger, Load, Qa):
 
     def __init__(self, subject, *args):
         """Set up a TASK child class environment.
+
         Initialise the Global Configuration, the Logger, the system load routines.
         Define a list of dependencies prerequisite to run this tasks.
         Define, create and aliases a Working directory for the tasks.
+
         If more arguments have been supplied to generic tasks, GenericTask will create an alias
         for each additionnal arg adding the suffix Dir to the name provided
         on the first optionnal arg provided to __init__
+
         """
 
         self.__order = self.initializeTasksOrder()
@@ -64,12 +67,15 @@ class GenericTask(Logger, Load, Qa):
     def _findTractquerierFile(self, prefix, defaultFile):
         """
         Utility fonctions to find configuration file for tractquerier
+
         File could be found into:
             First, the root of the project
             Second, the backup directory of the subject
+
         Args:
             prefix: prefix of the configuration file
             defaultFile: file in toadDir/templates/tract_queries to use by default
+
         Returns:
             path of the configuration file
         """
@@ -109,6 +115,7 @@ class GenericTask(Logger, Load, Qa):
     def initializeTasksOrder(self):
         """if the task file name contain the prefix xx- who xx represent an integer. Use that value as a weight
             to establish priority during for qa generation
+
         Return
             order: a weight that will be take into account during tasks sorting
         """
@@ -125,6 +132,7 @@ class GenericTask(Logger, Load, Qa):
 
     def getOrder(self):
         """return the order of execution of this subclasses
+
         Args:
             order: an integer that represent the order of the execution of the task
         """
@@ -133,6 +141,7 @@ class GenericTask(Logger, Load, Qa):
 
     def setOrder(self, order):
         """Define the order of execution of the subclasses
+
         Args:
             order: an integer that represent the order of the execution of the task
         """
@@ -172,12 +181,15 @@ class GenericTask(Logger, Load, Qa):
         """A simple Generic function that wrap getImage
             return an mri image given certain criteria
             this is a wrapper over mriutil getImage function
+
         Args:
             prefix:  an expression that the filename should start with
             postfix: an expression that the filename should end with (excluding the extension)
             ext:     name of the extension of the filename. defaults: nii.gz
+
         Returns:
             the relative filename if found, False otherwise
+
         """
         if items.startswith('get') and items.endswith('Images'):
             if "getImages" in items:
@@ -214,7 +226,9 @@ class GenericTask(Logger, Load, Qa):
 
     def __implement(self):
         """Generic implementation of a tasks
+
         -A task should create and move into is own working space
+
         """
         self.info("Launching implementation of {} task".format(self.getName()))
         if not os.path.exists(self.workingDir):
@@ -245,17 +259,22 @@ class GenericTask(Logger, Load, Qa):
 
     def implement(self):
         """Placeholder for the business logic implementation
+
          This function need to be implemented by a subclass of GenericTask
+
         Raises:
             NotImplementedError: this function have not been overridden by it's subClass
+
         """
         raise NotImplementedError
 
 
     def __meetRequirement(self):
         """Base class that validate that all requirements have been met prior to launch the task
+
             make sure that all dependent directory exists (why?)
             then call superclass meetRequirement
+
         """
         self.logHeader("meetRequirement")
         result = self.meetRequirement()
@@ -277,20 +296,27 @@ class GenericTask(Logger, Load, Qa):
 
     def meetRequirement(self, result = False):
         """Validate that all requirements have been met prior to launch the task
+
         This function need to be implemented by a subclass of GenericTask
+
         Args:
             result: A convenient boolean that we expect to be use for storing the status of this function
+
         Returns:
             result: True if all requirement are meet, False otherwise
+
         Raises:
             NotImplementedError: this function have not been overridden by it's subClass
+
         """
         raise NotImplementedError
 
 
     def isIgnore(self):
         """Parameter that determine if a tasks is optional
+
             if an overload of this method return True, the current tasks will be ignore
+
             Returns:
                 True if this tasks should be skipped, False otherwise
         """
@@ -299,6 +325,7 @@ class GenericTask(Logger, Load, Qa):
 
     def isTaskDirty(self):
         """Base class that validate if this tasks need to be submit for implementation
+
         """
         self.logHeader("isDirty")
         if self.isIgnore():
@@ -328,13 +355,18 @@ class GenericTask(Logger, Load, Qa):
 
     def isDirty(self, result = False):
         """Validate if this tasks need to be submit for implementation
+
         This function need to be implemented by a subclass of GenericTask
+
         Args:
             result: A convenient boolean that we expect to be use for storing the status of this function
+
         Returns:
             result: True if this tasks need to be submit for implementation, False otherwise
+
         Raises:
             NotImplementedError: this function have not been overridden by it's subClass
+
         """
         raise NotImplementedError
 
@@ -347,6 +379,7 @@ class GenericTask(Logger, Load, Qa):
 
     def __cleanup(self):
         """Base class that remove every files that may have been produce during the execution of the parent task.
+
         """
         self.cleanup()
 
@@ -354,7 +387,9 @@ class GenericTask(Logger, Load, Qa):
     def cleanup(self):
         """Default implementation of the cleanup files. This method remove any files that may have been produce
            during the execution.
+
         Can and should be overwritten by a parent class
+
         """
         if os.path.exists(self.workingDir) and os.path.isdir(self.workingDir):
             self.info("Cleaning up \"deleting\" {} directory".format(self.workingDir))
@@ -380,8 +415,10 @@ class GenericTask(Logger, Load, Qa):
 
     def run(self):
         """Method that have the responsibility to launch the implementation
+
         Args:
             tasks: the list of all  qualified task for this pipeline
+
         """
         self.stopBeforeTask()
 
@@ -437,13 +474,16 @@ class GenericTask(Logger, Load, Qa):
 
     def get(self, *args):
         """Utility that return a config element value from config.cfg base on superclass name as section
+
         Args:
            args: list of arguments as positional arguments. 
             if only 1 arguments is provide, the section will be the class name (the current class). and the argument will be the options name as specify in config.cfg
             if more arguments is provide, the first arguments will be the section and de second argument will be the the options name as specify in config.cfg
+
         Returns:
             If value is equal to True or False return a boolean, return a string otherwise
             A string value
+
         """
         if len(args) < 2:
             value = self.config.get(self.getName(), args[0])
@@ -458,13 +498,16 @@ class GenericTask(Logger, Load, Qa):
 
     def set(self, *args):
         """Utility that return a config element value from config.cfg base on superclass name as section
+
         Args:
            args: list of arguments as positional arguments.
             if only 1 arguments is provide, the section will be the class name (the current class). and the argument will be the options name as specify in config.cfg
             if more arguments is provide, the first arguments will be the section and de second argument will be the the options name as specify in config.cfg
+
         Returns:
             If value is equal to True or False return a boolean, return a string otherwise
             A string value
+
         """
         if len(args) < 3:
             value = self.config.set(self.getName(), args[0], args[1])
@@ -481,17 +524,21 @@ class GenericTask(Logger, Load, Qa):
 
     def launchCommand(self, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=None, nice=0):
         """Execute a program in a new process
+
         Args:
             command: a string representing a unix command to execute
             stdout: this attribute is a file object that provides output from the child process
             stderr: this attribute is a file object that provides error from the child process
             timeout: Number of seconds before a process is consider inactive, usefull against deadlock
             nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
+
         Returns
             return a 3 elements tuples representing the command execute, the standards output and the standard error message
+
         Raises
             OSError:      the function trying to execute a non-existent file.
             ValueError :  the command line is called with invalid arguments
+
         """
         binary = cmd.split(" ").pop(0)
         if util.which(binary) is None:
@@ -511,7 +558,9 @@ class GenericTask(Logger, Load, Qa):
 
     def launchMatlabCommand(self, source, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=None, nice=0):
         """Execute a Matlab script in a new process
+
         The script must contains all paths and program that are necessary to run the script
+
         Args:
             source: A matlab script to execute in the current working directory
             stdout: this attribute is a file object that provides output from the child process
@@ -520,6 +569,7 @@ class GenericTask(Logger, Load, Qa):
             nice: run cmd  with  an  adjusted  niceness, which affects process scheduling
         Returns
             return a 3 elements tuples representing the command execute, the standards output and the standard error message
+
         """
 
         [scriptName, ext] = os.path.splitext(os.path.basename(source))
@@ -531,12 +581,15 @@ class GenericTask(Logger, Load, Qa):
 
     def buildName(self, source, postfix, ext=None, absolute = True):
         """A simple utility function that return a file name that contain the postfix and the current working directory
+
         The filename is always into the current working  directory
         The extension name will be the same as source unless specify as argument
+
         Args:
             source: the input file name
             postfix: single element or array of elements which option item specified in config at the postfix section
             ext: the extension of the new target
+
         Returns:
             a file name that contain the postfix and the current working directory
         """
@@ -546,10 +599,12 @@ class GenericTask(Logger, Load, Qa):
 
     def uncompressImage(self, source):
         """Copy a source image into current working directory and uncompress it
+
         Args:
             source:  name of the source file
         Returns
             name of the output file
+
         """
         imageDir = os.path.dirname(source)
         if not imageDir or (imageDir in self.workingDir):
@@ -565,11 +620,14 @@ class GenericTask(Logger, Load, Qa):
 
     def rename(self, source, target):
         """rename an image name specify as source
+
         Args:
             source:  name of the source file
             target:  name of the output file
+
         Returns
             name of the output file
+
         """
         self.info("renaming {} to {}".format(source, target))
 
@@ -583,11 +641,15 @@ class GenericTask(Logger, Load, Qa):
 
     def parseTemplate(self, dict, template):
         """provide simpler string substitutions as described in PEP 292
+
         Args:
            dict: dictionary-like object with keys that match the placeholders in the template
            template: object passed to the constructors template argument.
+
         Returns:
             the string substitute
+
         """
 
         return util.parseTemplate(dict, template)
+
