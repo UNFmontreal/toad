@@ -296,8 +296,13 @@ class Correction(GenericTask):
         self.info("Launch eddy correction from fsl")
         tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "eddy")
-        cmd = "eddy --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} " \
-            .format(source, mask, index, acqp, bVecs, bVals, tmp)
+
+	if util.which('eddy'):
+	        cmd = "eddy --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} " \
+                    .format(source, mask, index, acqp, bVecs, bVals, tmp)
+	else:
+	        cmd = "eddy_openmp --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} " \
+                    .format(source, mask, index, acqp, bVecs, bVals, tmp)
 
         if topup is not None:
             cmd += " --topup={}".format(topup)
