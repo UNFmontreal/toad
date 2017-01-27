@@ -591,13 +591,22 @@ def tckedit(source, roi, target, downsample= "2"):
     Returns:
         the output track file
     """
-    cmd = "tckedit {} {} -downsample {} -quiet ".format(source, target, downsample)
+    cmd = "tckedit {} {} -quiet".format(source, target)
+
     if isinstance(roi, basestring):
         cmd += " -include {}".format(roi)
     else:
         for element in roi:
             cmd += " -include {}".format(element)
-    return util.launchCommand(cmd)
+    util.launchCommand(cmd)
+
+    if not(downsample == None):
+        cmdSample = "tckresample -downsample {0} {1} {1} -force"
+        cmdSample = cmdSample.format(downsample, target)
+        util.launchCommand(cmdSample)
+
+    return
+
 
 
 def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, extraArgs):

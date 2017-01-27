@@ -115,7 +115,7 @@ class TractographyMrtrix(GenericTask):
         Returns:
             the output track file
         """
-        self.info("Startiig tckedit creation from mrtrix on {}".format(source))
+        self.info("Starting tckedit creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
         mriutil.tckedit(source, roi, tmp, downsample)
         return self.rename(tmp, target)
@@ -183,13 +183,16 @@ class TractographyMrtrix(GenericTask):
 
         self.info("Starting tckgen creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
-        cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} \
-                    -algorithm {} -downsample {} -nthreads {} -quiet"\
-            .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'numbertracks'),
-                    algorithm, self.get('downsample'), self.getNTreadsMrtrix())
+        cmd = "tckgen {} {} -act {}".format(source, tmp, act)
+        cmd += " -seed_dynamic {} -step {}".format(source, self.get('step'))
+        cmd += " -maxlength {}".format(self.get('maxlength'))
+        cmd += " -number {}".format(self.get('numbertracks'))
+        cmd += " -algorithm {}".format(algorithm)
+        cmd += " -downsample {}".format(self.get('downsample'))
+        cmd += " -nthreads {} -quiet".format(self.getNTreadsMrtrix())
 
         if self.get('backtrack'):
-            cmd += ' -backtrack '
+            cmd += ' -backtrack'
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)
