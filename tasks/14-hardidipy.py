@@ -18,7 +18,9 @@ class HardiDipy(GenericTask):
 
 
     def __init__(self, subject):
-        GenericTask.__init__(self, subject, 'upsampling', 'registration', 'masking', 'qa')
+        GenericTask.__init__(
+                self, subject, 'upsampling', 'registration', 'masking', 'qa'
+                )
         self.__dwiData = None
         self.__csdModel = None
         self.__csdPeaks = None
@@ -46,14 +48,20 @@ class HardiDipy(GenericTask):
         maskData = maskImage.get_data()
         dwiData = dipy.segment.mask.applymask(dwiData, maskData)
 
-        gradientTable = dipy.core.gradients.gradient_table(numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile))
+        gradientTable = dipy.core.gradients.gradient_table(
+                numpy.loadtxt(bValsFile), numpy.loadtxt(bVecsFile)
+                )
         self.info('WARNING: We need to flip the x direction due to MRtrix new way to extract bvecs')
         gradientTable.gradients = gradientTable.gradients * numpy.array([-1,1,1])
 
         sphere = dipy.data.get_sphere(self.get("triangulated_spheres"))
 
-        response, ratio = dipy.reconst.csdeconv.auto_response(gradientTable, dwiData, roi_radius=10, fa_thr=0.7)
-        csdModel = dipy.reconst.csdeconv.ConstrainedSphericalDeconvModel(gradientTable, response)
+        response, ratio = dipy.reconst.csdeconv.auto_response(
+                gradientTable, dwiData, roi_radius=10, fa_thr=0.7
+                )
+        csdModel = dipy.reconst.csdeconv.ConstrainedSphericalDeconvModel(
+                gradientTable, response
+                )
         self.info('Start fODF computation')
 
         csdPeaks = dipy.direction.peaks_from_model(
@@ -74,7 +82,9 @@ class HardiDipy(GenericTask):
         #CSD
         target = self.buildName(source, 'csd')
         csdCoeff = csdPeaks.shm_coeff
-        csdCoeffImage = nibabel.Nifti1Image(csdCoeff.astype(numpy.double), dwiImage.get_affine())
+        csdCoeffImage = nibabel.Nifti1Image(
+                csdCoeff.astype(numpy.double), dwiImage.get_affine()
+                )
         nibabel.save(csdCoeffImage, target)
 
 
@@ -82,7 +92,9 @@ class HardiDipy(GenericTask):
         target = self.buildName(source,'gfa')
         gfa = csdPeaks.gfa
         gfa[numpy.isnan(gfa)] = 0
-        csdCoeffImage = nibabel.Nifti1Image(gfa.astype(numpy.float32), dwiImage.get_affine())
+        csdCoeffImage = nibabel.Nifti1Image(
+                gfa.astype(numpy.float32), dwiImage.get_affine()
+                )
         nibabel.save(csdCoeffImage, target)
 
 
