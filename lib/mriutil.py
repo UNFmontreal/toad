@@ -578,7 +578,7 @@ def isAfreesurferStructure(directory):
     return True
 
 
-def tckedit(source, roi, target):
+def tckedit(source, roi, target, launch=True):
     """ perform various editing operations on track files.
 
     Args:
@@ -596,11 +596,11 @@ def tckedit(source, roi, target):
     else:
         for element in roi:
             cmd += " -include {}".format(element)
-    util.launchCommand(cmd)
+    if launch: util.launchCommand(cmd)
     return cmd
 
 
-def tckresample(source, downsample, target):
+def tckresample(source, downsample, target, launch=True):
     """ perform resample on track files
 
     Args:
@@ -613,7 +613,7 @@ def tckresample(source, downsample, target):
     """
     cmd = "tckresample -downsample {} {} {}"
     cmd = cmd.format(downsample, source, target)
-    util.launchCommand(cmd)
+    if launch: util.launchCommand(cmd)
     return cmd
 
 
