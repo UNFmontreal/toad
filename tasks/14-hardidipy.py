@@ -75,8 +75,8 @@ class HardiDipy(GenericTask):
             return_odf=False,
             normalize_peaks=True,
             npeaks=5,
-            parallel=True,
-            nbr_processes=int(self.getNTreads()),
+            parallel=False,
+            #nbr_processes=int(self.getNTreads()),
             )
 
         #CSD

@@ -102,7 +102,7 @@ class TractographyMrtrix(GenericTask):
                     tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
                 self.__tcksiftRoiTrk = tcksiftRoiTrk
 
-    def __tckedit(self, source, roi, target, downsample= "2"):
+    def __tckedit(self, source, roi, target, downsample=2):
         """ perform various editing operations on track files.
 
         Args:
@@ -116,9 +116,11 @@ class TractographyMrtrix(GenericTask):
             the output track file
         """
         self.info("Starting tckedit creation from mrtrix on {}".format(source))
-        tmp = self.buildName(source, "tmp", "tck")
-        mriutil.tckedit(source, roi, tmp, downsample)
-        return self.rename(tmp, target)
+        tmp0 = self.buildName(source, "tmp0", "tck")
+        tmp1 = self.buildName(source, "tmp1", "tck")
+        self.info(mriutil.tckedit(source, roi, tmp0))
+        self.info(mriutil.tckresample(tmp0, downsample, tmp1))
+        return self.rename(tmp1, target)
 
     def __tckgenTensor(self, source, target, mask=None, act=None , seed_gmwmi=None, bFile=None, algorithm="iFOD2"):
         """ perform streamlines tractography.
