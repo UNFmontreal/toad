@@ -120,6 +120,7 @@ class TractographyMrtrix(GenericTask):
         tmp1 = self.buildName(source, "tmp1", "tck")
         self.launchCommand(mriutil.tckedit(source, roi, tmp0, False))
         self.launchCommand(mriutil.tckresample(tmp0, downsample, tmp1, False))
+        os.remove(tmp0)
         return self.rename(tmp1, target)
 
     def __tckgenTensor(self, source, target, mask=None, act=None , seed_gmwmi=None, bFile=None, algorithm="iFOD2"):
