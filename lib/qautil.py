@@ -13,6 +13,7 @@ import dipy.reconst.dti
 import dipy.segment.mask
 import dipy.viz.colormap
 import dipy.viz.fvtk
+from dipy.viz.fvtk import contour
 from dipy.viz import actor
 from dipy.viz import window
 from lib import util
@@ -578,15 +579,16 @@ def plotTrk(source, target, anatomical, roi=None,
     if roi is not None:
         roiImage= nibabel.load(roi)
         roiActor = dipy.viz.fvtk.contour(
-                roiImage.get_data(), levels=[1],
+                roiImage.get_data(), affine=roiImage.affine, levels=[1],
                 colors=[(1., 1., 0.)], opacities=[1.])
+
         roiActor.RotateX(xRot)
         roiActor.RotateY(yRot)
         roiActor.RotateZ(zRot)
 
     try:
         anatomicalImage = nibabel.load(anatomical)
-        sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
+        sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='rasmm')[0]]
         sourceActor = actor.line(
                 sourceImage, dipy.viz.colormap.line_colors(sourceImage))
         #if xSlice is not None: xSlice = xSlice
