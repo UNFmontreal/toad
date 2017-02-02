@@ -589,9 +589,9 @@ def plotTrk(source, target, anatomical, roi=None,
         sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='voxel')[0]]
         sourceActor = actor.line(
                 sourceImage, dipy.viz.colormap.line_colors(sourceImage))
-        if xSlice is not None: xSlice = [xSlice]
-        if ySlice is not None: ySlice = [ySlice]
-        if zSlice is not None: zSlice = [zSlice]
+        #if xSlice is not None: xSlice = xSlice
+        #if ySlice is not None: ySlice = ySlice
+        #if zSlice is not None: zSlice = zSlice
         anatomicalActor = actor.slicer(anatomicalImage.get_data(), anatomicalImage.affine)
         anatomicalActor.display(xSlice, ySlice, zSlice)
 
@@ -615,7 +615,7 @@ def plotTrk(source, target, anatomical, roi=None,
         ren.add(roiActor)
 
     ren.set_camera(
-            pos=(0,0,1), focal_point=(0,0,0), viewup=(0,1,0), verbose=False)
+            position=(0,0,1), focal_point=(0,0,0), view_up=(0,1,0))#, verbose=False)
 
     window.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
 
