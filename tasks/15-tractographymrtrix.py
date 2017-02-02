@@ -102,7 +102,7 @@ class TractographyMrtrix(GenericTask):
                     tcksiftRoi, norm , self.buildName(tcksiftRoi, None, 'trk'))
                 self.__tcksiftRoiTrk = tcksiftRoiTrk
 
-    def __tckedit(self, source, roi, target, downsample= "2"):
+    def __tckedit(self, source, roi, target, downsample=2):
         """ perform various editing operations on track files.
 
         Args:
@@ -115,10 +115,13 @@ class TractographyMrtrix(GenericTask):
         Returns:
             the output track file
         """
-        self.info("Startiig tckedit creation from mrtrix on {}".format(source))
-        tmp = self.buildName(source, "tmp", "tck")
-        mriutil.tckedit(source, roi, tmp, downsample)
-        return self.rename(tmp, target)
+        self.info("Starting tckedit creation from mrtrix on {}".format(source))
+        tmp0 = self.buildName(source, "tmp0", "tck")
+        tmp1 = self.buildName(source, "tmp1", "tck")
+        self.launchCommand(mriutil.tckedit(source, roi, tmp0, False))
+        self.launchCommand(mriutil.tckresample(tmp0, downsample, tmp1, False))
+        os.remove(tmp0)
+        return self.rename(tmp1, target)
 
     def __tckgenTensor(self, source, target, mask=None, act=None , seed_gmwmi=None, bFile=None, algorithm="iFOD2"):
         """ perform streamlines tractography.
@@ -183,13 +186,16 @@ class TractographyMrtrix(GenericTask):
 
         self.info("Starting tckgen creation from mrtrix on {}".format(source))
         tmp = self.buildName(source, "tmp", "tck")
-        cmd = "tckgen {} {} -act {} -seed_dynamic {} -step {} -maxlength {} -number {} \
-                    -algorithm {} -downsample {} -nthreads {} -quiet"\
-            .format(source, tmp, act, source, self.get('step'), self.get('maxlength'), self.get( 'numbertracks'),
-                    algorithm, self.get('downsample'), self.getNTreadsMrtrix())
+        cmd = "tckgen {} {} -act {}".format(source, tmp, act)
+        cmd += " -seed_dynamic {} -step {}".format(source, self.get('step'))
+        cmd += " -maxlength {}".format(self.get('maxlength'))
+        cmd += " -number {}".format(self.get('numbertracks'))
+        cmd += " -algorithm {}".format(algorithm)
+        cmd += " -downsample {}".format(self.get('downsample'))
+        cmd += " -nthreads {} -quiet".format(self.getNTreadsMrtrix())
 
         if self.get('backtrack'):
-            cmd += ' -backtrack '
+            cmd += ' -backtrack'
 
         if bFile is not None:
             cmd += " -grad {}".format(bFile)

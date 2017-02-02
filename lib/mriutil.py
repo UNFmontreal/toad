@@ -578,7 +578,7 @@ def isAfreesurferStructure(directory):
     return True
 
 
-def tckedit(source, roi, target, downsample= "2"):
+def tckedit(source, roi, target, launch=True):
     """ perform various editing operations on track files.
 
     Args:
@@ -586,18 +586,35 @@ def tckedit(source, roi, target, downsample= "2"):
         roi:    specify an inclusion region of interest, as either a binary mask image, or as a sphere
                 using 4 comma-separared values (x,y,z,radius)
         target: the output track file
-        downsample: increase the density of points along the length of the streamline by some factor
 
-    Returns:
-        the output track file
+    Returns: the executed command line
     """
-    cmd = "tckedit {} {} -downsample {} -quiet ".format(source, target, downsample)
+    cmd = "tckedit {} {} -quiet".format(source, target)
+
     if isinstance(roi, basestring):
         cmd += " -include {}".format(roi)
     else:
         for element in roi:
             cmd += " -include {}".format(element)
-    return util.launchCommand(cmd)
+    if launch: util.launchCommand(cmd)
+    return cmd
+
+
+def tckresample(source, downsample, target, launch=True):
+    """ perform resample on track files
+
+    Args:
+        source: the input track file
+        downsample: decrease the density of points along the length of the
+            streamline by some factor
+        target: the output track file
+
+    Returns: the executed command line
+    """
+    cmd = "tckresample -downsample {} {} {}"
+    cmd = cmd.format(downsample, source, target)
+    if launch: util.launchCommand(cmd)
+    return cmd
 
 
 def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, extraArgs):
