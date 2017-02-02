@@ -576,16 +576,6 @@ def plotTrk(source, target, anatomical, roi=None,
         xSlice=None, ySlice=None, zSlice=None,
         xRot=None, yRot=None, zRot=None):
 
-    if roi is not None:
-        roiImage= nibabel.load(roi)
-        roiActor = dipy.viz.fvtk.contour(
-                roiImage.get_data(), affine=roiImage.affine, levels=[1],
-                colors=[(1., 1., 0.)], opacities=[1.])
-
-        roiActor.RotateX(xRot)
-        roiActor.RotateY(yRot)
-        roiActor.RotateZ(zRot)
-
     try:
         anatomicalImage = nibabel.load(anatomical)
         sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='rasmm')[0]]
@@ -614,6 +604,15 @@ def plotTrk(source, target, anatomical, roi=None,
     ren.add(anatomicalActor)
 
     if roi is not None:
+        roiImage= nibabel.load(roi)
+        roiActor = dipy.viz.fvtk.contour(
+                roiImage.get_data(), affine=anatomicalImage.affine, levels=[1],
+                colors=[(1., 1., 0.)], opacities=[1.])
+
+        roiActor.RotateX(xRot)
+        roiActor.RotateY(yRot)
+        roiActor.RotateZ(zRot)
+
         ren.add(roiActor)
 
     ren.set_camera(
