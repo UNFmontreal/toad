@@ -79,15 +79,15 @@ class Parcellation(GenericTask):
         self.info("Log could be found at {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
         self.launchCommand(cmd, None, None, 86400)
         # Run BrainStem segmentation
-        #cmd = "recon-all -s {} -sd {} -brainstem-structures"\
-        #    .format(self.id, self.workingDir)
-        #self.info("Run brainstem segmentation")
-        #self.launchCommand(cmd, None, None, 86400)
+        cmd = "recon-all -s {} -sd {} -brainstem-structures"\
+            .format(self.id, self.workingDir)
+        self.info("Run brainstem segmentation")
+        self.launchCommand(cmd, None, None, 86400)
         # Run Hippocampal SubField segmentation
-        #cmd = "recon-all -s {} -sd {} -hippocampal-subfields-T1"\
-        #    .format(self.id, self.workingDir)
-        #self.info("Run hippocampal subfield segmentation")
-        #self.launchCommand(cmd, None, None, 86400)
+        cmd = "recon-all -s {} -sd {} -hippocampal-subfields-T1"\
+            .format(self.id, self.workingDir)
+        self.info("Run hippocampal subfield segmentation")
+        self.launchCommand(cmd, None, None, 86400)
 
     def __convertFeesurferImageIntoNifti(self, anatomicalName):
 

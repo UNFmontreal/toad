@@ -572,48 +572,68 @@ def plotReconstruction(data, mask, cc, target, model):
     dipy.viz.fvtk.clear(ren)
 
 
-def plotTrk(source, target, anatomical, roi=None,
+def plotTrk(trkFile, target, anatFile, roi=None,
         xSlice=None, ySlice=None, zSlice=None,
         xRot=None, yRot=None, zRot=None):
 
-    try:
-        anatomicalImage = nibabel.load(anatomical)
-        sourceImage = [s[0] for s in nibabel.trackvis.read(source, points_space='rasmm')[0]]
-        sourceActor = actor.line(
-                sourceImage, dipy.viz.colormap.line_colors(sourceImage))
-        #if xSlice is not None: xSlice = xSlice
-        #if ySlice is not None: ySlice = ySlice
-        #if zSlice is not None: zSlice = zSlice
-        anatomicalActor = actor.slicer(anatomicalImage.get_data(), anatomicalImage.affine)
-        anatomicalActor.display(xSlice, ySlice, zSlice)
-
-    except ValueError:
-        return False
-
-    sourceActor.RotateX(xRot)
-    sourceActor.RotateY(yRot)
-    sourceActor.RotateZ(zRot)
-
-    anatomicalActor.RotateX(xRot)
-    anatomicalActor.RotateY(yRot)
-    anatomicalActor.RotateZ(zRot)
+    anatImage = nibabel.load(anatFile)
+    trkImage = [s[0] for s in nibabel.trackvis.read(trkFile, points_space='rasmm')[0]]
 
     ren = window.Renderer()
 
-    ren.add(sourceActor)
-    ren.add(anatomicalActor)
+    trkActor = actor.line(
+        trkImage, dipy.viz.colormap.line_colors(trkImage))
 
-    if roi is not None:
-        roiImage= nibabel.load(roi)
-        roiActor = dipy.viz.fvtk.contour(
-                roiImage.get_data(), affine=anatomicalImage.affine, levels=[1],
-                colors=[(1., 1., 0.)], opacities=[1.])
+    if xSlice is not None:
+        anatActorSliceX = actor.slicer(anatImage.get_data(), anatImage.affine)
+        anatActorSliceX.display(xSlice, None, None)
+        # Apply rotation
+        anatActorSliceX.RotateX(xRot)
+        anatActorSliceX.RotateY(yRot)
+        anatActorSliceX.RotateZ(zRot)
 
-        roiActor.RotateX(xRot)
-        roiActor.RotateY(yRot)
-        roiActor.RotateZ(zRot)
+        ren.add(anatActorSliceX)
 
-        ren.add(roiActor)
+    if ySlice is not None:
+        anatActorSliceY = actor.slicer(anatImage.get_data(), anatImage.affine)
+        anatActorSliceY.display(None, ySlice, None)
+        # Apply rotation
+        anatActorSliceY.RotateX(xRot)
+        anatActorSliceY.RotateY(yRot)
+        anatActorSliceY.RotateZ(zRot)
+
+        ren.add(anatActorSliceY)
+
+    if zSlice is not None:
+        anatActorSliceZ = actor.slicer(anatImage.get_data(), anatImage.affine)
+        anatActorSliceZ.display(None, None, zSlice)
+        # Apply rotation
+        anatActorSliceZ.RotateX(xRot)
+        anatActorSliceZ.RotateY(yRot)
+        anatActorSliceZ.RotateZ(zRot)
+
+        ren.add(anatActorSliceZ)
+
+    trkActor.RotateX(xRot)
+    trkActor.RotateY(yRot)
+    trkActor.RotateZ(zRot)
+
+    ren.add(trkActor)
+
+    # Not in dipy 0.11.0 
+    # Wait until next version
+    # Already fixed here: https://github.com/nipy/dipy/pull/1163
+    #if roi is not None:
+    #    roiImage= nibabel.load(roi)
+    #    roiActor = dipy.viz.fvtk.contour(
+    #            roiImage.get_data(), affine=anatomicalImage.affine, levels=[1],
+    #            colors=[(1., 1., 0.)], opacities=[1.])
+
+    #    roiActor.RotateX(xRot)
+    #    roiActor.RotateY(yRot)
+    #    roiActor.RotateZ(zRot)
+
+    #    ren.add(roiActor)
 
     ren.set_camera(
             position=(0,0,1), focal_point=(0,0,0), view_up=(0,1,0))#, verbose=False)
