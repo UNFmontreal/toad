@@ -572,7 +572,7 @@ def isAfreesurferStructure(directory):
                 return True
         return False
 
-    for image in ["T1.mgz", "aparc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz", "talairach.m3z"]:
+    for image in ["T1.mgz", "aparc+aseg.mgz", "rh.ribbon.mgz", "lh.ribbon.mgz", "norm.mgz", "talairach.m3z", "rh.hippoSfLabels-T1.v10.FSvoxelSpace.mgz" , "lh.hippoSfLabels-T1.v10.FSvoxelSpace.mgz", "brainstemSsLabels.v10.FSvoxelSpace.mgz"]:
         if not find(image):
             return False
     return True

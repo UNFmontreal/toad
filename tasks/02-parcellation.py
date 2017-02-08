@@ -35,6 +35,7 @@ class Parcellation(GenericTask):
 
         self.__convertFreesurferImageIntoNifti(anat)
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
+        self.__mergeParcellation(self.get('wmparc'),self.get('aparc_aseg'),self.get('brainstem'),self.get('lhHipp'),self.get('rhHipp'))
         tt5Mgz = self.__create5ttImage()
         mriutil.convertAndRestride(tt5Mgz, self.get('tt5'), self.get('preparation', 'stride_orientation'))
         anatFreesurfer = self.getImage('anat', 'freesurfer')
@@ -42,7 +43,7 @@ class Parcellation(GenericTask):
         if self.get('cleanup'):
             self.__cleanup()
 
-    def __mergeParcellation(self, wmparcFile, aparcFile, brainstemFile, lhHipp, rhHipp)
+    def __mergeParcellation(self, wmparcFile, aparcFile, brainstemFile, lhHippFile, rhHippFile):
 
         wmparc = nibabel.load(wmparcFile)
         aparc = nibabel.load(aparcFile)
@@ -70,8 +71,8 @@ class Parcellation(GenericTask):
             aparcData[aparcData == brainstemValue] = 0
             wmparcData[wmparcData == brainstemValue] = 0
 
-        aparcData[brainstemData ~=0] =  brainstemData[brainstemData !=0]
-        wmparcData[brainstemData ~=0] =  brainstemData[brainstemData !=0]
+        aparcData[brainstemData != 0] =  brainstemData[brainstemData != 0]
+        wmparcData[brainstemData != 0] =  brainstemData[brainstemData != 0]
 
         lhHippData[lhHippData == 204] = 554 # presubiculum
         rhHippData[rhHippData == 204] = 504 # presubiculum
@@ -100,13 +101,15 @@ class Parcellation(GenericTask):
         lhHippData[lhHippData == 226] = 563 # Hipp Tail
         rhHippData[rhHippData == 226] = 513 # Hipp Tail
 
-        aparcData[rhHippData ~=0] =  rhHippData[rhHippData !=0]
-        aparcData[lhHippData ~=0] =  rhHippData[lhHippData !=0]
-        wmparcData[rhHippData ~=0] =  rhHippData[rhHippData !=0]
-        wmparcData[lhHippData ~=0] =  rhHippData[lhHippData !=0]
+        aparcData[rhHippData != 0] =  rhHippData[rhHippData != 0]
+        aparcData[lhHippData != 0] =  rhHippData[lhHippData != 0]
+        wmparcData[rhHippData != 0] =  rhHippData[rhHippData != 0]
+        wmparcData[lhHippData != 0] =  rhHippData[lhHippData != 0]
 
-        nb.Nifti1Image(wmparcData, wmparc.affine, wmparc.header).to_filename(wmparcFile)
-        nb.Nifti1Image(aparcData, aparc.affine, aparc.header).to_filename(aparcFile)
+        nibabel.Nifti1Image(lhHippData, lhHipp.affine, lhHipp.header).to_filename(lhHippFile)
+        nibabel.Nifti1Image(rhHippData, rhHipp.affine, rhHipp.header).to_filename(rhHippFile)
+        nibabel.Nifti1Image(wmparcData, wmparc.affine, wmparc.header).to_filename(wmparcFile)
+        nibabel.Nifti1Image(aparcData, aparc.affine, aparc.header).to_filename(aparcFile)
 
 
     def __findAndLinkFreesurferStructure(self):
@@ -170,9 +173,9 @@ class Parcellation(GenericTask):
                                     (self.get('wmparc'), "wmparc.mgz"),
                                     (self.get('rh_ribbon'), "rh.ribbon.mgz"),
                                     (self.get('lh_ribbon'), "lh.ribbon.mgz"),
-                                    (self.get('brainstemSsLabels.v10.FSvoxelSpace'), "brainstemSsLabels.v10.FSvoxelSpace.mgz"),
-                                    (self.get('rh.hippoSfLabels-T1.v10.FSvoxelSpace'), "rh.hippoSfLabels-T1.v10.FSvoxelSpace.mgz"),
-                                    (self.get('lh.hippoSfLabels-T1.v10.FSvoxelSpace'), "lh.hippoSfLabels-T1.v10.FSvoxelSpace.mgz"),
+                                    (self.get('brainstem'), "brainstemSsLabels.v10.FSvoxelSpace.mgz"),
+                                    (self.get("rhHipp"), "rh.hippoSfLabels-T1.v10.FSvoxelSpace.mgz"),
+                                    (self.get("lhHipp"), "lh.hippoSfLabels-T1.v10.FSvoxelSpace.mgz"),
                                     (self.get('norm'), "norm.mgz")]:
 
             mriutil.convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)),
@@ -300,7 +303,7 @@ class Parcellation(GenericTask):
             return m
 
         parc = nibabel.load(aparcAseg)
-
+        parc_data = parc.get_data()
         voxsize = numpy.asarray(parc.header.get_zooms()[:3])
         lh_wm = read_surf(lhWhite, parc)
         rh_wm = read_surf(rhWhite, parc)
@@ -338,7 +341,7 @@ class Parcellation(GenericTask):
                               503, # Right-fimbria
                               512, # Right-molecular-layer
                               505, # Right-fissure
-                              513, # Right-Hipp-Tail
+                              513 # Right-Hipp-Tail
                               ]).astype(numpy.float32)
 
         gm_smooth = scipy.ndimage.gaussian_filter(gm_rois, sigma=voxsize)
@@ -526,8 +529,9 @@ class Parcellation(GenericTask):
                         (self.getImage('lh_ribbon'), 'lh_ribbon'),
                         (self.getImage('norm'), 'norm'),
                         (self.getImage('mask'), 'freesurfer brain masks'),
-                        (self.getImage('brainstemSsLabels'), 'Brainstem label'),
-                        (self.getImage('hippoSfLabels'), 'Hippocampus label'),
+                        (self.getImage("brainstem"), 'Brainstem label'),
+                        (self.getImage("lhHipp"), 'Left Hippocampus label'),
+                        (self.getImage("rhHipp"), 'Right Hippocampus label'),
                         (self.getImage('tt5'), '5tt'))
 
     def qaSupplier(self):
