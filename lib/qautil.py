@@ -12,10 +12,8 @@ import dipy.data
 import dipy.reconst.dti
 import dipy.segment.mask
 import dipy.viz.colormap
-import dipy.viz.fvtk
-from dipy.viz.fvtk import contour
-from dipy.viz import actor
-from dipy.viz import window
+import dipy.viz.fvtk 
+from dipy.viz import actor, window
 from lib import util
 
 __author__ = "Christophe Bedetti"
