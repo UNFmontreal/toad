@@ -102,9 +102,9 @@ class Parcellation(GenericTask):
         rhHippData[rhHippData == 226] = 513 # Hipp Tail
 
         aparcData[rhHippData != 0] =  rhHippData[rhHippData != 0]
-        aparcData[lhHippData != 0] =  rhHippData[lhHippData != 0]
+        aparcData[lhHippData != 0] =  lhHippData[lhHippData != 0]
         wmparcData[rhHippData != 0] =  rhHippData[rhHippData != 0]
-        wmparcData[lhHippData != 0] =  rhHippData[lhHippData != 0]
+        wmparcData[lhHippData != 0] =  lhHippData[lhHippData != 0]
 
         nibabel.Nifti1Image(lhHippData, lhHipp.affine, lhHipp.header).to_filename(lhHippFile)
         nibabel.Nifti1Image(rhHippData, rhHipp.affine, rhHipp.header).to_filename(rhHippFile)
