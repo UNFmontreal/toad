@@ -345,7 +345,6 @@ class Plot4dVolume(object):
         from shutil import copyfile
         frameList = self.__createFrames(smallSize=False, grid=False)
         for frame, target in zip(frameList, targets):
-            print frame.name
             copyfile(frame.name, target)
             frame.close
 
