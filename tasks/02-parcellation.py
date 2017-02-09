@@ -25,7 +25,6 @@ class Parcellation(GenericTask):
         # self.setCleanupBeforeImplement(False)
 
     def implement(self):
-
         anat = self.getPreparationImage('anat')
 
         # Look if a freesurfer tree is already available
@@ -551,7 +550,7 @@ class Parcellation(GenericTask):
         aparcAsegQa = self.plot3dVolume(
                 anat, segOverlay=aparcAseg, fov=aparcAseg)
         wmparcQa = self.plot3dVolume(anat, segOverlay=wmparc, fov=wmparc)
-        tt5Qas = self.plot4dVolumeToFrames(tt5)
+        tt5Qas = self.plot4dVolumeToFrames(tt5, fov=brainMask)
 
         qaImages = Images(
             (anatQa, 'High resolution anatomical image from Freesurfer'),
