@@ -50,12 +50,12 @@ class Qa(object):
 
     def plot4dVolume(self, source, fov=None):
         """
-        Wrapper of the class Plot4dVolume of qautil
+        Wrapper of the class Plot4dVolume of qautil to create animated gif
         """
         target = self.buildName(source, None, ext='gif')
         frameFormat = ".{}".format(self.qaImagesFormat)
         qaPlot = qautil.Plot4dVolume(source, fov=fov, frameFormat=frameFormat)
-        qaPlot.save(target)
+        qaPlot.saveGif(target)
         return target
 
     def compare4dVolumes(self, source1, source2, fov=None):
@@ -66,8 +66,23 @@ class Qa(object):
         frameFormat = ".{}".format(self.qaImagesFormat)
         qaPlot = qautil.Plot4dVolume(
         source1, source2=source2, fov=fov, frameFormat=frameFormat)
-        qaPlot.save(target)
+        qaPlot.saveGif(target)
         return target
+
+    def plot4dVolumeToFrames(self, source, fov=None):
+        """
+        Wrapper of the class Plot4dVolume of qautil to create several images
+        """
+        frameFormat = ".{}".format(self.qaImagesFormat)
+        cgm = self.buildName(source, 'cgm', ext=frameFormat)
+        scgm = self.buildName(source, 'scgm', ext=frameFormat)
+        wm = self.buildName(source, 'wm', ext=frameFormat)
+        csf = self.buildName(source, 'csf', ext=frameFormat)
+        pt = self.buildName(source, 'pt', ext=frameFormat)
+        targets = [cgm, scgm, wm, csf, pt]
+        qaPlot = qautil.Plot4dVolume(source, fov=fov, frameFormat=frameFormat)
+        qaPlot.saveFrames(targets)
+        return targets
 
     def plotMovement(self, parametersFile, basename):
         """

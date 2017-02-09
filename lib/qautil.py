@@ -324,12 +324,10 @@ class Plot4dVolume(object):
             return vmax
 
 
-    def save(self, target):
+    def saveGif(self, target):
         """Generate animated gif with convert from imagemagick
         Args:
-            imageList: list of png to convert
             target: output filename
-            gifSpeed: delay between images (tens of ms)
         """
         if self.compareVolumes:
             frameList = self.__createCompareFrames()
@@ -339,14 +337,27 @@ class Plot4dVolume(object):
         for frame in frameList: frame.close
 
 
-    def __createFrames(self):
+    def saveFrames(self, targets):
+        """Generate images for each frames with convert from imagemagick
+        Args:
+            target: output filename
+        """
+        from shutil import copyfile
+        frameList = self.__createFrames(smallSize=False, grid=False)
+        for frame, target in zip(frameList, targets):
+            print frame.name
+            copyfile(frame.name, target)
+            frame.close
+
+
+    def __createFrames(self, smallSize=True, grid=True):
         frameList = []
         for num in range(self.imageData.shape[-1]):
             frame = tempfile.NamedTemporaryFile(suffix=self.frameFormat)
             plot = Plot3dVolume(
                     self.imageData[:,:,:,num], vmax=self.vmax,
-                    sourceIsData=True, fov=self.fov, grid=True)
-            plot.save(frame.name, smallSize=True)
+                    sourceIsData=True, fov=self.fov, grid=grid)
+            plot.save(frame.name, smallSize=smallSize)
             frameList.append(frame)
         return frameList
 

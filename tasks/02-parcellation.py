@@ -543,6 +543,7 @@ class Parcellation(GenericTask):
         brainMask = self.getImage('mask')
         aparcAseg = self.getImage('aparc_aseg')
         wmparc = self.getImage('wmparc')
+        tt5 = self.getImage('tt5')
 
         # Build qa images
         anatQa = self.plot3dVolume(anat, fov=brainMask)
@@ -550,11 +551,18 @@ class Parcellation(GenericTask):
         aparcAsegQa = self.plot3dVolume(
                 anat, segOverlay=aparcAseg, fov=aparcAseg)
         wmparcQa = self.plot3dVolume(anat, segOverlay=wmparc, fov=wmparc)
+        tt5Qas = self.plot4dVolumeToFrames(tt5)
 
         qaImages = Images(
             (anatQa, 'High resolution anatomical image from Freesurfer'),
             (brainMaskQa, 'Brain mask on norm from Freesurfer'),
             (aparcAsegQa, 'Aparc aseg segmentation from Freesurfer'),
-            (wmparcQa, 'White matter segmentation from Freesurfer'))
+            (wmparcQa, 'White matter segmentation from Freesurfer'),
+            (tt5Qas[0], 'Cortical grey matter'),
+            (tt5Qas[1], 'Sub-cortical grey matter'),
+            (tt5Qas[2], 'White matter'),
+            (tt5Qas[3], 'CSF'),
+            (tt5Qas[4], 'Pathological tissue'),
+            )
 
         return qaImages

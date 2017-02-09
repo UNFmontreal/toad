@@ -119,15 +119,23 @@ class Registration(GenericTask):
         brainMask = self.getImage('mask', 'resample')
         aparcAseg = self.getImage('aparc_aseg', 'resample')
         wmparc = self.getImage('wmparc', 'resample')
+        tt5 = self.getImage('tt5', 'resample')
 
         #Build qa images
         brainMaskQa = self.plot3dVolume(b0, edges=brainMask, fov=brainMask)
         aparcAsegQa = self.plot3dVolume(b0, segOverlay=aparcAseg, fov=brainMask)
         wmparcQa = self.plot3dVolume(b0, segOverlay=wmparc, fov=brainMask)
+        tt5Qas = self.plot4dVolumeToFrames(tt5, fov=brainMask)
 
         qaImages = Images(
             (brainMaskQa, 'Brain mask on upsampled b0'),
             (aparcAsegQa, 'aparcaseg segmentation on upsampled b0'),
-            (wmparcQa, 'white matter segmentation on upsampled b0'))
+            (wmparcQa, 'white matter segmentation on upsampled b0'),
+            (tt5Qas[0], 'Cortical grey matter'),
+            (tt5Qas[1], 'Sub-cortical grey matter'),
+            (tt5Qas[2], 'White matter'),
+            (tt5Qas[3], 'CSF'),
+            (tt5Qas[4], 'Pathological tissue'),
+            )
 
         return qaImages
