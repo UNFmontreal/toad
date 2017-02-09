@@ -63,8 +63,8 @@ class Parcellation(GenericTask):
             aparcData[aparcData == leftValue] = 2
             wmparcData[wmparcData == leftValue] = 5001
         for rightValue in [53]:
-            aparcData[aparcData == leftValue] = 41
-            wmparcData[wmparcData == leftValue] = 5002
+            aparcData[aparcData == rightValue] = 41
+            wmparcData[wmparcData == rightValue] = 5002
 
         # Remove brainstem(16) and 4th ventricule (15)
         for brainstemValue in [15, 16]:
