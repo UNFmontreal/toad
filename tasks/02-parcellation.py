@@ -33,14 +33,84 @@ class Parcellation(GenericTask):
             self.__submitReconAll(anat)
             # @TODO backup the recon-all to backup dir
 
-        self.__convertFeesurferImageIntoNifti(anat)
+        self.__convertFreesurferImageIntoNifti(anat)
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
+        self.__mergeParcellation(self.get('wmparc'),self.get('aparc_aseg'),self.get('brainstem'),self.get('lhHipp'),self.get('rhHipp'))
         tt5Mgz = self.__create5ttImage()
         mriutil.convertAndRestride(tt5Mgz, self.get('tt5'), self.get('preparation', 'stride_orientation'))
         anatFreesurfer = self.getImage('anat', 'freesurfer')
 
         if self.get('cleanup'):
             self.__cleanup()
+
+    def __mergeParcellation(self, wmparcFile, aparcFile, brainstemFile, lhHippFile, rhHippFile):
+
+        wmparc = nibabel.load(wmparcFile)
+        aparc = nibabel.load(aparcFile)
+        brainstem = nibabel.load(brainstemFile)
+        lhHipp = nibabel.load(lhHippFile)
+        rhHipp = nibabel.load(rhHippFile)
+
+        aparcData = aparc.get_data()
+        wmparcData = wmparc.get_data()
+        brainstemData = brainstem.get_data()
+        lhHippData = lhHipp.get_data()
+        rhHippData = rhHipp.get_data()
+
+
+        # Replace Left-Hipp (17) and Right-Hipp (53) to WM
+        for leftValue in [17]:
+            aparcData[aparcData == leftValue] = 2
+            wmparcData[wmparcData == leftValue] = 5001
+        for rightValue in [53]:
+            aparcData[aparcData == rightValue] = 41
+            wmparcData[wmparcData == rightValue] = 5002
+
+        # Remove brainstem(16) and 4th ventricule (15)
+        for brainstemValue in [15, 16]:
+            aparcData[aparcData == brainstemValue] = 0
+            wmparcData[wmparcData == brainstemValue] = 0
+
+        aparcData[brainstemData != 0] =  brainstemData[brainstemData != 0]
+        wmparcData[brainstemData != 0] =  brainstemData[brainstemData != 0]
+
+        lhHippData[lhHippData == 204] = 554 # presubiculum
+        rhHippData[rhHippData == 204] = 504 # presubiculum
+        lhHippData[lhHippData == 205] = 557 # subiculum
+        rhHippData[rhHippData == 205] = 507 # subiculum
+        lhHippData[lhHippData == 206] = 552 # CA1
+        rhHippData[rhHippData == 206] = 502 # CA1
+        lhHippData[lhHippData == 208] = 550 # CA3
+        rhHippData[rhHippData == 208] = 500 # CA3
+        lhHippData[lhHippData == 209] = 556 # CA4
+        rhHippData[rhHippData == 209] = 556 # CA4
+        lhHippData[lhHippData == 212] = 553 # fimbria
+        rhHippData[rhHippData == 212] = 503 # fimbria
+        lhHippData[lhHippData == 215] = 557 # Hipp Fissure
+        rhHippData[rhHippData == 215] = 507 # Hipp Fissure
+
+        # Invented
+        lhHippData[lhHippData == 203] = 559 # Parasubiculum
+        rhHippData[rhHippData == 203] = 509 # Parasubiculum
+        lhHippData[lhHippData == 210] = 560 # GC-DC
+        rhHippData[rhHippData == 210] = 510 # GC-DC
+        lhHippData[lhHippData == 211] = 561 # HATA
+        rhHippData[rhHippData == 211] = 511 # HATA
+        lhHippData[lhHippData == 214] = 562 # Molecular Layer
+        rhHippData[rhHippData == 214] = 512 # Molecular Layer
+        lhHippData[lhHippData == 226] = 563 # Hipp Tail
+        rhHippData[rhHippData == 226] = 513 # Hipp Tail
+
+        aparcData[rhHippData != 0] =  rhHippData[rhHippData != 0]
+        aparcData[lhHippData != 0] =  lhHippData[lhHippData != 0]
+        wmparcData[rhHippData != 0] =  rhHippData[rhHippData != 0]
+        wmparcData[lhHippData != 0] =  lhHippData[lhHippData != 0]
+
+        nibabel.Nifti1Image(lhHippData, lhHipp.affine, lhHipp.header).to_filename(lhHippFile)
+        nibabel.Nifti1Image(rhHippData, rhHipp.affine, rhHipp.header).to_filename(rhHippFile)
+        nibabel.Nifti1Image(wmparcData, wmparc.affine, wmparc.header).to_filename(wmparcFile)
+        nibabel.Nifti1Image(aparcData, aparc.affine, aparc.header).to_filename(aparcFile)
+
 
     def __findAndLinkFreesurferStructure(self):
         """Look if a freesurfer structure already exists in the backup.
@@ -78,8 +148,18 @@ class Parcellation(GenericTask):
             .format(self.get('directive'), anatomical, self.id, self.workingDir, self.getNTreads())
         self.info("Log could be found at {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
         self.launchCommand(cmd, None, None, 86400)
+        # Run BrainStem segmentation
+        cmd = "recon-all -s {} -sd {} -brainstem-structures"\
+            .format(self.id, self.workingDir)
+        self.info("Run brainstem segmentation")
+        self.launchCommand(cmd, None, None, 86400)
+        # Run Hippocampal SubField segmentation
+        cmd = "recon-all -s {} -sd {} -hippocampal-subfields-T1"\
+            .format(self.id, self.workingDir)
+        self.info("Run hippocampal subfield segmentation")
+        self.launchCommand(cmd, None, None, 86400)
 
-    def __convertFeesurferImageIntoNifti(self, anatomicalName):
+    def __convertFreesurferImageIntoNifti(self, anatomicalName):
 
         """
             Convert a List of mgz fresurfer into nifti compress format
@@ -93,6 +173,9 @@ class Parcellation(GenericTask):
                                     (self.get('wmparc'), "wmparc.mgz"),
                                     (self.get('rh_ribbon'), "rh.ribbon.mgz"),
                                     (self.get('lh_ribbon'), "lh.ribbon.mgz"),
+                                    (self.get('brainstem'), "brainstemSsLabels.v10.FSvoxelSpace.mgz"),
+                                    (self.get("rhHipp"), "rh.hippoSfLabels-T1.v10.FSvoxelSpace.mgz"),
+                                    (self.get("lhHipp"), "lh.hippoSfLabels-T1.v10.FSvoxelSpace.mgz"),
                                     (self.get('norm'), "norm.mgz")]:
 
             mriutil.convertAndRestride(self.__findImageInDirectory(source, os.path.join(self.workingDir, self.id)),
@@ -108,6 +191,9 @@ class Parcellation(GenericTask):
 
         subjectDir = os.path.join(self.workingDir, self.id)
         aparcAseg = self.__findImageInDirectory("aparc+aseg.mgz", subjectDir)
+        lhHippFile = self.__findImageInDirectory("lh.hippo", subjectDir)
+        rhHippFile = self.__findImageInDirectory("rh.hippo", subjectDir)
+        brainstemFile = self.__findImageInDirectory("brainstemSsLabels", subjectDir)
         lhWhite = self.__findImageInDirectory("lh.white", subjectDir)
         rhWhite = self.__findImageInDirectory("rh.white", subjectDir)
         lhPial = self.__findImageInDirectory("lh.pial", subjectDir)
@@ -217,8 +303,8 @@ class Parcellation(GenericTask):
             return m
 
         parc = nibabel.load(aparcAseg)
-        voxsize = numpy.asarray(parc.header.get_zooms()[:3])
         parc_data = parc.get_data()
+        voxsize = numpy.asarray(parc.header.get_zooms()[:3])
         lh_wm = read_surf(lhWhite, parc)
         rh_wm = read_surf(rhWhite, parc)
         lh_gm = read_surf(lhPial, parc)
@@ -226,38 +312,93 @@ class Parcellation(GenericTask):
         wm_pve = fill_hemis(lh_wm, rh_wm)
         gm_pve = fill_hemis(lh_gm, rh_gm)
 
-        gm_rois = group_rois([8,  #
-                              47,  #
-                              17,  #
-                              18,  #
-                              53,  #
-                              54  #
+        gm_rois = group_rois([8,   # Left-Cerebellum-Cortex
+                              47,  # Right-Cerebellum-Cortex
+                              17,  # Left-Hippocampus
+                              18,  # Left-Amygdala
+                              53,  # Right-Hippocampus
+                              54,  # Right-Amygdala
+                              559, # Left-para-subiculum
+                              554, # Left-pre-subiculum
+                              557, # Left-subiculum
+                              552, # Left-CA1
+                              550, # Left-CA3
+                              556, # Left-CA4
+                              560, # Left-GC-DC
+                              561, # Left-HATA
+                              553, # Left-fimbria
+                              562, # Left-molecular-layer
+                              555, # Left-fissure
+                              563, # Left-Hipp-Tail
+                              509, # Right-para-subiculum
+                              504, # Right-pre-subiculum
+                              507, # Right-subiculum
+                              502, # Right-CA1
+                              500, # Right-CA3
+                              506, # Right-CA4
+                              510, # Right-GC-DC
+                              511, # Right-HATA
+                              503, # Right-fimbria
+                              512, # Right-molecular-layer
+                              505, # Right-fissure
+                              513 # Right-Hipp-Tail
                               ]).astype(numpy.float32)
 
         gm_smooth = scipy.ndimage.gaussian_filter(gm_rois, sigma=voxsize)
 
-        subcort_rois = group_rois([10,  #
-                                   11,  #
-                                   12,  #
-                                   13,  #
-                                   26,  #
-                                   49,  #
-                                   50,  #
-                                   51,  #
-                                   52,  #
-                                   58  #
+        subcort_rois = group_rois([10,  # Left-Thalamus-Proper
+                                   11,  # Left-Caudate
+                                   12,  # Left-Putamen
+                                   13,  # Left-Pallidum
+                                   26,  # Left-Accumbens-area
+                                   49,  # Right-Thalamus-Proper
+                                   50,  # Right-Caudate
+                                   51,  # Right-Putamen
+                                   52,  # Right-Pallidum
+                                   58   # Right-Accumbens-area 
                                    ]).astype(numpy.float32)
 
         subcort_smooth = scipy.ndimage.gaussian_filter(subcort_rois, sigma=voxsize)
 
-        wm_rois = group_rois([7, 16, 28, 46, 60, 85, 192, 88,
-                             250, 251, 252, 253, 254, 255]).astype(numpy.float32)
+        wm_rois = group_rois([7,   # Left-Cerebellum-White-Matter
+                              16,  # Brain-Stem
+                              175, # Medulla
+                              174, # Pons
+                              173, # MidBrain
+                              28,  # Left-VentralDC
+                              46,  # Right-Cerebellum-White-Matter
+                              60,  # Right-VentralDC
+                              85,  # Optic-Chiasm
+                              192, # Corpus_Callosum
+                              88,  # future_WMSA
+                              250, # Fornix
+                              251, # CC_Posterior
+                              252, # CC_Mid_Posterior
+                              253, # CC_Central
+                              254, # CC_Mid_Anterior
+                              255  # CC_Anterior
+                              ]).astype(numpy.float32)
 
         wm_smooth = scipy.ndimage.gaussian_filter(wm_rois, sigma=voxsize)
-        bs_mask = parc_data == 16
-        bs_vdc_dil = scipy.ndimage.morphology.binary_dilation(group_rois([16, 60, 28]), iterations=2)
-        bs_vdc_excl = numpy.logical_and(bs_vdc_dil, numpy.logical_not(group_rois([16, 7, 46, 60, 28, 10,
-                                                                                  49, 2, 41, 0])))
+        bs_mask = parc_data == 16 # Brain-Stem
+        bs_vdc_dil = scipy.ndimage.morphology.binary_dilation(group_rois([16, # Brain-Stem
+                                                                          175, # Medulla
+                                                                          174, # Pons
+                                                                          173, # MidBrain
+                                                                          60, # Right-VentralDC
+                                                                          28  # Left-VentralDC
+                                                                         ]), iterations=2)
+        bs_vdc_excl = numpy.logical_and(bs_vdc_dil, numpy.logical_not(group_rois([16, # Brain-Stem
+                                                                                  7,  # Left-Cerebellum-White-Matter
+                                                                                  46, # Right-Cerebellum-White-Matter
+                                                                                  60, # Right-VentralDC
+                                                                                  28, # Left-VentralDC
+                                                                                  10, # Left-Thalamus-Proper
+                                                                                  49, # Right-Thalamus-Proper
+                                                                                  2,  # Left-Cerebral-White-Matter
+                                                                                  41, # Right-Cerebral-White-Matter
+                                                                                  0   # Nothing
+                                                                                  ])))
 
         lbs = numpy.where((bs_mask).any(-1).any(0))[0][-1]-3
 
@@ -266,7 +407,19 @@ class Parcellation(GenericTask):
             numpy.logical_not(parc_data_mask),
             scipy.ndimage.morphology.binary_dilation(parc_data_mask))
 
-        csf_rois = group_rois([4, 5, 14, 15, 24, 30, 31, 43, 44, 62, 63, 72])
+        csf_rois = group_rois([4,  # Left-Lateral-Ventricle
+                               5,  # Left-Inf-Lat-Vent
+                               14, # 3rd-Ventricle
+                               15, # 4th-Ventricle
+                               24, # CSF
+                               30, # Left-vessel
+                               31, # Left-choroid-plexus
+                               43, # Right-Lateral-Ventricle
+                               44, # Right-Inf-Lat-Vent
+                               62, # Right-vessel
+                               63, # Right-choroid-plexus
+                               72  # 5th-Ventricle
+                            ])
 
         csf_smooth = scipy.ndimage.gaussian_filter(
             numpy.logical_or(csf_rois, outer_csf).astype(numpy.float32),
@@ -281,7 +434,7 @@ class Parcellation(GenericTask):
         csf_smooth[bs_vdc_excl] += gm_smooth[bs_vdc_excl]
         gm_smooth[bs_vdc_excl] = 0
 
-        mask88 = parc_data == 88
+        mask88 = parc_data == 88 # future_WMSA
         wm = wm_pve+wm_smooth-csf_smooth-subcort_smooth
         wm[wm > 1] = 1
         wm[wm < 0] = 0
@@ -376,6 +529,9 @@ class Parcellation(GenericTask):
                         (self.getImage('lh_ribbon'), 'lh_ribbon'),
                         (self.getImage('norm'), 'norm'),
                         (self.getImage('mask'), 'freesurfer brain masks'),
+                        (self.getImage("brainstem"), 'Brainstem label'),
+                        (self.getImage("lhHipp"), 'Left Hippocampus label'),
+                        (self.getImage("rhHipp"), 'Right Hippocampus label'),
                         (self.getImage('tt5'), '5tt'))
 
     def qaSupplier(self):
