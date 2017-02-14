@@ -50,7 +50,7 @@ class DicomParser(Ascconv):
     def __initialized(self):
 
         try:
-            header = read_file(self.__filename, defer_size=None, stop_before_pixels=True)
+            header = read_file(self.__filename, defer_size=None, stop_before_pixels=True, force=True)
 
         except InvalidDicomError:
             self.__isDicom = False
