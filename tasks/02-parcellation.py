@@ -79,14 +79,14 @@ class Parcellation(GenericTask):
         rhHippData[rhHippData == 205] = 507 # subiculum
         lhHippData[lhHippData == 206] = 552 # CA1
         rhHippData[rhHippData == 206] = 502 # CA1
-        lhHippData[lhHippData == 208] = 550 # CA3
-        rhHippData[rhHippData == 208] = 500 # CA3
-        lhHippData[lhHippData == 209] = 556 # CA4
-        rhHippData[rhHippData == 209] = 556 # CA4
+        lhHippData[lhHippData == 208] = 550 # CA3, fs=CA2_3
+        rhHippData[rhHippData == 208] = 500 # CA3, fs=CA2_3
+        lhHippData[lhHippData == 209] = 556 # CA4, fs=CA4_DG
+        rhHippData[rhHippData == 209] = 506 # CA4, fs=CA4_DG
         lhHippData[lhHippData == 212] = 553 # fimbria
         rhHippData[rhHippData == 212] = 503 # fimbria
-        lhHippData[lhHippData == 215] = 557 # Hipp Fissure
-        rhHippData[rhHippData == 215] = 507 # Hipp Fissure
+        lhHippData[lhHippData == 215] = 557 # Hipp Fissure, Same as subiculum?
+        rhHippData[rhHippData == 215] = 507 # Hipp Fissure, Same as subiculum?
 
         # Invented
         lhHippData[lhHippData == 203] = 559 # Parasubiculum
