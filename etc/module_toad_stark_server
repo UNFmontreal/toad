@@ -1,0 +1,56 @@
+#%Module1.0#####################################################################
+##
+## modules toad
+##
+## modulefiles/toad/1.1  Written by Arnaud Bore
+##
+proc ModulesHelp { } {
+        global version modroot
+
+        puts stderr "toad/1.1 - sets the Environment for TOAD"
+}
+
+module-whatis   "Sets the environment for using TOAD "
+
+# Reset modules
+conflict matlab
+conflict fsl
+conflict freesurfer
+
+# Import Modules
+module load fsl/5.0.9
+module load freesurfer/6.0
+module load mrtrix/0.3.15
+module load tract_querier
+module load fibernavigator
+module load trackvis
+module load matlab/2012b
+
+# for Tcl script use only
+set     topdir          /usr/local
+set     version         1.1
+set     sys             linux86-64
+
+#disable KMP_AFFINITY
+setenv KMP_AFFINITY none
+
+#OPENMP set to 3
+setenv OMP_NUM_THREADS 3
+
+#force minc version 1 (netcdf) utilisation
+setenv MINC_FORCE_V2 0
+
+#disabled X11 utilisation into mayavi/tvtk package
+setenv ETS_TOOLKIT null
+
+# Add TOAD to the path
+prepend-path PATH $topdir/toad/bin
+
+# Server name and SGE queue name
+setenv TOADSERVER stark
+setenv SGEQUEUE toad.q
+
+# PYTHON SCRIPTS & PATH
+prepend-path PYTHONPATH /home/bore/softs/scilpy
+prepend-path PATH /home/bore/softs/scilpy/scripts
+
