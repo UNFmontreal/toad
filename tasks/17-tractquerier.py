@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import glob
 import os
 import shutil
 from core.toad.generictask import GenericTask
@@ -17,8 +18,8 @@ class Tractquerier(GenericTask):
 
 
     def implement(self):
-        shutil.copy(self.queries, self.workingDir)
-        shutil.copy(self.tq_dict, self.workingDir)
+        shutil.copy(self.queriesFile, self.workingDir)
+        shutil.copy(self.tq_dictFile, self.workingDir)
 
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         nbDirections = mriutil.getNbDirectionsFromDWI(dwi)  # Get number of directions
@@ -29,7 +30,7 @@ class Tractquerier(GenericTask):
 
         self.__tractQuerier(
                 self.tractographyTrk, atlasResample,
-                self.workingDir, self.queries)
+                self.workingDir, self.queriesFile)
 
 
     def __getTractography(self, nbDirections):
@@ -63,15 +64,16 @@ class Tractquerier(GenericTask):
 
 
     def __buildNameTractQuerierOutputs(self):
-        self.queries = [self.getImage('dwi', 'corpus_callosum', 'trk'),
-                        self.getImage('dwi', 'cortico_spinal.left', 'trk'),
-                        self.getImage('dwi', 'cortico_spinal.right', 'trk'),
-                        self.getImage('dwi', 'inferior_fronto_occipital.left', 'trk'),
-                        self.getImage('dwi', 'inferior_fronto_occipital.right', 'trk'),
-                        self.getImage('dwi', 'inferior_longitudinal_fasciculus.left', 'trk'),
-                        self.getImage('dwi', 'inferior_longitudinal_fasciculus.right', 'trk'),
-                        self.getImage('dwi', 'uncinate_fasciculus.left', 'trk'),
-                        self.getImage('dwi', 'uncinate_fasciculus.right', 'trk')]
+        self.queries = [self.getImage('dwi', 'cc_2', 'trk'),
+                        self.getImage('dwi', 'ioff.left', 'trk'),
+                        self.getImage('dwi', 'ioff.right', 'trk'),
+                        self.getImage('dwi', 'ilf.left', 'trk'),
+                        self.getImage('dwi', 'ilf.right', 'trk'),
+                        self.getImage('dwi', 'uf.left', 'trk'),
+                        self.getImage('dwi', 'uf.right', 'trk'),
+                        #self.getImage('dwi', 'cortico_spinal.left', 'trk'),
+                        #self.getImage('dwi', 'cortico_spinal.right', 'trk'),
+                        ]
 
 
     def isIgnore(self):
@@ -135,29 +137,30 @@ class Tractquerier(GenericTask):
                  'Corpus Callosum',
                  95, 60, 40, -80, 0, 160),
                 (self.queries[1],
-                 'Corticospinal tract Left',
-                 95, 80, 40, -90, 0, 160),
-                (self.queries[2],
-                 'Corticospinal tract right',
-                 95, 80, 40, -90, 0, 200),
-                (self.queries[3],
                  'Inferior Fronto Occipital tract left',
                  95, 80, 40, -90, 0, 90),
-                (self.queries[4],
+                (self.queries[2],
                  'Inferior Fronto Occipital tract right',
                  95, 80, 40, -90, 0, -90),
-                (self.queries[5],
+                (self.queries[3],
                  'inferior Longitudinal Fasciculus left',
                  95, 80, 40, -90, 0, 90),
-                (self.queries[6],
+                (self.queries[4],
                  'Inferior Longitudinal Fasciculus right',
                  95, 80, 40, -90, 0, -90),
-                (self.queries[7],
+                (self.queries[5],
                  'Uncinate Fasciculus left',
                  95, 80, 40, -90, 0, 90),
-                (self.queries[8],
+                (self.queries[6],
                  'Uncinate Fasciculus right',
-                 95, 80, 40, -90, 0, -90))
+                 95, 80, 40, -90, 0, -90),
+                #(self.queries[7],
+                # 'Corticospinal tract Left',
+                # 95, 80, 40, -90, 0, 160),
+                #(self.queries[8],
+                # 'Corticospinal tract right',
+                # 95, 80, 40, -90, 0, 200),
+                )
 
             for data, description, xSlice, ySlice, zSlice, xRot, yRot, zRot in tags:
                 if data is not None:

@@ -54,17 +54,16 @@ class GenericTask(Logger, Load, Qa):
         self.__dependenciesDirNames = {}
         for arg in args:
             self.dependencies.append(arg)
+        # Needed for tractquerier and tractfiltering task
         self._defaultQuery = None
-        self.queries = self._findTractquerierFile('queries', 'queries_freesurfer')
-        self.tq_dict = self._findTractquerierFile('tq_dict', 'tq_dict_freesurfer')
-
+        self.queriesFile = self._tractquerierFile('queries', 'queries_freesurfer6')
+        self.tq_dictFile = self._tractquerierFile('tq_dict', 'tq_dict_freesurfer6')
 
     @property
     def defaultQuery(self):
         return self._defaultQuery
 
-
-    def _findTractquerierFile(self, prefix, defaultFile):
+    def _tractquerierFile(self, prefix, defaultFile):
         """
         Utility fonctions to find configuration file for tractquerier
 
@@ -97,6 +96,7 @@ class GenericTask(Logger, Load, Qa):
             if self._defaultQuery == None:
                 self._defaultQuery = True
             target = defaultTarget
+
         return target
 
 

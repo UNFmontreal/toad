@@ -133,14 +133,19 @@ class Config(object):
         Returns:
             a list of all config files
         """
-        configFiles = ["{}/etc/config.cfg".format(arguments.toadDir), '~/.toad.cfg']
+        configFiles = [
+                "{}/etc/config.cfg".format(arguments.toadDir),
+                '~/.toad.cfg',
+                ]
 
-        #config file could be found into the root of the project, into the subject and into the backup directory
+        # Config file could be found into the root of the project,
+        # into the subject and into the backup directory
         if arguments.subject:
 
-            configFile = "{}/configRunning.cfg".format(os.path.join(arguments.subject, "00-backup"))
-            if os.path.exists(configFile):
-                configFiles.append(configFile)
+            configRunning = "{}/configRunning.cfg".format(
+                    os.path.join(arguments.subject, "00-backup"))
+            if os.path.exists(configRunning):
+                configFiles.append(configRunning)
 
             for directory in [os.path.dirname(arguments.subject),
                            arguments.subject,
