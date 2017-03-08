@@ -65,8 +65,8 @@ class Parcellation(GenericTask):
             aparcData[aparcData == rightValue] = 41
             wmparcData[wmparcData == rightValue] = 5002
 
-        # Remove brainstem(16) and 4th ventricule (15)
-        for brainstemValue in [15, 16]:
+        # Remove brainstem(16)
+        for brainstemValue in [16]:
             aparcData[aparcData == brainstemValue] = 0
             wmparcData[wmparcData == brainstemValue] = 0
 
@@ -79,14 +79,14 @@ class Parcellation(GenericTask):
         rhHippData[rhHippData == 205] = 507 # subiculum
         lhHippData[lhHippData == 206] = 552 # CA1
         rhHippData[rhHippData == 206] = 502 # CA1
-        lhHippData[lhHippData == 208] = 550 # CA3, fs=CA2_3
-        rhHippData[rhHippData == 208] = 500 # CA3, fs=CA2_3
-        lhHippData[lhHippData == 209] = 556 # CA4, fs=CA4_DG
-        rhHippData[rhHippData == 209] = 506 # CA4, fs=CA4_DG
+        lhHippData[lhHippData == 208] = 550 # CA3
+        rhHippData[rhHippData == 208] = 500 # CA3
+        lhHippData[lhHippData == 209] = 556 # CA4
+        rhHippData[rhHippData == 209] = 506 # CA4
         lhHippData[lhHippData == 212] = 553 # fimbria
         rhHippData[rhHippData == 212] = 503 # fimbria
-        lhHippData[lhHippData == 215] = 557 # Hipp Fissure, Same as subiculum?
-        rhHippData[rhHippData == 215] = 507 # Hipp Fissure, Same as subiculum?
+        lhHippData[lhHippData == 215] = 555 # Hipp Fissure
+        rhHippData[rhHippData == 215] = 505 # Hipp Fissure
 
         # Invented
         lhHippData[lhHippData == 203] = 559 # Parasubiculum
@@ -317,29 +317,29 @@ class Parcellation(GenericTask):
                               18,  # Left-Amygdala
                               53,  # Right-Hippocampus
                               54,  # Right-Amygdala
-                              559, # Left-para-subiculum
-                              554, # Left-pre-subiculum
-                              557, # Left-subiculum
-                              552, # Left-CA1
                               550, # Left-CA3
+                              552, # Left-CA1
+                              553, # Left-fimbria
+                              554, # Left-pre-subiculum
+                              555, # Left-fissure
                               556, # Left-CA4
+                              557, # Left-subiculum
+                              559, # Left-para-subiculum
                               560, # Left-GC-DC
                               561, # Left-HATA
-                              553, # Left-fimbria
                               562, # Left-molecular-layer
-                              555, # Left-fissure
                               563, # Left-Hipp-Tail
-                              509, # Right-para-subiculum
-                              504, # Right-pre-subiculum
-                              507, # Right-subiculum
-                              502, # Right-CA1
                               500, # Right-CA3
+                              502, # Right-CA1
+                              503, # Right-fimbria
+                              504, # Right-pre-subiculum
+                              505, # Right-fissure
                               506, # Right-CA4
+                              507, # Right-subiculum
+                              509, # Right-para-subiculum
                               510, # Right-GC-DC
                               511, # Right-HATA
-                              503, # Right-fimbria
                               512, # Right-molecular-layer
-                              505, # Right-fissure
                               513 # Right-Hipp-Tail
                               ]).astype(numpy.float32)
 
@@ -361,9 +361,10 @@ class Parcellation(GenericTask):
 
         wm_rois = group_rois([7,   # Left-Cerebellum-White-Matter
                               16,  # Brain-Stem
-                              175, # Medulla
-                              174, # Pons
                               173, # MidBrain
+                              174, # Pons
+                              175, # Medulla
+                              178, # SCP
                               28,  # Left-VentralDC
                               46,  # Right-Cerebellum-White-Matter
                               60,  # Right-VentralDC
@@ -381,9 +382,10 @@ class Parcellation(GenericTask):
         wm_smooth = scipy.ndimage.gaussian_filter(wm_rois, sigma=voxsize)
         bs_mask = parc_data == 16 # Brain-Stem
         bs_vdc_dil = scipy.ndimage.morphology.binary_dilation(group_rois([16, # Brain-Stem
-                                                                          175, # Medulla
-                                                                          174, # Pons
                                                                           173, # MidBrain
+                                                                          174, # Pons
+                                                                          175, # Medulla
+                                                                          178, # SCP
                                                                           60, # Right-VentralDC
                                                                           28  # Left-VentralDC
                                                                          ]), iterations=2)

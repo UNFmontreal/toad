@@ -1,5 +1,3 @@
-import FreeSurfer.qry
-
 #$Id: FreeSurferColorLUT.txt,v 1.38.2.6 2009_07_30 19:00:40 nicks Exp $
 
 #No. Label Name:                            R   G   B   A
@@ -20,8 +18,8 @@ Putamen.left |= 12
 Pallidum.left |= 13
 third_Ventricle |= 14
 fourth_Ventricle |= 15
-Brain_Stem |= 16
-Hippocampus.left |= 550 and 552 and 553 and 554 and 556 and 557 and 559 and 560 and 561 and 562 and 563
+Brain_Stem |= 173 and 174 and 175 and 178
+Hippocampus.left |= 550 and 552 and 553 and 554 and 555 and 556 and 557 and 559 and 560 and 561 and 562 and 563
 Amygdala.left |= 18
 Insula.left |= 19
 Operculum.left |= 20
@@ -57,7 +55,7 @@ Thalamus_Proper.right |= 49
 Caudate.right |= 50
 Putamen.right |= 51
 Pallidum.right |= 52
-Hippocampus.right |= 500 and 502 and 503 and 504 and 506 and 507 and 509 and 510 and 511 and 512 and 513
+Hippocampus.right |= 500 and 502 and 503 and 504 and 505 and 506 and 507 and 509 and 510 and 511 and 512 and 513
 Amygdala.right |= 54
 Insula.right |= 55
 Operculum.right |= 56
