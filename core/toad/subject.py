@@ -3,6 +3,7 @@ import shutil
 import os
 import xml.dom.minidom
 import ConfigParser
+import StringIO
 
 from core.toad.validation import Validation
 from logger import Logger
@@ -110,9 +111,37 @@ class Subject(Logger, Lock, Validation):
         Returns:
             True if the operation is a success, False otherwise
         """
-        xmlFilename = os.path.join(self .getLogDir(), self.__config.get('general', 'versions_file_name'))
+        xmlFilename = os.path.join(self.getLogDir(), self.__config.get('general', 'versions_file_name'))
         xmlToadTag = xmlhelper.createOrParseXmlDocument(xmlFilename)
         xmlToadTag.appendChild(xmlhelper.createApplicationTags(xmlSoftwaresTags))
         with open(xmlFilename, 'w') as w:
             xmlToadTag.writexml(w)
         return True
+
+    def writeConfigRunning(self, target):
+        # Create a deep copy of the configuration object
+        #http://stackoverflow.com/questions/23416370/manually-building-a-deep-copy-of-a-configparser-in-python-2-7
+        config_string = StringIO.StringIO()
+        self.__config.write(config_string)
+
+        # We must reset the buffer to make it ready for reading.
+        config_string.seek(0)
+        config_running = ConfigParser.ConfigParser()
+        config_running.readfp(config_string)
+
+        # Remove "ignore" options in each sections
+        for section in config_running.sections():
+            for name, value in config_running.items(section):
+                if name == "ignore":
+                    config_running.remove_option(section, "ignore")
+                    print "remove ignore for {}".format(section)
+
+        # Remove "arguments" section
+        if "arguments" in config_running.sections():
+            config_running.remove_section("arguments")
+            print "remove arguments"
+
+        configRunning = open(target, 'w')
+        config_running.write(configRunning)
+        configRunning.close()
+
