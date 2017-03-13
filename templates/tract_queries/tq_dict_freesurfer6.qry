@@ -18,8 +18,25 @@ Putamen.left |= 12
 Pallidum.left |= 13
 third_Ventricle |= 14
 fourth_Ventricle |= 15
-Brain_Stem |= 173 and 174 and 175 and 178
-Hippocampus.left |= 550 and 552 and 553 and 554 and 555 and 556 and 557 and 559 and 560 and 561 and 562 and 563
+
+Pons |= 174
+Medulla |= 175
+SCP |= 178
+Midbrain |= 173
+Brain_Stem |= Pons or Medulla or SCP or Midbrain
+
+# Invented
+hippParasubiculum.left |= 559
+hippParasubiculum.right |= 509
+hippGC_DC.left |= 560
+hippGC_DC.right |= 510
+hippHATA.left |= 561
+hippHATA.right |= 511
+hippMolecularLayer.left |= 562
+hippMolecularLayer.right |= 512
+hippTail.left |= 563
+hippTail.right |= 513
+
 Amygdala.left |= 18
 Insula.left |= 19
 Operculum.left |= 20
@@ -55,7 +72,6 @@ Thalamus_Proper.right |= 49
 Caudate.right |= 50
 Putamen.right |= 51
 Pallidum.right |= 52
-Hippocampus.right |= 500 and 502 and 503 and 504 and 505 and 506 and 507 and 509 and 510 and 511 and 512 and 513
 Amygdala.right |= 54
 Insula.right |= 55
 Operculum.right |= 56
@@ -1681,3 +1697,8 @@ S_subparietal.right |= wm_S_subparietal.right or ctx_S_subparietal.right
 S_temporal_inf.right |= wm_S_temporal_inf.right or ctx_S_temporal_inf.right
 S_temporal_sup.right |= wm_S_temporal_sup.right or ctx_S_temporal_sup.right
 S_temporal_transverse.right |= wm_S_temporal_transverse.right or ctx_S_temporal_transverse.right
+
+# Hippocampus
+hippocampus.right |= hippParasubiculum.right or hippGC_DC.right or hippHATA.right or hippMolecularLayer.right or hippTail.right or CA1.right or CA2_3.right or CA4_DG.right or hippocampal_fissure.right or fimbria.right or presubiculum.right or subiculum.right
+hippocampus.left |= hippParasubiculum.left or hippGC_DC.left or hippHATA.left or hippMolecularLayer.left or hippTail.left or CA1.left or CA2_3.left or CA4_DG.left or hippocampal_fissure.left or fimbria.left or presubiculum.left or subiculum.left
+

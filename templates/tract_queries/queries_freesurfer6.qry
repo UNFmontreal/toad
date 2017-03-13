@@ -293,12 +293,6 @@ CC_7 = (
     )
 )
 
-#Cortico-spinal tract
-cortico_spinal.side = (
-    endpoints_in(brain_stem)
-    and endpoints_in(precentral.side or postcentral.side)
-)
-
 #Thalamo-prefrontal
 thalamo_prefrontal.side = (
     endpoints_in(thalamus.side) and endpoints_in(prefrontal.side)
@@ -389,9 +383,17 @@ UF.side = (
     not in hemisphere.opposite
 )
 
-#Cortico-spinal tract
-cortico_spinal.side = (
-    (endpoints_in(brain_stem)
-    and endpoints_in(precentral.side or postcentral.side)
-    )
-not in hemisphere.opposite)
+# cortico-spinal #
+cst_pre.side |= ((precentral.side and Brain_Stem)
+    not in superiorfrontal.side
+    not in cerebellum_white_matter.side not in thalamus_proper.side
+    not in hemisphere.opposite)
+
+cst_post.side |= ((postcentral.side and Brain_Stem)
+    not in superiorfrontal.side
+    not in cerebellum_white_matter.side not in thalamus_proper.side
+    not in hemisphere.opposite)
+
+cortico_spinal_v1.side = cst_pre.side or cst_post.side
+
+
