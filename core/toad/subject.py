@@ -119,6 +119,9 @@ class Subject(Logger, Lock, Validation):
         return True
 
     def writeConfigRunning(self, target):
+        """
+        Write a snapshot of the configuration to the target file
+        """
         # Create a deep copy of the configuration object
         #http://stackoverflow.com/questions/23416370/manually-building-a-deep-copy-of-a-configparser-in-python-2-7
         config_string = StringIO.StringIO()
@@ -134,12 +137,10 @@ class Subject(Logger, Lock, Validation):
             for name, value in config_running.items(section):
                 if name == "ignore":
                     config_running.remove_option(section, "ignore")
-                    print "remove ignore for {}".format(section)
 
         # Remove "arguments" section
         if "arguments" in config_running.sections():
             config_running.remove_section("arguments")
-            print "remove arguments"
 
         configRunning = open(target, 'w')
         config_running.write(configRunning)
