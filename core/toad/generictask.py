@@ -39,7 +39,6 @@ class GenericTask(Logger, Load, Qa):
         self.__moduleName = self.__class__.__module__.split(".")[-1]
         self.__cleanupBeforeImplement = True
         self.config = subject.getConfig()
-        self.configRunning = 0
         self.subject = subject
         self.subjectDir = self.subject.getDir()
         self.toadDir = self.config.get('arguments', 'toad_dir')
@@ -54,17 +53,16 @@ class GenericTask(Logger, Load, Qa):
         self.__dependenciesDirNames = {}
         for arg in args:
             self.dependencies.append(arg)
+        # Needed for tractquerier and tractfiltering task
         self._defaultQuery = None
-        self.queries = self._findTractquerierFile('queries', 'queries_freesurfer')
-        self.tq_dict = self._findTractquerierFile('tq_dict', 'tq_dict_freesurfer')
-
+        self.queriesFile = self._tractquerierFile('queries', 'queries_freesurfer6')
+        self.tq_dictFile = self._tractquerierFile('tq_dict', 'tq_dict_freesurfer6')
 
     @property
     def defaultQuery(self):
         return self._defaultQuery
 
-
-    def _findTractquerierFile(self, prefix, defaultFile):
+    def _tractquerierFile(self, prefix, defaultFile):
         """
         Utility fonctions to find configuration file for tractquerier
 
@@ -97,6 +95,7 @@ class GenericTask(Logger, Load, Qa):
             if self._defaultQuery == None:
                 self._defaultQuery = True
             target = defaultTarget
+
         return target
 
 
@@ -243,10 +242,10 @@ class GenericTask(Logger, Load, Qa):
 
         self.implement()
 
-        # Open ConfigRunning File
-        self.configRunning = open( os.path.join(self.subjectDir, '00-backup' + os.path.sep + 'configRunning.cfg'), 'w')
-        self.config.write(self.configRunning)
-        self.configRunning.close()
+        # Save ConfigRunning File
+        configRunningPath = os.path.join(
+                self.subjectDir, '00-backup', 'configRunning.cfg')
+        self.subject.writeConfigRunning(configRunningPath)
 
         self.info("Create and supply images to the qa report ")
         if "qaSupplier" in dir(self):

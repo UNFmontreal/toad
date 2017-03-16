@@ -308,7 +308,7 @@ class Correction(GenericTask):
             cmd += " --topup={}".format(topup)
 
         self.getNTreadsEddy()
-        self.launchCommand(cmd, None, None, 5 * 60 * 60)
+        self.launchCommand(cmd, nice=5*60*60)
         return self.rename(tmp, target)
 
     def __computeFieldmap(self, dwi, bVals, mag, phase, norm, parcellationMask, freesurferAnat):
