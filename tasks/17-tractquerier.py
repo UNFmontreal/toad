@@ -71,8 +71,8 @@ class Tractquerier(GenericTask):
                         self.getImage('dwi', 'ilf.right', 'trk'),
                         self.getImage('dwi', 'uf.left', 'trk'),
                         self.getImage('dwi', 'uf.right', 'trk'),
-                        #self.getImage('dwi', 'cortico_spinal.left', 'trk'),
-                        #self.getImage('dwi', 'cortico_spinal.right', 'trk'),
+                        self.getImage('dwi', 'cortico_spinal.left', 'trk'),
+                        self.getImage('dwi', 'cortico_spinal.right', 'trk'),
                         ]
 
 
@@ -154,12 +154,12 @@ class Tractquerier(GenericTask):
                 (self.queries[6],
                  'Uncinate Fasciculus right',
                  95, 80, 40, -90, 0, -90),
-                #(self.queries[7],
-                # 'Corticospinal tract Left',
-                # 95, 80, 40, -90, 0, 160),
-                #(self.queries[8],
-                # 'Corticospinal tract right',
-                # 95, 80, 40, -90, 0, 200),
+                (self.queries[7],
+                 'Corticospinal tract Left',
+                 95, 80, 40, -90, 0, 160),
+                (self.queries[8],
+                 'Corticospinal tract right',
+                 95, 80, 40, -90, 0, 200),
                 )
 
             for data, description, xSlice, ySlice, zSlice, xRot, yRot, zRot in tags:

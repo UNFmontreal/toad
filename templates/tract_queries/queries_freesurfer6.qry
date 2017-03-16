@@ -394,6 +394,6 @@ cst_post.side |= ((postcentral.side and Brain_Stem)
     not in cerebellum_white_matter.side not in thalamus_proper.side
     not in hemisphere.opposite)
 
-cortico_spinal_v1.side = cst_pre.side or cst_post.side
+cortico_spinal.side = cst_pre.side or cst_post.side
 
 

@@ -76,8 +76,8 @@ class TractFiltering(GenericTask):
                         self.getImage('dwi', 'ilf.right', 'trk', self.relativeOutDir),
                         self.getImage('dwi', 'uf.left', 'trk', self.relativeOutDir),
                         self.getImage('dwi', 'uf.right', 'trk', self.relativeOutDir),
-                        #self.getImage('dwi', 'cortico_spinal.left', 'trk', self.relativeOutDir),
-                        #self.getImage('dwi', 'cortico_spinal.right', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'cortico_spinal.left', 'trk', self.relativeOutDir),
+                        self.getImage('dwi', 'cortico_spinal.right', 'trk', self.relativeOutDir),
                         ]
 
     def qaSupplier(self):
@@ -118,12 +118,12 @@ class TractFiltering(GenericTask):
                 (self.outputs[6],
                  'Uncinate Fasciculus right',
                  95, 80, 40, -90, 0, -90),
-                #(self.outputs[7],
-                # 'Corticospinal tract Left',
-                # 95, 80, 40, -90, 0, 160),
-                #(self.outputs[8],
-                # 'Corticospinal tract right',
-                # 95, 80, 40, -90, 0, 200),
+                (self.outputs[7],
+                 'Corticospinal tract Left',
+                 95, 80, 40, -90, 0, 160),
+                (self.outputs[8],
+                 'Corticospinal tract right',
+                 95, 80, 40, -90, 0, 200),
                 )
 
             for data, description, xSlice, ySlice, zSlice, xRot, yRot, zRot in tags:
