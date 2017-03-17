@@ -7,6 +7,8 @@ import util
 import os
 from shutil import rmtree
 from collections import OrderedDict
+from nibabel.streamlines import Field
+from nibabel.orientations import aff2axcodes
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -527,7 +529,7 @@ def get_vox_dims(volume):
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
 
 
-def tck2trk(source, anatomical ,target):
+def tck2trk(tractogram, anatomy ,target):
     """ Converts MRtrix (.tck) tract files into TrackVis (.trk) format using functions from dipy
 
     Args:
@@ -537,24 +539,31 @@ def tck2trk(source, anatomical ,target):
         target: an output Trackvis format image
 
     """
-    dx, dy, dz = get_data_dims(anatomical)
-    vx, vy, vz = get_vox_dims(anatomical)
-    image_file = nibabel.load(anatomical)
-    affine = image_file.get_affine()
 
-    header, streamlines = read_mrtrix_tracks(source, as_generator=True)
-    trk_header = nibabel.trackvis.empty_header()
-    trk_header['dim'] = [dx,dy,dz]
-    trk_header['voxel_size'] = [vx,vy,vz]
-    trk_header['n_count'] = header['count']
+    try:
+        nii = nibabel.load(anatomy)
+    except:
+        parser.error("Expecting anatomy image as first agument.")
 
-    axcode = nibabel.orientations.aff2axcodes(affine)
-    trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
-    trk_header['vox_to_ras'] = affine
-    transformed_streamlines = transform_to_trackvis_voxmm(streamlines, trk_header)
-    trk_tracks = ((ii, None, None) for ii in transformed_streamlines)
-    nibabel.trackvis.write(target, trk_tracks, trk_header)
-    return target
+    if nibabel.streamlines.detect_format(tractogram) is not nibabel.streamlines.TckFile:
+        print("Skipping non TCK file: '{}'".format(tractogram))
+        #continue
+
+    output_filename = tractogram[:-4] + '.trk'
+    if os.path.isfile(output_filename) and not args.force:
+        print("Skipping existing file: '{}'. Use -f to overwrite.".format(output_filename))
+        #continue
+
+    header = {}
+    header[Field.VOXEL_TO_RASMM] = nii.affine.copy()
+    header[Field.VOXEL_SIZES] = nii.header.get_zooms()[:3]
+    header[Field.DIMENSIONS] = nii.shape[:3]
+    header[Field.VOXEL_ORDER] = "".join(aff2axcodes(nii.affine))
+
+    tck = nibabel.streamlines.load(tractogram)
+    nibabel.streamlines.save(tck.tractogram, output_filename, header=header)
+
+    return output_filename
 
 
 def isAfreesurferStructure(directory):
