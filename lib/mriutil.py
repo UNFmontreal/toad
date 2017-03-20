@@ -530,7 +530,7 @@ def get_vox_dims(volume):
 
 
 def tck2trk(tractogram, anatomy ,target):
-    """ Converts MRtrix (.tck) tract files into TrackVis (.trk) format using functions from dipy
+    """ Converts MRtrix (.tck) tract files into TrackVis (.trk) format using Nibabel API
 
     Args:
 
@@ -548,8 +548,8 @@ def tck2trk(tractogram, anatomy ,target):
     if nibabel.streamlines.detect_format(tractogram) is not nibabel.streamlines.TckFile:
         print("Skipping non TCK file: '{}'".format(tractogram))
 
-    if os.path.isfile(output_filename) and not args.force:
-        print("Skipping existing file: '{}'. Use -f to overwrite.".format(output_filename))
+    if os.path.isfile(target) and not args.force:
+        print("Skipping existing file: '{}'. Use -f to overwrite.".format(target))
 
     header = {}
     header[Field.VOXEL_TO_RASMM] = nii.affine.copy()
