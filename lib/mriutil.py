@@ -548,7 +548,6 @@ def tck2trk(tractogram, anatomy ,target):
     if nibabel.streamlines.detect_format(tractogram) is not nibabel.streamlines.TckFile:
         print("Skipping non TCK file: '{}'".format(tractogram))
 
-    output_filename = tractogram[:-4] + '.trk'
     if os.path.isfile(output_filename) and not args.force:
         print("Skipping existing file: '{}'. Use -f to overwrite.".format(output_filename))
 
@@ -559,9 +558,9 @@ def tck2trk(tractogram, anatomy ,target):
     header[Field.VOXEL_ORDER] = "".join(aff2axcodes(nii.affine))
 
     tck = nibabel.streamlines.load(tractogram)
-    nibabel.streamlines.save(tck.tractogram, output_filename, header=header)
+    nibabel.streamlines.save(tck.tractogram, target, header=header)
 
-    return output_filename
+    return target
 
 
 def isAfreesurferStructure(directory):
