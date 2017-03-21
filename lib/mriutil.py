@@ -7,8 +7,6 @@ import util
 import os
 from shutil import rmtree
 from collections import OrderedDict
-from nibabel.streamlines import Field
-from nibabel.orientations import aff2axcodes
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -540,19 +538,13 @@ def tck2trk(tractogram, anatomy ,target):
 
     """
 
-    try:
-        nii = nibabel.load(anatomy)
-    except:
-        parser.error("Expecting anatomy image as first agument.")
-
-    if nibabel.streamlines.detect_format(tractogram) is not nibabel.streamlines.TckFile:
-        print("Skipping non TCK file: '{}'".format(tractogram))
-
+    nii = nibabel.load(anatomy)
+        
     header = {}
-    header[Field.VOXEL_TO_RASMM] = nii.affine.copy()
-    header[Field.VOXEL_SIZES] = nii.header.get_zooms()[:3]
-    header[Field.DIMENSIONS] = nii.shape[:3]
-    header[Field.VOXEL_ORDER] = "".join(aff2axcodes(nii.affine))
+    header[nibabel.streamlines.Field.VOXEL_TO_RASMM] = nii.affine.copy()
+    header[nibabel.streamlines.Field.VOXEL_SIZES] = nii.header.get_zooms()[:3]
+    header[nibabel.streamlines.Field.DIMENSIONS] = nii.shape[:3]
+    header[nibabel.streamlines.Field.VOXEL_ORDER] = "".join(nibabel.orientations.aff2axcodes(nii.affine))
 
     tck = nibabel.streamlines.load(tractogram)
     nibabel.streamlines.save(tck.tractogram, target, header=header)
