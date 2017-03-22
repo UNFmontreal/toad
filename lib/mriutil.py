@@ -7,8 +7,6 @@ import util
 import os
 from shutil import rmtree
 from collections import OrderedDict
-from nibabel.streamlines import Field
-from nibabel.orientations import aff2axcodes
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -540,22 +538,13 @@ def tck2trk(tractogram, anatomy ,target):
 
     """
 
-    try:
-        nii = nibabel.load(anatomy)
-    except:
-        parser.error("Expecting anatomy image as first agument.")
-
-    if nibabel.streamlines.detect_format(tractogram) is not nibabel.streamlines.TckFile:
-        print("Skipping non TCK file: '{}'".format(tractogram))
-
-    if os.path.isfile(output_filename) and not args.force:
-        print("Skipping existing file: '{}'. Use -f to overwrite.".format(output_filename))
+    nii = nibabel.load(anatomy)
 
     header = {}
-    header[Field.VOXEL_TO_RASMM] = nii.affine.copy()
-    header[Field.VOXEL_SIZES] = nii.header.get_zooms()[:3]
-    header[Field.DIMENSIONS] = nii.shape[:3]
-    header[Field.VOXEL_ORDER] = "".join(aff2axcodes(nii.affine))
+    header[nibabel.streamlines.Field.VOXEL_TO_RASMM] = nii.affine.copy()
+    header[nibabel.streamlines.Field.VOXEL_SIZES] = nii.header.get_zooms()[:3]
+    header[nibabel.streamlines.Field.DIMENSIONS] = nii.shape[:3]
+    header[nibabel.streamlines.Field.VOXEL_ORDER] = "".join(nibabel.orientations.aff2axcodes(nii.affine))
 
     tck = nibabel.streamlines.load(tractogram)
     nibabel.streamlines.save(tck.tractogram, target, header=header)
@@ -722,15 +711,22 @@ def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None)
     :param sourceDirMetrics:
     :return: Nothing
     """
-    rawDir = 'raw'
+    inputDir = 'input'
+    outputDir = 'output'
+    subjectDir = 'subject'
 
-    if os.path.exists(rawDir):
-        rmtree(rawDir)
+    if os.path.exists(inputDir):
+        rmtree(inputDir)
 
-    os.mkdir(rawDir)
+    if os.path.exists(outputDir):
+        rmtree(outputDir)
 
-    bundlesDir = os.path.join(rawDir,'bundles')
-    metricsDir = os.path.join(rawDir,'metrics')
+    os.mkdir(inputDir)
+    os.mkdir(outputDir)
+    os.mkdir(os.path.join(inputDir, subjectDir))
+
+    bundlesDir = os.path.join(inputDir, subjectDir, 'bundles')
+    metricsDir = os.path.join(inputDir, subjectDir, 'metrics')
 
     targetBundlesDir = os.path.join(workingDir, bundlesDir) + os.path.sep
     targetMetricsDir = os.path.join(workingDir, metricsDir) + os.path.sep
@@ -745,3 +741,5 @@ def setWorkingDirTractometry(workingDir, sourceBundles=None, sourceMetrics=None)
         if type(sourceMetrics) is list:
             for metric in sourceMetrics:
                 util.symlink(metric[0], targetMetricsDir, metric[1])
+
+
