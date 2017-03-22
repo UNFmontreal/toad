@@ -527,8 +527,8 @@ def get_vox_dims(volume):
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
 
 
-def tck2trk(source, anatomical ,target):
-    """ Converts MRtrix (.tck) tract files into TrackVis (.trk) format using functions from dipy
+def tck2trk(tractogram, anatomy ,target):
+    """ Converts MRtrix (.tck) tract files into TrackVis (.trk) format using Nibabel API
 
     Args:
 
@@ -537,23 +537,18 @@ def tck2trk(source, anatomical ,target):
         target: an output Trackvis format image
 
     """
-    dx, dy, dz = get_data_dims(anatomical)
-    vx, vy, vz = get_vox_dims(anatomical)
-    image_file = nibabel.load(anatomical)
-    affine = image_file.get_affine()
 
-    header, streamlines = read_mrtrix_tracks(source, as_generator=True)
-    trk_header = nibabel.trackvis.empty_header()
-    trk_header['dim'] = [dx,dy,dz]
-    trk_header['voxel_size'] = [vx,vy,vz]
-    trk_header['n_count'] = header['count']
+    nii = nibabel.load(anatomy)
+        
+    header = {}
+    header[nibabel.streamlines.Field.VOXEL_TO_RASMM] = nii.affine.copy()
+    header[nibabel.streamlines.Field.VOXEL_SIZES] = nii.header.get_zooms()[:3]
+    header[nibabel.streamlines.Field.DIMENSIONS] = nii.shape[:3]
+    header[nibabel.streamlines.Field.VOXEL_ORDER] = "".join(nibabel.orientations.aff2axcodes(nii.affine))
 
-    axcode = nibabel.orientations.aff2axcodes(affine)
-    trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
-    trk_header['vox_to_ras'] = affine
-    transformed_streamlines = transform_to_trackvis_voxmm(streamlines, trk_header)
-    trk_tracks = ((ii, None, None) for ii in transformed_streamlines)
-    nibabel.trackvis.write(target, trk_tracks, trk_header)
+    tck = nibabel.streamlines.load(tractogram)
+    nibabel.streamlines.save(tck.tractogram, target, header=header)
+
     return target
 
 
