@@ -528,7 +528,7 @@ def get_vox_dims(volume):
 
 
 def tck2trk(tractogram, anatomy ,target):
-    """ Converts MRtrix (.tck) tract files into TrackVis (.trk) format using functions from dipy
+    """ Converts MRtrix (.tck) tract files into TrackVis (.trk) format using Nibabel API
 
     Args:
 
