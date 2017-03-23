@@ -111,7 +111,7 @@ striatum.side |= putamen.side or pallidum.side or caudate.side
 # Queries from Brain Struct Funct 2016
 
 #Cingulum bundle
-CB.side = only(cingular.side
+CB.side |= only(cingular.side
     and (
         middlefrontalgyrus.side or
         cuneus.side or
@@ -129,7 +129,7 @@ CB.side = only(cingular.side
 )
 
 #Extreme capsule
-EmC.side = (
+EmC.side |= (
     (endpoints_in(
         inferiorfrontalgyrus.side or
         middlefrontalgyrus.side
@@ -141,7 +141,7 @@ EmC.side = (
 not in hemisphere.opposite)
 
 #Superior longitudinal fascicle I
-SLF_I.side = (
+SLF_I.side |= (
     endpoints_in(superiorparietal.side)
     and (
         middlefrontalgyrus.side or
@@ -155,7 +155,7 @@ SLF_I.side = (
 )
 
 #Superior longitudinal fascicle II
-SLF_II.side = (
+SLF_II.side |= (
     endpoints_in(
         inferiorparietal.side or
         lateraloccipital.side
@@ -172,7 +172,7 @@ SLF_II.side = (
 )
 
 #Superior longitudinal fascicle III
-SLF_III.side = (
+SLF_III.side |= (
     endpoints_in(supramarginal.side)
     and endpoints_in(inferiorfrontalgyrus.side)
     and only(
@@ -183,7 +183,7 @@ SLF_III.side = (
 )
 
 #Arcuate fascicle
-AF.side = (
+AF.side |= (
     endpoints_in(
         inferiorfrontalgyrus.side or
         middlefrontalgyrus.side or
@@ -218,7 +218,7 @@ ILF.side = (
 )
 
 #Middle longitudinal fascicle
-MdLF.side = (
+MdLF.side |= (
     (
         (temporal.side and anterior_of(amygdala.side)) or
         superiortemporal.side
@@ -228,7 +228,7 @@ MdLF.side = (
 )
 
 #Uncinate fascicle
-UF.side = (
+UF.side |= (
     insula.side
     and (
         inferiorfrontalgyrus.side or
@@ -239,7 +239,7 @@ UF.side = (
 )
 
 #Rostrum
-CC_1 = (
+CC_1 |= (
     endpoints_in(orbitofrontalgyrus.left)
     and endpoints_in(orbitofrontalgyrus.right)
 )
@@ -248,13 +248,13 @@ CC_1 = (
 CC_2 = endpoints_in(prefrontal.left) and endpoints_in(prefrontal.right)
 
 #Rostral body
-CC_3 = endpoints_in(premotor.left) and endpoints_in(premotor.right)
+CC_3 |= endpoints_in(premotor.left) and endpoints_in(premotor.right)
 
 #Anterior midbody
-CC_4 = endpoints_in(motor.left) and endpoints_in(motor.right)
+CC_4 |= endpoints_in(motor.left) and endpoints_in(motor.right)
 
 #Posterior midbody
-CC_5 = (
+CC_5 |= (
     endpoints_in(
         postcentral.left or
         posteriorcingulate.left or
@@ -268,7 +268,7 @@ CC_5 = (
 )
 
 #Isthmus
-CC_6 = (
+CC_6 |= (
     endpoints_in(
         superior_temporal_lobule.left or
         posterior_parietal_lobule.left or
@@ -282,7 +282,7 @@ CC_6 = (
 )
 
 #Splenium
-CC_7 = (
+CC_7 |= (
     endpoints_in(
         occipital.left or
         inferior_temporal_lobule.left
@@ -294,67 +294,67 @@ CC_7 = (
 )
 
 #Thalamo-prefrontal
-thalamo_prefrontal.side = (
+thalamo_prefrontal.side |= (
     endpoints_in(thalamus.side) and endpoints_in(prefrontal.side)
 )
 
 #Thalamo-premotor
-thalamo_premotor.side = (
+thalamo_premotor.side |= (
     endpoints_in(thalamus.side) and endpoints_in(premotor.side)
 )
 
 #Thalamo-precentral
-thalamo_precentral.side = (
+thalamo_precentral.side |= (
     endpoints_in(thalamus.side) and endpoints_in(precentral.side)
 )
 
 #Thalamo-postcentral
-thalamo_postcentral.side = (
+thalamo_postcentral.side |= (
     endpoints_in(thalamus.side) and endpoints_in(postcentral.side)
 )
 
 #Thalamo-parietal
-thalamo_parietal.side = (
+thalamo_parietal.side |= (
     endpoints_in(thalamus.side) and endpoints_in(parietal.side)
 )
 
 #Thalamo-occipital
-thalamo_occipital.side = (
+thalamo_occipital.side |= (
     endpoints_in(thalamus.side) and endpoints_in(occipital.side)
 )
 
 #Striato-fronto-orbital
-striato_fronto_orbital.side = (
+striato_fronto_orbital.side |= (
     endpoints_in(striatum.side) and endpoints_in(orbitofrontalgyrus.side)
 )
 
 #Striato-prefrontal
-striato_prefrontal.side = (
+striato_prefrontal.side |= (
     endpoints_in(striatum.side) and endpoints_in(prefrontal.side)
 )
 
 #Striato-premotor
-striato_premotor.side = (
+striato_premotor.side |= (
     endpoints_in(striatum.side) and endpoints_in(premotor.side)
 )
 
 #Striato-precentral
-striato_precentral.side = (
+striato_precentral.side |= (
     endpoints_in(striatum.side) and endpoints_in(precentral.side)
 )
 
 #Striato-postcentral
-striato_poscentral.side = (
+striato_poscentral.side |= (
     endpoints_in(striatum.side) and endpoints_in(postcentral.side)
 )
 
 #Striato-parietal
-striato_parietal.side = (
+striato_parietal.side |= (
     endpoints_in(striatum.side) and endpoints_in(parietal.side)
 )
 
 #Striato-occipital
-striato_parietal.side = (
+striato_parietal.side |= (
     endpoints_in(striatum.side) and endpoints_in(occipital.side)
 )
 
