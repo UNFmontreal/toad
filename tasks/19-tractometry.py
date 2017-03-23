@@ -44,9 +44,8 @@ class Tractometry(GenericTask):
                 ('std_perpoint.csv', 'simple'),
                 ]
         for csvPath, method in csvToClean:
-            if os.path.isfile(self.absOutDir+csvPath):
-                self.cleanCsv(self.absOutDir+csvPath, method)
-
+            if os.path.isfile(os.path.join(self.absOutDir,csvPath)):
+                self.cleanCsv(os.path.join(self.absOutDir, csvPath), method)
 
     def cleanCsv(self, csvPath, method):
         # Build out path
