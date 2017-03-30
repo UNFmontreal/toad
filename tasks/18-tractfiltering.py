@@ -11,8 +11,9 @@ class TractFiltering(GenericTask):
                              'preparation', 'registration', 'tensorfsl',
                              'hardidipy', 'tractquerier', 'qa')
         self.setCleanupBeforeImplement(False)
-        self.relativeOutDir = 'raw/outlier_cleaned_tracts'
-        self.absOutDir = os.path.join(self.workingDir, 'raw', 'outlier_cleaned_tracts')
+        self.absInDir = os.path.join(self.workingDir, 'input')
+        self.relativeOutDir = 'output/subject/outlier_cleaned_tracts'
+        self.absOutDir = os.path.join(self.workingDir, 'output')
 
     def implement(self):
 
@@ -24,8 +25,8 @@ class TractFiltering(GenericTask):
         configFile = self.__getConfigFile(
                 'configTractFiltering', 'configTractFiltering_default')
 
-        cmdTpl = "scil_run_tractometry.py --config_file {0} {1} {1} -v -f "
-        cmd = cmdTpl.format(configFile, self.workingDir)
+        cmdTpl = "scil_run_tractometry.py --config_file {0} {1} {2} -v -f "
+        cmd = cmdTpl.format(configFile, self.absInDir, self.absOutDir)
         self.launchCommand(cmd)
 
     def isIgnore(self):
@@ -48,7 +49,7 @@ class TractFiltering(GenericTask):
         Returns:
             True if any expected file or resource is missing, False otherwise
         """
-        return not os.path.isdir(self.absOutDir)
+        return not os.path.isdir(self.absOutDir + '/subject/outlier_cleaned_tracts')
 
 
     def __getConfigFile(self, prefix, defaultFile):

@@ -16,19 +16,21 @@ class Tractometry(GenericTask):
                 'tensordipy', 'hardimrtrix', 'hardidipy', 'tractfiltering',)
         self.setCleanupBeforeImplement(False)
 
+        self.absInDir = os.path.join(self.workingDir, 'input')
+        self.absOutDir = os.path.join(self.workingDir, 'output')
 
     def implement(self):
         mriutil.setWorkingDirTractometry(
                 self.workingDir,
-                self.getTractFilteringImages('dwi', None, 'trk','raw/bundles/'),
+                self.getTractFilteringImages('dwi', None, 'trk','input/subject/bundles/'),
                 self.__buildListMetrics()
                 )
 
         configFile = self.__getConfigFile(
                 'configTractometry', 'configTractometry_default')
 
-        cmdTpl = "scil_run_tractometry.py --config_file {0} {1} {1} -v -f "
-        cmd = cmdTpl.format(configFile, self.workingDir)
+        cmdTpl = "scil_run_tractometry.py --config_file {0} {1} {2} -v -f "
+        cmd = cmdTpl.format(configFile, self.absInDir, self.absOutDir)
         self.launchCommand(cmd)
 
         csvToClean = [
@@ -42,9 +44,8 @@ class Tractometry(GenericTask):
                 ('std_perpoint.csv', 'simple'),
                 ]
         for csvPath, method in csvToClean:
-            if os.path.isfile(csvPath):
-                self.cleanCsv(csvPath, method)
-
+            if os.path.isfile(os.path.join(self.absOutDir,csvPath)):
+                self.cleanCsv(os.path.join(self.absOutDir, csvPath), method)
 
     def cleanCsv(self, csvPath, method):
         # Build out path
@@ -87,7 +88,7 @@ class Tractometry(GenericTask):
             True if all requirement are meet, False otherwise
         """
         return os.path.isdir(os.path.join(
-                self.tractfilteringDir, 'raw', 'outlier_cleaned_tracts'))
+                self.tractfilteringDir, 'output', 'subject', 'outlier_cleaned_tracts'))
 
 
     def isDirty(self):
@@ -96,7 +97,7 @@ class Tractometry(GenericTask):
             True if any expected file or resource is missing, False otherwise
         """
         return not os.path.isdir(os.path.join(
-                self.workingDir, 'raw', 'histograms'))
+                self.workingDir, 'output', 'subject', 'histograms'))
 
 
     def __buildListMetrics(self):
