@@ -32,6 +32,11 @@ class Parcellation(GenericTask):
             self.__submitReconAll(anat)
             # @TODO backup the recon-all to backup dir
 
+        if not self.__findImageInDirectory("brainstemSsLabels.v10.FSvoxelSpace.mgz", os.path.join(self.workingDir, self.id)):
+            self.__submitSubSegmentation(anat, 'brainstem')
+        if not self.__findImageInDirectory("rh.hippoSfLabels-T1.v10.FSvoxelSpace.mgz", os.path.join(self.workingDir, self.id)):
+            self.__submitSubSegmentation(anat, 'hippocampus')
+
         self.__convertFreesurferImageIntoNifti(anat)
         self.__createSegmentationMask(self.get('aparc_aseg'), self.get('mask'))
         self.__mergeParcellation(self.get('wmparc'),self.get('aparc_aseg'),self.get('brainstem'),self.get('lhHipp'),self.get('rhHipp'))
@@ -147,16 +152,20 @@ class Parcellation(GenericTask):
             .format(self.get('directive'), anatomical, self.id, self.workingDir, self.getNTreads())
         self.info("Log could be found at {}/{}/scripts/recon-all.log".format(self.workingDir, self.id))
         self.launchCommand(cmd, None, None, 86400)
-        # Run BrainStem segmentation
-        cmd = "recon-all -s {} -sd {} -brainstem-structures"\
-            .format(self.id, self.workingDir)
-        self.info("Run brainstem segmentation")
-        self.launchCommand(cmd, None, None, 86400)
-        # Run Hippocampal SubField segmentation
-        cmd = "recon-all -s {} -sd {} -hippocampal-subfields-T1"\
-            .format(self.id, self.workingDir)
-        self.info("Run hippocampal subfield segmentation")
-        self.launchCommand(cmd, None, None, 86400)
+
+    def __submitSubSegmentation(self, anatomical, mode):
+        if mode=='brainstem':
+            # Run BrainStem segmentation
+            cmd = "recon-all -s {} -sd {} -brainstem-structures"\
+                .format(self.id, self.workingDir)
+            self.info("Run brainstem segmentation")
+            self.launchCommand(cmd, None, None, 86400)
+        if mode=='hippocampus':
+            # Run Hippocampal SubField segmentation
+            cmd = "recon-all -s {} -sd {} -hippocampal-subfields-T1"\
+                .format(self.id, self.workingDir)
+            self.info("Run hippocampal subfield segmentation")
+            self.launchCommand(cmd, None, None, 86400)
 
     def __convertFreesurferImageIntoNifti(self, anatomicalName):
 
