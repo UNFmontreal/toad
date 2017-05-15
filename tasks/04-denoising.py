@@ -50,7 +50,14 @@ class Denoising(GenericTask):
 
         target = self.buildName(dwi, "denoise")
 
-        if self.get("algorithm") == "nlmeans":
+        if self.get("algorithm") == "mp-pca":
+            targetNoise = self.buildName(dwi, "noise")
+
+            self.algorithm = "mp-pca"
+            cmd = "dwidenoise {} {} -mask {} -noise {} -extent {}".format(dwi, target, mask, targetNoise, self.get('extent'))
+            self.launchCommand(cmd)
+
+        elif self.get("algorithm") == "nlmeans":
 
             self.algorithm = "nlmeans"
             dwiImage = nibabel.load(dwi)
