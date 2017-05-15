@@ -54,7 +54,8 @@ class Denoising(GenericTask):
             targetNoise = self.buildName(dwi, "noise")
 
             self.algorithm = "mp-pca"
-            cmd = "dwidenoise {} {} -mask {} -noise {} -extent {}".format(dwi, target, mask, targetNoise, self.get('extent'))
+            #cmd = "dwidenoise {} {} -mask {} -noise {} -extent {} -nthreads {} -quiet".format(dwi, target, mask, targetNoise, self.get('extent'), self.getNTreadsMrtrix())
+            cmd = "dwidenoise {} {} -noise {} -extent {} -nthreads {} -quiet".format(dwi, target, targetNoise, self.get('extent'), self.getNTreadsMrtrix())
             self.launchCommand(cmd)
 
         elif self.get("algorithm") == "nlmeans":
