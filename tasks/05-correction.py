@@ -297,8 +297,8 @@ class Correction(GenericTask):
         tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "eddy")
 
-	if util.which('eddy'):
-	        cmd = "eddy --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} " \
+	if util.which('eddy_openmp_patch'):
+	        cmd = "eddy_openmp_patch --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} --data_is_shelled " \
                     .format(source, mask, index, acqp, bVecs, bVals, tmp)
 	else:
 	        cmd = "eddy_openmp --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} " \
