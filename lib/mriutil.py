@@ -81,6 +81,24 @@ def mrinfo(source):
     (executedCmd, stdout, stderr) = util.launchCommand(cmd)
     return stdout.splitlines()
 
+def getBValues(source, grad):
+    """Use mrinfo to get BValues
+
+    Args:
+        Source: dwi file
+
+    Returns:
+        An array of bValues
+
+    Raises:
+        ValueError: if mrinfo binary is not found
+
+    """
+    cmd = "mrinfo {} -grad {} -shells".format(source, grad)
+    (executedCmd, stdout, stderr) = util.launchCommand(cmd)
+    return stdout.split()
+
+
 def mrcalc(source, value, target):
     """
     #@TODO comment the purpose of this function
