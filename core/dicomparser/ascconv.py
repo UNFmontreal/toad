@@ -17,6 +17,7 @@ class Ascconv(object):
 
         self.__numSlices = None # Always available
         self.__patFactor = None  # Always available PAT Factor
+        self.__multiBandFactor = 0 # MultiBand Factor
         self.__epiFactor = None  # Always available Epi Factor
         self.__phaseResolution = None  # 1
         self.__phaseOversampling = 1  # otherwise 1 + __phaseOversampling
@@ -27,11 +28,12 @@ class Ascconv(object):
 
 
     def __repr__(self):
-        return "filename={}, phaseEncodingDirection={}, patFactor={}, epiFactor={}, " \
+        return "filename={}, phaseEncodingDirection={}, patFactor={}, multiBandFactor={}, epiFactor={}, " \
                "phaseResolution={}, phaseOversampling ={}" \
                     .format(self.__fileName,
                             self.__phaseEncodingDirection,
                             self.__patFactor,
+                            self.__multiBandFactor,
                             self.__epiFactor,
                             self.__phaseResolution,
                             self.__phaseOversampling)
@@ -50,6 +52,9 @@ class Ascconv(object):
 
     def getEpiFactor(self):
         return self.__epiFactor
+
+    def getMultiBandFactor(self):
+        return self.__multiBandFactor
 
     def getPhaseResolution(self):
         return self.__phaseResolution
@@ -127,6 +132,12 @@ class Ascconv(object):
                 elif "skspace.limagesperslab" in line:
                     try:
                         self.__numSlices = int(line.split("=")[-1].strip())
+                    except ValueError:
+                        pass
+
+                elif "ssliceacceleration.lmultibandfactor" in line:
+                    try:
+                        self.__multiBandFactor = int(line.split("=")[-1].strip())
                     except ValueError:
                         pass
 
