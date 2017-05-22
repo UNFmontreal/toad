@@ -53,7 +53,7 @@ class Correction(GenericTask):
         if self.get("phase_enc_dir") == "1" and b0PA and b0AP is False:
             b0AP = b0
 
-        [dwi, b0, b0AP, b0PA] = self.__oddEvenNumberOfSlices(dwi, b0, b0AP, b0PA)
+        topupConfigFile = self.__checkOddEvenNumberOfSlices(dwi)
 
         self.set('method', None)
 
@@ -69,11 +69,12 @@ class Correction(GenericTask):
 
             elif self.get("phase_enc_dir") == "1":
                 concatenateB0Image = self.__concatenateB0(b0AP, b0PA, self.buildName("b0ap_b0pa", None, "nii.gz"))
+
             # Create the acquisition parameter file
             acqpTopup = self.__createAcquisitionParameterFile('topup')
 
             # Run topup on concatenate B0 image
-            [topupBaseName, topupImage] = self.__topup(concatenateB0Image, acqpTopup, self.get('b02b0_filename'))
+            [topupBaseName, topupImage] = self.__topup(concatenateB0Image, acqpTopup, topupConfigFile)
             b0Image = self.__fslmathsTmean(os.path.join(self.workingDir, topupImage))
             self.set('method', 'topup')
 
@@ -95,7 +96,7 @@ class Correction(GenericTask):
         # Create an index file
         indexFile = self.__createIndexFile(mriutil.getNbDirectionsFromDWI(dwi))
 
-        outputImage = self.__correctionEddy(dwi, mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals)
+        outputImage = self.__correctionEddy(dwi, mask, topupBaseName, indexFile, acqpEddy, bVecs, bVals, bEnc)
 
         eddyParameterFiles = self.getImage('dwi', None, 'eddy_parameters')
 
@@ -123,34 +124,23 @@ class Correction(GenericTask):
 
         self.rename(outputImage, self.buildName(outputImage, 'corrected'))
 
-    def __oddEvenNumberOfSlices(self, *args):
-        """return a list of images that will count a odd number of slices in z direction
+    def __checkOddEvenNumberOfSlices(self, source):
+        """return the config file b02b0
 
-            If an even number of slices is found, the upper volume will be remove
+            If an even number of slices is found, b02b0_even will be used otherwise we'll b02b0_odd
 
         Args:
             *args: a list of images
 
         Returns:
-             a list of images stripped
+             config file b02b0
 
         """
-        output = []
-        for image in args:
-            if image:
-                try:
-                    zDims = int(mriutil.getMriDimensions(image)[2])
-                    if zDims % 2 == 1:
-                        target = self.buildName(image, "subset")
-                        mriutil.extractSubVolume(image, target, '+2', "0:{}".format(zDims - 2), self.getNTreadsMrtrix())
-                        output.append(target)
-                    else:
-                        output.append(image)
-                except ValueError:
-                    output.append(image)
-            else:
-                output.append(False)
-        return output
+        zDims = int(mriutil.getMriDimensions(source)[2])
+        if zDims % 2 == 1:
+            return self.get('b02b0_odd')
+        else:
+            return self.get('b02b0_even')
 
     def __concatenateB0(self, source1, source2, target):
         """Concatenate two images along the axis 3
@@ -277,7 +267,7 @@ class Correction(GenericTask):
         self.info(mriutil.fslmaths(source, target, 'Tmean'))
         return target
 
-    def __correctionEddy(self, source, mask, topup, index, acqp, bVecs, bVals):
+    def __correctionEddy(self, source, mask, topup, index, acqp, bVecs, bVals, bEnc):
         """Performs eddy correction on a dwi file.
 
         Args:
@@ -297,12 +287,12 @@ class Correction(GenericTask):
         tmp = self.buildName(source, "tmp")
         target = self.buildName(source, "eddy")
 
-	if util.which('eddy'):
-	        cmd = "eddy --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} " \
+        cmd = "eddy_openmp_patch --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} " \
                     .format(source, mask, index, acqp, bVecs, bVals, tmp)
-	else:
-	        cmd = "eddy_openmp --imain={} --mask={} --index={} --acqp={} --bvecs={} --bvals={} --out={} " \
-                    .format(source, mask, index, acqp, bVecs, bVals, tmp)
+
+        if len(mriutil.getBValues(source, bEnc))>2:
+            cmd += " --data_is_shelled --mb={} " \
+                    .format(self.get('multiband'))
 
         if topup is not None:
             cmd += " --topup={}".format(topup)
