@@ -78,7 +78,11 @@ class TractographyMrtrix(GenericTask):
                 self.set('algorithm', 'Probabilist')  # Set Method tractography Prob
 
         else:
-            csd =  self.getHardimrtrixImage('dwi', 'csd')
+            if len(mriutil.getBValues(dwi, bFile))==2:
+                csd =  self.getHardimrtrixImage('dwi', 'csd')
+            else:
+                csd =  self.getHardimrtrixImage('dwi', 'wm')
+
             hardiTck = self.__tckgenHardi(
                     csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
             hardiTrk = mriutil.tck2trk(
