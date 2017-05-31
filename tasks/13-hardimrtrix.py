@@ -38,10 +38,10 @@ class HardiMrtrix(GenericTask):
             if exists(tmpDir):
                 rmdir(tmpDir)
 
-            csdImage = self.__dwi2csd(dwi, outputDwi2Response, mask, bFile, self.buildName(dwi, "csd"))
+            fodImage = self.__dwi2fod(dwi, outputDwi2Response, mask, bFile, self.buildName(dwi, "csd"))
 
-            fixelPeak = self.__csd2fixelPeak(csdImage, mask, self.buildName(dwi, "fixel_peak", 'msf'))
-            self.__csd2fixelAFD(csdImage, mask, self.buildName(dwi, "afd", 'msf'))
+            fixelPeak = self.__fod2fixel(fodImage, mask, 'peak', self.buildName(dwi, "fixel_peak", 'msf'))
+            self.__fod2fixel(fodImage, mask, 'afd', self.buildName(dwi, "afd", 'msf'))
         else:
             try:
                 outputDwi2Response = self.__dwi2response(dwi, mask, bFile, tmpDir, fivett)
@@ -51,10 +51,10 @@ class HardiMrtrix(GenericTask):
             if exists(tmpDir):
                 rmdir(tmpDir)
 
-            csdImage = self.__dwi2csd(dwi, outputDwi2Response, mask, bFile, "", True)
+            fodImage = self.__dwi2fod(dwi, outputDwi2Response, mask, bFile, "", True)
 
-            fixelPeak = self.__csd2fixelPeak(csdImage[0], mask, self.buildName(dwi, "fixel_peak", 'msf'))
-            self.__csd2fixelAFD(csdImage[0], mask, self.buildName(dwi, "afd", 'msf'))
+            fixelPeak = self.__fod2fixel(fodImage[0], mask, 'peak', self.buildName(dwi, "fixel_peak", 'msf'))
+            self.__fod2fixel(fodImage[0], mask, 'afd', self.buildName(dwi, "afd", 'msf'))
 
         self.__fixelPeak2nufo(fixelPeak, mask, self.buildName(dwi, 'nufo'))
 
@@ -91,18 +91,17 @@ class HardiMrtrix(GenericTask):
             return [self.rename(tmpWM, targetWM), self.rename(tmpGM, targetGM), self.rename(tmpCSF, targetCSF)]
 
 
-    def __dwi2csd(self, source, dwi2response, mask, bFile, target, tt5=False):
+    def __dwi2fod(self, source, dwi2response, mask, bFile, target, tt5=False):
 
         #Single shell
         if not tt5:
-            self.info("Starting dwi2fod creation for csd from mrtrix on {}".format(source))
+            self.info("Starting dwi2fod creation using csd from mrtrix on {}".format(source))
 
             tmp = self.buildName(source, "tmp")
             cmd = "dwi2fod csd {} {} {} -mask {} -grad {} -nthreads {} -quiet"\
                 .format(source, dwi2response, tmp, mask, bFile, self.getNTreadsMrtrix())
             self.launchCommand(cmd)
 
-            self.info("renaming {} to {}".format(tmp, target))
             return self.rename(tmp, target)
         else:# MultiShellMultiTissue
             tmpWM = self.buildName(source, "tmpWM")
@@ -112,7 +111,7 @@ class HardiMrtrix(GenericTask):
             tmpCSF = self.buildName(source, "tmpCSF")
             targetCSF = self.buildName(source, "csf")
 
-            self.info("Starting dwi2fod creation for msmt_csd from mrtrix on {}".format(source))
+            self.info("Starting dwi2fod creation using msmt_csd from mrtrix on {}".format(source))
             cmd = "dwi2fod msmt_csd -mask {} -grad {} -nthreads {} -quiet {} {} {} {} {} {} {}"\
                 .format(mask, bFile, self.getNTreadsMrtrix(), source, dwi2response[0], tmpWM, dwi2response[1], tmpGM, dwi2response[2], tmpCSF)
             self.launchCommand(cmd)
@@ -120,38 +119,20 @@ class HardiMrtrix(GenericTask):
             return [self.rename(tmpWM, targetWM), self.rename(tmpGM, targetGM), self.rename(tmpCSF, targetCSF)]
 
 
-    def __csd2fixelPeak(self, source, mask, target):
-        """Produce fixel and nufo image from an csd image
+    def __fod2fixel(self, source, mask, metric, target):
+        """Produce fixel metric from a csd image
 
         Args:
+
             source: the source image
 
         Return:
             the fixel peak image
-
         """
         tmp = self.buildName(source, "tmp", "msf")
-        self.info("Starting fod2fixel creation from mrtrix on {}".format(source))
-        cmd = "fod2fixel {} -peak {} -force -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
+        self.info("Starting fod2fixel creation {} from mrtrix on {}".format(metric, source))
+        cmd = "fod2fixel -mask {} {} -{} {} -force -nthreads {} -quiet".format(mask, source, metric, tmp, self.getNTreadsMrtrix())
         self.launchCommand(cmd)
-        self.info("renaming {} to {}".format(tmp, target))
-        return self.rename(tmp, target)
-
-    def __csd2fixelAFD(self, source, mask, target):
-        """Produce fixel and nufo image from an csd image
-
-        Args:
-            source: the source image
-
-        Return:
-            the fixel AFD image
-
-        """
-        tmp = self.buildName(source, "tmp", "msf")
-        self.info("Starting fod2fixel creation from mrtrix on {}".format(source))
-        cmd = "fod2fixel {} -afd {} -force -nthreads {} -quiet".format(source, tmp, self.getNTreadsMrtrix())
-        self.launchCommand(cmd)
-        self.info("renaming {} to {}".format(tmp, target))
         return self.rename(tmp, target)
 
     def __fixelPeak2nufo(self, source, mask, target):
@@ -172,22 +153,8 @@ class HardiMrtrix(GenericTask):
 
 
     def isDirty(self):
-
-        print Images((self.getImage('dwi', 'nufo'), 'Number of Fibers Orientations'),
-                      (self.getImage('dwi', 'afd', 'msf'), 'Apparent Fiber Density'),
-                      (self.getImage('dwi', 'fixel_peak', 'msf'), 'fixel peak image'))
-
-        print Images((self.getImage('dwi', None, 'txt'), "response function estimation text file"),
-                    (self.getImage('dwi', 'csd'), "constrained spherical deconvolution"))
-
-        print Images((self.getImage('dwi', 'wm', 'txt'), "wm response function estimation text file"),
-                    (self.getImage('dwi', 'gm', 'txt'), "gm response function estimation text file"),
-                    (self.getImage('dwi', 'csf', 'txt'), "csf response function estimation text file"),
-                    (self.getImage('dwi', 'wm'), "constrained spherical deconvolution"),
-                    (self.getImage('dwi', 'gm'), "gm image"),
-                    (self.getImage('dwi', 'csf'), "csf image"))
-
-        return Images((self.getImage('dwi', 'nufo'), 'Number of Fibers Orientations'),
+        if len(self.get('dwi_BValues'))>2: # MutliShells
+            return Images((self.getImage('dwi', 'nufo'), 'Number of Fibers Orientations'),
                       (self.getImage('dwi', 'afd', 'msf'), 'Apparent Fiber Density'),
                       (self.getImage('dwi', 'fixel_peak', 'msf'), 'fixel peak image'),
                       (self.getImage('dwi', 'wm', 'txt'), "wm response function estimation text file"),
@@ -195,9 +162,9 @@ class HardiMrtrix(GenericTask):
                       (self.getImage('dwi', 'csf', 'txt'), "csf response function estimation text file"),
                       (self.getImage('dwi', 'wm'), "constrained spherical deconvolution"),
                       (self.getImage('dwi', 'gm'), "gm image"),
-                      (self.getImage('dwi', 'csf'), "csf image")) \
-                or \
-                Images((self.getImage('dwi', 'nufo'), 'Number of Fibers Orientations'),
+                      (self.getImage('dwi', 'csf'), "csf image"))
+        else:
+            return Images((self.getImage('dwi', 'nufo'), 'Number of Fibers Orientations'),
                       (self.getImage('dwi', 'afd', 'msf'), 'Apparent Fiber Density'),
                       (self.getImage('dwi', 'fixel_peak', 'msf'), 'fixel peak image'), 
                       (self.getImage('dwi', None, 'txt'), "response function estimation text file"),
