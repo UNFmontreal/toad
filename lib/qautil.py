@@ -539,15 +539,16 @@ def plotReconstruction(data, mask, cc, target, model):
 
     brainCenter = numpy.floor(numpy.mean(brainBox, 0))
     ccCenter = numpy.floor(numpy.mean(ccBox, 0))
+    ccCenter.astype(int)
 
     shift = numpy.subtract(brainBox[1], brainBox[0]) / 6
 
-    xmin = ccCenter[0] - shift[0]
-    xmax = ccCenter[0] + shift[0]
-    ymin = ccCenter[1]
-    ymax = ccCenter[1] + 1
-    zmin = ccCenter[2] - shift[0]
-    zmax = ccCenter[2] + shift[0]
+    xmin = int(ccCenter[0] - shift[0])
+    xmax = int(ccCenter[0] + shift[0])
+    ymin = int(ccCenter[1])
+    ymax = int(ccCenter[1] + 1)
+    zmin = int(ccCenter[2] - shift[0])
+    zmax = int(ccCenter[2] + shift[0])
 
     #Visualization
     sphere = dipy.data.get_sphere('symmetric724')
