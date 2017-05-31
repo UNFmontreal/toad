@@ -5,6 +5,7 @@ from lib.mriutil import getlmax, getBValues
 import  tempfile
 from os import rmdir
 from os.path import exists
+from ast import literal_eval
 
 __author__ = "Mathieu Desrosiers"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -19,7 +20,6 @@ class HardiMrtrix(GenericTask):
 
     def implement(self):
 
-        # TODO produce "Generalised Fractional Anisotropy": self.getImage(self.workingDir,'dwi','gfa'),
         dwi = self.getUpsamplingImage('dwi', 'upsample')
         bFile = self.getUpsamplingImage('grad', None, 'b') 
         mask = self.getRegistrationImage('mask', 'resample')
@@ -153,7 +153,7 @@ class HardiMrtrix(GenericTask):
 
 
     def isDirty(self):
-        if len(self.get('dwi_BValues'))>2: # MutliShells
+        if len(literal_eval(self.get('dwi_BValues')))>2: # MutliShells
             return Images((self.getImage('dwi', 'nufo'), 'Number of Fibers Orientations'),
                       (self.getImage('dwi', 'afd', 'msf'), 'Apparent Fiber Density'),
                       (self.getImage('dwi', 'fixel_peak', 'msf'), 'fixel peak image'),
@@ -166,7 +166,7 @@ class HardiMrtrix(GenericTask):
         else:
             return Images((self.getImage('dwi', 'nufo'), 'Number of Fibers Orientations'),
                       (self.getImage('dwi', 'afd', 'msf'), 'Apparent Fiber Density'),
-                      (self.getImage('dwi', 'fixel_peak', 'msf'), 'fixel peak image'), 
+                      (self.getImage('dwi', 'fixel_peak', 'msf'), 'fixel peak image'),
                       (self.getImage('dwi', None, 'txt'), "response function estimation text file"),
                       (self.getImage('dwi', 'csd'), "constrained spherical deconvolution"))
 
