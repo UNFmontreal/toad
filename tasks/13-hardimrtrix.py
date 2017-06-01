@@ -153,7 +153,9 @@ class HardiMrtrix(GenericTask):
 
 
     def isDirty(self):
-        if len(literal_eval(self.get('dwi_BValues')))>2: # MutliShells
+        dwi = self.getUpsamplingImage('dwi', 'upsample')
+        bFile = self.getUpsamplingImage('grad', None, 'b')
+        if len(getBValues(dwi, bFile))>2: # MutliShells
             return Images((self.getImage('dwi', 'nufo'), 'Number of Fibers Orientations'),
                       (self.getImage('dwi', 'afd', 'msf'), 'Apparent Fiber Density'),
                       (self.getImage('dwi', 'fixel_peak', 'msf'), 'fixel peak image'),
