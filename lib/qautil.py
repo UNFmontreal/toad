@@ -15,6 +15,7 @@ import dipy.viz.colormap
 import dipy.viz.fvtk 
 from dipy.viz import actor, window
 from lib import util
+import traceback
 
 __author__ = "Christophe Bedetti"
 __copyright__ = "Copyright (C) 2014, TOAD"
@@ -643,9 +644,7 @@ def plotTrk(trkFile, target, anatFile, roi=None,
     #    roiActor.RotateZ(zRot)
 
     #    ren.add(roiActor)
-
     ren.set_camera(
             position=(0,0,1), focal_point=(0,0,0), view_up=(0,1,0))#, verbose=False)
-
-    window.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
-
+    #window.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
+    window.snapshot(ren, fname=target, size=(1200, 1200), offscreen=True)

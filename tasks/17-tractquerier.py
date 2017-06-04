@@ -6,7 +6,6 @@ from core.toad.generictask import GenericTask
 from lib import mriutil, util
 from lib.images import Images
 
-
 class Tractquerier(GenericTask):
 
     def __init__(self, subject):
