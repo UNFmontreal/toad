@@ -24,7 +24,8 @@ class Backup(GenericTask):
 
     def implement(self):
 
-        self.info("Build directories structure for subject: {}".format(os.path.basename(self.workingDir)))
+        self.info("Build directories structure for subject: {}".format(
+            os.path.basename(self.workingDir)))
         #@TODO add description to that struct
         images = Images((self.getSubjectImage('anat'), ""),
                        (self.getSubjectImage('dwi'), ""),
@@ -46,14 +47,34 @@ class Backup(GenericTask):
 
         for image, description in images.getData():
             if image:
-                self.info("Found {} image: moving it to {} directory".format(description, image, self.workingDir))
+                self.info("Found {} image: moving it to {} directory".format(
+                    description, image, self.workingDir))
                 shutil.move(image, self.workingDir)
 
-        directories = [os.path.join(self.subjectDir, directory) for directory in os.listdir(self.subjectDir) if os.path.isdir(os.path.join(self.subjectDir, directory))]
+        directories = []
+        for directory in os.listdir(self.subjectDir):
+            target = os.path.join(self.subjectDir, directory)
+            if os.path.isdir(target):
+                directories.append(target)
+
         for directory in directories:
             if mriutil.isAfreesurferStructure(directory):
                 self.info("{} seem\'s a valid freesurfer structure: moving it to {} directory".format(directory, self.workingDir))
-                shutil.move(directory, self.workingDir)
+
+                if os.path.islink(directory):
+                    os.chdir(self.subjectDir)
+                    # We need to chdir because `directory` is in
+                    # `self.subjectDir` and we need `os.path.abspath` to
+                    # work correctly
+                    fsDirName = os.path.basename(directory)
+                    linkto = os.path.abspath(os.readlink(directory))
+                    newLinkto = os.path.relpath(linkto, self.workingDir)
+                    newTarget = os.path.join(self.workingDir, fsDirName)
+                    os.symlink(newLinkto, newTarget)
+                    os.unlink(directory)
+                    os.chdir(self.workingDir)
+                else:
+                    shutil.move(directory, self.workingDir)
 
 
     def meetRequirement(self):
