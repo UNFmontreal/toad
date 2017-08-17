@@ -34,14 +34,27 @@ def fslmaths(source1, target, operator="bin", source2=None):
     return util.launchCommand(cmd)
 
 
-def extractFirstB0FromDwi(source, target, bVals, nthreads = "1"):
+def extractB0sFromDwi(source, target, bVals, bVecs, nthreads = "1"):
     """Perform an extraction of the first b0 image found into a DWI image
 
     Args:
         source: The input image
         target: The resulting output name
-        bvals:   A gradient encoding B0 values file name
+        bvals:   BValue table
+        bvecs: Gradient table
 
+    Returns:
+         A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
+    """
+    cmd = 'dwiextract -bzero {} {} -fslgrad {} {} -nthreads {} -quiet'.format(source, target, bVecs, bVals, nthreads)
+    return util.launchCommand(cmd)
+
+def extractFirstB0FromDwi(source, target, bVals, nthreads = "1"):
+    """Perform an extraction of the first b0 image found into a DWI image
+    Args:
+        source: The input image
+        target: The resulting output name
+        bvals:   A gradient encoding B0 values file name
     Returns:
          A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
     """
@@ -205,6 +218,8 @@ def getNbDirectionsFromDWI(source):
     dimensions =  getMriDimensions(source)
     if len(dimensions) == 4:
             return int(dimensions[3])
+    else:
+        return 1
     return 0
 
 
