@@ -41,7 +41,7 @@ class Correction(GenericTask):
         self.info("extract b0 image from the dwi")
         b0 = os.path.join(self.workingDir,
                           os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
-        self.info(mriutil.extractFirstB0FromDwi(dwi, b0, bVals))
+        self.info(mriutil.extractB0sFromDwi(dwi, b0, bVals, bVecs))
 
         self.info("look if all images have the same voxel size and dimension scale")
         self.__validateSizeAndDimension(dwi, b0, b0AP, b0PA)
@@ -66,9 +66,17 @@ class Correction(GenericTask):
             # Concatenate B0 image together
             if self.get("phase_enc_dir") == "0":
                 concatenateB0Image = self.__concatenateB0(b0PA, b0AP, self.buildName("b0pa_b0ap", None, "nii.gz"))
-
+                self.dimB0s = [mriutil.getNbDirectionsFromDWI(b0PA), mriutil.getNbDirectionsFromDWI(b0AP)]
             elif self.get("phase_enc_dir") == "1":
                 concatenateB0Image = self.__concatenateB0(b0AP, b0PA, self.buildName("b0ap_b0pa", None, "nii.gz"))
+                self.dimB0s = [mriutil.getNbDirectionsFromDWI(b0AP), mriutil.getNbDirectionsFromDWI(b0PA)]
+
+            if int(mriutil.getMriDimensions(dwi)[2]) % 2 == 1: # Number of slice in z axis
+                if 'force' not in self.get('crop'): # Use odd number
+                    [dwi, b0, b0AP, b0PA, concatenateB0Image] = self.__cropNumberOfSlices(dwi, b0, b0AP, b0PA, concatenateB0Image)
+
+            # Select config File for topup
+            topupConfigFile = self.__checkOddEvenNumberOfSlices(dwi)
 
             # Create the acquisition parameter file
             acqpTopup = self.__createAcquisitionParameterFile('topup')
@@ -124,6 +132,36 @@ class Correction(GenericTask):
 
         self.rename(outputImage, self.buildName(outputImage, 'corrected'))
 
+    def __cropNumberOfSlices(self, *args):
+        """return a list of images that will count a odd number of slices in z direction
+            If an even number of slices is found, the upper volume will be remove
+        Args:
+            *args: a list of images
+        Returns:
+             a list of images stripped
+        """
+        output = []
+        for image in args:
+            if image:
+                try:
+                    zDims = int(mriutil.getMriDimensions(image)[2])
+                    if zDims % 2 == 1:
+                        target = self.buildName(image, "crop")
+                        if 'top' in self.get('crop'):
+                            mriutil.extractSubVolume(image, target, '+2', "0:{}".format(zDims - 2), self.getNTreadsMrtrix())
+                        elif 'bottom' in self.get('crop'):
+                            mriutil.extractSubVolume(image, target, '+2', "1:{}".format(zDims - 1), self.getNTreadsMrtrix())
+                        output.append(target)
+                    else:
+                        output.append(image)
+                except ValueError:
+                    output.append(image)
+            else:
+                output.append(False)
+        return output
+
+
+
     def __checkOddEvenNumberOfSlices(self, source):
         """return the config file b02b0
 
@@ -172,6 +210,7 @@ class Correction(GenericTask):
             the acquisition parameter file name
 
         """
+
         try:
             phaseEncDir = int(self.get('phase_enc_dir'))
         except ValueError:
@@ -188,7 +227,12 @@ class Correction(GenericTask):
 
         if type == 'topup':
             parameter = 'acqp_topup'
-            text = "0 1 0 {}\n0 -1 0 {}\n".format(factor, factor)
+            text = ""
+            for nDim in range(self.dimB0s[0]):
+                text += "0 1 0 {}\n".format(factor)
+
+            for nDim in range(self.dimB0s[1]):
+                text += "0 -1 0 {}\n".format(factor)
 
         elif type == 'eddy':
             parameter = 'acqp_eddy'
