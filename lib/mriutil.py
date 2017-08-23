@@ -34,8 +34,25 @@ def fslmaths(source1, target, operator="bin", source2=None):
     return util.launchCommand(cmd)
 
 
+def extractFirstB0sFromDWI(source, target, bVals, nthreads):
+    vals = open(bVals, 'r')
+    bvals = vals.readlines()
+    vals.close()
+    index = 0
+    for currVals in bvals[0].split(' '):
+        if  int(currVals) == 0:
+            index+=1
+        else:
+            break
+
+    if index == 0:
+        raise ValueError
+    else:
+        cmd = 'mrconvert -coord 3 0:{} {} {} -nthreads {} -quiet'.format(str(index-1), source, target, nthreads)
+        return util.launchCommand(cmd)
+
 def extractB0sFromDwi(source, target, bVals, bVecs, nthreads = "1"):
-    """Perform an extraction of the first b0 image found into a DWI image
+    """Perform an extraction of all b0s image found into a DWI image
 
     Args:
         source: The input image
