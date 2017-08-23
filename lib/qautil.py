@@ -15,7 +15,6 @@ import dipy.viz.colormap
 import dipy.viz.fvtk 
 from dipy.viz import actor, window
 from lib import util
-import traceback
 
 __author__ = "Christophe Bedetti"
 __copyright__ = "Copyright (C) 2014, TOAD"
