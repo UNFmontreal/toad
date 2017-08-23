@@ -41,7 +41,12 @@ class Correction(GenericTask):
         self.info("extract b0 image from the dwi")
         b0 = os.path.join(self.workingDir,
                           os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
-        self.info(mriutil.extractB0sFromDwi(dwi, b0, bVals, bVecs))
+
+        # Extract first n b0s from DWI
+        self.info(mriutil.extractFirstB0sFromDWI(dwi, b0, bVals, self.getNTreadsMrtrix()))
+
+        # Get number of b0s extracted from DWI
+        tDims = int(mriutil.getMriDimensions(b0)[3])
 
         self.info("look if all images have the same voxel size and dimension scale")
         self.__validateSizeAndDimension(dwi, b0, b0AP, b0PA)
@@ -49,9 +54,21 @@ class Correction(GenericTask):
         # Generate a missing b0 image if we could. --> 0 = P>>A, 1 = A>>P
         if self.get("phase_enc_dir") == "0" and b0AP and b0PA is False:
             b0PA = b0
+            # Extract same number of volumes b0PA
+            b0APDim = int(mriutil.getMriDimensions(b0AP)[3])
+            target = os.path.join(self.workingDir,
+                          os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0_ap')))
+            self.info(mriutil.extractSubVolume(b0AP, target, '+3', "{}:{}".format(b0APDim-tDims, b0APDim-1 ), self.getNTreadsMrtrix()))
+            b0AP = target
 
         if self.get("phase_enc_dir") == "1" and b0PA and b0AP is False:
             b0AP = b0
+            # Extract same number of volumes b0PA
+            b0PADim = int(mriutil.getMriDimensions(b0PA)[3])
+            target = os.path.join(self.workingDir,
+                          os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0_pa')))
+            self.info(mriutil.extractSubVolume(b0PA, target, '+3', "{}:{}".format(b0PADim-tDims, b0PADim-1), self.getNTreadsMrtrix()))
+            b0PA = target
 
         topupConfigFile = self.__checkOddEvenNumberOfSlices(dwi)
 
@@ -335,8 +352,12 @@ class Correction(GenericTask):
                     .format(source, mask, index, acqp, bVecs, bVals, tmp)
 
         if len(mriutil.getBValues(source, bEnc))>2:
-            cmd += " --data_is_shelled --mb={} " \
-                    .format(self.get('multiband'))
+            #cmd += " --data_is_shelled --mb={} " \
+            cmd += " --data_is_shelled"
+            zDims = int(mriutil.getMriDimensions(source)[2])
+            if zDims % 3 == 0:
+                cmd += " --mb={}".format(self.get('multiband'))
+            #        .format(self.get('multiband'))
 
         if topup is not None:
             cmd += " --topup={}".format(topup)
