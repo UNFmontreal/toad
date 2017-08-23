@@ -355,7 +355,7 @@ class Correction(GenericTask):
             #cmd += " --data_is_shelled --mb={} " \
             cmd += " --data_is_shelled"
             zDims = int(mriutil.getMriDimensions(source)[2])
-            if zDims % 3 == 0:
+            if zDims % int(self.get('multiband')) == 0:
                 cmd += " --mb={}".format(self.get('multiband'))
             #        .format(self.get('multiband'))
 
