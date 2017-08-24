@@ -35,6 +35,13 @@ def fslmaths(source1, target, operator="bin", source2=None):
 
 
 def extractFirstB0sFromDWI(source, target, bVals, nthreads):
+    """Extract first n b0s from DWI using bVal
+
+    Ex: BVal contains: 0 0 0 1000 1000 1000 0 1000
+        Each value corresponds to one volume
+        Output would the first 3 b0s  
+
+    """
     vals = open(bVals, 'r')
     bvals = vals.readlines()
     vals.close()
