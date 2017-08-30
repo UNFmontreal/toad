@@ -160,7 +160,7 @@ class Plot3dVolume(object):
         """
         #@TODO: better result with self.slices ?
         if vmax == None:
-            return numpy.percentile(self.imageData, 99)
+            return numpy.nanpercentile(self.imageData, 99)
         else:
             return vmax
 
