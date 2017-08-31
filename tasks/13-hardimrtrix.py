@@ -28,8 +28,10 @@ class HardiMrtrix(GenericTask):
         tmpDir = tempfile.mkdtemp(prefix='tmp', dir=self.workingDir)
         self.set('lmax', getlmax(dwi))
         self.set('dwi_BValues', getBValues(dwi, bFile))
+        self.set('dwi_nbBValues', len(getBValues(dwi, bFile))-1)
 
         if len(getBValues(dwi, bFile))==2:
+            self.set('dwi_multishell', False)
             try:
                 outputDwi2Response = self.__dwi2response(dwi, wmMask, bFile, tmpDir)
             except:
@@ -43,6 +45,7 @@ class HardiMrtrix(GenericTask):
             fixelPeak = self.__fod2fixel(fodImage, mask, 'peak', self.buildName(dwi, "fixel_peak", 'msf'))
             self.__fod2fixel(fodImage, mask, 'afd', self.buildName(dwi, "afd", 'msf'))
         else:
+            self.set('dwi_multishell', True)
             try:
                 outputDwi2Response = self.__dwi2response(dwi, mask, bFile, tmpDir, fivett)
             except:
