@@ -55,7 +55,14 @@ class Denoising(GenericTask):
 
             self.algorithm = "mp-pca"
             #cmd = "dwidenoise {} {} -mask {} -noise {} -extent {} -nthreads {} -quiet".format(dwi, target, mask, targetNoise, self.get('extent'), self.getNTreadsMrtrix())
+            #cmd = "dwidenoise {} {} -noise {} -extent {} -nthreads {} -quiet".format(dwi, target, targetNoise, self.get('extent'), self.getNTreadsMrtrix())
             cmd = "dwidenoise {} {} -noise {} -extent {} -nthreads {} -quiet".format(dwi, target, targetNoise, self.get('extent'), self.getNTreadsMrtrix())
+            self.launchCommand(cmd)
+
+            residuals = self.buildName(dwi, "residuals")
+            noise = self.getImage("dwi","noise")
+
+            cmd = "mrcalc {} {} -subtract {} -nthreads {} -quiet".format(dwi, noise, residuals, self.getNTreadsMrtrix())
             self.launchCommand(cmd)
 
         elif self.get("algorithm") == "nlmeans":
@@ -190,6 +197,8 @@ class Denoising(GenericTask):
         brainMask = self.getImage('mask', 'resample')
         b0 = self.getImage('b0')
         noiseMask = self.getImage('dwi', 'noise_mask')
+        noise = self.getImage('dwi','noise')
+        residuals = self.getImage('dwi', 'residuals')
 
         #Build qa images
         if dwiDenoised:
@@ -211,6 +220,19 @@ class Denoising(GenericTask):
                     noiseMaskQa = self.plot3dVolume(
                             b0, edges=noiseMask, fov=noiseMask)
                     qaImages.append(
-                            (noiseMaskQa, 'Noise mask from the nlmeans algorithm'))
+                            (noiseMaskQa, 'Noise mask from the mp-pca algorithm'))
+
+            if self.algorithm == "mp-pca":
+                if noise:
+                    noiseQa = self.plot3dVolume(
+                            noise, fov=noise)
+                    qaImages.append(
+                            (noiseQa, 'Noise from the mp-pca algorithm'))
+
+                if residuals:
+                    resQa = self.plot4dVolume(
+                            residuals, fov=residuals)
+                    qaImages.append(
+                            (resQa, 'Residuals from the mp-pca algorithm'))
 
         return qaImages

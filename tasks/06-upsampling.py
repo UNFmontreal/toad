@@ -36,8 +36,9 @@ class Upsampling(GenericTask):
 
         interp = self.get('interp')
         template = self.getParcellationImage('anat','freesurfer','nii.gz')
-        voxelSize = self.get('methodology','t1_voxelsize') # Get t1 voxel size to upsample
-        voxelSize = voxelSize.translate(None, '[],') # Remove specific caracteres 
+
+        voxelSize = mriutil.getMriVoxelSize(template) # Get t1 voxel size to upsample
+        voxelSize = str(voxelSize).translate(None, '[],') # Remove specific caracteres 
 
         dwiUpsample= self.__upsampling(dwi, voxelSize, interp, self.buildName(dwi, "upsample"))
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))

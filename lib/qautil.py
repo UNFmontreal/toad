@@ -160,7 +160,7 @@ class Plot3dVolume(object):
         """
         #@TODO: better result with self.slices ?
         if vmax == None:
-            return numpy.percentile(self.imageData, 99)
+            return numpy.nanpercentile(self.imageData, 99)
         else:
             return vmax
 
@@ -319,7 +319,7 @@ class Plot4dVolume(object):
         Initialized vmax
         """
         if vmax == None:
-            return numpy.percentile(self.imageData, 99)
+            return numpy.nanpercentile(self.imageData, 99)
         else:
             return vmax
 
@@ -539,15 +539,16 @@ def plotReconstruction(data, mask, cc, target, model):
 
     brainCenter = numpy.floor(numpy.mean(brainBox, 0))
     ccCenter = numpy.floor(numpy.mean(ccBox, 0))
+    ccCenter.astype(int)
 
     shift = numpy.subtract(brainBox[1], brainBox[0]) / 6
 
-    xmin = ccCenter[0] - shift[0]
-    xmax = ccCenter[0] + shift[0]
-    ymin = ccCenter[1]
-    ymax = ccCenter[1] + 1
-    zmin = ccCenter[2] - shift[0]
-    zmax = ccCenter[2] + shift[0]
+    xmin = int(ccCenter[0] - shift[0])
+    xmax = int(ccCenter[0] + shift[0])
+    ymin = int(ccCenter[1])
+    ymax = int(ccCenter[1] + 1)
+    zmin = int(ccCenter[2] - shift[0])
+    zmax = int(ccCenter[2] + shift[0])
 
     #Visualization
     sphere = dipy.data.get_sphere('symmetric724')
@@ -642,9 +643,7 @@ def plotTrk(trkFile, target, anatFile, roi=None,
     #    roiActor.RotateZ(zRot)
 
     #    ren.add(roiActor)
-
     ren.set_camera(
             position=(0,0,1), focal_point=(0,0,0), view_up=(0,1,0))#, verbose=False)
-
-    window.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
-
+    #window.record(ren, out_path=target, size=(1200, 1200), n_frames=1)
+    window.snapshot(ren, fname=target, size=(1200, 1200), offscreen=True)

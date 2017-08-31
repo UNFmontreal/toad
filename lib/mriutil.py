@@ -34,14 +34,51 @@ def fslmaths(source1, target, operator="bin", source2=None):
     return util.launchCommand(cmd)
 
 
-def extractFirstB0FromDwi(source, target, bVals, nthreads = "1"):
-    """Perform an extraction of the first b0 image found into a DWI image
+def extractFirstB0sFromDWI(source, target, bVals, nthreads):
+    """Extract first n b0s from DWI using bVal
+
+    Ex: BVal contains: 0 0 0 1000 1000 1000 0 1000
+        Each value corresponds to one volume
+        Output would the first 3 b0s  
+
+    """
+    vals = open(bVals, 'r')
+    bvals = vals.readlines()
+    vals.close()
+    index = 0
+    for currVals in bvals[0].split(' '):
+        if  int(currVals) == 0:
+            index+=1
+        else:
+            break
+
+    if index == 0:
+        raise ValueError
+    else:
+        cmd = 'mrconvert -coord 3 0:{} {} {} -nthreads {} -quiet'.format(str(index-1), source, target, nthreads)
+        return util.launchCommand(cmd)
+
+def extractB0sFromDwi(source, target, bVals, bVecs, nthreads = "1"):
+    """Perform an extraction of all b0s image found into a DWI image
 
     Args:
         source: The input image
         target: The resulting output name
-        bvals:   A gradient encoding B0 values file name
+        bvals:   BValue table
+        bvecs: Gradient table
 
+    Returns:
+         A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
+    """
+    cmd = 'dwiextract -bzero {} {} -fslgrad {} {} -nthreads {} -quiet'.format(source, target, bVecs, bVals, nthreads)
+    return util.launchCommand(cmd)
+
+def extractFirstB0FromDwi(source, target, bVals, nthreads = "1"):
+    """Perform an extraction of the first b0 image found into a DWI image
+    Args:
+        source: The input image
+        target: The resulting output name
+        bvals:   A gradient encoding B0 values file name
     Returns:
          A tuple of 3 elements representing (the command launch, the stdout and stderr of the execution)
     """
@@ -80,6 +117,24 @@ def mrinfo(source):
     cmd = "mrinfo {}".format(source)
     (executedCmd, stdout, stderr) = util.launchCommand(cmd)
     return stdout.splitlines()
+
+def getBValues(source, grad):
+    """Use mrinfo to get BValues
+
+    Args:
+        Source: dwi file
+
+    Returns:
+        An array of bValues
+
+    Raises:
+        ValueError: if mrinfo binary is not found
+
+    """
+    cmd = "mrinfo {} -grad {} -shells".format(source, grad)
+    (executedCmd, stdout, stderr) = util.launchCommand(cmd)
+    return stdout.split()
+
 
 def mrcalc(source, value, target):
     """
@@ -187,6 +242,8 @@ def getNbDirectionsFromDWI(source):
     dimensions =  getMriDimensions(source)
     if len(dimensions) == 4:
             return int(dimensions[3])
+    else:
+        return 1
     return 0
 
 

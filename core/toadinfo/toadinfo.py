@@ -78,6 +78,8 @@ class Toadinfo(DicomParser):
                 config.set("correction", "#Echo spacing has not been found", )
                 config.set("correction", "#echo_spacing")
 
+            config.set("correction", "multiband", self.getMultiBandFactor())
+
             if not config.has_section("denoising"):  # Add information about denoising
                 config.add_section("denoising")
 

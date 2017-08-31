@@ -6,7 +6,6 @@ from core.toad.generictask import GenericTask
 from lib import mriutil, util
 from lib.images import Images
 
-
 class Tractquerier(GenericTask):
 
     def __init__(self, subject):
@@ -163,7 +162,7 @@ class Tractquerier(GenericTask):
                 )
 
             for data, description, xSlice, ySlice, zSlice, xRot, yRot, zRot in tags:
-                if data is not None:
+                if data:
                     imageQa = self.plotTrk(data, norm, None, xSlice, ySlice, zSlice, xRot, yRot, zRot)
                     qaImages.append((imageQa, description))
         else:

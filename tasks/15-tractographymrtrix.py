@@ -40,7 +40,7 @@ class TractographyMrtrix(GenericTask):
         # If step is None set Step = voxelSize/2
 
         if self.get('step') == 'None':
-            voxelSize = [float(x) for x in self.get('methodology', 't1_voxelsize')[1:-1].split(',')]
+            voxelSize = mriutil.get_vox_dims(norm)
             self.set('step', str(float(voxelSize[0]) * 0.5))
             self.set('angle', str(90 * float(self.get('step')) / float(voxelSize[0])))
 
@@ -78,7 +78,11 @@ class TractographyMrtrix(GenericTask):
                 self.set('algorithm', 'Probabilist')  # Set Method tractography Prob
 
         else:
-            csd =  self.getHardimrtrixImage('dwi', 'csd')
+            if len(mriutil.getBValues(dwi, bFile))==2:
+                csd =  self.getHardimrtrixImage('dwi', 'csd')
+            else:
+                csd =  self.getHardimrtrixImage('dwi', 'wm')
+
             hardiTck = self.__tckgenHardi(
                     csd, self.buildName(csd, 'hardi_prob', 'tck'), tt5)
             hardiTrk = mriutil.tck2trk(

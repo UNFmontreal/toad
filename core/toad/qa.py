@@ -362,6 +362,8 @@ class Qa(object):
                 bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_aonlm']))
             elif tags['denoising_algorithm'] == 'lpca':
                 bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_lpca']))
+            elif tags['denoising_algorithm'] == 'mp-pca':
+                bibReferences.append("<p>[%s] %s</p></ br>" % (indexReferences, references['ref_mppca']))
             indexReferences += 1
 
         if not tags['correction_ignore']:

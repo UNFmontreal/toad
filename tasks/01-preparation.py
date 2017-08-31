@@ -147,12 +147,28 @@ class Preparation(GenericTask):
 
         tags = (
             ('anat', self.plot3dVolume, 'High resolution anatomical image'),
-            ('dwi', self.plot4dVolume, 'Diffusion weighted image'),
-            ('b0_ap', self.plot3dVolume, 'B0 AP image'),
-            ('b0_pa', self.plot3dVolume, 'B0 PA image'),
-            ('mag', self.plot3dVolume, 'Magnitude image'),
-            ('phase', self.plot3dVolume, 'Phase image'),
-            )
+            ('dwi', self.plot4dVolume, 'Diffusion weighted image'))
+
+        tags = list(tags)
+
+        if self.getImage('b0_pa'):
+            if len(mriutil.getMriDimensions(self.getImage('b0_pa')))==4:
+                tags.append(('b0_pa', self.plot4dVolume, 'B0 PA images'))
+            else:
+                tags.append(('b0_pa', self.plot3dVolume, 'B0 PA image'))
+
+
+        if self.getImage('b0_ap'):
+            if len(mriutil.getMriDimensions(self.getImage('b0_ap')))==4:
+                tags.append(('b0_ap', self.plot4dVolume, 'B0 AP images'))
+            else:
+                tags.append(('b0_ap', self.plot3dVolume, 'B0 AP image'))
+
+        tags.append(('mag', self.plot3dVolume, 'Magnitude image'))
+        tags.append(('phase', self.plot3dVolume, 'Phase image'))
+
+        tags = tuple(tags)
+
         for prefix, plotMethod, description in tags:
             source = self.getImage(prefix)
             if source:

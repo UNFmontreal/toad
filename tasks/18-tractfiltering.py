@@ -128,7 +128,7 @@ class TractFiltering(GenericTask):
                 )
 
             for data, description, xSlice, ySlice, zSlice, xRot, yRot, zRot in tags:
-                if data is not None:
+                if data:
                     imageQa = self.plotTrk(data, norm, None, xSlice, ySlice, zSlice, xRot, yRot, zRot)
                     qaImages.append((imageQa, description))
                 else:
