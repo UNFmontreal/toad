@@ -319,7 +319,7 @@ class Plot4dVolume(object):
         Initialized vmax
         """
         if vmax == None:
-            return numpy.percentile(self.imageData, 99)
+            return numpy.nanpercentile(self.imageData, 99)
         else:
             return vmax
 
