@@ -83,7 +83,7 @@ class Correction(GenericTask):
         if self.get("methodology", "intrasession"):
             extraArgs += " -usesqform "
 
-        mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
+        mask, _notUsed_a, _notUsed_b = mriutil.computeDwiMaskFromFreesurfer(b0Image,
                                                     norm,
                                                     parcellationMask,
                                                     self.buildName(parcellationMask, 'temporary'),
@@ -354,7 +354,7 @@ class Correction(GenericTask):
         invertMatrixName = self.buildName(matrixName, 'inverse', 'mat')
         self.info(mriutil.invertMatrix(matrixName, invertMatrixName))
         magnitudeIntoDwiSpace = self.__interpolateFieldmapInEpiSpace(warped, b0, invertMatrixName)
-        magnitudeIntoDwiSpaceMask = self.__mask(parcellationMask, b0m, anat2fm, invertMatrixName)
+        magnitudeIntoDwiSpaceMask = self.__mask(parcellationMask, b0, anat2fm, invertMatrixName)
         interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
         self.info('Create the shift map')
         saveshift = self.__performDistortionCorrection(b0, interpolateFieldmap, magnitudeIntoDwiSpaceMask)
