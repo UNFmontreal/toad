@@ -694,9 +694,9 @@ def computeDwiMaskFromFreesurfer(source, reference, sourceToResample, target, ex
     cmd = "flirt -in {} -ref {} -omat {} -out {} {}".format(source, reference, matrix, dummyTarget, extraArgs)
     util.launchCommand(cmd)
     invertMatrix(matrix, freesurferToB0)
-    cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {} ".format(sourceToResample, source, freesurferToB0, target)
+    cmd = "flirt -in {} -ref {} -applyxfm -init {} -out {} -interp nearestneighbour".format(sourceToResample, source, freesurferToB0, target)
     util.launchCommand(cmd)
-    return target
+    return target, matrix, freesurferToB0
 
 def getlmax(dwi):
 

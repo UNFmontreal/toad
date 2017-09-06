@@ -109,7 +109,7 @@ class Correction(GenericTask):
         if self.get("methodology", "intrasession"):
             extraArgs += " -usesqform "
 
-        mask = mriutil.computeDwiMaskFromFreesurfer(b0Image,
+        mask, _notUsed_a, _notUsed_b = mriutil.computeDwiMaskFromFreesurfer(b0Image,
                                                     norm,
                                                     parcellationMask,
                                                     self.buildName(parcellationMask, 'temporary'),
@@ -382,11 +382,12 @@ class Correction(GenericTask):
         if self.get("methodology", "intrasession"):
             extraArgs += " -usesqform  -dof 6"
 
-        interpolateMask = mriutil.computeDwiMaskFromFreesurfer(mag,
-                                                               norm,
-                                                               parcellationMask,
-                                                               self.buildName(parcellationMask, 'interpolate'),
-                                                               extraArgs)
+        interpolateMask, fm2anat, anat2fm = mriutil.computeDwiMaskFromFreesurfer(
+            mag,
+            norm,
+            parcellationMask,
+            self.buildName(parcellationMask, 'interpolate'),
+            extraArgs)
 
         self.info('Resampling the anatomical mask into the phase image space')
         # interpolateMask = self.__interpolateAnatMaskToFieldmap(anat, phaseRescale, invertFielmapToAnat, mask)
@@ -408,7 +409,7 @@ class Correction(GenericTask):
         invertMatrixName = self.buildName(matrixName, 'inverse', 'mat')
         self.info(mriutil.invertMatrix(matrixName, invertMatrixName))
         magnitudeIntoDwiSpace = self.__interpolateFieldmapInEpiSpace(warped, b0, invertMatrixName)
-        magnitudeIntoDwiSpaceMask = self.__mask(magnitudeIntoDwiSpace)
+        magnitudeIntoDwiSpaceMask = self.__mask(parcellationMask, b0, anat2fm, invertMatrixName)
         interpolateFieldmap = self.__interpolateFieldmapInEpiSpace(fieldmap, b0, invertMatrixName)
         self.info('Create the shift map')
         saveshift = self.__performDistortionCorrection(b0, interpolateFieldmap, magnitudeIntoDwiSpaceMask)
@@ -543,9 +544,9 @@ class Correction(GenericTask):
         self.launchCommand(cmd)
         return target
 
-    def __mask(self, source):
-        target = self.buildName(source, 'mask')
-        cmd = "fslmaths {} -bin {}".format(source, target)
+    def __mask(self, source, ref, anat2fm, fm2b0):
+        target = self.buildName(source, 'epimask')
+        cmd = "applywarp  --premat={} --postmat={} -i {} -r {} -o {}".format(anat2fm, fm2b0, source, ref, target)
         self.launchCommand(cmd)
         return target
 
