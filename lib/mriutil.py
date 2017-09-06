@@ -709,6 +709,9 @@ def getlmax(dwi):
 
     order -= 2
 
+    if order > 8: # dont exceed 8
+        order = 8
+
     return order
 
 def computeNoiseMask(source, target):
