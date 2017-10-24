@@ -34,13 +34,13 @@ class Upsampling(GenericTask):
         bVecs = util.symlink(bVecs, self.workingDir)
         bEnc = util.symlink(bEnc, self.workingDir)
 
-
         noUpsampling = False
+
         try:
             noUpsampling = self.get('noUpsampling')
-
-        if noUpsampling:
             dwiUpsample = self.rename(dwi, self.buildName(dwi, "upsample"))
+        except RuntimeError:
+            pass # does nothing
         else:
             interp = self.get('interp')
             template = self.getParcellationImage('anat','freesurfer','nii.gz')
