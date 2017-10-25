@@ -32,7 +32,11 @@ class TensorFsl(GenericTask):
         #mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
         mask = self.getRegistrationImage('mask', 'resample')
 
-        self.__fitNODDI(dwi, bVals, bVecs, mask)
+        if self.get('fitNODDI'):
+            kernels = os.path.join(self.subjectDir, 'kernels' )
+            if os.path.exists(kernels):
+                os.remove(kernels)
+            self.__fitNODDI(dwi, bVals, bVecs, mask)
 
         self.__produceTensors(dwi, bVecs, bVals, mask)
 
