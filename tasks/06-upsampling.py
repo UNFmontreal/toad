@@ -34,13 +34,8 @@ class Upsampling(GenericTask):
         bVecs = util.symlink(bVecs, self.workingDir)
         bEnc = util.symlink(bEnc, self.workingDir)
 
-        noUpsampling = False
-
-        try:
-            noUpsampling = self.get('noUpsampling')
-            dwiUpsample = self.rename(dwi, self.buildName(dwi, "upsample"))
-        except RuntimeError:
-            pass # does nothing
+        if self.get('passUpsampling'):
+            dwiUpsample = self.rename(os.path.join(self.workingDir, os.path.basename(dwi)), self.buildName(dwi, "upsample"))
         else:
             interp = self.get('interp')
             template = self.getParcellationImage('anat','freesurfer','nii.gz')
@@ -52,7 +47,6 @@ class Upsampling(GenericTask):
 
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
-
 
     def __linkDwiImage(self):
         dwi = self.getCorrectionImage('dwi', 'corrected')
