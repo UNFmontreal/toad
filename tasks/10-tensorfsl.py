@@ -35,7 +35,7 @@ class TensorFsl(GenericTask):
         if self.get('fitNODDI'):
             kernels = os.path.join(self.subjectDir, 'kernels' )
             if os.path.exists(kernels):
-                os.remove(kernels)
+                shutil.rmtree(kernels)
             self.__fitNODDI(dwi, bVals, bVecs, mask)
 
         self.__produceTensors(dwi, bVecs, bVals, mask)
