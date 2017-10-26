@@ -28,8 +28,8 @@ class Parcellation(GenericTask):
         anat = self.getPreparationImage('anat')
 
         # Look if a freesurfer tree is already available
-        if not self.__findAndLinkFreesurferStructure():
-            self.__submitReconAll(anat)
+        #if not self.__findAndLinkFreesurferStructure():
+        #    self.__submitReconAll(anat)
             # @TODO backup the recon-all to backup dir
 
         if not self.__findImageInDirectory("brainstemSsLabels.v10.FSvoxelSpace.mgz", os.path.join(self.workingDir, self.id)):
@@ -529,7 +529,11 @@ class Parcellation(GenericTask):
                 os.remove(source)
 
     def meetRequirement(self):
-        return Images((self.getPreparationImage('anat'), 'high resolution'))
+        freesurferStructure = os.path.join(self.preparationDir, self.id)
+        if not mriutil.isAfreesurferStructure(freesurferStructure):
+            return False
+        else:
+            return Images((self.getPreparationImage('anat'), 'high resolution'))
 
     def isDirty(self):
         return Images((self.getImage('aparc_aseg'), 'parcellation  atlas'),
