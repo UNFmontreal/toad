@@ -256,7 +256,7 @@ class SubjectManager(Logger, Config):
                         subjects.append(subject)
 
                     elif self.config.getboolean('arguments', 'prompt'):
-                            msg = "It seem\'m like {} is having an issue and will probably fail!".format(subject)
+                            msg = "It seem\'s like {} is having an issue and will probably fail!".format(subject)
                             if util.displayYesNoMessage(msg, "Would you like to remove it from the list (y or n)"):
                                 self.info("Removing subject {} from the submitting list\n".format(subject))
                             else:
