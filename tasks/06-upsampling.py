@@ -34,7 +34,7 @@ class Upsampling(GenericTask):
         bVecs = util.symlink(bVecs, self.workingDir)
         bEnc = util.symlink(bEnc, self.workingDir)
 
-        if self.get('passUpsampling'):
+        if self.get('skipUpsampling'):
             dwiUpsample = self.rename(os.path.join(self.workingDir, os.path.basename(dwi)), self.buildName(dwi, "upsample"))
         else:
             interp = self.get('interp')
