@@ -156,6 +156,22 @@ class Validation(object):
         bVals = util.getImage(self.config, self.workingDir,'grad', None, 'bvals')
         bVecs = util.getImage(self.config, self.workingDir,'grad', None, 'bvecs')
 
+        directories = []
+
+        for directory in os.listdir(self.workingDir):
+            target = os.path.join(self.workingDir, directory)
+            if os.path.isdir(target):
+                directories.append(target)
+
+        validFS = False
+        for directory in directories:
+            if mriutil.isAfreesurferStructure(directory):
+                validFS = True
+
+        if not validFS:
+            self.warning("No valid freesurfer directory found in: {}".format(self.workingDir))
+            return False
+
         if (not bEnc) and (not bVals or not bVecs):
             self.warning("No valid .b encoding or (.bvals, .bvecs) files found in directory: {}".format(self.workingDir))
             return False
