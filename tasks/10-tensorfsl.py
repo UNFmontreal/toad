@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
+import amico
+
+amico.core.setup()
 
 from core.toad.generictask import GenericTask
 from lib.images import Images
-
+from lib import util
+import shutil
 
 __author__ = "Mathieu Desrosiers, Arnaud Bore"
 __copyright__ = "Copyright (C) 2016, TOAD"
@@ -27,6 +31,12 @@ class TensorFsl(GenericTask):
         bVecs = self.getUpsamplingImage('grad', None, 'bvecs')
         #mask = self.getImage(self.maskingDir, 'anat', ['resample', 'extended', 'mask'])
         mask = self.getRegistrationImage('mask', 'resample')
+
+        if self.get('fitNODDI'):
+            kernels = os.path.join(self.subjectDir, 'kernels' )
+            if os.path.exists(kernels):
+                shutil.rmtree(kernels)
+            self.__fitNODDI(dwi, bVals, bVecs, mask)
 
         self.__produceTensors(dwi, bVecs, bVals, mask)
 
@@ -72,6 +82,24 @@ class TensorFsl(GenericTask):
             dst = self.buildName(source, postfix)
             self.info("rename {} to {}".format(src, dst))
             os.rename(src, dst)
+
+    def __fitNODDI(self, dwi, bVals, bVecs, mask):
+
+        # Init amico
+        ae = amico.Evaluation(self.subjectDir, self.workingDir.split('/')[-1])
+        # Convert bvecs bvals to scheme
+        amico.util.fsl2scheme( bVals, bVecs, os.path.join(self.workingDir, "dwi.scheme"))
+        # Load data
+        ae.load_data(dwi_filename = dwi, scheme_filename = "dwi.scheme", mask_filename = mask, b0_thr = 0)
+        # Compute noddi model
+        ae.set_model("NODDI")
+        ae.generate_kernels()
+        ae.load_kernels()
+        ae.fit()
+        # Save File
+        ae.save_results()
+        # Move kernels folder to AMICO folder
+        shutil.move(os.path.join(self.subjectDir, 'kernels'), os.path.join(self.workingDir, 'AMICO'))
 
     def __mean(self, source1, source2, target):
         cmd = "fslmaths {} -add {} -div 2 {}".format(source1, source2, target)

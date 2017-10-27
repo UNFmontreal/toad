@@ -34,16 +34,19 @@ class Upsampling(GenericTask):
         bVecs = util.symlink(bVecs, self.workingDir)
         bEnc = util.symlink(bEnc, self.workingDir)
 
-        interp = self.get('interp')
-        template = self.getParcellationImage('anat','freesurfer','nii.gz')
+        if self.get('skipUpsampling'):
+            dwiUpsample = self.rename(os.path.join(self.workingDir, os.path.basename(dwi)), self.buildName(dwi, "upsample"))
+        else:
+            interp = self.get('interp')
+            template = self.getParcellationImage('anat','freesurfer','nii.gz')
 
-        voxelSize = mriutil.getMriVoxelSize(template) # Get t1 voxel size to upsample
-        voxelSize = str(voxelSize).translate(None, '[],') # Remove specific caracteres 
+            voxelSize = mriutil.getMriVoxelSize(template) # Get t1 voxel size to upsample
+            voxelSize = str(voxelSize).translate(None, '[],') # Remove specific caracteres 
 
-        dwiUpsample= self.__upsampling(dwi, voxelSize, interp, self.buildName(dwi, "upsample"))
+            dwiUpsample= self.__upsampling(dwi, voxelSize, interp, self.buildName(dwi, "upsample"))
+
         b0Upsample = os.path.join(self.workingDir, os.path.basename(dwiUpsample).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0')))
         self.info(mriutil.extractFirstB0FromDwi(dwiUpsample, b0Upsample, bVals))
-
 
     def __linkDwiImage(self):
         dwi = self.getCorrectionImage('dwi', 'corrected')
@@ -76,7 +79,6 @@ class Upsampling(GenericTask):
         self.launchCommand(cmd)
         return self.rename(tmp, target)
 
-
     def meetRequirement(self, result=True):
 
         #@TODO add gradient files validation and correct this function
@@ -88,7 +90,6 @@ class Upsampling(GenericTask):
             self.warning("No proper dwi image found as requirement")
             result = False
         return result
-
 
     def isDirty(self):
         return Images((self.getImage('dwi', "upsample"), 'upsampled diffusion weighted'),
