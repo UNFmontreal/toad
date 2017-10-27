@@ -37,6 +37,7 @@ class TensorFsl(GenericTask):
             if os.path.exists(kernels):
                 shutil.rmtree(kernels)
             self.__fitNODDI(dwi, bVals, bVecs, mask)
+            shutil.rmtree(kernels)
 
         self.__produceTensors(dwi, bVecs, bVals, mask)
 
@@ -98,8 +99,6 @@ class TensorFsl(GenericTask):
         ae.fit()
         # Save File
         ae.save_results()
-        # Move kernels folder to AMICO folder
-        shutil.move(os.path.join(self.subjectDir, 'kernels'), os.path.join(self.workingDir, 'AMICO'))
 
     def __mean(self, source1, source2, target):
         cmd = "fslmaths {} -add {} -div 2 {}".format(source1, source2, target)
