@@ -28,7 +28,7 @@ class Parcellation(GenericTask):
         anat = self.getPreparationImage('anat')
 
         # Look if a freesurfer tree is already available
-        #if not self.__findAndLinkFreesurferStructure():
+        self.__findAndLinkFreesurferStructure()
         #    self.__submitReconAll(anat)
             # @TODO backup the recon-all to backup dir
 
