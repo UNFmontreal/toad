@@ -3,6 +3,7 @@
 
 import csv
 import os
+import shutil
 from core.toad.generictask import GenericTask
 from lib import mriutil, util
 from lib.images import Images
@@ -26,8 +27,8 @@ class Tractometry(GenericTask):
                 self.__buildListMetrics()
                 )
 
-        configFile = self.__getConfigFile(
-                'configTractometry', 'configTractometry_default')
+        shutil.copy(self.configTractometry, self.workingDir)
+        configFile = self.configTractometry
 
         cmdTpl = "scil_run_tractometry.py --config_file {0} {1} {2} -v -f "
         cmd = cmdTpl.format(configFile, self.absInDir, self.absOutDir)
@@ -116,23 +117,6 @@ class Tractometry(GenericTask):
                 (self.getHardiMRTRIXImage('dwi', 'nufo'), 'mrtrix_nufo.nii.gz'),
                 (self.getHardiDIPYImage('dwi', 'nufo'), 'dipy_nufo.nii.gz')]
 
-
-    def __getConfigFile(self, prefix, defaultFile):
-
-        target = self.getPreparationImage(prefix, None, 'json')
-        if target:
-            util.symlink(target, self.buildName(target, None, 'json'))
-        else:
-            defaultFileName = '{}.json'.format(defaultFile)
-            defaultFileLink = os.path.join(
-                self.toadDir,
-                "templates",
-                "tractometry",
-                defaultFileName,
-            )
-            target = defaultFileLink
-            util.copy(defaultFileLink, self.workingDir, defaultFileName)
-        return target
 
     '''
     def qaSupplier(self):

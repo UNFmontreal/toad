@@ -57,14 +57,22 @@ class GenericTask(Logger, Load, Qa):
         self._defaultQuery = None
         self.queriesFile = self._tractquerierFile('queries', 'queries_freesurfer6')
         self.tq_dictFile = self._tractquerierFile('tq_dict', 'tq_dict_freesurfer6')
+        self.configTractFiltering = self._tractquerierFile(
+                'configTractFiltering', 'configTractFiltering_default',
+                subDir="tractometry", ext="json")
+        self.configTractometry = self._tractquerierFile(
+                'configTractometry', 'configTractometry_default',
+                subDir="tractometry", ext="json")
+
 
     @property
     def defaultQuery(self):
         return self._defaultQuery
 
-    def _tractquerierFile(self, prefix, defaultFile):
+    def _tractquerierFile(self, prefix, defaultFile,
+            subDir="tract_queries", ext="qry"):
         """
-        Utility fonctions to find configuration file for tractquerier
+        Utility fonctions to find configuration file for tractography
 
         File could be found into:
             First, the root of the project
@@ -72,18 +80,20 @@ class GenericTask(Logger, Load, Qa):
 
         Args:
             prefix: prefix of the configuration file
-            defaultFile: file in toadDir/templates/tract_queries to use by default
+            defaultFile: file in toadDir/templates/{subDir} to use by default
+            subDir: sub-directory of templates
+            ext: extension of the config file
 
         Returns:
             path of the configuration file
         """
         rootDir = os.path.dirname(self.subjectDir)
         backupDir = os.path.join(self.subjectDir, '00-backup')
-        rootTarget = glob.glob('{}/{}_*qry'.format(rootDir, prefix))
-        backupTarget = glob.glob('{}/{}_*qry'.format(backupDir, prefix))
+        rootTarget = glob.glob('{}/{}_*{}'.format(rootDir, prefix, ext))
+        backupTarget = glob.glob('{}/{}_*{}'.format(backupDir, prefix, ext))
         defaultTarget = os.path.join(
-                self.toadDir, 'templates', 'tract_queries',
-                '{}.qry'.format(defaultFile))
+                self.toadDir, 'templates', subDir,
+                '{}.{}'.format(defaultFile, ext))
 
         if len(backupTarget) == 1:
             self._defaultQuery = False

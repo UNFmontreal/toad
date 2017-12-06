@@ -33,9 +33,9 @@ Configuration file to remove outliers
 
 - function: scil_run_tractometry (If you need more information send a message to toadunf.criugm@gmail.com)
 
-### 2- Use your own queries and atlases
+### 2- Use your own configuration
 
-If you want to use your own configuration file you need to add it in your backup or raw folder. It has to start with **configTractFiltering** with a **.json** extension. You can find an example in /usr/local/toad/template/tractometry/configTractFiltering_default.json
+If you want to use your own configuration file, put the file into your toad_data folder or your subject backup folder. It has to start with **configTractFiltering** with a **.json** extension. You can find an example in /usr/local/toad/template/tractometry/configTractFiltering_default.json
 
 ## Expected result(s) - Quality Assessment (QA)
 
