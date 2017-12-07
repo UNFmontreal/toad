@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import shutil
 from core.toad.generictask import GenericTask
 from lib import mriutil, util
 from lib.images import Images
@@ -22,8 +23,8 @@ class TractFiltering(GenericTask):
                 self.getTractQuerierImages('dwi', None, 'trk'),
                 [(self.getTensorFSLImage('dwi', 'fa'), 'fsl_fa.nii.gz')])
 
-        configFile = self.__getConfigFile(
-                'configTractFiltering', 'configTractFiltering_default')
+        shutil.copy(self.configTractFiltering, self.workingDir)
+        configFile = self.configTractFiltering
 
         cmdTpl = "scil_run_tractometry.py --config_file {0} {1} {2} -v -f "
         cmd = cmdTpl.format(configFile, self.absInDir, self.absOutDir)
@@ -51,23 +52,6 @@ class TractFiltering(GenericTask):
         """
         return not os.path.isdir(self.absOutDir + '/subject/outlier_cleaned_tracts')
 
-
-    def __getConfigFile(self, prefix, defaultFile):
-
-        target = self.getPreparationImage(prefix, None, 'json')
-        if target:
-            util.symlink(target, self.buildName(target, None, 'json'))
-        else:
-            defaultFileName = '{}.json'.format(defaultFile)
-            defaultFileLink = os.path.join(
-                self.toadDir,
-                "templates",
-                "tractometry",
-                defaultFileName,
-            )
-            target = defaultFileLink
-            util.copy(defaultFileLink, self.workingDir, defaultFileName)
-        return target
 
     def __buildNameTractfilteringOutputs(self):
         self.outputs = [self.getImage('dwi', 'cc_2', 'trk', self.relativeOutDir),
