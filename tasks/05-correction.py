@@ -46,7 +46,7 @@ class Correction(GenericTask):
         self.info(mriutil.extractFirstB0sFromDWI(dwi, b0, bVals, self.getNTreadsMrtrix()))
 
         # Get number of b0s extracted from DWI
-        tDims = int(mriutil.getMriDimensions(b0)[3])
+	tDims = int(mriutil.getMriDimensions(b0)[3])
 
         self.info("look if all images have the same voxel size and dimension scale")
         self.__validateSizeAndDimension(dwi, b0, b0AP, b0PA)
@@ -55,20 +55,26 @@ class Correction(GenericTask):
         if self.get("phase_enc_dir") == "0" and b0AP and b0PA is False:
             b0PA = b0
             # Extract same number of volumes b0PA
-            b0APDim = int(mriutil.getMriDimensions(b0AP)[3])
-            target = os.path.join(self.workingDir,
-                          os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0_ap')))
-            self.info(mriutil.extractSubVolume(b0AP, target, '+3', "{}:{}".format(b0APDim-tDims, b0APDim-1 ), self.getNTreadsMrtrix()))
-            b0AP = target
+	    try:
+	        b0APDim = int(mriutil.getMriDimensions(b0AP)[3])
+        	target = os.path.join(self.workingDir,
+               	         os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0_ap')))
+            	self.info(mriutil.extractSubVolume(b0AP, target, '+3', "{}:{}".format(b0APDim-tDims, b0APDim-1 ), self.getNTreadsMrtrix()))
+            	b0AP = target
+	    except:
+		b0APDim = 1
 
         if self.get("phase_enc_dir") == "1" and b0PA and b0AP is False:
             b0AP = b0
             # Extract same number of volumes b0PA
-            b0PADim = int(mriutil.getMriDimensions(b0PA)[3])
-            target = os.path.join(self.workingDir,
+            try:
+		b0PADim = int(mriutil.getMriDimensions(b0PA)[3])
+		target = os.path.join(self.workingDir,
                           os.path.basename(dwi).replace(self.get("prefix", 'dwi'), self.get("prefix", 'b0_pa')))
-            self.info(mriutil.extractSubVolume(b0PA, target, '+3', "{}:{}".format(b0PADim-tDims, b0PADim-1), self.getNTreadsMrtrix()))
-            b0PA = target
+	        self.info(mriutil.extractSubVolume(b0PA, target, '+3', "{}:{}".format(b0PADim-tDims, b0PADim-1), self.getNTreadsMrtrix()))
+		b0PA = target
+	    except:
+		b0PADim = 1
 
         topupConfigFile = self.__checkOddEvenNumberOfSlices(dwi)
 
