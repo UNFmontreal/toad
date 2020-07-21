@@ -1,3 +1,12 @@
+# TOAD IS NO LONGER MAINTAINED 
+# PLEASE USE TRACTOFLOW
+
+**Github:** https://github.com/scilus/tractoflow
+
+**Documentation:** https://tractoflow-documentation.readthedocs.io/en/latest/
+
+**Paper:** https://pubmed.ncbi.nlm.nih.gov/32447016/
+
 # TOAD <br/> (Toolkit for Analysis in Diffusion MRI)
 
 **Organization:** Unité Fonctionnelle de Neuroimagerie ([UNF](http://www.unf-montreal.ca)), Centre de recherche de l’institut Universitaire de Gériatrie de Montréal ([CRIUGM](http://criugm.qc.ca/))
